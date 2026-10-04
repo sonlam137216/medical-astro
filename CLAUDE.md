@@ -79,16 +79,16 @@ draft → queued → building → deployed / failed.
 - Bảng quan hệ cho thực thể có cấu trúc. JSONB chỉ cho nội dung section có schema rõ ràng, kèm validation và version schema.
 - Bật RLS, kiểm tra quyền phía server cho mọi thao tác quản trị. Không tin role do client khai báo.
 - `service_role` / secret key, R2 credentials, build hook chỉ ở backend hoặc CI secret. Không commit, không đưa ra browser.
-- Quyền xử lý `consultation_requests` tách khỏi quyền biên tập nội dung. Vai trò ban đầu: `admin`, `editor`.
+- **Chỉ có một vai trò: `admin`** (chủ dự án chốt 2026-10-05). Không có `editor`, không có quyền Publish riêng: mọi admin được sửa nội dung, publish và xem yêu cầu tư vấn. RLS chỉ cần phân biệt admin với người còn lại. Khi cần thêm vai trò thì thêm sau bằng migration, đừng thiết kế sẵn.
 - Tách local / staging / production. Staging không ghi vào dữ liệu production.
 - `noindex` cho admin và preview, nhưng không thay thế xác thực.
 - Log không ghi thông tin cá nhân.
 
 ## Form tư vấn
 
-Luồng: Workers API validate → lưu Supabase → gửi email thông báo (nếu đã cấu hình).
+Luồng: Workers API validate → lưu Supabase → admin xem trong `/admin`. **Không gửi email thông báo** (chủ dự án chốt 2026-10-05): không tích hợp nhà cung cấp email, không hàng đợi retry email.
 
-- Lưu thành công trước. Lỗi email không được làm mất request, phải ghi nhận và retry.
+- Chỉ trả thành công khi đã lưu được vào DB. Không có kênh thông báo nên admin phải thấy rõ yêu cầu mới (số lượng chưa xử lý trong `/admin`).
 - Validation phía server, giới hạn kích thước request, rate limit, Turnstile khi cần.
 - Chỉ hỏi các field có trong Figma và thực sự cần cho tư vấn.
 
@@ -117,10 +117,8 @@ LCP ≤ 2,5s, INP ≤ 200ms, CLS ≤ 0,1 (phân vị 75, tách mobile/desktop). 
 Dùng placeholder, không tự điền:
 
 - Danh sách trang đầy đủ, Figma Home và mobile.
-- Domain, tài khoản Cloudflare, project Supabase, quyền deploy.
+- Domain, tài khoản Cloudflare, quyền deploy. **Chưa có project Supabase** (2026-10-05): migration viết trong repo, chạy được cục bộ, region chọn khi tạo project.
 - Region database, thị trường ưu tiên.
-- Ai được quyền Publish.
-- Nhà cung cấp email, địa chỉ nhận thông báo.
 - Số lượng và dung lượng video, nhu cầu cập nhật nội dung tức thời.
 - Traffic dự kiến, ngân sách vận hành.
 
