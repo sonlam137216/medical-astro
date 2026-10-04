@@ -1,0 +1,166 @@
+---
+import Logo from './Logo.astro';
+import { site, footerTreatments, footerExplore, footerLegal } from '../data/site';
+---
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer__grid">
+      <div class="footer__brand">
+        <Logo tone="light" />
+        <p class="t-h3 footer__name">{site.name}</p>
+        <p class="footer__tagline">{site.tagline}</p>
+      </div>
+
+      <nav class="footer__col" aria-label="Treatment">
+        <h2 class="footer__title">Treatment</h2>
+        <ul>
+          {footerTreatments.map((l) => (
+            <li>
+              <a href={l.href}>{l.label}</a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+
+      <nav class="footer__col" aria-label="Explore">
+        <h2 class="footer__title">Explore</h2>
+        <ul>
+          {footerExplore.map((l) => (
+            <li>
+              <a href={l.href}>{l.label}</a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+
+      <div class="footer__col">
+        <h2 class="footer__title">Contact Us</h2>
+        <address>
+          <p>{site.addressLine}</p>
+          <p>
+            <a href={`tel:${site.phoneIntl.replace(/\s/g, '')}`}>{site.phoneIntl}</a>
+          </p>
+          <p>{site.hours}</p>
+        </address>
+      </div>
+    </div>
+
+    <div class="footer__bottom">
+      <p>{site.copyright}</p>
+      <ul class="footer__legal">
+        {footerLegal.map((l) => (
+          <li>
+            <a href={l.href}>{l.label}</a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </div>
+</footer>
+
+<style>
+  /* Figma: Shared / Footer — navy, padding 120×64, 4 columns, bottom bar */
+  .footer {
+    background: var(--color-navy);
+    color: var(--color-white);
+    padding-block: 64px;
+  }
+
+  .footer__grid {
+    display: grid;
+    grid-template-columns: 377px 278px 277px 1fr;
+    gap: 0;
+  }
+
+  .footer__brand {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding-right: 48px;
+  }
+
+  .footer__name {
+    color: var(--color-white);
+    margin-top: 8px;
+  }
+
+  .footer__tagline {
+    max-width: 320px;
+  }
+
+  /* Link columns measure 14px in Figma (not 16): widths checked against the 1440 frame */
+  .footer__col {
+    font-size: var(--text-small);
+    line-height: var(--text-small-lh);
+  }
+
+  .footer__title {
+    font-size: var(--text-small);
+    line-height: var(--text-small-lh);
+    font-weight: 600;
+    margin: 0 0 20px;
+  }
+
+  .footer__col ul {
+    display: grid;
+    gap: 12px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .footer__col address {
+    display: grid;
+    gap: 12px;
+    font-style: normal;
+    max-width: 260px;
+  }
+
+  .footer a:hover {
+    text-decoration: underline;
+  }
+
+  .footer__bottom {
+    display: flex;
+    justify-content: space-between;
+    gap: 24px;
+    margin-top: 48px;
+    font-size: var(--text-small);
+  }
+
+  .footer__legal {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .footer__legal li + li::before {
+    content: '·';
+    margin-inline: 12px;
+  }
+
+  @media (max-width: 1024px) {
+    .footer__grid {
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+    }
+
+    .footer__brand {
+      grid-column: 1 / -1;
+      padding-right: 0;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .footer__grid {
+      grid-template-columns: 1fr;
+    }
+
+    .footer__bottom {
+      flex-direction: column;
+    }
+  }
+</style>

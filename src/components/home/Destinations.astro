@@ -1,0 +1,59 @@
+---
+import Section from '../Section.astro';
+import SectionIntro from '../SectionIntro.astro';
+import Button from '../Button.astro';
+import LocationCard from '../cards/LocationCard.astro';
+import { destinations } from '../../data/home';
+---
+
+<Section tone="soft" labelledby="destinations-title">
+  <SectionIntro label={destinations.label} headingId="destinations-title">
+    <Fragment slot="title">
+      Exceptional dental care in
+      <br />
+      destinations worth discovering
+    </Fragment>
+    <Button slot="action" variant="outline" href={destinations.cta.href}>
+      {destinations.cta.label}
+    </Button>
+  </SectionIntro>
+
+  <ul class="grid">
+    {destinations.locations.map((l) => (
+      <li>
+        <LocationCard {...l} />
+      </li>
+    ))}
+  </ul>
+</Section>
+
+<style>
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .grid li {
+    display: flex;
+  }
+
+  .grid li > :global(*) {
+    flex: 1;
+  }
+
+  @media (max-width: 1024px) {
+    .grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 640px) {
+    .grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

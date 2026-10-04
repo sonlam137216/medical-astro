@@ -1,0 +1,68 @@
+---
+import { Image } from 'astro:assets';
+import Section from '../Section.astro';
+import SectionIntro from '../SectionIntro.astro';
+import { smileStories } from '../../data/home';
+---
+
+<Section labelledby="stories-title">
+  <SectionIntro label={smileStories.label} headingId="stories-title">
+    <Fragment slot="title">Real Stories. Real Smiles.</Fragment>
+  </SectionIntro>
+
+  <div class="story">
+    <div class="story__text">
+      <p>{smileStories.summary}</p>
+      <div>
+        <p>{smileStories.detailsTitle}</p>
+        {smileStories.details.map((line) => (
+          <p>{line}</p>
+        ))}
+      </div>
+    </div>
+    <Image
+      class="story__img"
+      src={smileStories.image.src}
+      alt={smileStories.image.alt}
+      width={656}
+      height={486}
+      densities={[1, 2]}
+      sizes="(max-width: 960px) 100vw, 656px"
+      loading="lazy"
+    />
+  </div>
+</Section>
+
+<style>
+  .story {
+    display: grid;
+    grid-template-columns: 1fr 656px;
+    align-items: center;
+    gap: 64px;
+  }
+
+  .story__text {
+    display: grid;
+    gap: 32px;
+    max-width: 420px;
+  }
+
+  .story__img {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 656 / 486;
+    object-fit: cover;
+    border-radius: var(--radius-image);
+  }
+
+  @media (max-width: 960px) {
+    .story {
+      grid-template-columns: 1fr;
+      gap: 32px;
+    }
+
+    .story__text {
+      max-width: none;
+    }
+  }
+</style>

@@ -1,0 +1,47 @@
+---
+import { Image } from 'astro:assets';
+import type { Img } from '../../data/home';
+
+interface Props {
+  name: string;
+  address: string;
+  href: string;
+  image: Img;
+  linkLabel?: string;
+  /** Discover Vietnam cards use the 16/26 body style rather than small muted text. */
+  detail?: boolean;
+}
+
+const { name, address, href, image, linkLabel = 'Directions', detail = false } = Astro.props;
+---
+
+<article class="card location">
+  <Image
+    class="card__media location__img"
+    src={image.src}
+    alt={image.alt}
+    width={384}
+    height={216}
+    densities={[1, 2]}
+    sizes="(max-width: 768px) 100vw, 384px"
+    loading="lazy"
+  />
+  <div class="card__body">
+    <h3 class="t-h3">{name}</h3>
+    <p class:list={detail ? [] : ['t-small', 'muted']}>{address}</p>
+    <a class="link-arrow" href={href}>
+      {linkLabel} <span aria-hidden="true">→</span>
+    </a>
+  </div>
+</article>
+
+<style>
+  .location__img {
+    aspect-ratio: 384 / 216;
+    object-fit: cover;
+  }
+
+  .card__body {
+    gap: 12px;
+  }
+</style>

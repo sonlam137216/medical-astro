@@ -1,0 +1,32 @@
+---
+import { Image } from 'astro:assets';
+import logo from '../assets/images/brand/logo.png';
+import logoWhite from '../assets/images/brand/logo-white.png';
+
+interface Props {
+  tone?: 'dark' | 'light';
+}
+
+const { tone = 'dark' } = Astro.props;
+const src = tone === 'light' ? logoWhite : logo;
+// Figma renders the logo at 185 wide
+const height = Math.round((185 * src.height) / src.width);
+---
+
+<a href="/" class="logo" aria-label="Melatec Luxury Dental Clinic — home">
+  <Image
+    {src}
+    alt="Melatec Luxury Dental Clinic"
+    width={185}
+    {height}
+    densities={[1, 2]}
+    loading="eager"
+  />
+</a>
+
+<style>
+  .logo {
+    display: inline-block;
+    line-height: 0;
+  }
+</style>

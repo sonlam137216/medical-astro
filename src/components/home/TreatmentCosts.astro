@@ -1,0 +1,166 @@
+---
+import Section from '../Section.astro';
+import SectionIntro from '../SectionIntro.astro';
+import { costComparison as c } from '../../data/home';
+---
+
+<Section labelledby="costs-title">
+  <SectionIntro label={c.label} headingId="costs-title">
+    <Fragment slot="title">
+      Exceptional dental care.
+      <br />
+      Made more accessible.
+    </Fragment>
+    <p>{c.subtitle}</p>
+  </SectionIntro>
+
+  <div class="scroller" tabindex="0" role="region" aria-label="Treatment cost comparison">
+    <table class="table">
+      <colgroup>
+        <col class="col-first" />
+        <col span={6} class="col-country" />
+        <col />
+      </colgroup>
+      <thead>
+        <tr>
+          <th scope="col">Treatment</th>
+          {c.countries.map((country, i) => (
+            <th scope="col" class:list={{ 'is-vn': i === 0 }}>
+              {country}
+            </th>
+          ))}
+          <th scope="col">Saving</th>
+        </tr>
+      </thead>
+      <tbody>
+        {c.rows.map((row) => (
+          <tr>
+            <th scope="row">
+              <span class="row__name">{row.name}</span>
+              <span class="row__note">{row.note}</span>
+            </th>
+            {c.countries.map((_, i) => (
+              <td class:list={{ 'is-vn': i === 0 }}>
+                {c.cell.price}
+                <br />
+                {c.cell.clinics}
+              </td>
+            ))}
+            <td>{c.saving}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+
+  <details class="method">
+    <summary>{c.methodologyTitle}</summary>
+    <!-- PLACEHOLDER: the Figma file only shows the collapsed row; methodology text must come from the owner -->
+    <p class="muted">Methodology to be provided by Melatec.</p>
+  </details>
+</Section>
+
+<style>
+  .scroller {
+    overflow-x: auto;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card);
+  }
+
+  .table {
+    width: 100%;
+    min-width: 1200px;
+    border-collapse: collapse;
+    table-layout: fixed;
+    font-size: var(--text-small);
+    line-height: var(--text-small-lh);
+    text-align: left;
+  }
+
+  .col-first {
+    width: 262px;
+  }
+
+  .col-country {
+    width: 140px;
+  }
+
+  thead th {
+    padding: 22px 8px;
+    background: var(--color-soft);
+    font-weight: 600;
+    color: var(--color-heading);
+  }
+
+  thead th:first-child,
+  tbody th {
+    padding-left: 24px;
+  }
+
+  tbody tr:nth-child(even) {
+    background: var(--color-soft);
+  }
+
+  tbody th,
+  tbody td {
+    padding: 24px 8px;
+    vertical-align: top;
+    font-weight: 400;
+    color: var(--color-muted);
+  }
+
+  tbody th {
+    width: 262px;
+    padding-right: 16px;
+  }
+
+  .row__name {
+    display: block;
+    font-weight: 600;
+    color: var(--color-heading);
+  }
+
+  .row__note {
+    display: block;
+    margin-top: 4px;
+  }
+
+  .is-vn {
+    color: var(--color-blue);
+  }
+
+  tbody td.is-vn {
+    font-weight: 600;
+  }
+
+  .method summary {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 4px 0;
+    cursor: pointer;
+    list-style: none;
+    font-size: var(--text-small);
+    line-height: var(--text-small-lh);
+    color: var(--color-heading);
+  }
+
+  .method summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .method summary::after {
+    content: '+';
+    font-size: 20px;
+    line-height: 20px;
+    color: var(--color-blue);
+  }
+
+  .method[open] summary::after {
+    content: '–';
+  }
+
+  .method p {
+    margin-top: 12px;
+  }
+</style>

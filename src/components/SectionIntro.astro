@@ -1,0 +1,60 @@
+---
+// Label + h2 (+ optional paragraph) with an optional action (button) aligned to the right.
+interface Props {
+  label: string;
+  headingId?: string;
+  inverse?: boolean;
+}
+
+const { label, headingId, inverse = false } = Astro.props;
+---
+
+<div class:list={['intro', { 'intro--inverse': inverse }]}>
+  <div class="intro__text">
+    <p class="t-label intro__label">{label}</p>
+    <h2 class="t-h2 intro__title" id={headingId}>
+      <slot name="title" />
+    </h2>
+    <div class="intro__body">
+      <slot />
+    </div>
+  </div>
+  <div class="intro__action">
+    <slot name="action" />
+  </div>
+</div>
+
+<style>
+  .intro {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 24px;
+  }
+
+  .intro__text {
+    display: grid;
+    gap: 12px;
+    max-width: 1000px;
+  }
+
+  .intro__body:empty,
+  .intro__action:empty {
+    display: none;
+  }
+
+  .intro__body {
+    margin-top: 12px;
+  }
+
+  .intro--inverse .intro__label,
+  .intro--inverse .intro__title {
+    color: var(--color-white);
+  }
+
+  @media (max-width: 768px) {
+    .intro {
+      flex-direction: column;
+    }
+  }
+</style>

@@ -1,0 +1,273 @@
+---
+import { Image } from 'astro:assets';
+import SiteLayout from '../layouts/SiteLayout.astro';
+import PageHero from '../components/PageHero.astro';
+import Section from '../components/Section.astro';
+import SectionIntro from '../components/SectionIntro.astro';
+import Button from '../components/Button.astro';
+import InfoCard from '../components/cards/InfoCard.astro';
+import DoctorCard from '../components/cards/DoctorCard.astro';
+import CtaBand from '../components/CtaBand.astro';
+import SeamlessJourney from '../components/SeamlessJourney.astro';
+import { towerImage, doctorProfiles } from '../data/shared';
+import { aboutHero, stats, personalisedCare, whyChoose, insideClinic } from '../data/about';
+
+export const prerender = true;
+
+const doctors = doctorProfiles.map(({ name, role, image }) => ({ name, role, image }));
+---
+
+<SiteLayout title="About us · Melatec Dental Clinic">
+  <PageHero label={aboutHero.label} image={towerImage} imageHeight={298} upper>
+    <Fragment slot="title">Welcome to Melatec</Fragment>
+    {aboutHero.paragraphs.map((p) => (
+      <p>{p}</p>
+    ))}
+    <Button slot="actions" href="#consultation">
+      Book free consultation
+    </Button>
+  </PageHero>
+
+  <section class="stats" aria-label="Melatec at a glance">
+    <div class="container">
+      <ul class="stats__grid">
+        {stats.map((s) => (
+          <li class="stats__card">
+            <span class="stats__value">{s.value}</span>
+            <span>{s.label}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <Section labelledby="care-title">
+    <SectionIntro label={personalisedCare.label} headingId="care-title">
+      <Fragment slot="title">{personalisedCare.title}</Fragment>
+    </SectionIntro>
+    <div class="care">
+      {personalisedCare.rows.map((row) => (
+        <div class="care__row">
+          <Image
+            class="care__img"
+            src={row.image.src}
+            alt={row.image.alt}
+            width={568}
+            height={379}
+            densities={[1, 2]}
+            sizes="(max-width: 900px) 100vw, 568px"
+            loading="lazy"
+          />
+          <div class="care__text">
+            <h3 class="t-h3">{row.title}</h3>
+            <p>{row.body}</p>
+          </div>
+        </div>
+      ))}
+    </div>
+  </Section>
+
+  <Section tone="soft" labelledby="why-title">
+    <SectionIntro label={whyChoose.label} headingId="why-title">
+      <Fragment slot="title">{whyChoose.title}</Fragment>
+    </SectionIntro>
+    <ul class="cards">
+      {whyChoose.items.map((i) => (
+        <li>
+          <InfoCard {...i} />
+        </li>
+      ))}
+    </ul>
+  </Section>
+
+  <Section labelledby="inside-title">
+    <SectionIntro label={insideClinic.label} headingId="inside-title">
+      <Fragment slot="title">{insideClinic.title}</Fragment>
+    </SectionIntro>
+    <ul class="photos">
+      {insideClinic.photos.map((p) => (
+        <li>
+          <Image
+            class="photos__img"
+            src={p.src}
+            alt={p.alt}
+            width={282}
+            height={216}
+            densities={[1, 2]}
+            sizes="(max-width: 640px) 50vw, 282px"
+            loading="lazy"
+          />
+        </li>
+      ))}
+    </ul>
+  </Section>
+
+  <CtaBand
+    actions={[
+      { label: 'Book a consultation', href: '#consultation' },
+      { label: 'Explore our services', href: '/services', variant: 'outline-light' },
+    ]}
+  />
+
+  <Section labelledby="specialists-title">
+    <SectionIntro label="Our doctors" headingId="specialists-title">
+      <Fragment slot="title">Meet Melatec’s Specialists</Fragment>
+    </SectionIntro>
+    <ul class="doctors">
+      {doctors.map((d) => (
+        <li>
+          <DoctorCard {...d} />
+        </li>
+      ))}
+    </ul>
+    <div>
+      <Button variant="outline" href="/our-doctors">
+        View all doctors
+      </Button>
+    </div>
+  </Section>
+
+  <SeamlessJourney />
+</SiteLayout>
+
+<style>
+  .stats {
+    padding-block: 40px;
+  }
+
+  .stats__grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .stats__card {
+    display: grid;
+    gap: 4px;
+    padding: 24px 20px;
+    background: var(--color-soft);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card);
+  }
+
+  .stats__value {
+    font-family: var(--font-serif);
+    font-weight: 600;
+    font-size: 36px;
+    line-height: 44px;
+    color: var(--color-heading);
+  }
+
+  .care {
+    display: grid;
+    gap: 40px;
+  }
+
+  .care__row {
+    display: grid;
+    grid-template-columns: 568px 1fr;
+    align-items: center;
+    gap: 64px;
+  }
+
+  .care__row:nth-child(even) {
+    grid-template-columns: 1fr 568px;
+  }
+
+  .care__row:nth-child(even) .care__img {
+    order: 2;
+  }
+
+  .care__img {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 568 / 379;
+    object-fit: cover;
+    border-radius: var(--radius-image);
+  }
+
+  .care__text {
+    display: grid;
+    gap: 24px;
+    max-width: 480px;
+  }
+
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 40px 24px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .photos {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .photos__img {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 282 / 216;
+    object-fit: cover;
+    border-radius: var(--radius-card);
+  }
+
+  .doctors {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .doctors li {
+    display: flex;
+  }
+
+  .doctors li > :global(*) {
+    flex: 1;
+  }
+
+  @media (max-width: 1024px) {
+    .stats__grid,
+    .photos,
+    .doctors {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .cards {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .care__row,
+    .care__row:nth-child(even) {
+      grid-template-columns: 1fr;
+      gap: 24px;
+    }
+
+    .care__row:nth-child(even) .care__img {
+      order: 0;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .cards,
+    .doctors {
+      grid-template-columns: 1fr;
+    }
+
+    .stats__grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

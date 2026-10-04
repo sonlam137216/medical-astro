@@ -1,0 +1,126 @@
+---
+import { Image } from 'astro:assets';
+import type { Img } from '../data/types';
+
+interface Props {
+  label: string;
+  image: Img;
+  /** Rendered image height in px (width is 568). Figma uses 298 on content pages, 430–480 on landing/packages. */
+  imageHeight: number;
+  /** Rounded 24px image (landing and packages pages) or square corners (About, Services, Doctors). */
+  rounded?: boolean;
+  /** Content pages set the h1 in capitals. */
+  upper?: boolean;
+  headingId?: string;
+}
+
+const {
+  label,
+  image,
+  imageHeight,
+  rounded = false,
+  upper = false,
+  headingId = 'page-title',
+} = Astro.props;
+---
+
+<section class="band band--soft" aria-labelledby={headingId}>
+  <div class="container hero">
+    <div class="hero__text">
+      <p class="t-label">{label}</p>
+      <h1 class:list={['t-hero', { 'is-upper': upper }]} id={headingId}>
+        <slot name="title" />
+      </h1>
+      <div class="hero__body">
+        <slot />
+      </div>
+      <div class="hero__actions">
+        <slot name="actions" />
+      </div>
+      <div class="hero__extra">
+        <slot name="extra" />
+      </div>
+    </div>
+    <Image
+      class:list={['hero__img', { 'is-rounded': rounded }]}
+      src={image.src}
+      alt={image.alt}
+      width={568}
+      height={imageHeight}
+      densities={[1, 2]}
+      sizes="(max-width: 900px) 100vw, 568px"
+      loading="eager"
+      fetchpriority="high"
+      style={`aspect-ratio: 568 / ${imageHeight};`}
+    />
+  </div>
+</section>
+
+<style>
+  .band {
+    padding-block: var(--section-pad-y);
+  }
+
+  .band--soft {
+    background: var(--color-soft);
+  }
+
+  .hero {
+    display: grid;
+    grid-template-columns: 1fr 568px;
+    align-items: center;
+    gap: 64px;
+  }
+
+  .hero__text {
+    display: grid;
+    gap: 24px;
+    justify-items: start;
+  }
+
+  .hero__body {
+    display: grid;
+    gap: 24px;
+    max-width: 600px;
+    color: var(--color-heading);
+  }
+
+  .hero__body:empty,
+  .hero__actions:empty,
+  .hero__extra:empty {
+    display: none;
+  }
+
+  .hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .hero__extra {
+    display: grid;
+    gap: 16px;
+    color: var(--color-heading);
+  }
+
+  .is-upper {
+    text-transform: uppercase;
+  }
+
+  .hero__img {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+  }
+
+  .hero__img.is-rounded {
+    border-radius: var(--radius-image);
+  }
+
+  @media (max-width: 960px) {
+    .hero {
+      grid-template-columns: 1fr;
+      gap: 40px;
+    }
+  }
+</style>

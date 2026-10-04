@@ -1,0 +1,73 @@
+---
+import { Image } from 'astro:assets';
+import Section from '../Section.astro';
+import Button from '../Button.astro';
+import { conversations } from '../../data/home';
+---
+
+<Section tone="soft" labelledby="conversations-title">
+  <div class="split">
+    <Image
+      class="split__img"
+      src={conversations.image.src}
+      alt={conversations.image.alt}
+      width={568}
+      height={400}
+      densities={[1, 2]}
+      sizes="(max-width: 900px) 100vw, 568px"
+      loading="lazy"
+    />
+    <div class="split__text">
+      <p class="t-label">{conversations.label}</p>
+      <h2 class="t-h2" id="conversations-title">
+        Real conversations.
+        <br />
+        Expert insights.
+        <br />
+        Personal experiences.
+      </h2>
+      <p class="split__body">{conversations.body}</p>
+      <div>
+        <!-- PROVISIONAL target: no videos page exists (video is out of scope) -->
+        <Button variant="outline" href="#">
+          View all videos
+        </Button>
+      </div>
+    </div>
+  </div>
+</Section>
+
+<style>
+  .split {
+    display: grid;
+    grid-template-columns: 568px 1fr;
+    align-items: center;
+    gap: 64px;
+  }
+
+  .split__img {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 568 / 400;
+    object-fit: cover;
+    border-radius: var(--radius-image);
+  }
+
+  .split__text {
+    display: grid;
+    gap: 16px;
+    justify-items: start;
+  }
+
+  .split__body {
+    max-width: 540px;
+    margin-bottom: 8px;
+  }
+
+  @media (max-width: 960px) {
+    .split {
+      grid-template-columns: 1fr;
+      gap: 32px;
+    }
+  }
+</style>

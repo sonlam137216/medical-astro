@@ -1,0 +1,59 @@
+---
+import SectionIntro from './SectionIntro.astro';
+import Section from './Section.astro';
+import PackageCard from './cards/PackageCard.astro';
+import { packageCards } from '../data/shared';
+
+interface Props {
+  /** Travel Combos shows a "Cost / Dental Tourism Package Prices" intro, Single Treatments does not. */
+  intro?: { label: string; title: string };
+}
+
+const { intro } = Astro.props;
+---
+
+<Section labelledby={intro ? 'packages-title' : undefined}>
+  {intro && (
+    <SectionIntro label={intro.label} headingId="packages-title">
+      <Fragment slot="title">{intro.title}</Fragment>
+    </SectionIntro>
+  )}
+  <ul class="grid">
+    {packageCards.map((p) => (
+      <li>
+        <PackageCard {...p} />
+      </li>
+    ))}
+  </ul>
+</Section>
+
+<style>
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .grid li {
+    display: flex;
+  }
+
+  .grid li > :global(*) {
+    flex: 1;
+  }
+
+  @media (max-width: 1024px) {
+    .grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 640px) {
+    .grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

@@ -1,0 +1,40 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import ConsultationSection from '../components/ConsultationSection.astro';
+import SocialBar from '../components/SocialBar.astro';
+
+interface Props {
+  title: string;
+  description?: string;
+  /** Show the shared "Book a consultation" block above the footer (all Figma pages have it). */
+  consultation?: boolean;
+  /** Show the "Stay Connected" social row above the footer. */
+  social?: boolean;
+  /** Pathname used to highlight the active nav link (defaults to the request path). */
+  current?: string;
+  /** Header variations seen in Figma: the Dental Implants landing page swaps the utility text and CTA. */
+  header?: {
+    utility?: { label: string; href?: string };
+    cta?: { label: string; href?: string };
+  };
+}
+
+const { title, description, consultation = true, social = true, current, header } = Astro.props;
+---
+
+<!-- noindex stays on until launch (Phase 7 replaces this with per-environment robots handling) -->
+<BaseLayout title={title} description={description} noindex>
+  <a class="skip-link visually-hidden" href="#main">
+    Skip to content
+  </a>
+  <Header current={current} utility={header?.utility} cta={header?.cta} />
+  <main id="main">
+    <slot />
+  </main>
+  {consultation && <ConsultationSection />}
+  <slot name="after-consultation" />
+  {social && <SocialBar />}
+  <Footer />
+</BaseLayout>

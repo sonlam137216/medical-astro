@@ -1,0 +1,74 @@
+/*
+ * Design tokens — single source of truth for colour, type, spacing and shape.
+ *
+ * Source: Figma "Melatec" file, Page 1 (read 2026-10-04).
+ *  - Colour hex values were sampled from rendered swatches of the Figma colour styles
+ *    (color/heading, color/muted, ...), so treat them as accurate to display rounding.
+ *  - Type scale and layout numbers (sizes, line-heights, padding, gaps, radius) were read
+ *    from the Figma design panel.
+ *  - Font families: Inter is confirmed (label style). The serif used for hero/h2 is NOT
+ *    labelled in Figma; Cormorant Garamond is the closest match by eye. Confirm with the owner.
+ *  - Marked "(added)" = not in Figma (mobile/tablet behaviour), chosen by us.
+ */
+:root {
+  /* colour (Figma colour styles) */
+  --color-heading: #183c78;
+  --color-muted: #828282;
+  --color-white: #ffffff;
+  --color-blue: #0441cf;
+  --color-border: #b2c9f3;
+  --color-navy: #020f32;
+  --color-soft: #f0f7fd;
+
+  /* font families */
+  --font-serif: 'Cormorant Garamond', 'Times New Roman', serif;
+  --font-sans: 'Inter Variable', system-ui, sans-serif;
+
+  /* type scale: size / line-height (Figma text styles Melatec/*) */
+  --text-hero: 60px;
+  --text-hero-lh: 66px;
+  --text-h2: 42px;
+  --text-h2-lh: 48px;
+  --text-h3: 23px;
+  --text-h3-lh: 31px;
+  --text-body: 16px;
+  --text-body-lh: 26px;
+  --text-small: 14px;
+  --text-small-lh: 22px;
+  --text-button: 14px;
+  --text-button-lh: 20px;
+  --text-label: 12px; /* unstyled in Figma: Inter SemiBold, line 18, tracking 12% */
+  --text-label-lh: 18px;
+  --tracking-label: 0.12em;
+
+  /* layout (desktop frame is 1440 wide, content 1200, side padding 120) */
+  --container: 1200px;
+  --gutter: 120px;
+  --section-pad-y: 80px;
+  --utility-bar-h: 38px;
+  --nav-h: 88px;
+
+  /* shape */
+  --radius-control: 8px; /* buttons, inputs */
+  --radius-card: 16px; /* cards (Service Card radius 16) */
+  --radius-image: 24px; /* large photos (hero, before/after) */
+  --radius-panel: 24px; /* consultation card */
+}
+
+/* (added) fluid fallbacks below the 1440 design; Figma only has desktop frames */
+@media (max-width: 1200px) {
+  :root {
+    --gutter: 48px;
+  }
+}
+
+@media (max-width: 768px) {
+  :root {
+    --gutter: 20px;
+    --section-pad-y: 56px;
+    --text-hero: 40px;
+    --text-hero-lh: 46px;
+    --text-h2: 32px;
+    --text-h2-lh: 38px;
+  }
+}

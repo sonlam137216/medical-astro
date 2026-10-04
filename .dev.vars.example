@@ -1,0 +1,16 @@
+# Copy to .dev.vars for local `wrangler dev`. Never commit .dev.vars.
+# Values below are placeholders; real values come from the owner's accounts (not yet provisioned).
+
+# Supabase (Phase 3) — the secret key stays server-side only
+SUPABASE_URL=
+SUPABASE_PUBLISHABLE_KEY=
+SUPABASE_SECRET_KEY=
+
+# Cloudflare R2 media (Phase 5)
+R2_PUBLIC_BASE_URL=
+
+# Cloudflare Turnstile for the consultation form (Phase 4)
+TURNSTILE_SECRET_KEY=
+
+# Publish pipeline (Phase 6) — build hook is a secret, backend only
+DEPLOY_BUILD_HOOK_URL=

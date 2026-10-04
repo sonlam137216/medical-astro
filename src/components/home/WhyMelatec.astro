@@ -1,0 +1,77 @@
+---
+import Section from '../Section.astro';
+import { whyMelatec } from '../../data/home';
+---
+
+<Section tone="soft" labelledby="why-title">
+  <div class="why">
+    <div class="why__intro">
+      <p class="t-label">{whyMelatec.label}</p>
+      <h2 class="t-h2" id="why-title">
+        Premium dental journey,
+        <br />
+        from first consultation
+        <br />
+        to final smile
+      </h2>
+      <p class="why__body">{whyMelatec.body}</p>
+    </div>
+
+    <ol class="why__list">
+      {whyMelatec.items.map((item) => (
+        <li class="why__item">
+          <span class="why__no">{item.number}</span>
+          <div>
+            <h3 class="t-h3">{item.title}</h3>
+            <p>{item.body}</p>
+          </div>
+        </li>
+      ))}
+    </ol>
+  </div>
+</Section>
+
+<style>
+  .why {
+    display: grid;
+    grid-template-columns: 494px 1fr;
+    gap: 64px;
+    align-items: start;
+  }
+
+  .why__intro {
+    display: grid;
+    gap: 16px;
+  }
+
+  .why__list {
+    display: grid;
+    gap: 24px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .why__item {
+    display: grid;
+    grid-template-columns: 41px 1fr;
+    gap: 24px;
+  }
+
+  .why__item h3 {
+    margin-bottom: 8px;
+  }
+
+  .why__no {
+    padding-top: 6px;
+    font: 600 var(--text-label) / var(--text-label-lh) var(--font-sans);
+    color: var(--color-blue);
+  }
+
+  @media (max-width: 960px) {
+    .why {
+      grid-template-columns: 1fr;
+      gap: 40px;
+    }
+  }
+</style>

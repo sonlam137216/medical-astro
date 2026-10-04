@@ -1,0 +1,56 @@
+---
+import Section from '../Section.astro';
+import SectionIntro from '../SectionIntro.astro';
+import Button from '../Button.astro';
+import DoctorCard from '../cards/DoctorCard.astro';
+import { doctors } from '../../data/home';
+---
+
+<Section labelledby="doctors-title">
+  <SectionIntro label={doctors.label} headingId="doctors-title">
+    <Fragment slot="title">Meet Our Specialists</Fragment>
+    <p>{doctors.body}</p>
+    <Button slot="action" variant="outline" href={doctors.cta.href}>
+      {doctors.cta.label}
+    </Button>
+  </SectionIntro>
+
+  <ul class="grid">
+    {doctors.people.map((p) => (
+      <li>
+        <DoctorCard {...p} />
+      </li>
+    ))}
+  </ul>
+</Section>
+
+<style>
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .grid li {
+    display: flex;
+  }
+
+  .grid li > :global(*) {
+    flex: 1;
+  }
+
+  @media (max-width: 1024px) {
+    .grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 520px) {
+    .grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

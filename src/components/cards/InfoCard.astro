@@ -1,0 +1,39 @@
+---
+// Numbered/eyebrow card used by "Dental tourism support", "Why choose Melatec", "Clear answers", etc.
+interface Props {
+  eyebrow: string;
+  title: string;
+  body: string;
+  /** Titles on the Services/Packages pages are set in capitals. */
+  upper?: boolean;
+}
+
+const { eyebrow, title, body, upper = false } = Astro.props;
+---
+
+<article class="card info">
+  <p class="info__eyebrow">{eyebrow}</p>
+  <h3 class:list={['t-h3', { 'is-upper': upper }]}>{title}</h3>
+  <p>{body}</p>
+</article>
+
+<style>
+  .info {
+    display: grid;
+    align-content: start;
+    gap: 12px;
+    height: 100%;
+    padding: 24px;
+  }
+
+  .info__eyebrow {
+    font: 600 var(--text-label) / var(--text-label-lh) var(--font-sans);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-blue);
+  }
+
+  .is-upper {
+    text-transform: uppercase;
+  }
+</style>

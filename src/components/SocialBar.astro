@@ -1,0 +1,58 @@
+---
+import { Image } from 'astro:assets';
+import facebook from '../assets/images/social/facebook.png';
+import instagram from '../assets/images/social/instagram.png';
+import youtube from '../assets/images/social/youtube.png';
+import linkedin from '../assets/images/social/linkedin.png';
+
+// PLACEHOLDER: Figma shows the four icons but no profile URLs. Replace each href with the real profile.
+const links = [
+  { name: 'Facebook', icon: facebook, href: '#' },
+  { name: 'Instagram', icon: instagram, href: '#' },
+  { name: 'YouTube', icon: youtube, href: '#' },
+  { name: 'LinkedIn', icon: linkedin, href: '#' },
+];
+---
+
+<section class="social" aria-label="Social media">
+  <div class="container social__inner">
+    <h2 class="t-h3">Stay Connected</h2>
+    <ul>
+      {links.map((l) => (
+        <li>
+          <a href={l.href} aria-label={l.name}>
+            <Image src={l.icon} alt="" width={32} height={32} densities={[1, 2]} loading="lazy" />
+          </a>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<style>
+  .social {
+    padding-block: 24px;
+    background: var(--color-white);
+  }
+
+  .social__inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+  }
+
+  ul {
+    display: flex;
+    gap: 32px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  a {
+    display: block;
+    border-radius: 6px;
+  }
+</style>

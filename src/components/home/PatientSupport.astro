@@ -1,0 +1,65 @@
+---
+import { patientSupport } from '../../data/home';
+---
+
+<section class="support" aria-label="Why international patients choose Melatec">
+  <div class="container">
+    <ul class="support__grid">
+      {patientSupport.map((item) => (
+        <li class="support__card">
+          <span class="support__no">{item.number}</span>
+          <span class="support__title">{item.title}</span>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<style>
+  .support {
+    padding-block: 40px;
+    background: var(--color-white);
+  }
+
+  .support__grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 32px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .support__card {
+    display: grid;
+    align-content: start;
+    gap: 4px;
+    padding: 20px 16px;
+    background: var(--color-soft);
+    border-radius: 12px;
+  }
+
+  .support__no {
+    font: 600 var(--text-label) / var(--text-label-lh) var(--font-sans);
+    color: var(--color-blue);
+  }
+
+  .support__title {
+    font: 600 var(--text-button) / var(--text-button-lh) var(--font-sans);
+    color: var(--color-heading);
+    white-space: pre-line;
+  }
+
+  @media (max-width: 1024px) {
+    .support__grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+  }
+
+  @media (max-width: 520px) {
+    .support__grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

@@ -1,0 +1,31 @@
+---
+import SiteLayout from '../layouts/SiteLayout.astro';
+import Hero from '../components/Hero.astro';
+import PatientSupport from '../components/home/PatientSupport.astro';
+import Services from '../components/home/Services.astro';
+import Conversations from '../components/home/Conversations.astro';
+import TreatmentCosts from '../components/home/TreatmentCosts.astro';
+import WhyMelatec from '../components/home/WhyMelatec.astro';
+import InsideClinic from '../components/home/InsideClinic.astro';
+import Destinations from '../components/home/Destinations.astro';
+import OurDoctors from '../components/home/OurDoctors.astro';
+import HowItWorks from '../components/home/HowItWorks.astro';
+import SmileStories from '../components/home/SmileStories.astro';
+
+// Static page: built once, served directly from Cloudflare static assets.
+export const prerender = true;
+---
+
+<SiteLayout title="Melatec Dental Clinic · Vietnam">
+  <Hero />
+  <PatientSupport />
+  <Services />
+  <Conversations />
+  <TreatmentCosts />
+  <WhyMelatec />
+  <InsideClinic />
+  <Destinations />
+  <OurDoctors />
+  <HowItWorks />
+  <SmileStories />
+</SiteLayout>

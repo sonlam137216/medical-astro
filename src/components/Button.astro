@@ -1,0 +1,67 @@
+---
+interface Props {
+  /** `light` and `outline-light` are for navy bands (Figma "Take the first step"). */
+  variant?: 'primary' | 'outline' | 'light' | 'outline-light';
+  href?: string;
+  type?: 'button' | 'submit';
+  class?: string;
+}
+
+const { variant = 'primary', href, type = 'button', class: className } = Astro.props;
+const Tag = href ? 'a' : 'button';
+const attrs = href ? { href } : { type };
+---
+
+<Tag class:list={['btn', `btn--${variant}`, className]} {...attrs}>
+  <slot />
+</Tag>
+
+<style>
+  /* Figma: Button Primary / Outline — height 48, padding 16×14, gap 8, radius 8, text Melatec/button 14/20 */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 14px 16px;
+    border: 1px solid transparent;
+    border-radius: var(--radius-control);
+    font: 600 var(--text-button) / var(--text-button-lh) var(--font-sans);
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .btn--primary {
+    background: var(--color-blue);
+    color: var(--color-white);
+  }
+
+  .btn--outline {
+    background: var(--color-white);
+    border-color: var(--color-border);
+    color: var(--color-blue);
+  }
+
+  .btn--light {
+    background: var(--color-white);
+    color: var(--color-blue);
+  }
+
+  .btn--outline-light {
+    background: transparent;
+    border-color: var(--color-white);
+    color: var(--color-white);
+  }
+
+  .btn--outline-light:hover {
+    background: rgb(255 255 255 / 12%);
+  }
+
+  .btn--primary:hover {
+    background: var(--color-heading);
+  }
+
+  .btn--outline:hover {
+    border-color: var(--color-blue);
+  }
+</style>

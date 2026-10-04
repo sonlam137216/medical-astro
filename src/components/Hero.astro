@@ -1,0 +1,97 @@
+---
+import Button from './Button.astro';
+import { Image } from 'astro:assets';
+import { site } from '../data/site';
+import { heroImage } from '../data/home';
+---
+
+<section class="hero section section--soft">
+  <div class="container hero__split">
+    <div class="hero__content">
+      <p class="t-label">Melatec Dental Clinic · Vietnam</p>
+      <h1 class="t-hero">
+        Every Perfect Journey
+        <br />
+        Begins with a<br />
+        Radiant Smile
+      </h1>
+      <p class="hero__body">
+        Premium dentistry, thoughtfully tailored to you.
+        <br />
+        From dental implants and porcelain crowns to veneers and complete smile makeovers, every
+        treatment is guided by clinical precision and refined care.
+        <br />
+        English-speaking specialists, advanced technology and a truly personalized experience all in
+        Vietnam.
+      </p>
+      <div class="hero__actions">
+        <Button href={site.whatsappUrl}>WhatsApp us</Button>
+        <!-- PLACEHOLDER target: no video file has been supplied yet (see WEBSITE_TECHSTACK §8) -->
+        <Button variant="outline" href="#video">
+          Watch video
+        </Button>
+      </div>
+      <p class="hero__trust t-small">
+        Trusted by patients from 20+ countries
+        <br />
+        Australia · USA · UK · France · Japan · Korea
+      </p>
+    </div>
+    <Image
+      class="hero__img"
+      src={heroImage.src}
+      alt={heroImage.alt}
+      width={568}
+      height={560}
+      densities={[1, 2]}
+      sizes="(max-width: 900px) 100vw, 568px"
+      loading="eager"
+      fetchpriority="high"
+    />
+  </div>
+</section>
+
+<style>
+  .hero__split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    gap: 64px;
+  }
+
+  .hero__content {
+    display: grid;
+    gap: 24px;
+    align-content: center;
+  }
+
+  .hero__body {
+    color: var(--color-heading);
+    max-width: 520px;
+  }
+
+  .hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .hero__img {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 568 / 560;
+    object-fit: cover;
+    border-radius: var(--radius-image);
+  }
+
+  .hero__trust {
+    color: var(--color-muted);
+  }
+
+  @media (max-width: 900px) {
+    .hero__split {
+      grid-template-columns: 1fr;
+      gap: 40px;
+    }
+  }
+</style>

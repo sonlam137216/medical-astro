@@ -1,0 +1,216 @@
+---
+import { Image } from 'astro:assets';
+import SiteLayout from '../../layouts/SiteLayout.astro';
+import PageHero from '../../components/PageHero.astro';
+import Section from '../../components/Section.astro';
+import SectionIntro from '../../components/SectionIntro.astro';
+import Button from '../../components/Button.astro';
+import InfoCard from '../../components/cards/InfoCard.astro';
+import PlanVisit from '../../components/PlanVisit.astro';
+import { site } from '../../data/site';
+import { heroImage, options, answers, support, faq } from '../../data/implants';
+
+export const prerender = true;
+---
+
+<!-- Landing-page variant: the header swaps the utility text and CTA; the page has its own consultation block and no social row. -->
+<SiteLayout
+  title="Dental implants · Melatec Dental Clinic"
+  consultation={false}
+  social={false}
+  header={{
+    utility: { label: 'English-speaking patient support' },
+    cta: { label: 'Free consultation', href: '#consultation' },
+  }}
+>
+  <PageHero label="Dental implants" image={heroImage} imageHeight={430} rounded>
+    <Fragment slot="title">
+      Plan your smile
+      <br />
+      before you fly.
+    </Fragment>
+    <p>
+      Explore single-tooth implants and full-arch restoration with a personalised treatment plan,
+      estimated cost and clear travel guidance.
+    </p>
+    <Fragment slot="actions">
+      <Button href="#consultation">Get your treatment plan</Button>
+      <Button variant="outline" href={site.whatsappUrl}>
+        Ask on WhatsApp
+      </Button>
+    </Fragment>
+    <p slot="extra" class="muted">
+      Personalised care · English-speaking support
+    </p>
+  </PageHero>
+
+  <Section labelledby="options-title">
+    <SectionIntro label={options.label} headingId="options-title">
+      <Fragment slot="title">{options.title}</Fragment>
+      <p>{options.body}</p>
+    </SectionIntro>
+    <ul class="options">
+      {options.cards.map((c) => (
+        <li class="card option">
+          <div class="option__media">
+            <Image
+              src={c.image.src}
+              alt={c.image.alt}
+              width={336}
+              height={180}
+              densities={[1, 2]}
+              sizes="(max-width: 700px) 100vw, 336px"
+              loading="lazy"
+            />
+          </div>
+          <h3 class="t-h3">{c.title}</h3>
+          <p>{c.body}</p>
+          <p class="option__price">{c.price}</p>
+          <p class="t-small muted">{c.note}</p>
+          <div>
+            <Button variant="outline" href="#consultation">
+              Request an estimate
+            </Button>
+          </div>
+        </li>
+      ))}
+    </ul>
+  </Section>
+
+  <Section tone="soft" labelledby="answers-title">
+    <SectionIntro label={answers.label} headingId="answers-title">
+      <Fragment slot="title">{answers.title}</Fragment>
+    </SectionIntro>
+    <ul class="cards">
+      {answers.items.map((i) => (
+        <li>
+          <InfoCard {...i} />
+        </li>
+      ))}
+    </ul>
+  </Section>
+
+  <Section tone="soft" labelledby="support-title">
+    <SectionIntro label={support.label} headingId="support-title">
+      <Fragment slot="title">{support.title}</Fragment>
+      <p>{support.body}</p>
+    </SectionIntro>
+    <ul class="cards">
+      {support.items.map((i) => (
+        <li>
+          <InfoCard {...i} />
+        </li>
+      ))}
+    </ul>
+  </Section>
+
+  <Section labelledby="faq-title">
+    <SectionIntro label={faq.label} headingId="faq-title">
+      <Fragment slot="title">{faq.title}</Fragment>
+    </SectionIntro>
+    <div class="faq">
+      {faq.questions.map((q) => (
+        <details>
+          <summary>{q}</summary>
+          <!-- PLACEHOLDER: the design shows questions only -->
+          <p class="muted">Answer to be provided by Melatec.</p>
+        </details>
+      ))}
+    </div>
+  </Section>
+
+  <PlanVisit />
+</SiteLayout>
+
+<style>
+  .options {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .option {
+    display: grid;
+    align-content: start;
+    gap: 16px;
+    padding: 24px;
+  }
+
+  .option__media :global(img) {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 336 / 180;
+    object-fit: cover;
+    border-radius: 12px;
+  }
+
+  .option__price {
+    font-family: var(--font-serif);
+    font-weight: 600;
+    font-size: 36px;
+    line-height: 44px;
+    color: var(--color-blue);
+  }
+
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .faq {
+    display: grid;
+  }
+
+  .faq details {
+    padding-block: 18px;
+  }
+
+  .faq summary {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    cursor: pointer;
+    list-style: none;
+    color: var(--color-heading);
+  }
+
+  .faq summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .faq summary::after {
+    content: '+';
+    font-size: 24px;
+    line-height: 26px;
+    color: var(--color-blue);
+  }
+
+  .faq details[open] summary::after {
+    content: '–';
+  }
+
+  .faq details p {
+    margin-top: 12px;
+  }
+
+  @media (max-width: 1024px) {
+    .options,
+    .cards {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 640px) {
+    .options,
+    .cards {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

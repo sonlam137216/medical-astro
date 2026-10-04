@@ -1,0 +1,31 @@
+---
+import SiteLayout from '../../layouts/SiteLayout.astro';
+import PageHero from '../../components/PageHero.astro';
+import PackageGrid from '../../components/PackageGrid.astro';
+import CtaBand from '../../components/CtaBand.astro';
+import TourismSupport from '../../components/TourismSupport.astro';
+import { towerImage } from '../../data/shared';
+
+export const prerender = true;
+---
+
+<!-- Figma frame: "Dental Packages / Single Treatments" -->
+<SiteLayout title="Dental packages · Melatec Dental Clinic">
+  <PageHero label="Our dental packages." image={towerImage} imageHeight={480} rounded upper>
+    <Fragment slot="title">Comprehensive dental care for every smile</Fragment>
+    <p>
+      Providing advanced implant, cosmetic, orthodontic, and restorative dental care in a modern,
+      patient-focused clinical environment.
+    </p>
+  </PageHero>
+
+  <PackageGrid />
+
+  <CtaBand
+    actions={[
+      { label: 'Book a consultation', href: '#consultation' },
+      { label: 'Explore our services', href: '/services', variant: 'outline-light' },
+    ]}
+  />
+  <TourismSupport />
+</SiteLayout>

@@ -1,0 +1,76 @@
+---
+import { Image } from 'astro:assets';
+import Section from '../Section.astro';
+import SectionIntro from '../SectionIntro.astro';
+import { insideClinic } from '../../data/home';
+---
+
+<Section labelledby="clinic-title">
+  <SectionIntro label={insideClinic.label} headingId="clinic-title">
+    <Fragment slot="title">{insideClinic.title}</Fragment>
+  </SectionIntro>
+
+  <ul class="tiles">
+    {insideClinic.tiles.map((tile) => (
+      <li>
+        <figure class="tile">
+          <Image
+            class="tile__img"
+            src={tile.image.src}
+            alt={tile.image.alt}
+            width={221}
+            height={180}
+            densities={[1, 2]}
+            sizes="(max-width: 640px) 50vw, 221px"
+            loading="lazy"
+          />
+          <figcaption>{tile.caption}</figcaption>
+        </figure>
+      </li>
+    ))}
+  </ul>
+</Section>
+
+<style>
+  .tiles {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 24px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .tile {
+    display: grid;
+    gap: 16px;
+    margin: 0;
+  }
+
+  .tile__img {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 221 / 180;
+    object-fit: cover;
+    border-radius: var(--radius-card);
+  }
+
+  figcaption {
+    font-size: var(--text-small);
+    line-height: var(--text-small-lh);
+    color: var(--color-heading);
+  }
+
+  @media (max-width: 1024px) {
+    .tiles {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  @media (max-width: 640px) {
+    .tiles {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+  }
+</style>

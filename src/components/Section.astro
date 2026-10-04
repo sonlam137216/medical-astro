@@ -1,0 +1,42 @@
+---
+// Figma section frame: full-width band, 120px side padding (the .container), 80px vertical, 40px gap.
+interface Props {
+  tone?: 'white' | 'soft' | 'navy';
+  id?: string;
+  labelledby?: string;
+  class?: string;
+}
+
+const { tone = 'white', id, labelledby, class: className } = Astro.props;
+---
+
+<section id={id} aria-labelledby={labelledby} class:list={['band', `band--${tone}`, className]}>
+  <div class="container band__inner">
+    <slot />
+  </div>
+</section>
+
+<style>
+  .band {
+    padding-block: var(--section-pad-y);
+  }
+
+  .band--white {
+    background: var(--color-white);
+  }
+
+  .band--soft {
+    background: var(--color-soft);
+  }
+
+  .band--navy {
+    background: var(--color-navy);
+    color: var(--color-white);
+  }
+
+  .band__inner {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+  }
+</style>

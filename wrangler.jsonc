@@ -1,0 +1,21 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "compatibility_date": "2026-10-01",
+  "compatibility_flags": ["global_fetch_strictly_public"],
+  "name": "melatec-website",
+  "main": "@astrojs/cloudflare/entrypoints/server",
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+  },
+  "observability": {
+    "enabled": true,
+  },
+  // Staging: build with CLOUDFLARE_ENV=staging (see `npm run deploy:staging`).
+  // Secrets for each environment are set separately; staging must never use production credentials.
+  "env": {
+    "staging": {
+      "name": "melatec-website-staging",
+    },
+  },
+}

@@ -1,0 +1,57 @@
+---
+import { Image } from 'astro:assets';
+import type { Img } from '../../data/home';
+
+interface Props {
+  name: string;
+  role: string;
+  href?: string;
+  image: Img;
+}
+
+const { name, role, href, image } = Astro.props;
+---
+
+<article class="card doctor">
+  <Image
+    class="card__media doctor__img"
+    src={image.src}
+    alt={image.alt}
+    width={282}
+    height={280}
+    densities={[1, 2]}
+    sizes="(max-width: 600px) 100vw, 282px"
+    loading="lazy"
+  />
+  <div class="card__body">
+    <h3 class="doctor__name">{name}</h3>
+    <p class="t-small muted">{role}</p>
+    {href && (
+      <a class="link-arrow" href={href}>
+        View profile <span aria-hidden="true">→</span>
+      </a>
+    )}
+  </div>
+</article>
+
+<style>
+  .doctor__img {
+    aspect-ratio: 282 / 280;
+    object-fit: contain;
+    object-position: center bottom;
+    background: var(--color-white);
+  }
+
+  .card__body {
+    gap: 8px;
+  }
+
+  .doctor__name {
+    font: 600 var(--text-button) / var(--text-button-lh) var(--font-sans);
+    color: var(--color-heading);
+  }
+
+  .link-arrow {
+    margin-top: 8px;
+  }
+</style>

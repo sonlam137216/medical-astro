@@ -1,0 +1,45 @@
+---
+import { Image } from 'astro:assets';
+import type { Img } from '../../data/home';
+
+interface Props {
+  title: string;
+  body: string;
+  image: Img;
+}
+
+const { title, body, image } = Astro.props;
+---
+
+<article class="card journey">
+  <Image
+    class="card__media journey__img"
+    src={image.src}
+    alt={image.alt}
+    width={282}
+    height={150}
+    densities={[1, 2]}
+    sizes="(max-width: 600px) 100vw, 282px"
+    loading="lazy"
+  />
+  <div class="card__body">
+    <h3 class="journey__title">{title}</h3>
+    <p class="t-small muted">{body}</p>
+  </div>
+</article>
+
+<style>
+  .journey__img {
+    aspect-ratio: 282 / 150;
+    object-fit: cover;
+  }
+
+  .card__body {
+    gap: 12px;
+  }
+
+  .journey__title {
+    font: 600 var(--text-button) / var(--text-button-lh) var(--font-sans);
+    color: var(--color-heading);
+  }
+</style>

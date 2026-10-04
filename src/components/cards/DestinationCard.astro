@@ -1,0 +1,43 @@
+---
+import { Image } from 'astro:assets';
+import type { Img } from '../../data/types';
+
+interface Props {
+  text: string;
+  href: string;
+  image: Img;
+  linkLabel?: string;
+}
+
+const { text, href, image, linkLabel = 'Directions' } = Astro.props;
+---
+
+<article class="card destination">
+  <Image
+    class="card__media destination__img"
+    src={image.src}
+    alt={image.alt}
+    width={282}
+    height={216}
+    densities={[1, 2]}
+    sizes="(max-width: 640px) 100vw, 282px"
+    loading="lazy"
+  />
+  <div class="card__body">
+    <p>{text}</p>
+    <a class="link-arrow" href={href}>
+      {linkLabel} <span aria-hidden="true">→</span>
+    </a>
+  </div>
+</article>
+
+<style>
+  .destination__img {
+    aspect-ratio: 282 / 216;
+    object-fit: cover;
+  }
+
+  .card__body {
+    gap: 16px;
+  }
+</style>

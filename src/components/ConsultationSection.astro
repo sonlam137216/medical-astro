@@ -1,0 +1,189 @@
+---
+import Button from './Button.astro';
+import { site, footerTreatments } from '../data/site';
+
+// Copy is from Figma "Shared / Consultation". The rating line is a claim made by the design;
+// the owner must confirm it is current and verifiable before launch.
+const services = footerTreatments.map((t) => t.label); // PROVISIONAL option list
+---
+
+<section class="consult" id="consultation" aria-labelledby="consult-title">
+  <div class="container">
+    <div class="consult__card">
+      <div class="consult__info">
+        <p class="t-label">Visit us</p>
+        <h2 class="t-h2" id="consult-title">
+          Come see us in Viet Nam
+        </h2>
+        <p class="t-h3 consult__name">{site.name}</p>
+        <p class="consult__rating">★★★★★ 4.9/5 on Google Reviews</p>
+        <p class="consult__line">{site.addressLine.replace(', Vietnam', '')}</p>
+        <p class="consult__line">
+          Phone / WhatsApp
+          <br />
+          {site.phoneIntl}
+        </p>
+        <p class="consult__line">{site.hours}</p>
+        <p class="consult__note">
+          Consultation support in English and flexible scheduling for overseas patients.
+        </p>
+      </div>
+
+      <div class="consult__formwrap">
+        <h2 class="consult__formtitle">Book a consultation</h2>
+        <!--
+          Not wired yet (Phase 4). POST (never GET) so personal data can never end up in the URL.
+          The endpoint does not exist yet, so submitting currently returns an error.
+        -->
+        <form class="form" method="post" action="/api/consultation" data-form="consultation">
+          <div class="field">
+            <label for="cf-name">Name</label>
+            <input
+              id="cf-name"
+              name="name"
+              type="text"
+              autocomplete="name"
+              placeholder="Your full name"
+              required
+            />
+          </div>
+          <div class="field">
+            <label for="cf-phone">Phone</label>
+            <input
+              id="cf-phone"
+              name="phone"
+              type="tel"
+              autocomplete="tel"
+              placeholder="Country code + number"
+              required
+            />
+          </div>
+          <div class="field">
+            <label for="cf-email">Email</label>
+            <input
+              id="cf-email"
+              name="email"
+              type="email"
+              autocomplete="email"
+              placeholder="you@example.com"
+              required
+            />
+          </div>
+          <div class="field">
+            <label for="cf-service">Services</label>
+            <select id="cf-service" name="service">
+              <option value="">Select a treatment</option>
+              {services.map((s) => (
+                <option value={s}>{s}</option>
+              ))}
+            </select>
+          </div>
+          <div class="form__actions">
+            <Button type="submit">Request consultation</Button>
+          </div>
+          <p class="form__note">*Your information is kept strictly confidential.</p>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .consult {
+    padding-block: var(--section-pad-y);
+    background: var(--color-white);
+  }
+
+  .consult__card {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 48px;
+    padding: 48px 40px;
+    background: var(--color-soft);
+    border-radius: 24px;
+  }
+
+  .consult__info {
+    display: grid;
+    align-content: start;
+    gap: 20px;
+  }
+
+  .consult__name {
+    margin-top: 12px;
+  }
+
+  .consult__rating {
+    color: var(--color-blue);
+  }
+
+  .consult__note {
+    color: var(--color-muted);
+  }
+
+  .consult__formtitle {
+    font-family: var(--font-serif);
+    font-weight: 600;
+    font-size: 36px;
+    line-height: 44px;
+    color: var(--color-heading);
+    margin: 0 0 32px;
+  }
+
+  .form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+
+  .field {
+    display: grid;
+    gap: 8px;
+  }
+
+  .field label {
+    color: var(--color-heading);
+  }
+
+  .field input,
+  .field select {
+    width: 100%;
+    height: 54px;
+    padding: 0 16px;
+    font: inherit;
+    color: var(--color-navy);
+    background: var(--color-white);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-control);
+  }
+
+  .field input::placeholder {
+    color: var(--color-muted);
+  }
+
+  .form__actions,
+  .form__note {
+    grid-column: 1 / -1;
+  }
+
+  .form__actions {
+    display: flex;
+  }
+
+  .form__note {
+    color: var(--color-muted);
+  }
+
+  @media (max-width: 900px) {
+    .consult__card {
+      grid-template-columns: 1fr;
+      padding: 32px 20px;
+    }
+  }
+
+  @media (max-width: 560px) {
+    .form {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

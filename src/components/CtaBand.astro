@@ -1,0 +1,75 @@
+---
+import Button from './Button.astro';
+
+interface Action {
+  label: string;
+  href: string;
+  variant?: 'light' | 'outline-light';
+}
+
+interface Props {
+  label?: string;
+  title?: string;
+  actions: Action[];
+}
+
+const {
+  label = 'Take the first step',
+  title = 'Begin Your Personalized Dental Journey',
+  actions,
+} = Astro.props;
+---
+
+<section class="band" aria-labelledby="cta-title">
+  <div class="container cta">
+    <div class="cta__text">
+      <p class="t-label cta__label">{label}</p>
+      <h2 class="t-h2 cta__title" id="cta-title">
+        {title}
+      </h2>
+    </div>
+    <div class="cta__actions">
+      {actions.map((a) => (
+        <Button href={a.href} variant={a.variant ?? 'light'}>
+          {a.label}
+        </Button>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .band {
+    padding-block: var(--section-pad-y);
+    background: var(--color-navy);
+  }
+
+  .cta {
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    align-items: center;
+    gap: 40px;
+  }
+
+  .cta__text {
+    display: grid;
+    gap: 12px;
+  }
+
+  .cta__label,
+  .cta__title {
+    color: var(--color-white);
+  }
+
+  .cta__actions {
+    display: grid;
+    gap: 16px;
+    justify-items: start;
+  }
+
+  @media (max-width: 960px) {
+    .cta {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

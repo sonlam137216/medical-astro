@@ -1,0 +1,32 @@
+---
+import { Image } from 'astro:assets';
+import Section from './Section.astro';
+import SectionIntro from './SectionIntro.astro';
+import { seamlessJourney as j } from '../data/shared';
+---
+
+<Section labelledby="journey-title">
+  <SectionIntro label={j.label} headingId="journey-title">
+    <Fragment slot="title">{j.title}</Fragment>
+  </SectionIntro>
+  <Image
+    class="journey"
+    src={j.image.src}
+    alt={j.image.alt}
+    width={1200}
+    height={676}
+    densities={[1, 2]}
+    sizes="(max-width: 1440px) 100vw, 1200px"
+    loading="lazy"
+  />
+</Section>
+
+<style>
+  .journey {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1200 / 676;
+    object-fit: cover;
+    border-radius: var(--radius-image);
+  }
+</style>

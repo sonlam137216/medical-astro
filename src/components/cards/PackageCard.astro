@@ -1,0 +1,86 @@
+---
+import { Image } from 'astro:assets';
+import inclusionDot from '../../assets/images/icons/inclusion-dot.png';
+import type { Img } from '../../data/types';
+
+interface Props {
+  title: string;
+  inclusions: string[];
+  total: string;
+  href: string;
+  image: Img;
+}
+
+const { title, inclusions, total, href, image } = Astro.props;
+---
+
+<article class="card package">
+  <Image
+    class="card__media package__img"
+    src={image.src}
+    alt={image.alt}
+    width={384}
+    height={190}
+    densities={[1, 2]}
+    sizes="(max-width: 768px) 100vw, 384px"
+    loading="lazy"
+  />
+  <div class="card__body">
+    <h3 class="t-h3">{title}</h3>
+    <ul class="package__list">
+      {inclusions.map((item) => (
+        <li>
+          <Image
+            src={inclusionDot}
+            alt=""
+            width={20}
+            height={20}
+            densities={[1, 2]}
+            loading="lazy"
+          />
+          <span>{item}</span>
+        </li>
+      ))}
+    </ul>
+    <p class="package__total">{total}</p>
+    <a class="link-arrow" href={href}>
+      Learn more <span aria-hidden="true">→</span>
+    </a>
+  </div>
+</article>
+
+<style>
+  .package__img {
+    aspect-ratio: 384 / 190;
+    object-fit: cover;
+    object-position: center top;
+  }
+
+  .package__list {
+    display: grid;
+    gap: 12px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .package__list li {
+    display: grid;
+    grid-template-columns: 20px 1fr;
+    align-items: start;
+    gap: 12px;
+  }
+
+  .package__list li :global(img) {
+    margin-top: 3px;
+  }
+
+  .package__total {
+    font-family: var(--font-serif);
+    font-weight: 600;
+    font-size: 32px;
+    line-height: 40px;
+    text-transform: uppercase;
+    color: var(--color-blue);
+  }
+</style>

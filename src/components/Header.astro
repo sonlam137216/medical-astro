@@ -1,0 +1,240 @@
+---
+import Button from './Button.astro';
+import Logo from './Logo.astro';
+import { site, mainNav, utilityLink } from '../data/site';
+
+interface Props {
+  /** Pathname of the current page, used to highlight the active link. */
+  current?: string;
+  /** Right side of the utility bar. Defaults to the "Dental Knowledge" link. */
+  utility?: { label: string; href?: string };
+  /** Header call to action. Defaults to "Book consultation". */
+  cta?: { label: string; href?: string };
+}
+
+const {
+  current = Astro.url.pathname,
+  utility = utilityLink,
+  cta = { label: 'Book consultation', href: '#consultation' },
+} = Astro.props;
+const isActive = (href: string) => (href === '/' ? current === '/' : current.startsWith(href));
+---
+
+<header class="header">
+  <div class="utility">
+    <div class="container utility__inner">
+      <p class="t-small utility__contact">
+        {site.phoneDisplay}&nbsp; <span aria-hidden="true">·</span>&nbsp;
+        <a href={`mailto:${site.email}`}>{site.email}</a>
+      </p>
+      {utility.href ? (
+        <a class="t-small" href={utility.href}>
+          {utility.label}
+        </a>
+      ) : (
+        <span class="t-small">{utility.label}</span>
+      )}
+    </div>
+  </div>
+
+  <div class="nav">
+    <div class="container nav__inner">
+      <Logo />
+
+      <!-- Small-screen menu is an addition: Figma only has the 1440 desktop header -->
+      <div class="menu" data-menu>
+        <button
+          class="menu__toggle"
+          type="button"
+          aria-expanded="false"
+          aria-controls="site-menu"
+          data-menu-toggle
+        >
+          <span class="visually-hidden">Menu</span>
+          <span class="menu__bars" aria-hidden="true"></span>
+        </button>
+        <nav id="site-menu" class="menu__panel" aria-label="Main">
+          <ul class="menu__list">
+            {mainNav.map((link) => (
+              <li>
+                <a
+                  class:list={['t-small', 'menu__link', { 'is-active': isActive(link.href) }]}
+                  href={link.href}
+                  aria-current={isActive(link.href) ? 'page' : undefined}
+                >
+                  {link.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+          <Button href={cta.href ?? '#consultation'} class="menu__cta">
+            {cta.label}
+          </Button>
+        </nav>
+      </div>
+    </div>
+  </div>
+</header>
+
+<script>
+  const menu = document.querySelector<HTMLElement>('[data-menu]');
+  const toggle = document.querySelector<HTMLButtonElement>('[data-menu-toggle]');
+
+  const setOpen = (open: boolean) => {
+    menu?.classList.toggle('is-open', open);
+    toggle?.setAttribute('aria-expanded', String(open));
+  };
+
+  toggle?.addEventListener('click', () => setOpen(!menu?.classList.contains('is-open')));
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') setOpen(false);
+  });
+</script>
+
+<style>
+  .utility {
+    background: var(--color-navy);
+    color: var(--color-white);
+  }
+
+  .utility__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    min-height: var(--utility-bar-h);
+    padding-block: 8px;
+  }
+
+  .nav {
+    background: var(--color-white);
+  }
+
+  .nav__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    min-height: var(--nav-h);
+    padding-block: 20px;
+  }
+
+  .menu {
+    display: flex;
+    flex: 1;
+  }
+
+  .menu__toggle {
+    display: none;
+    padding: 12px;
+    background: none;
+    border: 0;
+    cursor: pointer;
+  }
+
+  .menu__bars,
+  .menu__bars::before,
+  .menu__bars::after {
+    display: block;
+    width: 22px;
+    height: 2px;
+    background: var(--color-heading);
+    content: '';
+  }
+
+  .menu__bars {
+    position: relative;
+  }
+
+  .menu__bars::before,
+  .menu__bars::after {
+    position: absolute;
+    left: 0;
+  }
+
+  .menu__bars::before {
+    top: -7px;
+  }
+
+  .menu__bars::after {
+    top: 7px;
+  }
+
+  .menu__panel {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+  }
+
+  .menu__list {
+    display: flex;
+    gap: 24px;
+    margin: 0 auto 0 30px;
+    padding: 0;
+    list-style: none;
+  }
+
+  .menu__link {
+    color: var(--color-heading);
+  }
+
+  .menu__link:hover,
+  .menu__link.is-active {
+    color: var(--color-blue);
+  }
+
+  @media (max-width: 1024px) {
+    .utility__contact {
+      font-size: 12px;
+    }
+
+    .menu {
+      flex: 0;
+      position: relative;
+    }
+
+    .menu__toggle {
+      display: block;
+    }
+
+    .menu__panel {
+      flex-direction: column;
+      align-items: stretch;
+      position: absolute;
+      right: 0;
+      top: 100%;
+      width: min(320px, 90vw);
+      padding: 16px;
+      background: var(--color-white);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-control);
+      z-index: 10;
+    }
+
+    .menu__list {
+      flex-direction: column;
+      gap: 4px;
+      margin: 0 0 16px;
+    }
+
+    .menu__link {
+      display: block;
+      padding: 10px 4px;
+    }
+
+    /* With JS the panel is collapsed until toggled; without JS it stays visible */
+    :global(.js) .menu__panel {
+      display: none;
+    }
+
+    :global(.js) .menu.is-open .menu__panel {
+      display: flex;
+    }
+
+    :global(html:not(.js)) .menu__toggle {
+      display: none;
+    }
+  }
+</style>

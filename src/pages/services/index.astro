@@ -1,0 +1,75 @@
+---
+import SiteLayout from '../../layouts/SiteLayout.astro';
+import PageHero from '../../components/PageHero.astro';
+import Section from '../../components/Section.astro';
+import ServiceCard from '../../components/cards/ServiceCard.astro';
+import CtaBand from '../../components/CtaBand.astro';
+import TourismSupport from '../../components/TourismSupport.astro';
+import SeamlessJourney from '../../components/SeamlessJourney.astro';
+import { towerImage, serviceDetails } from '../../data/shared';
+
+export const prerender = true;
+---
+
+<SiteLayout title="Dental services · Melatec Dental Clinic">
+  <PageHero label="Our services." image={towerImage} imageHeight={298} upper>
+    <Fragment slot="title">Comprehensive dental care for every smile</Fragment>
+    <p>
+      Providing advanced implant, cosmetic, orthodontic, and restorative dental care in a modern,
+      patient-focused clinical environment.
+    </p>
+  </PageHero>
+
+  <Section labelledby="dental-services-title">
+    <h2 class="visually-hidden" id="dental-services-title">
+      Dental services
+    </h2>
+    <ul class="grid">
+      {serviceDetails.map((s) => (
+        <li>
+          <ServiceCard {...s} detail />
+        </li>
+      ))}
+    </ul>
+  </Section>
+
+  <CtaBand
+    actions={[
+      { label: 'Book a consultation', href: '#consultation' },
+      { label: 'Explore our doctors', href: '/our-doctors', variant: 'outline-light' },
+    ]}
+  />
+  <TourismSupport />
+  <SeamlessJourney />
+</SiteLayout>
+
+<style>
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .grid li {
+    display: flex;
+  }
+
+  .grid li > :global(*) {
+    flex: 1;
+  }
+
+  @media (max-width: 1024px) {
+    .grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 640px) {
+    .grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
