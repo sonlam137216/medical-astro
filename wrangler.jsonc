@@ -1,82 +1,80 @@
 {
-	"$schema": "./node_modules/wrangler/config-schema.json",
-	"compatibility_date": "2026-10-01",
-	"compatibility_flags": [
-		"global_fetch_strictly_public"
-	],
-	"name": "melatec-website",
-	"main": "@astrojs/cloudflare/entrypoints/server",
-	"assets": {
-		"directory": "./dist",
-		"binding": "ASSETS",
-	},
-	// Per-IP brakes (consultation form, admin sign-in). Bindings only: they create no Cloudflare resource.
-	"ratelimits": [
-		{
-			"name": "CONSULTATION_LIMITER",
-			"namespace_id": "1001",
-			"simple": {
-				"limit": 5,
-				"period": 60
-			},
-		},
-		{
-			"name": "ADMIN_LOGIN_LIMITER",
-			"namespace_id": "1011",
-			"simple": {
-				"limit": 10,
-				"period": 60
-			},
-		},
-	],
-	// Media files (images). Binding to a bucket that must exist for deploys; `wrangler dev` simulates it locally.
-	"r2_buckets": [
-		{
-			"binding": "MEDIA",
-			"bucket_name": "melatec-media"
-		},
-		{
-			"bucket_name": "melatec-media",
-			"binding": "melatec_media"
-		},
-		{
-			"bucket_name": "melatec-media-staging",
-			"binding": "melatec_media_staging"
-		}
-	],
-	"observability": {
-		"enabled": true,
-	},
-	// Staging: build with CLOUDFLARE_ENV=staging (see `npm run deploy:staging`).
-	// Secrets for each environment are set separately; staging must never use production credentials.
-	"env": {
-		"staging": {
-			"name": "melatec-website-staging",
-			// Bindings are not inherited by environments.
-			"r2_buckets": [
-				{
-					"binding": "MEDIA",
-					"bucket_name": "melatec-media-staging"
-				}
-			],
-			"ratelimits": [
-				{
-					"name": "CONSULTATION_LIMITER",
-					"namespace_id": "1002",
-					"simple": {
-						"limit": 5,
-						"period": 60
-					},
-				},
-				{
-					"name": "ADMIN_LOGIN_LIMITER",
-					"namespace_id": "1012",
-					"simple": {
-						"limit": 10,
-						"period": 60
-					},
-				},
-			],
-		},
-	},
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "compatibility_date": "2026-10-01",
+  "compatibility_flags": ["global_fetch_strictly_public"],
+  "name": "melatec-website",
+  "main": "@astrojs/cloudflare/entrypoints/server",
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+  },
+  // Per-IP brakes (consultation form, admin sign-in). Bindings only: they create no Cloudflare resource.
+  "ratelimits": [
+    {
+      "name": "CONSULTATION_LIMITER",
+      "namespace_id": "1001",
+      "simple": {
+        "limit": 5,
+        "period": 60,
+      },
+    },
+    {
+      "name": "ADMIN_LOGIN_LIMITER",
+      "namespace_id": "1011",
+      "simple": {
+        "limit": 10,
+        "period": 60,
+      },
+    },
+  ],
+  // Media files (images). Binding to a bucket that must exist for deploys; `wrangler dev` simulates it locally.
+  "r2_buckets": [
+    {
+      "binding": "MEDIA",
+      "bucket_name": "melatec-media",
+    },
+    {
+      "bucket_name": "melatec-media",
+      "binding": "melatec_media",
+    },
+    {
+      "bucket_name": "melatec-media-staging",
+      "binding": "melatec_media_staging",
+    },
+  ],
+  "observability": {
+    "enabled": true,
+  },
+  // Staging: build with CLOUDFLARE_ENV=staging (see `npm run deploy:staging`).
+  // Secrets for each environment are set separately; staging must never use production credentials.
+  "env": {
+    "staging": {
+      "name": "melatec-website-staging",
+      // Bindings are not inherited by environments.
+      "r2_buckets": [
+        {
+          "binding": "MEDIA",
+          "bucket_name": "melatec-media-staging",
+        },
+      ],
+      "ratelimits": [
+        {
+          "name": "CONSULTATION_LIMITER",
+          "namespace_id": "1002",
+          "simple": {
+            "limit": 5,
+            "period": 60,
+          },
+        },
+        {
+          "name": "ADMIN_LOGIN_LIMITER",
+          "namespace_id": "1012",
+          "simple": {
+            "limit": 10,
+            "period": 60,
+          },
+        },
+      ],
+    },
+  },
 }
