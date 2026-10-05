@@ -56,7 +56,7 @@ Sau mỗi thay đổi schema: viết migration mới, chạy `db:reset`, `db:tes
 
 ## Đẩy lên project Supabase thật
 
-**Đã đẩy lên (2026-10-05): 4 migration đầu đã áp dụng (`20261005120000_media_variants.sql` viết sau đó, chưa đẩy). Không sửa các file này nữa; sai thì viết migration mới.** Không drop bảng tay trên Dashboard: lịch sử migration sẽ lệch với DB thật. Cần làm lại từ đầu thì xoá sạch object do migration tạo (bảng, function, domain), chạy `npx supabase migration repair --status reverted <version>` cho từng migration rồi `db push` lại.
+**Đã đẩy lên (2026-10-05): cả 5 migration đã áp dụng (4 file đầu, rồi `20261005120000_media_variants.sql`). Không sửa các file này nữa; sai thì viết migration mới.** Không drop bảng tay trên Dashboard: lịch sử migration sẽ lệch với DB thật. Cần làm lại từ đầu thì xoá sạch object do migration tạo (bảng, function, domain), chạy `npx supabase migration repair --status reverted <version>` cho từng migration rồi `db push` lại.
 
 Project hiện tại: `npbiucxxcnppgecmkhdz` (`https://npbiucxxcnppgecmkhdz.supabase.co`). Chạy trong terminal của bạn, tại thư mục dự án, vì có bước đăng nhập và nhập mật khẩu DB:
 
