@@ -1,0 +1,58 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import '../styles/admin.css';
+
+interface Props {
+  title: string;
+  /** False on the sign-in page, where there is no session yet. */
+  nav?: boolean;
+  current?: 'dashboard' | 'consultations';
+}
+
+const { title, nav = true, current } = Astro.props;
+
+// Unprocessed requests: the only way an admin learns about a new one (the site sends no email).
+let newCount = 0;
+if (nav) {
+  const { count } = await Astro.locals.db
+    .from('consultation_requests')
+    .select('id', { count: 'exact', head: true })
+    .eq('status', 'new');
+  newCount = count ?? 0;
+}
+---
+
+<BaseLayout title={`${title} · Melatec admin`} noindex>
+  <div class="admin-shell">
+    {nav && (
+      <header class="admin-bar">
+        <span class="admin-bar__brand">Melatec admin</span>
+        <nav aria-label="Admin">
+          <a href="/admin" aria-current={current === 'dashboard' ? 'page' : undefined}>
+            Dashboard
+          </a>
+          <a
+            href="/admin/consultations"
+            aria-current={current === 'consultations' ? 'page' : undefined}
+          >
+            Consultations
+            {newCount > 0 && (
+              <span class="admin-badge" aria-label={`${newCount} new`}>
+                {newCount}
+              </span>
+            )}
+          </a>
+        </nav>
+        <div class="admin-bar__user">
+          <span>{Astro.locals.admin.email}</span>
+          <form method="post" action="/admin/auth/logout">
+            <button class="admin-btn admin-btn--ghost" type="submit">
+              Sign out
+            </button>
+          </form>
+        </div>
+      </header>
+    )}
+    <slot />
+  </div>
+</BaseLayout>

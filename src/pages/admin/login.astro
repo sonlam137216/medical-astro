@@ -1,0 +1,45 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+
+export const prerender = false;
+
+const error = Astro.url.searchParams.get('error');
+const message =
+  error === 'rate'
+    ? 'Too many attempts. Please wait a minute and try again.'
+    : error === 'unavailable'
+      ? 'Sign-in is not available right now.'
+      : error
+        ? 'Email or password is incorrect.'
+        : null;
+---
+
+<AdminLayout title="Sign in" nav={false}>
+  <main class="admin-login">
+    <h1 class="t-h2">Admin sign in</h1>
+    {message && (
+      <p class="admin-notice admin-notice--error" role="alert">
+        {message}
+      </p>
+    )}
+    <form class="admin-form admin-card" method="post" action="/admin/auth/login">
+      <label>
+        Email
+        <input type="email" name="email" autocomplete="username" maxlength="254" required />
+      </label>
+      <label>
+        Password
+        <input
+          type="password"
+          name="password"
+          autocomplete="current-password"
+          maxlength="256"
+          required
+        />
+      </label>
+      <button class="admin-btn" type="submit">
+        Sign in
+      </button>
+    </form>
+  </main>
+</AdminLayout>

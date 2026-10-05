@@ -1,0 +1,107 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+
+export const prerender = false;
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const id = Astro.params.id ?? '';
+if (!UUID_RE.test(id)) return new Response('Not found', { status: 404 });
+
+const { data: request } = await Astro.locals.db
+  .from('consultation_requests')
+  .select('*')
+  .eq('id', id)
+  .maybeSingle();
+if (!request) return new Response('Not found', { status: 404 });
+
+const when = new Intl.DateTimeFormat('en-GB', {
+  dateStyle: 'long',
+  timeStyle: 'short',
+  timeZone: 'Asia/Ho_Chi_Minh',
+});
+const STATUSES = [
+  ['new', 'New'],
+  ['in_progress', 'In progress'],
+  ['done', 'Done'],
+  ['spam', 'Spam'],
+] as const;
+const saved = Astro.url.searchParams.has('saved');
+const failed = Astro.url.searchParams.has('error');
+---
+
+<AdminLayout title={request.full_name} current="consultations">
+  <main class="admin-main">
+    <p>
+      <a href="/admin/consultations">← All requests</a>
+    </p>
+    <h1>{request.full_name}</h1>
+
+    {saved && (
+      <p class="admin-notice" role="status">
+        Saved.
+      </p>
+    )}
+    {failed && (
+      <p class="admin-notice admin-notice--error" role="alert">
+        Could not save. Please try again.
+      </p>
+    )}
+
+    <section class="admin-card" aria-labelledby="details-title">
+      <h2 id="details-title" class="t-h3">
+        Request
+      </h2>
+      <dl class="admin-dl" style="margin-top: 16px">
+        <dt>Received</dt>
+        <dd>{when.format(new Date(request.created_at))} (Vietnam time)</dd>
+        <dt>Email</dt>
+        <dd>
+          <a href={`mailto:${request.email}`}>{request.email}</a>
+        </dd>
+        <dt>Phone</dt>
+        <dd>
+          <a href={`tel:${request.phone.replace(/[^+\d]/g, '')}`}>{request.phone}</a>
+        </dd>
+        <dt>Interested in</dt>
+        <dd>{request.service_interest ?? '—'}</dd>
+        <dt>Sent from page</dt>
+        <dd>{request.source_path ?? '—'}</dd>
+        <dt>Country (by network)</dt>
+        <dd>{request.client_country ?? '—'}</dd>
+        {request.handled_at && (
+          <>
+            <dt>Last status change</dt>
+            <dd>{when.format(new Date(request.handled_at))}</dd>
+          </>
+        )}
+      </dl>
+    </section>
+
+    <form
+      class="admin-form admin-card"
+      method="post"
+      action={`/admin/consultations/${request.id}/update`}
+    >
+      <h2 class="t-h3">Handling</h2>
+      <label>
+        Status
+        <select name="status">
+          {STATUSES.map(([value, label]) => (
+            <option value={value} selected={value === request.status}>
+              {label}
+            </option>
+          ))}
+        </select>
+      </label>
+      <label>
+        Internal note (never shown to the patient)
+        <textarea name="internal_note" maxlength="2000">{request.internal_note ?? ''}</textarea>
+      </label>
+      <div>
+        <button class="admin-btn" type="submit">
+          Save
+        </button>
+      </div>
+    </form>
+  </main>
+</AdminLayout>

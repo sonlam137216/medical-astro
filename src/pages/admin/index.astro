@@ -1,0 +1,44 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+
+export const prerender = false;
+
+const STATUSES = [
+  ['new', 'New'],
+  ['in_progress', 'In progress'],
+  ['done', 'Done'],
+  ['spam', 'Spam'],
+] as const;
+
+const counts = await Promise.all(
+  STATUSES.map(async ([status]) => {
+    const { count } = await Astro.locals.db
+      .from('consultation_requests')
+      .select('id', { count: 'exact', head: true })
+      .eq('status', status);
+    return count ?? 0;
+  }),
+);
+---
+
+<AdminLayout title="Dashboard" current="dashboard">
+  <main class="admin-main">
+    <h1>Dashboard</h1>
+    <section class="admin-card" aria-labelledby="req-title">
+      <h2 id="req-title" class="t-h3">
+        Consultation requests
+      </h2>
+      <p class="admin-muted">The website sends no email, so check here for new requests.</p>
+      <dl class="admin-dl" style="margin-top: 16px">
+        {STATUSES.map(([status, label], i) => (
+          <>
+            <dt>{label}</dt>
+            <dd>
+              <a href={`/admin/consultations?status=${status}`}>{counts[i]}</a>
+            </dd>
+          </>
+        ))}
+      </dl>
+    </section>
+  </main>
+</AdminLayout>

@@ -1,0 +1,251 @@
+/* Admin area. Plain, no framework; reuses the design tokens. Not part of the Figma design. */
+.admin-shell {
+  display: flow-root; /* keep child margins inside the tinted background */
+  min-height: 100vh;
+  background: var(--color-soft);
+}
+
+.admin-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 24px;
+  padding: 12px 24px;
+  background: var(--color-navy);
+  color: var(--color-white);
+}
+
+.admin-bar__brand {
+  font-weight: 600;
+  margin-right: 8px;
+}
+
+.admin-bar nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  flex: 1;
+}
+
+.admin-bar a {
+  padding: 4px 0;
+  border-bottom: 2px solid transparent;
+}
+
+.admin-bar a[aria-current='page'],
+.admin-bar a:hover {
+  border-bottom-color: var(--color-border);
+}
+
+.admin-bar__user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+}
+
+.admin-main {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 32px 24px 64px;
+  display: grid;
+  gap: 24px;
+}
+
+.admin-main h1 {
+  font-family: var(--font-serif);
+  font-weight: 600;
+  font-size: 36px;
+  line-height: 44px;
+  color: var(--color-heading);
+}
+
+.admin-card {
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 24px;
+}
+
+.admin-badge {
+  display: inline-block;
+  min-width: 22px;
+  padding: 0 7px;
+  margin-left: 6px;
+  border-radius: 11px;
+  background: var(--color-blue);
+  color: var(--color-white);
+  font-size: 12px;
+  line-height: 22px;
+  text-align: center;
+}
+
+.admin-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 40px;
+  padding: 0 16px;
+  font: 600 14px / 20px var(--font-sans);
+  color: var(--color-white);
+  background: var(--color-blue);
+  border: 1px solid var(--color-blue);
+  border-radius: var(--radius-control);
+  cursor: pointer;
+}
+
+.admin-btn--ghost {
+  color: inherit;
+  background: transparent;
+  border-color: currentColor;
+  height: 32px;
+}
+
+.admin-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.admin-form {
+  display: grid;
+  gap: 16px;
+}
+
+.admin-form label {
+  display: grid;
+  gap: 6px;
+  color: var(--color-heading);
+  font-weight: 500;
+}
+
+.admin-form input,
+.admin-form select,
+.admin-form textarea {
+  width: 100%;
+  padding: 10px 14px;
+  font: inherit;
+  color: var(--color-navy);
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+}
+
+.admin-form textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+.admin-notice {
+  padding: 12px 16px;
+  border-radius: var(--radius-control);
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+}
+
+.admin-notice--error {
+  color: var(--color-error);
+  border-color: var(--color-error);
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.admin-table th,
+.admin-table td {
+  padding: 10px 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--color-border);
+  vertical-align: top;
+}
+
+.admin-table th {
+  color: var(--color-heading);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.admin-table-wrap {
+  overflow-x: auto;
+}
+
+.admin-status {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  background: var(--color-soft);
+  color: var(--color-heading);
+}
+
+.admin-status[data-status='new'] {
+  background: var(--color-blue);
+  color: var(--color-white);
+}
+
+.admin-status[data-status='spam'] {
+  background: #f4dcda;
+  color: var(--color-error);
+}
+
+.admin-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.admin-tabs a {
+  padding: 6px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 20px;
+  background: var(--color-white);
+  font-size: 14px;
+}
+
+.admin-tabs a[aria-current='page'] {
+  background: var(--color-heading);
+  border-color: var(--color-heading);
+  color: var(--color-white);
+}
+
+.admin-dl {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 10px 24px;
+  margin: 0;
+}
+
+.admin-dl dt {
+  color: var(--color-muted);
+}
+
+.admin-dl dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.admin-muted {
+  color: var(--color-muted);
+}
+
+.admin-login {
+  max-width: 420px;
+  margin: 12vh auto 0;
+  padding: 0 16px;
+  display: grid;
+  gap: 20px;
+}
+
+@media (max-width: 560px) {
+  .admin-dl {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+
+  .admin-dl dd {
+    margin-bottom: 10px;
+  }
+}

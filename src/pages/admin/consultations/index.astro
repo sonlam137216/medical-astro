@@ -1,0 +1,112 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+
+export const prerender = false;
+
+const PAGE_SIZE = 25;
+const FILTERS = [
+  ['new', 'New'],
+  ['in_progress', 'In progress'],
+  ['done', 'Done'],
+  ['spam', 'Spam'],
+  ['all', 'All'],
+] as const;
+
+const requested = Astro.url.searchParams.get('status') ?? 'new';
+const status = FILTERS.some(([key]) => key === requested) ? requested : 'new';
+const page = Math.max(1, Math.floor(Number(Astro.url.searchParams.get('page'))) || 1);
+const from = (page - 1) * PAGE_SIZE;
+
+let query = Astro.locals.db
+  .from('consultation_requests')
+  .select('id, created_at, full_name, email, phone, service_interest, client_country, status', {
+    count: 'exact',
+  })
+  .order('created_at', { ascending: false })
+  .range(from, from + PAGE_SIZE - 1);
+if (status !== 'all') query = query.eq('status', status);
+
+const { data: rows, count, error } = await query;
+const total = count ?? 0;
+const lastPage = Math.max(1, Math.ceil(total / PAGE_SIZE));
+
+// Vietnam time: the clinic is in Hanoi.
+const when = new Intl.DateTimeFormat('en-GB', {
+  dateStyle: 'medium',
+  timeStyle: 'short',
+  timeZone: 'Asia/Ho_Chi_Minh',
+});
+const link = (s: string, p = 1) => `/admin/consultations?status=${s}${p > 1 ? `&page=${p}` : ''}`;
+---
+
+<AdminLayout title="Consultations" current="consultations">
+  <main class="admin-main">
+    <h1>Consultation requests</h1>
+
+    <nav class="admin-tabs" aria-label="Filter by status">
+      {FILTERS.map(([key, label]) => (
+        <a href={link(key)} aria-current={key === status ? 'page' : undefined}>
+          {label}
+        </a>
+      ))}
+    </nav>
+
+    {error && (
+      <p class="admin-notice admin-notice--error" role="alert">
+        Could not load requests.
+      </p>
+    )}
+
+    <div class="admin-card admin-table-wrap">
+      {rows && rows.length > 0 ? (
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Received (Vietnam time)</th>
+              <th>Name</th>
+              <th>Contact</th>
+              <th>Interest</th>
+              <th>Country</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((r) => (
+              <tr>
+                <td>{when.format(new Date(r.created_at))}</td>
+                <td>
+                  <a href={`/admin/consultations/${r.id}`}>{r.full_name}</a>
+                </td>
+                <td>
+                  {r.email}
+                  <br />
+                  {r.phone}
+                </td>
+                <td>{r.service_interest ?? '—'}</td>
+                <td>{r.client_country ?? '—'}</td>
+                <td>
+                  <span class="admin-status" data-status={r.status}>
+                    {r.status.replace('_', ' ')}
+                  </span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      ) : (
+        <p class="admin-muted">No requests here.</p>
+      )}
+    </div>
+
+    {lastPage > 1 && (
+      <p>
+        {page > 1 && <a href={link(status, page - 1)}>← Newer</a>}
+        <span class="admin-muted">
+          {' '}
+          Page {page} of {lastPage} ({total} requests){' '}
+        </span>
+        {page < lastPage && <a href={link(status, page + 1)}>Older →</a>}
+      </p>
+    )}
+  </main>
+</AdminLayout>
