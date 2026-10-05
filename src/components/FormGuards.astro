@@ -1,0 +1,27 @@
+---
+// Shared parts of every consultation form (see src/scripts/consultation-form.ts and /api/consultation).
+// Place the hidden fields at the top of the <form> and the status line before the note.
+interface Props {
+  part: 'fields' | 'status';
+}
+const { part } = Astro.props;
+---
+
+{part === 'fields' ? (
+  <>
+    <input type="hidden" name="submission_id" value="" />
+    {/* Honeypot: invisible to people, tempting to bots. */}
+    <div class="form__trap" inert>
+      <label>
+        Website
+        <input type="text" name="website" tabindex="-1" autocomplete="off" />
+      </label>
+    </div>
+  </>
+) : (
+  <p class="form__status" role="status" aria-live="polite" data-status />
+)}
+
+<script>
+  import '../scripts/consultation-form';
+</script>

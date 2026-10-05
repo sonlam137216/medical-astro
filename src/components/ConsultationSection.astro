@@ -1,5 +1,6 @@
 ---
 import Button from './Button.astro';
+import FormGuards from './FormGuards.astro';
 import { site, footerTreatments } from '../data/site';
 
 // Copy is from Figma "Shared / Consultation". The rating line is a claim made by the design;
@@ -32,10 +33,11 @@ const services = footerTreatments.map((t) => t.label); // PROVISIONAL option lis
       <div class="consult__formwrap">
         <h2 class="consult__formtitle">Book a consultation</h2>
         <!--
-          Not wired yet (Phase 4). POST (never GET) so personal data can never end up in the URL.
-          The endpoint does not exist yet, so submitting currently returns an error.
+          POST (never GET) so personal data can never end up in the URL. Works without JS (the endpoint
+          answers with a small page); the script below upgrades it to an in-page submit.
         -->
         <form class="form" method="post" action="/api/consultation" data-form="consultation">
+          <FormGuards part="fields" />
           <div class="field">
             <label for="cf-name">Name</label>
             <input
@@ -44,6 +46,7 @@ const services = footerTreatments.map((t) => t.label); // PROVISIONAL option lis
               type="text"
               autocomplete="name"
               placeholder="Your full name"
+              maxlength="120"
               required
             />
           </div>
@@ -55,6 +58,7 @@ const services = footerTreatments.map((t) => t.label); // PROVISIONAL option lis
               type="tel"
               autocomplete="tel"
               placeholder="Country code + number"
+              maxlength="40"
               required
             />
           </div>
@@ -66,6 +70,7 @@ const services = footerTreatments.map((t) => t.label); // PROVISIONAL option lis
               type="email"
               autocomplete="email"
               placeholder="you@example.com"
+              maxlength="254"
               required
             />
           </div>
@@ -81,6 +86,7 @@ const services = footerTreatments.map((t) => t.label); // PROVISIONAL option lis
           <div class="form__actions">
             <Button type="submit">Request consultation</Button>
           </div>
+          <FormGuards part="status" />
           <p class="form__note">*Your information is kept strictly confidential.</p>
         </form>
       </div>

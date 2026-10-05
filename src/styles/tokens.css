@@ -19,6 +19,8 @@
   --color-border: #b2c9f3;
   --color-navy: #020f32;
   --color-soft: #f0f7fd;
+  /* Not in Figma: form error state, added for Phase 4. */
+  --color-error: #b3261e;
 
   /* font families */
   --font-serif: 'Cormorant Garamond', 'Times New Roman', serif;

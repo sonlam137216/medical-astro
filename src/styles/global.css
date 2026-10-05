@@ -159,3 +159,31 @@ p {
 .link-arrow:hover {
   text-decoration: underline;
 }
+
+/* Consultation forms (see FormGuards.astro). Shared by every form that posts to /api/consultation. */
+.form__trap {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.form__status {
+  grid-column: 1 / -1;
+  margin: 0;
+}
+
+.form__status[data-kind='ok'] {
+  color: var(--color-blue);
+}
+
+.form__status[data-kind='error'] {
+  color: var(--color-error);
+}
+
+.field input[aria-invalid='true'],
+.field select[aria-invalid='true'] {
+  /* !important: component-scoped `.field input` rules would otherwise win on specificity. */
+  border-color: var(--color-error) !important;
+}
