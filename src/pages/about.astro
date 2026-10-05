@@ -9,12 +9,15 @@ import InfoCard from '../components/cards/InfoCard.astro';
 import DoctorCard from '../components/cards/DoctorCard.astro';
 import CtaBand from '../components/CtaBand.astro';
 import SeamlessJourney from '../components/SeamlessJourney.astro';
-import { towerImage, doctorProfiles } from '../data/shared';
+import { towerImage } from '../data/shared';
+import { getDoctors } from '../lib/content';
 import { aboutHero, stats, personalisedCare, whyChoose, insideClinic } from '../data/about';
 
 export const prerender = true;
 
-const doctors = doctorProfiles.map(({ name, role, image }) => ({ name, role, image }));
+const doctors = (await getDoctors())
+  .slice(0, 4)
+  .map(({ name, role, image }) => ({ name, role, image }));
 ---
 
 <SiteLayout title="About us · Melatec Dental Clinic">

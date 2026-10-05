@@ -4,28 +4,43 @@ import type { Img } from '../../data/home';
 
 interface Props {
   name: string;
-  role: string;
+  role?: string | null;
   href?: string;
-  image: Img;
+  /** Missing for doctors managed in the CMS until media is connected: initials are shown instead. */
+  image?: Img;
 }
 
 const { name, role, href, image } = Astro.props;
+
+// 'Dr. Le Thi Yen' -> 'TY' (last two words, titles ignored)
+const initials = name
+  .replace(/^(dr|prof|assoc\. prof)\.?\s+/i, '')
+  .split(/\s+/)
+  .slice(-2)
+  .map((w) => w[0]?.toUpperCase() ?? '')
+  .join('');
 ---
 
 <article class="card doctor">
-  <Image
-    class="card__media doctor__img"
-    src={image.src}
-    alt={image.alt}
-    width={282}
-    height={280}
-    densities={[1, 2]}
-    sizes="(max-width: 600px) 100vw, 282px"
-    loading="lazy"
-  />
+  {image ? (
+    <Image
+      class="card__media doctor__img"
+      src={image.src}
+      alt={image.alt}
+      width={282}
+      height={280}
+      densities={[1, 2]}
+      sizes="(max-width: 600px) 100vw, 282px"
+      loading="lazy"
+    />
+  ) : (
+    <div class="card__media doctor__img doctor__initials" aria-hidden="true">
+      {initials}
+    </div>
+  )}
   <div class="card__body">
     <h3 class="doctor__name">{name}</h3>
-    <p class="t-small muted">{role}</p>
+    {role && <p class="t-small muted">{role}</p>}
     {href && (
       <a class="link-arrow" href={href}>
         View profile <span aria-hidden="true">→</span>
@@ -40,6 +55,14 @@ const { name, role, href, image } = Astro.props;
     object-fit: contain;
     object-position: center bottom;
     background: var(--color-white);
+  }
+
+  .doctor__initials {
+    display: grid;
+    place-items: center;
+    font: 600 56px / 1 var(--font-serif);
+    color: var(--color-heading);
+    background: var(--color-soft);
   }
 
   .card__body {

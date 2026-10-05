@@ -1,0 +1,29 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import DoctorForm from '../../../components/admin/DoctorForm.astro';
+import { EMPTY_DOCTOR, processDoctorPost } from '../../../lib/doctor-admin';
+
+export const prerender = false;
+
+const result =
+  Astro.request.method === 'POST'
+    ? await processDoctorPost(Astro.request, Astro.locals.db, null)
+    : null;
+if (result && 'redirect' in result) return result.redirect;
+if (result) Astro.response.status = result.status;
+---
+
+<AdminLayout title="Add doctor" current="doctors">
+  <main class="admin-main">
+    <p>
+      <a href="/admin/doctors">← All doctors</a>
+    </p>
+    <h1>Add doctor</h1>
+    <DoctorForm
+      values={result?.values ?? EMPTY_DOCTOR}
+      errors={result?.errors}
+      formError={result?.formError}
+      submitLabel="Add doctor"
+    />
+  </main>
+</AdminLayout>

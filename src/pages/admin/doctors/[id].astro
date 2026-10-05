@@ -1,0 +1,39 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import DoctorForm from '../../../components/admin/DoctorForm.astro';
+import { isUuid, processDoctorPost, valuesFromRow } from '../../../lib/doctor-admin';
+
+export const prerender = false;
+
+const id = Astro.params.id ?? '';
+if (!isUuid(id)) return new Response('Not found', { status: 404 });
+
+const { data: doctor } = await Astro.locals.db
+  .from('doctors')
+  .select('*')
+  .eq('id', id)
+  .maybeSingle();
+if (!doctor) return new Response('Not found', { status: 404 });
+
+const result =
+  Astro.request.method === 'POST'
+    ? await processDoctorPost(Astro.request, Astro.locals.db, id)
+    : null;
+if (result && 'redirect' in result) return result.redirect;
+if (result) Astro.response.status = result.status;
+---
+
+<AdminLayout title={doctor.full_name} current="doctors">
+  <main class="admin-main">
+    <p>
+      <a href="/admin/doctors">← All doctors</a>
+    </p>
+    <h1>{doctor.full_name}</h1>
+    <DoctorForm
+      values={result?.values ?? valuesFromRow(doctor)}
+      errors={result?.errors}
+      formError={result?.formError}
+      submitLabel="Save changes"
+    />
+  </main>
+</AdminLayout>

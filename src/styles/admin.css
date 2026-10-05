@@ -249,3 +249,43 @@
     margin-bottom: 10px;
   }
 }
+
+.admin-field-error {
+  color: var(--color-error);
+  font-weight: 400;
+  font-size: 14px;
+}
+
+.admin-hint {
+  color: var(--color-muted);
+  font-weight: 400;
+  font-size: 14px;
+}
+
+.admin-form input[aria-invalid='true'],
+.admin-form textarea[aria-invalid='true'] {
+  border-color: var(--color-error);
+}
+
+.admin-form label.admin-check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 500;
+}
+
+.admin-form label.admin-check input {
+  width: auto;
+}
+
+.admin-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+a.admin-btn {
+  text-decoration: none;
+}

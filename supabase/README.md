@@ -2,6 +2,10 @@
 
 Schema, migration, RLS và test cho PostgreSQL của Supabase. Quyết định đã chốt: chỉ một vai trò `admin`, không gửi email, chỉ tiếng Anh.
 
+## Lưu ý cấu hình Auth local
+
+Trong `config.toml`, `[auth.email] enable_signup` bật/tắt **cả nhà cung cấp email** (kể cả đăng nhập), không chỉ đăng ký. Giữ `true` để admin đăng nhập được; việc cấm đăng ký người lạ do `[auth] enable_signup = false` đảm nhiệm (đã kiểm: đăng nhập được, đăng ký trả `signup_disabled`). Trên project thật, tương ứng là tắt "Allow new users to sign up" nhưng vẫn bật Email provider.
+
 ## Mô hình bảo mật
 
 | Vai trò                        | Quyền                                                                                       |

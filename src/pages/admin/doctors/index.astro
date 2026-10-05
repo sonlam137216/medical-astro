@@ -1,0 +1,72 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+
+export const prerender = false;
+
+const { data: doctors, error } = await Astro.locals.db
+  .from('doctors')
+  .select('id, full_name, role_title, slug, sort_order, is_visible')
+  .order('sort_order', { ascending: true })
+  .order('full_name', { ascending: true });
+const saved = Astro.url.searchParams.has('saved');
+---
+
+<AdminLayout title="Doctors" current="doctors">
+  <main class="admin-main">
+    <div class="admin-actions">
+      <h1>Doctors</h1>
+      <a class="admin-btn" href="/admin/doctors/new">
+        Add doctor
+      </a>
+    </div>
+
+    {saved && (
+      <p class="admin-notice" role="status">
+        Saved. Publish to show the change on the website.
+      </p>
+    )}
+    {error && (
+      <p class="admin-notice admin-notice--error" role="alert">
+        Could not load doctors.
+      </p>
+    )}
+
+    <div class="admin-card admin-table-wrap">
+      {doctors && doctors.length > 0 ? (
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Order</th>
+              <th>Name</th>
+              <th>Title</th>
+              <th>Address</th>
+              <th>On website</th>
+            </tr>
+          </thead>
+          <tbody>
+            {doctors.map((d) => (
+              <tr>
+                <td>{d.sort_order}</td>
+                <td>
+                  <a href={`/admin/doctors/${d.id}`}>{d.full_name}</a>
+                </td>
+                <td>{d.role_title ?? '—'}</td>
+                <td>{d.slug}</td>
+                <td>
+                  <span class="admin-status" data-status={d.is_visible ? 'visible' : 'hidden'}>
+                    {d.is_visible ? 'visible' : 'hidden'}
+                  </span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      ) : (
+        <p class="admin-muted">
+          No doctors yet. Until you publish a doctor, the website shows sample profiles from the
+          design.
+        </p>
+      )}
+    </div>
+  </main>
+</AdminLayout>

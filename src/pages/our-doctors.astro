@@ -3,9 +3,12 @@ import { Image } from 'astro:assets';
 import SiteLayout from '../layouts/SiteLayout.astro';
 import PageHero from '../components/PageHero.astro';
 import Section from '../components/Section.astro';
-import { towerImage, doctorProfiles } from '../data/shared';
+import { towerImage } from '../data/shared';
+import { getDoctors } from '../lib/content';
 
 export const prerender = true;
+
+const doctorProfiles = await getDoctors();
 ---
 
 <!-- Figma highlights "About us" in the nav on this page -->
@@ -30,25 +33,38 @@ export const prerender = true;
     <ul class="profiles">
       {doctorProfiles.map((d) => (
         <li class="card profile">
-          <Image
-            class="profile__img"
-            src={d.image.src}
-            alt={d.image.alt}
-            width={282}
-            height={422}
-            densities={[1, 2]}
-            sizes="(max-width: 700px) 60vw, 282px"
-            loading="lazy"
-          />
+          {d.image ? (
+            <Image
+              class="profile__img"
+              src={d.image.src}
+              alt={d.image.alt}
+              width={282}
+              height={422}
+              densities={[1, 2]}
+              sizes="(max-width: 700px) 60vw, 282px"
+              loading="lazy"
+            />
+          ) : (
+            <div class="profile__img profile__initials" aria-hidden="true">
+              {d.name
+                .replace(/^(dr|prof|assoc\. prof)\.?\s+/i, '')
+                .split(/\s+/)
+                .slice(-2)
+                .map((w) => w[0]?.toUpperCase() ?? '')
+                .join('')}
+            </div>
+          )}
           <div class="profile__text">
             <h3 class="t-h3">{d.name}</h3>
-            <p class="t-small">{d.role}</p>
-            <p class="t-small profile__bio">{d.bio}</p>
+            {d.role && <p class="t-small">{d.role}</p>}
+            {d.bio && <p class="t-small profile__bio">{d.bio}</p>}
             <ul class="profile__creds">
               {d.credentials.map((c) => (
                 <li class="t-small">{c}</li>
               ))}
-              <li class="t-small">Languages: English</li>
+              {d.languages.length > 0 && (
+                <li class="t-small">Languages: {d.languages.join(', ')}</li>
+              )}
             </ul>
           </div>
         </li>
@@ -80,6 +96,15 @@ export const prerender = true;
     aspect-ratio: 282 / 422;
     object-fit: contain;
     object-position: center bottom;
+  }
+
+  .profile__initials {
+    display: grid;
+    place-items: center;
+    font: 600 72px / 1 var(--font-serif);
+    color: var(--color-heading);
+    background: var(--color-soft);
+    border-radius: 12px;
   }
 
   .profile__text {

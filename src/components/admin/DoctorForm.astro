@@ -1,0 +1,115 @@
+---
+import type { DoctorFormValues } from '../../lib/doctor-admin';
+import type { DoctorErrors } from '../../lib/doctors';
+import { LIMITS } from '../../lib/doctors';
+
+interface Props {
+  values: DoctorFormValues;
+  errors?: DoctorErrors;
+  formError?: string;
+  submitLabel: string;
+}
+
+const { values, errors = {}, formError, submitLabel } = Astro.props;
+---
+
+<form class="admin-form admin-card" method="post">
+  {formError && (
+    <p class="admin-notice admin-notice--error" role="alert">
+      {formError}
+    </p>
+  )}
+
+  <label>
+    Full name
+    <input
+      name="full_name"
+      value={values.full_name}
+      maxlength={LIMITS.name}
+      required
+      aria-invalid={errors.full_name ? 'true' : undefined}
+    />
+    {errors.full_name && <span class="admin-field-error">{errors.full_name}</span>}
+  </label>
+
+  <label>
+    Page address (slug)
+    <input
+      name="slug"
+      value={values.slug}
+      maxlength={LIMITS.slug}
+      placeholder="Leave empty to create it from the name"
+      aria-invalid={errors.slug ? 'true' : undefined}
+    />
+    {errors.slug && <span class="admin-field-error">{errors.slug}</span>}
+  </label>
+
+  <label>
+    Title / specialty
+    <input
+      name="role_title"
+      value={values.role_title}
+      maxlength={LIMITS.role}
+      placeholder="For example Implantologist"
+      aria-invalid={errors.role_title ? 'true' : undefined}
+    />
+    {errors.role_title && <span class="admin-field-error">{errors.role_title}</span>}
+  </label>
+
+  <label>
+    Biography
+    <textarea
+      name="bio"
+      maxlength={LIMITS.bio}
+      aria-invalid={errors.bio ? 'true' : undefined}
+    >{values.bio}</textarea>
+    {errors.bio && <span class="admin-field-error">{errors.bio}</span>}
+  </label>
+
+  <label>
+    Qualifications (one per line)
+    <textarea
+      name="credentials"
+      aria-invalid={errors.credentials ? 'true' : undefined}
+    >{values.credentials}</textarea>
+    <span class="admin-hint">Only publish what the doctor and the clinic have confirmed.</span>
+    {errors.credentials && <span class="admin-field-error">{errors.credentials}</span>}
+  </label>
+
+  <label>
+    Languages (comma separated)
+    <input
+      name="languages"
+      value={values.languages}
+      aria-invalid={errors.languages ? 'true' : undefined}
+    />
+    {errors.languages && <span class="admin-field-error">{errors.languages}</span>}
+  </label>
+
+  <label>
+    Display order (lowest first)
+    <input
+      name="sort_order"
+      type="number"
+      min="0"
+      max={LIMITS.sortOrder}
+      value={values.sort_order}
+      aria-invalid={errors.sort_order ? 'true' : undefined}
+    />
+    {errors.sort_order && <span class="admin-field-error">{errors.sort_order}</span>}
+  </label>
+
+  <label class="admin-check">
+    <input type="checkbox" name="is_visible" checked={values.is_visible} />
+    Show on the website
+  </label>
+
+  <div>
+    <button class="admin-btn" type="submit">
+      {submitLabel}
+    </button>
+  </div>
+  <p class="admin-hint">
+    Saving changes the working copy only. Changes appear on the public site after you publish.
+  </p>
+</form>

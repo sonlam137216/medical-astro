@@ -1,0 +1,126 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import { buildSnapshot, hashSnapshot } from '../../../lib/snapshot';
+
+export const prerender = false;
+
+const db = Astro.locals.db;
+
+const snapshot = await buildSnapshot(db);
+const hash = await hashSnapshot(snapshot);
+
+const { data: revisions } = await db
+  .from('content_revisions')
+  .select('id, revision_number, content_hash, note, created_at')
+  .order('revision_number', { ascending: false })
+  .limit(10);
+const latest = revisions?.[0] ?? null;
+const hasChanges = !latest || latest.content_hash !== hash;
+
+const { data: jobs } = await db
+  .from('publish_jobs')
+  .select('id, status, queued_at, finished_at, error, content_revisions(revision_number)')
+  .order('created_at', { ascending: false })
+  .limit(10);
+
+const when = new Intl.DateTimeFormat('en-GB', {
+  dateStyle: 'medium',
+  timeStyle: 'short',
+  timeZone: 'Asia/Ho_Chi_Minh',
+});
+const sp = Astro.url.searchParams;
+const published = sp.get('published');
+---
+
+<AdminLayout title="Publish" current="publish">
+  <main class="admin-main">
+    <h1>Publish</h1>
+
+    {published && (
+      <p class="admin-notice" role="status">
+        Revision {published} created and queued.
+      </p>
+    )}
+    {sp.has('unchanged') && (
+      <p class="admin-notice" role="status">
+        Nothing changed since the last revision.
+      </p>
+    )}
+    {sp.has('error') && (
+      <p class="admin-notice admin-notice--error" role="alert">
+        Could not publish. Please try again.
+      </p>
+    )}
+
+    <section class="admin-card" aria-labelledby="state-title">
+      <h2 id="state-title" class="t-h3">
+        Working copy
+      </h2>
+      <p style="margin-top: 8px">
+        {hasChanges
+          ? latest
+            ? 'There are changes that are not published yet.'
+            : 'Nothing has been published yet. The website shows sample content from the design.'
+          : `The working copy matches revision ${latest?.revision_number}.`}
+      </p>
+      <p class="admin-muted" style="margin-top: 8px">
+        Includes {snapshot.doctors.length} visible doctor{snapshot.doctors.length === 1 ? '' : 's'}.
+        Other content is not managed here yet.
+      </p>
+      <form
+        class="admin-form"
+        method="post"
+        action="/admin/publish/create"
+        style="margin-top: 16px"
+      >
+        <label>
+          Note (optional)
+          <input name="note" maxlength="500" placeholder="What changed?" />
+        </label>
+        <div>
+          <button class="admin-btn" type="submit" disabled={!hasChanges}>
+            Publish
+          </button>
+        </div>
+      </form>
+      <p class="admin-hint" style="margin-top: 12px">
+        Publishing saves an unchangeable copy (a revision) and queues a build. Building and
+        deploying are not automated yet: until they are, the website changes only after a developer
+        runs a deploy, which builds from the newest revision.
+      </p>
+    </section>
+
+    <section class="admin-card admin-table-wrap" aria-labelledby="jobs-title">
+      <h2 id="jobs-title" class="t-h3">
+        Recent publishes
+      </h2>
+      {jobs && jobs.length > 0 ? (
+        <table class="admin-table" style="margin-top: 12px">
+          <thead>
+            <tr>
+              <th>Revision</th>
+              <th>Queued (Vietnam time)</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {jobs.map((j) => (
+              <tr>
+                <td>#{j.content_revisions?.revision_number ?? '—'}</td>
+                <td>{when.format(new Date(j.queued_at))}</td>
+                <td>
+                  <span class="admin-status" data-status={j.status}>
+                    {j.status}
+                  </span>
+                  {j.error && <div class="admin-field-error">{j.error}</div>}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      ) : (
+        <p class="admin-muted">Nothing published yet.</p>
+      )}
+    </section>
+  </main>
+</AdminLayout>
