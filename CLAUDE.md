@@ -6,8 +6,9 @@ Tài liệu gốc: [WEBSITE_TECHSTACK.md](./WEBSITE_TECHSTACK.md) (tiếng Việ
 
 ## Trạng thái hiện tại
 
-- **Giai đoạn 1 đã xong:** skeleton Astro 7 + `@astrojs/cloudflare` 14 + Wrangler 4, TypeScript strict. Git repo đã `init` (nhánh `main`), chưa commit. Chưa có remote, chưa deploy (chưa có tài khoản Cloudflare).
+- **Giai đoạn 1 đã xong:** skeleton Astro 7 + `@astrojs/cloudflare` 14 + Wrangler 4, TypeScript strict. Git repo nhánh `main`. Chưa có remote, chưa deploy (chưa có tài khoản Cloudflare).
 - **Giai đoạn 2 (UI public) đã dựng xong ở mức bố cục, còn tinh chỉnh.** 7 trang tĩnh đã có: `/`, `/about`, `/services`, `/services/dental-implants`, `/our-doctors`, `/dental-packages` (frame Single Treatments), `/dental-packages/travel-combos`. Tokens ở `src/styles/tokens.css`, font tự host (Inter variable + Cormorant Garamond 600), component chung ở `src/components` (Header, Footer, Button, Section, SectionIntro, PageHero, CtaBand, ConsultationSection, PlanVisit, SocialBar...), thẻ ở `src/components/cards`, section riêng của Home ở `src/components/home`. Nội dung nằm ở `src/data/*.ts` (sẽ chuyển sang Supabase ở giai đoạn 5). Ảnh nằm ở `src/assets/images` (xem `SOURCES.md` ở đó). Đã kiểm trực quan với Figma ở 1440 và kiểm không tràn ngang ở ~500px; chưa so từng pixel.
+- **Giai đoạn 3 (database) đã xong và đã đẩy lên project thật (2026-10-05).** `supabase/migrations` (4 file) đã áp dụng trên project `npbiucxxcnppgecmkhdz`: 20 bảng `public`, RLS bật hết, 25 policy, `anon` không có quyền nào (đã kiểm bằng REST với publishable key và secret key). **Không sửa 4 migration này**, sai thì viết migration mới. Không drop bảng tay trên Dashboard (từng làm, lịch sử migration lệch với DB thật); cần làm lại thì dùng `supabase migration repair`. `supabase/seed.sql` chỉ local, `supabase/tests/database` (82 test pgTAP), `src/types/database.ts` sinh tự động. Việc chủ dự án còn phải làm: tạo tài khoản admin và thêm vào `public.admins` (xem `supabase/README.md`).
 - **Chưa có trong Figma, tự bổ sung:** toàn bộ responsive mobile/tablet, menu hamburger, trạng thái hover/focus. Trang Dental Implants trong Figma có hai section "Treatment options and costs" giống hệt nhau, đã chỉ dựng một.
 - **Dữ liệu mẫu từ thiết kế, không phải sự thật kinh doanh:** 5 thẻ dịch vụ giống nhau, giá "600$" / "$600" / "C$1,250 · 40 clinics", bảng so sánh giá, số liệu "30,000+ khách…", "4.9/5 Google Reviews", "20+ countries", thông tin bác sĩ, địa chỉ chi nhánh. Chủ dự án phải xác nhận hoặc thay trước khi lên production. Ảnh có người thật (before/after), ảnh X-quang, ảnh có chữ quảng cáo tiếng Việt in sẵn cần xác nhận quyền sử dụng.
 - Chỗ tạm cần thay: route đánh dấu `PROVISIONAL` trong `src/data/*.ts` (chỉ 7 trang trên tồn tại, các link còn lại như `/travel-guide`, `/dental-knowledge` hiện 404), URL mạng xã hội (`href="#"`), nút "Watch video"/"View all videos" (chưa có video), danh sách dịch vụ trong form, câu trả lời FAQ và phần phương pháp ở bảng giá (Figma chỉ có câu hỏi). Logo là PNG 370px, cần bản vector. Form POST tới `/api/consultation` chưa tồn tại (giai đoạn 4).
@@ -28,6 +29,7 @@ Node theo `.nvmrc` (22.22.0; Astro 7 cần ≥ 22.12). Dùng `fnm use`.
 - `npm run check`: `wrangler types` + `astro check`. `npm run lint`, `npm run format:check`, `npm run build`.
 - `npm run deploy:staging` / `deploy:production`: build + `wrangler deploy`. Cần `wrangler login` và tài khoản Cloudflare. Chưa chạy lần nào.
 - Sau khi sửa `wrangler.jsonc` phải chạy `npm run typegen`. `worker-configuration.d.ts` được sinh ra và bị gitignore.
+- Database local (cần Docker): `npm run db:start`, `db:reset`, `db:test`, `db:lint`, `db:types`, `db:stop`. Chi tiết và quy tắc viết migration ở `supabase/README.md`. Sau khi đổi schema phải chạy lại `db:types` và commit file sinh ra.
 - Secret local: copy `.dev.vars.example` thành `.dev.vars` (không commit).
 
 Đã chủ động tắt `session` (không dùng KV) và image binding lúc runtime trong `astro.config.mjs` để tránh tạo tài nguyên Cloudflare ngoài ý muốn. Bật lại chỉ khi có lý do.
@@ -75,7 +77,7 @@ draft → queued → building → deployed / failed.
 
 ## Dữ liệu và bảo mật
 
-- Schema quản lý bằng migration lưu trong repo. Tên bảng trong tài liệu chỉ là gợi ý.
+- Schema quản lý bằng migration lưu trong repo (`supabase/migrations`), **không sửa migration đã đẩy lên project thật**, sai thì viết migration mới. Bảng nội dung là bản làm việc; Publish chép vào `content_revisions` bất biến và build chỉ đọc snapshot. Bảng mới phải bật RLS + policy admin + có test (test `rls.test.sql` fail nếu có bảng `public` thiếu RLS). `anon` không có quyền trên bảng nào. Không copy dữ liệu cá nhân vào `audit_logs`.
 - Bảng quan hệ cho thực thể có cấu trúc. JSONB chỉ cho nội dung section có schema rõ ràng, kèm validation và version schema.
 - Bật RLS, kiểm tra quyền phía server cho mọi thao tác quản trị. Không tin role do client khai báo.
 - `service_role` / secret key, R2 credentials, build hook chỉ ở backend hoặc CI secret. Không commit, không đưa ra browser.
@@ -117,7 +119,7 @@ LCP ≤ 2,5s, INP ≤ 200ms, CLS ≤ 0,1 (phân vị 75, tách mobile/desktop). 
 Dùng placeholder, không tự điền:
 
 - Danh sách trang đầy đủ, Figma Home và mobile.
-- Domain, tài khoản Cloudflare, quyền deploy. **Chưa có project Supabase** (2026-10-05): migration viết trong repo, chạy được cục bộ, region chọn khi tạo project.
+- Domain, tài khoản Cloudflare, quyền deploy. Project Supabase đã tạo (ref `npbiucxxcnppgecmkhdz`), region "asia" chưa rõ chính xác.
 - Region database, thị trường ưu tiên.
 - Số lượng và dung lượng video, nhu cầu cập nhật nội dung tức thời.
 - Traffic dự kiến, ngân sách vận hành.

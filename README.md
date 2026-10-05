@@ -35,18 +35,22 @@ npm run preview    # build rồi chạy wrangler dev
 
 ## Lệnh
 
-| Lệnh                        | Tác dụng                                                 |
-| --------------------------- | -------------------------------------------------------- |
-| `npm run dev`               | Dev server Astro                                         |
-| `npm run build`             | Build ra `dist/` (trang tĩnh + Worker)                   |
-| `npm run preview`           | Build rồi chạy `wrangler dev`                            |
-| `npm run check`             | Sinh type Worker rồi chạy `astro check`                  |
-| `npm run lint`              | ESLint                                                   |
-| `npm run format`            | Prettier, ghi đè file                                    |
-| `npm run format:check`      | Prettier, chỉ kiểm tra (CI dùng lệnh này)                |
-| `npm run typegen`           | `wrangler types`, chạy lại sau khi sửa `wrangler.jsonc`  |
-| `npm run deploy:staging`    | Build với `CLOUDFLARE_ENV=staging` rồi `wrangler deploy` |
-| `npm run deploy:production` | Build rồi `wrangler deploy`                              |
+| Lệnh                        | Tác dụng                                                   |
+| --------------------------- | ---------------------------------------------------------- |
+| `npm run dev`               | Dev server Astro                                           |
+| `npm run build`             | Build ra `dist/` (trang tĩnh + Worker)                     |
+| `npm run preview`           | Build rồi chạy `wrangler dev`                              |
+| `npm run check`             | Sinh type Worker rồi chạy `astro check`                    |
+| `npm run lint`              | ESLint                                                     |
+| `npm run format`            | Prettier, ghi đè file                                      |
+| `npm run format:check`      | Prettier, chỉ kiểm tra (CI dùng lệnh này)                  |
+| `npm run db:start`          | Chạy Postgres local bằng Docker (xem `supabase/README.md`) |
+| `npm run db:reset`          | Tạo lại DB local từ migration và seed                      |
+| `npm run db:test`           | Test RLS và ràng buộc bằng pgTAP                           |
+| `npm run db:types`          | Sinh `src/types/database.ts` từ schema local               |
+| `npm run typegen`           | `wrangler types`, chạy lại sau khi sửa `wrangler.jsonc`    |
+| `npm run deploy:staging`    | Build với `CLOUDFLARE_ENV=staging` rồi `wrangler deploy`   |
+| `npm run deploy:production` | Build rồi `wrangler deploy`                                |
 
 Hai lệnh deploy cần `wrangler login` và tài khoản Cloudflare. Chưa chạy lần nào.
 
@@ -79,6 +83,7 @@ src/
   layouts/          BaseLayout (HTML shell) và SiteLayout (header, footer, form tư vấn)
   pages/            route của Astro
   styles/           tokens.css (màu, cỡ chữ, khoảng cách) và global.css
+supabase/           migration, seed, test pgTAP và hướng dẫn database (xem supabase/README.md)
 wrangler.jsonc      cấu hình Cloudflare (production và staging)
 .dev.vars.example   danh sách biến môi trường sẽ cần, copy thành .dev.vars khi chạy cục bộ
 ```
@@ -101,7 +106,7 @@ Figma chỉ có bản desktop 1440px. Responsive mobile/tablet và menu thu gọ
 
 1. ~~Khởi tạo Astro + Cloudflare~~ xong.
 2. ~~UI public theo Figma~~ xong ở mức bố cục, còn tinh chỉnh.
-3. Schema Supabase, migration, Auth, RLS. Chỉ một vai trò `admin`.
+3. Schema Supabase, migration, Auth, RLS, chỉ một vai trò `admin`: **đã viết và test ở local**, chờ đẩy lên project thật.
 4. Form tư vấn: validate phía server, lưu DB, chống spam. Không gửi email.
 5. CMS `/admin` và quản lý media R2.
 6. Quy trình draft, publish, build, deploy.

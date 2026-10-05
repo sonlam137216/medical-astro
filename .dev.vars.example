@@ -2,7 +2,7 @@
 # Values below are placeholders; real values come from the owner's accounts (not yet provisioned).
 
 # Supabase (Phase 3) — the secret key stays server-side only
-SUPABASE_URL=
+SUPABASE_URL=https://npbiucxxcnppgecmkhdz.supabase.co
 SUPABASE_PUBLISHABLE_KEY=
 SUPABASE_SECRET_KEY=
 
