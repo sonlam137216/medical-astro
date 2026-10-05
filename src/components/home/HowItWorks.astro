@@ -4,7 +4,9 @@ import SectionIntro from '../SectionIntro.astro';
 import Button from '../Button.astro';
 import JourneyCard from '../cards/JourneyCard.astro';
 import { howItWorks } from '../../data/home';
-import { site } from '../../data/site';
+import { getSiteContent } from '../../lib/site-content';
+
+const site = await getSiteContent();
 ---
 
 <Section tone="navy" labelledby="how-title">
@@ -26,9 +28,11 @@ import { site } from '../../data/site';
       <br />
       {howItWorks.helpBody}
     </p>
-    <Button variant="outline" href={site.whatsappUrl}>
-      Chat on WhatsApp
-    </Button>
+    {site.whatsappUrl && (
+      <Button variant="outline" href={site.whatsappUrl}>
+        Chat on WhatsApp
+      </Button>
+    )}
   </div>
 </Section>
 

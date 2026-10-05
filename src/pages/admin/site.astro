@@ -1,0 +1,53 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import EntityForm from '../../components/admin/EntityForm.astro';
+import { SITE_FIELDS, type EntityDef } from '../../lib/cms/entities';
+import { loadSiteValues, processSitePost } from '../../lib/cms/site';
+
+export const prerender = false;
+
+const db = Astro.locals.db;
+const result = Astro.request.method === 'POST' ? await processSitePost(Astro.request, db) : null;
+if (result && 'redirect' in result) return result.redirect;
+if (result) Astro.response.status = result.status;
+
+const { values, exists } = await loadSiteValues(db);
+
+// The generic form renders from an entity definition; this one is the single site-details row.
+const def: EntityDef = {
+  key: 'site',
+  table: 'site_settings',
+  singular: 'site details',
+  plural: 'Site details',
+  intro: '',
+  titleField: 'site_name',
+  columns: [],
+  fields: SITE_FIELDS,
+  order: [],
+  deletable: false,
+};
+const saved = Astro.url.searchParams.has('saved');
+---
+
+<AdminLayout title="Site details" current="content:site">
+  <main class="admin-main">
+    <h1>Site details</h1>
+    <p class="admin-muted">
+      Contact details, tagline and social links shown in the header, footer and contact sections.
+      {!exists && ' Nothing is saved yet, so the website uses the sample details from the design.'}
+    </p>
+    {saved && (
+      <p class="admin-notice" role="status">
+        Saved. Publish to show the change on the website.
+      </p>
+    )}
+    <EntityForm
+      def={def}
+      values={result?.values ?? values}
+      errors={result?.errors}
+      formError={result?.formError}
+      options={{ images: [], refs: {} }}
+      submitLabel="Save"
+    />
+  </main>
+</AdminLayout>

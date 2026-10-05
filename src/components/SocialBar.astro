@@ -4,30 +4,34 @@ import facebook from '../assets/images/social/facebook.png';
 import instagram from '../assets/images/social/instagram.png';
 import youtube from '../assets/images/social/youtube.png';
 import linkedin from '../assets/images/social/linkedin.png';
+import { getSiteContent } from '../lib/site-content';
 
-// PLACEHOLDER: Figma shows the four icons but no profile URLs. Replace each href with the real profile.
-const links = [
-  { name: 'Facebook', icon: facebook, href: '#' },
-  { name: 'Instagram', icon: instagram, href: '#' },
-  { name: 'YouTube', icon: youtube, href: '#' },
-  { name: 'LinkedIn', icon: linkedin, href: '#' },
-];
+const icons = { facebook, instagram, youtube, linkedin } as const;
+// Profile links come from Site details. Before anything is published they are '#' placeholders (Figma
+// shows the four icons but no URLs); published, a platform without a link is simply not shown.
+const links = (await getSiteContent()).social.flatMap((l) =>
+  l.platform in icons
+    ? [{ name: l.name, icon: icons[l.platform as keyof typeof icons], href: l.href }]
+    : [],
+);
 ---
 
-<section class="social" aria-label="Social media">
-  <div class="container social__inner">
-    <h2 class="t-h3">Stay Connected</h2>
-    <ul>
-      {links.map((l) => (
-        <li>
-          <a href={l.href} aria-label={l.name}>
-            <Image src={l.icon} alt="" width={32} height={32} densities={[1, 2]} loading="lazy" />
-          </a>
-        </li>
-      ))}
-    </ul>
-  </div>
-</section>
+{links.length > 0 && (
+  <section class="social" aria-label="Social media">
+    <div class="container social__inner">
+      <h2 class="t-h3">Stay Connected</h2>
+      <ul>
+        {links.map((l) => (
+          <li>
+            <a href={l.href} aria-label={l.name}>
+              <Image src={l.icon} alt="" width={32} height={32} densities={[1, 2]} loading="lazy" />
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+)}
 
 <style>
   .social {

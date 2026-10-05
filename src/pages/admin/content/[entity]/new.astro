@@ -1,0 +1,36 @@
+---
+import AdminLayout from '../../../../layouts/AdminLayout.astro';
+import EntityForm from '../../../../components/admin/EntityForm.astro';
+import { entityByKey } from '../../../../lib/cms/entities';
+import { emptyValues, loadOptions, processPost } from '../../../../lib/cms/admin';
+
+export const prerender = false;
+
+const def = entityByKey(Astro.params.entity);
+if (!def || def.creatable === false) return new Response('Not found', { status: 404 });
+
+const db = Astro.locals.db;
+const result =
+  Astro.request.method === 'POST' ? await processPost(Astro.request, db, def, null) : null;
+if (result && 'redirect' in result) return result.redirect;
+if (result) Astro.response.status = result.status;
+
+const options = await loadOptions(db, def);
+---
+
+<AdminLayout title={`Add ${def.singular}`} current={`content:${def.key}`}>
+  <main class="admin-main">
+    <p>
+      <a href={`/admin/content/${def.key}`}>← {def.plural}</a>
+    </p>
+    <h1>Add {def.singular}</h1>
+    <EntityForm
+      def={def}
+      values={result?.values ?? emptyValues(def.fields)}
+      errors={result?.errors}
+      formError={result?.formError}
+      options={options}
+      submitLabel={`Add ${def.singular}`}
+    />
+  </main>
+</AdminLayout>

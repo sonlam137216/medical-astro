@@ -1,6 +1,6 @@
 import { defineMiddleware } from 'astro:middleware';
 import { env } from 'cloudflare:workers';
-import { authenticate, setSessionCookies } from './lib/admin-auth';
+import { authenticate } from './lib/admin-auth';
 
 // Everything under /admin needs a signed-in admin, except the sign-in page and its POST endpoint.
 // Public pages are prerendered, so this only runs for /admin requests in the Worker.
@@ -15,11 +15,8 @@ export const onRequest = defineMiddleware(async (context, next) => {
   if (!isAdminPath(path)) return next();
 
   if (!PUBLIC_ADMIN_PATHS.has(path)) {
-    const session = await authenticate(env, context.cookies);
+    const session = await authenticate(env.DB, context.cookies);
     if (!session) return harden(redirectTo('/admin/login'));
-    if (session.refreshed) {
-      setSessionCookies(context.cookies, session.refreshed, context.url.protocol === 'https:');
-    }
     context.locals.admin = session.admin;
     context.locals.db = session.db;
   }

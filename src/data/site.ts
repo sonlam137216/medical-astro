@@ -1,6 +1,6 @@
 /**
  * Site-wide content. Text is copied from the Figma design (2026-10-04).
- * This will move to Supabase (site_settings / navigation_items) when the CMS exists (Phase 5);
+ * This is replaced by the database (site_settings / navigation_items) once published from the CMS (Phase 5);
  * keeping it as typed data now means components do not change when the source does.
  *
  * Routes marked PROVISIONAL are not in Figma. Confirm the final URL structure with the owner.

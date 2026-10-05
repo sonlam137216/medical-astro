@@ -1,6 +1,8 @@
 ---
 import Logo from './Logo.astro';
-import { site, footerTreatments, footerExplore, footerLegal } from '../data/site';
+import { getSiteContent } from '../lib/site-content';
+
+const site = await getSiteContent();
 ---
 
 <footer class="footer">
@@ -9,13 +11,13 @@ import { site, footerTreatments, footerExplore, footerLegal } from '../data/site
       <div class="footer__brand">
         <Logo tone="light" />
         <p class="t-h3 footer__name">{site.name}</p>
-        <p class="footer__tagline">{site.tagline}</p>
+        {site.tagline && <p class="footer__tagline">{site.tagline}</p>}
       </div>
 
       <nav class="footer__col" aria-label="Treatment">
         <h2 class="footer__title">Treatment</h2>
         <ul>
-          {footerTreatments.map((l) => (
+          {site.footerTreatments.map((l) => (
             <li>
               <a href={l.href}>{l.label}</a>
             </li>
@@ -26,7 +28,7 @@ import { site, footerTreatments, footerExplore, footerLegal } from '../data/site
       <nav class="footer__col" aria-label="Explore">
         <h2 class="footer__title">Explore</h2>
         <ul>
-          {footerExplore.map((l) => (
+          {site.footerExplore.map((l) => (
             <li>
               <a href={l.href}>{l.label}</a>
             </li>
@@ -37,19 +39,21 @@ import { site, footerTreatments, footerExplore, footerLegal } from '../data/site
       <div class="footer__col">
         <h2 class="footer__title">Contact Us</h2>
         <address>
-          <p>{site.addressLine}</p>
-          <p>
-            <a href={`tel:${site.phoneIntl.replace(/\s/g, '')}`}>{site.phoneIntl}</a>
-          </p>
-          <p>{site.hours}</p>
+          {site.addressLine && <p>{site.addressLine}</p>}
+          {site.phoneIntl && (
+            <p>
+              <a href={`tel:${site.phoneIntl.replace(/\s/g, '')}`}>{site.phoneIntl}</a>
+            </p>
+          )}
+          {site.hours && <p>{site.hours}</p>}
         </address>
       </div>
     </div>
 
     <div class="footer__bottom">
-      <p>{site.copyright}</p>
+      {site.copyright && <p>{site.copyright}</p>}
       <ul class="footer__legal">
-        {footerLegal.map((l) => (
+        {site.footerLegal.map((l) => (
           <li>
             <a href={l.href}>{l.label}</a>
           </li>

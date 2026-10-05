@@ -1,0 +1,189 @@
+---
+import type { EntityDef } from '../../lib/cms/entities';
+import type { FieldErrors, FormValues } from '../../lib/cms/fields';
+import type { FormOptions } from '../../lib/cms/admin';
+
+// Renders the form of any registered content type from its field list.
+interface Props {
+  def: EntityDef;
+  values: FormValues;
+  errors?: FieldErrors;
+  formError?: string;
+  options: FormOptions;
+  submitLabel: string;
+}
+
+const { def, values, errors = {}, formError, options, submitLabel } = Astro.props;
+const text = (name: string) => String(values[name] ?? '');
+const invalid = (name: string) => (errors[name] ? 'true' : undefined);
+---
+
+<form class="admin-form admin-card" method="post">
+  {formError && (
+    <p class="admin-notice admin-notice--error" role="alert">
+      {formError}
+    </p>
+  )}
+
+  {def.fields.map((f) => {
+    const error = errors[f.name];
+    return (
+      <>
+        {f.type === 'bool' && (
+          <label class="admin-check">
+            <input type="checkbox" name={f.name} checked={Boolean(values[f.name])} />
+            {f.label}
+          </label>
+        )}
+
+        {f.type === 'image' && (
+          <fieldset class="admin-picker-wrap">
+            <legend>{f.label}</legend>
+            <div class="admin-picker">
+              <label>
+                <input type="radio" name={f.name} value="" checked={text(f.name) === ''} />
+                No image
+              </label>
+              {options.images.map((img) => (
+                <label>
+                  <input
+                    type="radio"
+                    name={f.name}
+                    value={img.id}
+                    checked={text(f.name) === img.id}
+                  />
+                  <img src={img.thumb} alt="" loading="lazy" />
+                  <span>{img.label}</span>
+                </label>
+              ))}
+            </div>
+            <span class="admin-hint">
+              Upload images in <a href="/admin/media">Media</a> first. Only use images you have the
+              right to publish.
+            </span>
+            {error && <span class="admin-field-error">{error}</span>}
+          </fieldset>
+        )}
+
+        {f.type === 'money' && (
+          <label>
+            {f.label}
+            <span class="admin-money">
+              <input
+                name={f.name}
+                value={text(f.name)}
+                inputmode="decimal"
+                placeholder="Leave empty if there is no price"
+                aria-invalid={invalid(f.name)}
+              />
+              <input
+                name={f.currencyName}
+                value={text(f.currencyName)}
+                maxlength="3"
+                aria-label="Currency"
+                placeholder="USD"
+              />
+            </span>
+            {f.help && <span class="admin-hint">{f.help}</span>}
+            {error && <span class="admin-field-error">{error}</span>}
+          </label>
+        )}
+
+        {f.type !== 'bool' && f.type !== 'image' && f.type !== 'money' && (
+          <label>
+            {f.label}
+            {(f.type === 'text' ||
+              f.type === 'url' ||
+              f.type === 'path' ||
+              f.type === 'email' ||
+              f.type === 'weburl') && (
+              <input
+                name={f.name}
+                value={text(f.name)}
+                maxlength={'max' in f ? f.max : 200}
+                placeholder={'placeholder' in f ? f.placeholder : undefined}
+                required={f.required}
+                readonly={f.readonly}
+                type={f.type === 'email' ? 'email' : 'text'}
+                aria-invalid={invalid(f.name)}
+              />
+            )}
+            {f.type === 'slug' && (
+              <input
+                name={f.name}
+                value={text(f.name)}
+                maxlength="100"
+                placeholder={
+                  f.from ? 'Leave empty to create it from the name' : 'lowercase-with-hyphens'
+                }
+                required={f.required}
+                aria-invalid={invalid(f.name)}
+              />
+            )}
+            {f.type === 'textarea' && <textarea
+              name={f.name}
+              rows={f.rows ?? 5}
+              maxlength={f.max}
+              aria-invalid={invalid(f.name)}
+            >{text(f.name)}</textarea>}
+            {f.type === 'lines' && <textarea
+              name={f.name}
+              rows="5"
+              aria-invalid={invalid(f.name)}
+            >{text(f.name)}</textarea>}
+            {f.type === 'int' && (
+              <input
+                name={f.name}
+                type="number"
+                min={f.min}
+                max={f.max}
+                value={text(f.name)}
+                aria-invalid={invalid(f.name)}
+              />
+            )}
+            {f.type === 'date' && (
+              <input
+                name={f.name}
+                type="date"
+                value={text(f.name)}
+                aria-invalid={invalid(f.name)}
+              />
+            )}
+            {f.type === 'select' && (
+              <select name={f.name} aria-invalid={invalid(f.name)}>
+                {f.options.map(([value, label]) => (
+                  <option value={value} selected={text(f.name) === value}>
+                    {label}
+                  </option>
+                ))}
+              </select>
+            )}
+            {f.type === 'ref' && (
+              <select name={f.name} aria-invalid={invalid(f.name)}>
+                <option value="" selected={text(f.name) === ''}>
+                  None
+                </option>
+                {(options.refs[f.name] ?? []).map((o) => (
+                  <option value={o.value} selected={text(f.name) === o.value}>
+                    {o.label}
+                  </option>
+                ))}
+              </select>
+            )}
+            {f.help && <span class="admin-hint">{f.help}</span>}
+            {error && <span class="admin-field-error">{error}</span>}
+          </label>
+        )}
+      </>
+    );
+  })}
+
+  <div>
+    <button class="admin-btn" type="submit">
+      {submitLabel}
+    </button>
+  </div>
+  <p class="admin-hint">
+    Saving changes the working copy only. Changes appear on the website after you publish.
+  </p>
+</form>

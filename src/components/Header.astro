@@ -1,7 +1,7 @@
 ---
 import Button from './Button.astro';
 import Logo from './Logo.astro';
-import { site, mainNav, utilityLink } from '../data/site';
+import { getSiteContent } from '../lib/site-content';
 
 interface Props {
   /** Pathname of the current page, used to highlight the active link. */
@@ -12,9 +12,10 @@ interface Props {
   cta?: { label: string; href?: string };
 }
 
+const site = await getSiteContent();
 const {
   current = Astro.url.pathname,
-  utility = utilityLink,
+  utility = site.utility ?? undefined,
   cta = { label: 'Book consultation', href: '#consultation' },
 } = Astro.props;
 const isActive = (href: string) => (href === '/' ? current === '/' : current.startsWith(href));
@@ -24,15 +25,20 @@ const isActive = (href: string) => (href === '/' ? current === '/' : current.sta
   <div class="utility">
     <div class="container utility__inner">
       <p class="t-small utility__contact">
-        {site.phoneDisplay}&nbsp; <span aria-hidden="true">·</span>&nbsp;
-        <a href={`mailto:${site.email}`}>{site.email}</a>
+        {site.phoneDisplay}
+        {site.phoneDisplay && site.email && (
+          <>
+            &nbsp; <span aria-hidden="true">·</span>&nbsp;
+          </>
+        )}
+        {site.email && <a href={`mailto:${site.email}`}>{site.email}</a>}
       </p>
-      {utility.href ? (
+      {utility && utility.href ? (
         <a class="t-small" href={utility.href}>
           {utility.label}
         </a>
       ) : (
-        <span class="t-small">{utility.label}</span>
+        utility && <span class="t-small">{utility.label}</span>
       )}
     </div>
   </div>
@@ -55,7 +61,7 @@ const isActive = (href: string) => (href === '/' ? current === '/' : current.sta
         </button>
         <nav id="site-menu" class="menu__panel" aria-label="Main">
           <ul class="menu__list">
-            {mainNav.map((link) => (
+            {site.main.map((link) => (
               <li>
                 <a
                   class:list={['t-small', 'menu__link', { 'is-active': isActive(link.href) }]}

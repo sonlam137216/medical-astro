@@ -382,3 +382,58 @@ a.admin-btn {
   padding: 0;
   margin-bottom: 6px;
 }
+
+.admin-money {
+  display: grid;
+  grid-template-columns: 1fr 90px;
+  gap: 8px;
+}
+
+.admin-menu {
+  position: relative;
+}
+
+.admin-menu summary {
+  padding: 4px 0;
+  cursor: pointer;
+  list-style: none;
+  border-bottom: 2px solid transparent;
+}
+
+.admin-menu summary::-webkit-details-marker {
+  display: none;
+}
+
+.admin-menu summary::after {
+  content: ' ▾';
+  font-size: 11px;
+}
+
+.admin-menu summary.active,
+.admin-menu summary:hover {
+  border-bottom-color: var(--color-border);
+}
+
+.admin-menu__list {
+  position: absolute;
+  z-index: 10;
+  top: 100%;
+  left: 0;
+  display: grid;
+  min-width: 200px;
+  padding: 8px;
+  margin-top: 6px;
+  background: var(--color-navy);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+}
+
+.admin-menu__list a {
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 6px;
+}
+
+.admin-menu__list a:hover {
+  background: rgb(255 255 255 / 12%);
+}

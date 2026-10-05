@@ -1,6 +1,7 @@
 ---
 import { Image } from 'astro:assets';
 import SiteLayout from '../../layouts/SiteLayout.astro';
+import { getPageSeo } from '../../lib/site-content';
 import PageHero from '../../components/PageHero.astro';
 import Section from '../../components/Section.astro';
 import SectionIntro from '../../components/SectionIntro.astro';
@@ -13,10 +14,19 @@ import { towerImage } from '../../data/shared';
 import { gallery, destinations, discover } from '../../data/packages';
 
 export const prerender = true;
+
+const seo = await getPageSeo('/dental-packages/travel-combos', {
+  title: 'Travel combos · Melatec Dental Clinic',
+});
 ---
 
 <!-- Figma frame: "Dental Packages / Travel Combos". Order and the missing social row follow the design. -->
-<SiteLayout title="Travel combos · Melatec Dental Clinic" current="/dental-packages" social={false}>
+<SiteLayout
+  title={seo.title}
+  description={seo.description}
+  current="/dental-packages"
+  social={false}
+>
   <PageHero label="Our dental packages." image={towerImage} imageHeight={480} rounded upper>
     <Fragment slot="title">Comprehensive dental care for every smile</Fragment>
     <p>

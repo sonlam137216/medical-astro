@@ -27,10 +27,22 @@ export const POST: APIRoute = async ({ request, params, locals }) => {
   const note = (form.get('internal_note') ?? '').replace(/\r\n/g, '\n').trim();
   if (!STATUSES.includes(status) || note.length > 2000) return to('error=1');
 
-  // Runs as the signed-in admin: RLS allows it, and only `status` and `internal_note` are writable.
+  // Only the handling fields are ever written: the contact details a visitor submitted cannot be edited.
+  // Who handled it, and when, is recorded only when the status actually changes.
+  const { data: current } = await locals.db
+    .from('consultation_requests')
+    .select('status')
+    .eq('id', id)
+    .maybeSingle();
+  if (!current) return to('error=1');
+  const stamp =
+    current.status === status
+      ? {}
+      : { handled_by: locals.admin.id, handled_at: new Date().toISOString() };
+
   const { data, error } = await locals.db
     .from('consultation_requests')
-    .update({ status, internal_note: note === '' ? null : note })
+    .update({ status, internal_note: note === '' ? null : note, ...stamp })
     .eq('id', id)
     .select('id');
 

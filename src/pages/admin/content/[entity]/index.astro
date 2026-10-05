@@ -1,0 +1,107 @@
+---
+import AdminLayout from '../../../../layouts/AdminLayout.astro';
+import { entityByKey } from '../../../../lib/cms/entities';
+import { listRows } from '../../../../lib/cms/admin';
+
+export const prerender = false;
+
+const def = entityByKey(Astro.params.entity);
+if (!def) return new Response('Not found', { status: 404 });
+
+const { rows, failed } = await listRows(Astro.locals.db, def);
+const sp = Astro.url.searchParams;
+
+const cell = (value: unknown) => {
+  if (value === true) return 'yes';
+  if (value === false) return 'no';
+  if (value === null || value === undefined || value === '') return '—';
+  return String(value);
+};
+// Show the label of a select value (for example "Main menu" instead of "header").
+const labelFor = (field: string, value: unknown) => {
+  const f = def.fields.find((x) => x.name === field);
+  if (f && f.type === 'select') {
+    const match = f.options.find(([key]) => key === String(value));
+    if (match) return match[1];
+  }
+  return cell(value);
+};
+---
+
+<AdminLayout title={def.plural} current={`content:${def.key}`}>
+  <main class="admin-main">
+    <div class="admin-actions">
+      <h1>{def.plural}</h1>
+      {def.creatable !== false && (
+        <a class="admin-btn" href={`/admin/content/${def.key}/new`}>
+          Add {def.singular}
+        </a>
+      )}
+      {def.key === 'pages' && (
+        <form method="post" action="/admin/content/pages/seed">
+          <button class="admin-btn" type="submit">
+            Add the website’s pages
+          </button>
+        </form>
+      )}
+    </div>
+    <p class="admin-muted">{def.intro}</p>
+
+    {sp.has('saved') && (
+      <p class="admin-notice" role="status">
+        Saved. Publish to show the change on the website.
+      </p>
+    )}
+    {sp.has('deleted') && (
+      <p class="admin-notice" role="status">
+        Deleted. Publish to remove it from the website.
+      </p>
+    )}
+    {sp.has('seeded') && (
+      <p class="admin-notice" role="status">
+        The website’s pages are listed. Edit one to set its search text.
+      </p>
+    )}
+    {sp.has('error') && (
+      <p class="admin-notice admin-notice--error" role="alert">
+        Something went wrong. Please try again.
+      </p>
+    )}
+    {failed && (
+      <p class="admin-notice admin-notice--error" role="alert">
+        Could not load the list.
+      </p>
+    )}
+
+    <div class="admin-card admin-table-wrap">
+      {rows.length > 0 ? (
+        <table class="admin-table">
+          <thead>
+            <tr>
+              {def.columns.map((c) => (
+                <th>{c.label}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((row) => (
+              <tr>
+                {def.columns.map((c) => (
+                  <td>
+                    {c.field === def.titleField ? (
+                      <a href={`/admin/content/${def.key}/${row.id}`}>{cell(row[c.field])}</a>
+                    ) : (
+                      labelFor(c.field, row[c.field])
+                    )}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      ) : (
+        <p class="admin-muted">Nothing here yet.</p>
+      )}
+    </div>
+  </main>
+</AdminLayout>

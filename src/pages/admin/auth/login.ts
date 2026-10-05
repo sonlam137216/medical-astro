@@ -1,11 +1,6 @@
 import type { APIRoute } from 'astro';
 import { env } from 'cloudflare:workers';
-import {
-  createUserClient,
-  isSameOrigin,
-  setSessionCookies,
-  verifyAdmin,
-} from '../../../lib/admin-auth';
+import { isSameOrigin, setSessionCookie, signIn } from '../../../lib/admin-auth';
 import { readBodyLimited } from '../../../lib/consultation';
 
 export const prerender = false;
@@ -30,20 +25,21 @@ export const POST: APIRoute = async ({ request, cookies, url }) => {
   const password = form.get('password') ?? '';
   if (!email || !password || email.length > 254 || password.length > 256) return back('1');
 
-  const client = createUserClient(env);
-  if (!client) {
-    console.error('admin login: Supabase is not configured');
+  if (!env.DB) {
+    console.error('admin login: the DB binding is not configured');
     return back('unavailable');
   }
 
-  const { data, error } = await client.auth.signInWithPassword({ email, password });
-  // One generic message for every failure (wrong password, unknown user, not an admin).
-  if (error || !data.session) return back('1');
+  // One generic message for every failure (wrong password, unknown account).
+  let session;
+  try {
+    session = await signIn(env.DB, email, password);
+  } catch {
+    console.error('admin login: database error');
+    return back('unavailable');
+  }
+  if (!session) return back('1');
 
-  // A valid Supabase user who is not listed in `admins` gets no session at all.
-  const admin = await verifyAdmin(env, data.session.access_token);
-  if (!admin) return back('1');
-
-  setSessionCookies(cookies, data.session, url.protocol === 'https:');
+  setSessionCookie(cookies, session.token, url.protocol === 'https:');
   return new Response(null, { status: 303, headers: { location: '/admin' } });
 };

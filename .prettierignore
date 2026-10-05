@@ -6,4 +6,3 @@ package-lock.json
 worker-configuration.d.ts
 WEBSITE_TECHSTACK.md
 src/types/database.ts
-supabase/.temp/

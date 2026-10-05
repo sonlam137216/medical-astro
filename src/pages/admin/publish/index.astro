@@ -1,7 +1,12 @@
 ---
 import { env } from 'cloudflare:workers';
 import AdminLayout from '../../../layouts/AdminLayout.astro';
-import { buildSnapshot, hashSnapshot, snapshotProblems } from '../../../lib/snapshot';
+import {
+  buildSnapshot,
+  hashSnapshot,
+  sampleSections,
+  snapshotProblems,
+} from '../../../lib/snapshot';
 
 export const prerender = false;
 
@@ -9,7 +14,19 @@ const db = Astro.locals.db;
 
 const snapshot = await buildSnapshot(db);
 const hash = await hashSnapshot(snapshot);
-const problems = snapshotProblems(snapshot);
+const target = env.PUBLISH_TARGET ?? 'staging';
+const problems = snapshotProblems(snapshot, target);
+const stillSample = sampleSections(snapshot);
+const count = (n: number | undefined, one: string, many: string) =>
+  n ? `${n} ${n === 1 ? one : many}` : null;
+const included = [
+  snapshot.site ? 'site details' : null,
+  count(snapshot.navigation?.length, 'menu link', 'menu links'),
+  count(snapshot.pages?.length, 'page setting', 'page settings'),
+  count(snapshot.doctors?.length, 'doctor', 'doctors'),
+  count(snapshot.faqs?.length, 'answered question', 'answered questions'),
+  count(snapshot.redirects?.length, 'redirect', 'redirects'),
+].filter((x): x is string => x !== null);
 
 const { data: revisions } = await db
   .from('content_revisions')
@@ -103,6 +120,14 @@ const build = sp.get('build');
       </section>
     )}
 
+    {target === 'production' && (
+      <p class="admin-notice" role="note">
+        Not managed here yet: the text and figures inside the pages (for example patient counts,
+        review ratings and prices) are still written in the website’s code and come from the design.
+        Check them before launch.
+      </p>
+    )}
+
     <section class="admin-card" aria-labelledby="live-title">
       <h2 id="live-title" class="t-h3">
         On the website
@@ -143,8 +168,11 @@ const build = sp.get('build');
           : `The working copy matches revision ${latest?.revision_number}.`}
       </p>
       <p class="admin-muted" style="margin-top: 8px">
-        Includes {snapshot.doctors.length} visible doctor{snapshot.doctors.length === 1 ? '' : 's'}.
-        Other content is not managed here yet.
+        {included.length > 0
+          ? `Includes ${included.join(', ')}.`
+          : 'Nothing to publish yet: no content has been added.'}
+        {stillSample.length > 0 &&
+          ` Still using sample content from the design: ${stillSample.join(', ')}.`}
       </p>
       <form
         class="admin-form"

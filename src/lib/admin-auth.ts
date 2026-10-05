@@ -1,98 +1,135 @@
-import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import type { AstroCookies } from 'astro';
-import type { Database } from '../types/database';
+import { createDb, type Db, type SqlDatabase } from './db.ts';
+import { DUMMY_HASH, verifyPassword } from './password.ts';
 
-// Admin sign-in. The browser only ever holds the user's own Supabase JWT (httpOnly cookies scoped to
-// /admin). Every admin query runs with that JWT and the publishable key, so Row Level Security
-// (`is_admin()`) decides what is allowed. The secret key is never used here.
+// Admin sign-in, on Cloudflare D1 (no external auth service).
+//
+// The browser holds one random session token in an httpOnly cookie scoped to /admin. The database stores only
+// the token's SHA-256 in `admin_sessions`, so a copy of the database cannot be used to sign in, and deleting a
+// row signs that session out at once. Authorisation is by middleware: every /admin request is authenticated
+// here before any handler runs, and there is one role (admin = a row in `admins`).
+//
+// This file is the only code that reads `admins` and `admin_sessions` (they are not in the table registry).
 
-export const ACCESS_COOKIE = 'mt-access';
-export const REFRESH_COOKIE = 'mt-refresh';
+export const SESSION_COOKIE = 'mt-session';
+export const SESSION_SECONDS = 60 * 60 * 24 * 7;
 const COOKIE_PATH = '/admin';
-const REFRESH_MAX_AGE = 60 * 60 * 24 * 7;
 
-export type AdminDb = SupabaseClient<Database>;
+export type AdminDb = Db;
 export interface AdminUser {
   id: string;
   email: string;
 }
-export interface SessionTokens {
-  access_token: string;
-  refresh_token: string;
-  expires_in: number;
-}
 export interface AdminContext {
   admin: AdminUser;
   db: AdminDb;
-  /** Set when the access token had expired and a refresh token produced a new session. */
-  refreshed: SessionTokens | null;
 }
 
-type Env = { SUPABASE_URL?: string; SUPABASE_PUBLISHABLE_KEY?: string };
+/** SHA-256 hex. Session tokens are 256 random bits, so a fast hash is enough to protect them at rest. */
+export async function sha256Hex(text: string): Promise<string> {
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+  return [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, '0')).join('');
+}
 
-/** Client acting as the signed-in user (when `accessToken` is given) or as an anonymous caller. */
-export function createUserClient(env: Env, accessToken?: string): AdminDb | null {
-  if (!env.SUPABASE_URL || !env.SUPABASE_PUBLISHABLE_KEY) return null;
-  return createClient<Database>(env.SUPABASE_URL, env.SUPABASE_PUBLISHABLE_KEY, {
-    auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
-    global: accessToken ? { headers: { Authorization: `Bearer ${accessToken}` } } : undefined,
+function newToken(): string {
+  const bytes = crypto.getRandomValues(new Uint8Array(32));
+  return btoa(String.fromCharCode(...bytes))
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/, '');
+}
+
+const first = async <T>(
+  sql: SqlDatabase,
+  query: string,
+  ...params: unknown[]
+): Promise<T | null> => {
+  const { results } = await sql
+    .prepare(query)
+    .bind(...params)
+    .all();
+  return ((results ?? [])[0] as T | undefined) ?? null;
+};
+
+/** Check email + password and open a session. Returns null for any failure (the caller shows one message). */
+export async function signIn(
+  sql: SqlDatabase,
+  email: string,
+  password: string,
+  now = new Date(),
+): Promise<{ admin: AdminUser; token: string } | null> {
+  const row = await first<{ id: string; email: string; password_hash: string }>(
+    sql,
+    'SELECT id, email, password_hash FROM admins WHERE email = ?',
+    email.trim(),
+  );
+  // Always do the expensive hash, so a missing account is not faster than a wrong password.
+  const ok = await verifyPassword(password, row?.password_hash ?? DUMMY_HASH);
+  if (!row || !ok) return null;
+
+  const token = newToken();
+  const at = now.toISOString();
+  await sql.batch([
+    sql.prepare('DELETE FROM admin_sessions WHERE expires_at <= ?').bind(at),
+    sql
+      .prepare('INSERT INTO admin_sessions (admin_id, token_hash, expires_at) VALUES (?, ?, ?)')
+      .bind(
+        row.id,
+        await sha256Hex(token),
+        new Date(now.getTime() + SESSION_SECONDS * 1000).toISOString(),
+      ),
+    sql.prepare('UPDATE admins SET last_login_at = ? WHERE id = ?').bind(at, row.id),
+  ]);
+  return { admin: { id: row.id, email: row.email }, token };
+}
+
+/** The admin behind a session token, with a database handle that records their changes in the audit log. */
+export async function authenticate(
+  sql: SqlDatabase | undefined,
+  cookies: AstroCookies,
+  now = new Date(),
+): Promise<AdminContext | null> {
+  const token = cookies.get(SESSION_COOKIE)?.value;
+  if (!sql || !token || token.length > 100) return null;
+
+  const row = await first<{ id: string; email: string }>(
+    sql,
+    'SELECT a.id AS id, a.email AS email FROM admin_sessions s JOIN admins a ON a.id = s.admin_id ' +
+      'WHERE s.token_hash = ? AND s.expires_at > ?',
+    await sha256Hex(token),
+    now.toISOString(),
+  );
+  if (!row) return null;
+  return {
+    admin: { id: row.id, email: row.email },
+    db: createDb(sql, { actorId: row.id, audit: true }),
+  };
+}
+
+/** Sign out: the session row is deleted, so a copied cookie stops working too. */
+export async function signOut(sql: SqlDatabase | undefined, cookies: AstroCookies): Promise<void> {
+  const token = cookies.get(SESSION_COOKIE)?.value;
+  if (sql && token && token.length <= 100) {
+    await sql
+      .prepare('DELETE FROM admin_sessions WHERE token_hash = ?')
+      .bind(await sha256Hex(token))
+      .all();
+  }
+  clearSessionCookie(cookies);
+}
+
+export function setSessionCookie(cookies: AstroCookies, token: string, secure: boolean) {
+  cookies.set(SESSION_COOKIE, token, {
+    httpOnly: true,
+    secure,
+    sameSite: 'lax',
+    path: COOKIE_PATH,
+    maxAge: SESSION_SECONDS,
   });
 }
 
-/** Read claims for display only. Call this after the database accepted the token, never to trust it. */
-function claimsOf(token: string): { sub?: string; email?: string } {
-  try {
-    const payload = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
-    return JSON.parse(atob(payload));
-  } catch {
-    return {};
-  }
-}
-
-/** The database validates the JWT itself; `is_admin()` is true only for users listed in `public.admins`. */
-export async function verifyAdmin(
-  env: Env,
-  accessToken: string,
-): Promise<{ admin: AdminUser; db: AdminDb } | null> {
-  const db = createUserClient(env, accessToken);
-  if (!db) return null;
-  const { data, error } = await db.rpc('is_admin');
-  if (error || data !== true) return null;
-  const claims = claimsOf(accessToken);
-  if (!claims.sub) return null;
-  return { admin: { id: claims.sub, email: claims.email ?? '' }, db };
-}
-
-export async function authenticate(env: Env, cookies: AstroCookies): Promise<AdminContext | null> {
-  const access = cookies.get(ACCESS_COOKIE)?.value;
-  if (access) {
-    const ok = await verifyAdmin(env, access);
-    if (ok) return { ...ok, refreshed: null };
-  }
-
-  const refresh = cookies.get(REFRESH_COOKIE)?.value;
-  if (refresh) {
-    const anon = createUserClient(env);
-    const { data, error } = anon
-      ? await anon.auth.refreshSession({ refresh_token: refresh })
-      : { data: null, error: true };
-    if (!error && data?.session) {
-      const ok = await verifyAdmin(env, data.session.access_token);
-      if (ok) return { ...ok, refreshed: data.session };
-    }
-  }
-  return null;
-}
-
-export function setSessionCookies(cookies: AstroCookies, session: SessionTokens, secure: boolean) {
-  const base = { httpOnly: true, secure, sameSite: 'lax' as const, path: COOKIE_PATH };
-  cookies.set(ACCESS_COOKIE, session.access_token, { ...base, maxAge: session.expires_in });
-  cookies.set(REFRESH_COOKIE, session.refresh_token, { ...base, maxAge: REFRESH_MAX_AGE });
-}
-
-export function clearSessionCookies(cookies: AstroCookies) {
-  cookies.delete(ACCESS_COOKIE, { path: COOKIE_PATH });
-  cookies.delete(REFRESH_COOKIE, { path: COOKIE_PATH });
+export function clearSessionCookie(cookies: AstroCookies) {
+  cookies.delete(SESSION_COOKIE, { path: COOKIE_PATH });
 }
 
 /** Admin forms are same-origin POSTs; refuse anything else (Astro's own check only covers form types). */

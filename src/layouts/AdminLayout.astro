@@ -1,12 +1,13 @@
 ---
 import BaseLayout from './BaseLayout.astro';
 import '../styles/admin.css';
+import { ENTITIES } from '../lib/cms/entities';
 
 interface Props {
   title: string;
   /** False on the sign-in page, where there is no session yet. */
   nav?: boolean;
-  current?: 'dashboard' | 'consultations' | 'doctors' | 'media' | 'publish';
+  current?: string;
 }
 
 const { title, nav = true, current } = Astro.props;
@@ -45,6 +46,16 @@ if (nav) {
           <a href="/admin/doctors" aria-current={current === 'doctors' ? 'page' : undefined}>
             Doctors
           </a>
+          <details class="admin-menu">
+            <summary class:list={{ active: current?.startsWith('content:') }}>Content</summary>
+            <div class="admin-menu__list">
+              <a href="/admin/site">Site details</a>
+              <a href="/admin/doctors">Doctors</a>
+              {ENTITIES.map((e) => (
+                <a href={`/admin/content/${e.key}`}>{e.plural}</a>
+              ))}
+            </div>
+          </details>
           <a href="/admin/media" aria-current={current === 'media' ? 'page' : undefined}>
             Media
           </a>

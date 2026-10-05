@@ -1,5 +1,6 @@
 ---
 import SiteLayout from '../../layouts/SiteLayout.astro';
+import { getPageSeo } from '../../lib/site-content';
 import PageHero from '../../components/PageHero.astro';
 import Section from '../../components/Section.astro';
 import ServiceCard from '../../components/cards/ServiceCard.astro';
@@ -9,9 +10,11 @@ import SeamlessJourney from '../../components/SeamlessJourney.astro';
 import { towerImage, serviceDetails } from '../../data/shared';
 
 export const prerender = true;
+
+const seo = await getPageSeo('/services', { title: 'Dental services · Melatec Dental Clinic' });
 ---
 
-<SiteLayout title="Dental services · Melatec Dental Clinic">
+<SiteLayout title={seo.title} description={seo.description}>
   <PageHero label="Our services." image={towerImage} imageHeight={298} upper>
     <Fragment slot="title">Comprehensive dental care for every smile</Fragment>
     <p>

@@ -1,0 +1,112 @@
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { readdirSync, readFileSync, statSync } from 'node:fs';
+import { join } from 'node:path';
+import {
+  allVariantKeys,
+  mediaUrl,
+  parseKey,
+  thumbnailKey,
+  toPublicImage,
+  variantKey,
+} from '../src/lib/media.ts';
+import { readWebp } from '../src/lib/webp.ts';
+
+const ID = '3f2504e0-4f89-41d3-9a0c-0305e82c3301';
+
+test('keys round trip', () => {
+  const key = variantKey(ID, 2, 960);
+  assert.equal(key, `media/${ID}/v2/960.webp`);
+  assert.deepEqual(parseKey(key), { assetId: ID, version: 2, width: 960 });
+});
+
+test('only keys the CMS writes are valid', () => {
+  for (const bad of [
+    '',
+    'media/x.webp',
+    `media/${ID}/v1/960.png`,
+    `media/${ID}/../x/v1/1.webp`,
+    `other/${ID}/v1/960.webp`,
+    `media/${ID}/v1/abc.webp`,
+  ]) {
+    assert.equal(parseKey(bad), null, bad);
+  }
+});
+
+test('all variant keys derive from the largest', () => {
+  assert.deepEqual(
+    allVariantKeys(variantKey(ID, 1, 1600), [480, 960, 1600]),
+    [480, 960, 1600].map((w) => variantKey(ID, 1, w)),
+  );
+  assert.deepEqual(allVariantKeys('legacy-key', [480]), ['legacy-key']);
+  assert.equal(thumbnailKey(variantKey(ID, 1, 1600), [960, 480, 1600]), variantKey(ID, 1, 480));
+});
+
+test('urls use the public base when set, the Worker route otherwise', () => {
+  const key = variantKey(ID, 1, 480);
+  assert.equal(mediaUrl(key), `/${key}`);
+  assert.equal(mediaUrl(key, 'https://media.example.com/'), `https://media.example.com/${key}`);
+});
+
+test('public image has a srcset and empty alt when decorative', () => {
+  const asset = {
+    r2_key: variantKey(ID, 1, 960),
+    width: 960,
+    height: 576,
+    alt_text: 'x',
+    is_decorative: false,
+    variant_widths: [960, 480],
+  };
+  const img = toPublicImage(asset)!;
+  assert.equal(img.srcset, `/media/${ID}/v1/480.webp 480w, /media/${ID}/v1/960.webp 960w`);
+  assert.equal(img.alt, 'x');
+  assert.equal(toPublicImage({ ...asset, is_decorative: true })!.alt, '');
+  assert.equal(toPublicImage({ ...asset, width: null }), null);
+});
+
+// WebP header reader, checked against the real images in the project (sizes verified separately with sips).
+const files = (dir: string): string[] =>
+  readdirSync(dir).flatMap((f) => {
+    const p = join(dir, f);
+    return statSync(p).isDirectory() ? files(p) : p.endsWith('.webp') ? [p] : [];
+  });
+
+test('readWebp reads the project images and rejects bad input', () => {
+  const found = files('src/assets');
+  assert.ok(found.length > 5);
+  for (const f of found) {
+    const info = readWebp(new Uint8Array(readFileSync(f)));
+    assert.ok(info && info.width > 0 && info.height > 0, f);
+  }
+  const ok = new Uint8Array(readFileSync(found[0]));
+  assert.equal(readWebp(ok.subarray(0, ok.length - 10)), null, 'truncated');
+  assert.equal(readWebp(new Uint8Array(0)), null);
+  assert.equal(
+    readWebp(new Uint8Array([0x89, 0x50, 0x4e, 0x47, 13, 10, 26, 10, ...new Array(40).fill(0)])),
+    null,
+    'png',
+  );
+});
+
+test('readWebp reads lossless (VP8L) headers', () => {
+  for (const [w, h] of [
+    [800, 600],
+    [1, 1],
+    [16383, 16383],
+  ]) {
+    const b = new Uint8Array(40);
+    b.set([0x52, 0x49, 0x46, 0x46], 0);
+    b.set([0x57, 0x45, 0x42, 0x50], 8);
+    b.set([0x56, 0x50, 0x38, 0x4c], 12);
+    const size = b.length - 8;
+    b[4] = size & 255;
+    b[5] = (size >> 8) & 255;
+    b[20] = 0x2f;
+    const v = ((w - 1) | ((h - 1) << 14)) >>> 0;
+    b[21] = v & 255;
+    b[22] = (v >>> 8) & 255;
+    b[23] = (v >>> 16) & 255;
+    b[24] = (v >>> 24) & 255;
+    assert.deepEqual(readWebp(b), { width: w, height: h });
+  }
+});

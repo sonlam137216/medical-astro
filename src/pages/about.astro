@@ -1,6 +1,7 @@
 ---
 import { Image } from 'astro:assets';
 import SiteLayout from '../layouts/SiteLayout.astro';
+import { getPageSeo } from '../lib/site-content';
 import PageHero from '../components/PageHero.astro';
 import Section from '../components/Section.astro';
 import SectionIntro from '../components/SectionIntro.astro';
@@ -18,9 +19,11 @@ export const prerender = true;
 const doctors = (await getDoctors())
   .slice(0, 4)
   .map(({ name, role, image }) => ({ name, role, image }));
+
+const seo = await getPageSeo('/about', { title: 'About us · Melatec Dental Clinic' });
 ---
 
-<SiteLayout title="About us · Melatec Dental Clinic">
+<SiteLayout title={seo.title} description={seo.description}>
   <PageHero label={aboutHero.label} image={towerImage} imageHeight={298} upper>
     <Fragment slot="title">Welcome to Melatec</Fragment>
     {aboutHero.paragraphs.map((p) => (

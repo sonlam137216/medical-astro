@@ -1,5 +1,6 @@
 ---
 import SiteLayout from '../../layouts/SiteLayout.astro';
+import { getPageSeo } from '../../lib/site-content';
 import PageHero from '../../components/PageHero.astro';
 import PackageGrid from '../../components/PackageGrid.astro';
 import CtaBand from '../../components/CtaBand.astro';
@@ -7,10 +8,14 @@ import TourismSupport from '../../components/TourismSupport.astro';
 import { towerImage } from '../../data/shared';
 
 export const prerender = true;
+
+const seo = await getPageSeo('/dental-packages', {
+  title: 'Dental packages · Melatec Dental Clinic',
+});
 ---
 
 <!-- Figma frame: "Dental Packages / Single Treatments" -->
-<SiteLayout title="Dental packages · Melatec Dental Clinic">
+<SiteLayout title={seo.title} description={seo.description}>
   <PageHero label="Our dental packages." image={towerImage} imageHeight={480} rounded upper>
     <Fragment slot="title">Comprehensive dental care for every smile</Fragment>
     <p>

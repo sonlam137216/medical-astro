@@ -1,7 +1,10 @@
 ---
 import Button from './Button.astro';
 import FormGuards from './FormGuards.astro';
-import { site, footerTreatments } from '../data/site';
+import { footerTreatments } from '../data/site';
+import { getSiteContent } from '../lib/site-content';
+
+const site = await getSiteContent();
 
 // Copy is from Figma "Shared / Consultation". The rating line is a claim made by the design;
 // the owner must confirm it is current and verifiable before launch.
@@ -18,13 +21,17 @@ const services = footerTreatments.map((t) => t.label); // PROVISIONAL option lis
         </h2>
         <p class="t-h3 consult__name">{site.name}</p>
         <p class="consult__rating">★★★★★ 4.9/5 on Google Reviews</p>
-        <p class="consult__line">{site.addressLine.replace(', Vietnam', '')}</p>
-        <p class="consult__line">
-          Phone / WhatsApp
-          <br />
-          {site.phoneIntl}
-        </p>
-        <p class="consult__line">{site.hours}</p>
+        {site.addressLine && (
+          <p class="consult__line">{site.addressLine.replace(', Vietnam', '')}</p>
+        )}
+        {site.phoneIntl && (
+          <p class="consult__line">
+            Phone / WhatsApp
+            <br />
+            {site.phoneIntl}
+          </p>
+        )}
+        {site.hours && <p class="consult__line">{site.hours}</p>}
         <p class="consult__note">
           Consultation support in English and flexible scheduling for overseas patients.
         </p>

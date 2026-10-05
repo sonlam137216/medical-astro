@@ -1,5 +1,6 @@
 ---
 import SiteLayout from '../layouts/SiteLayout.astro';
+import { getPageSeo } from '../lib/site-content';
 import Hero from '../components/Hero.astro';
 import PatientSupport from '../components/home/PatientSupport.astro';
 import Services from '../components/home/Services.astro';
@@ -14,9 +15,11 @@ import SmileStories from '../components/home/SmileStories.astro';
 
 // Static page: built once, served directly from Cloudflare static assets.
 export const prerender = true;
+
+const seo = await getPageSeo('/', { title: 'Melatec Dental Clinic · Vietnam' });
 ---
 
-<SiteLayout title="Melatec Dental Clinic · Vietnam">
+<SiteLayout title={seo.title} description={seo.description}>
   <Hero />
   <PatientSupport />
   <Services />

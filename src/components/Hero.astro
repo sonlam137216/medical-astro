@@ -1,7 +1,9 @@
 ---
 import Button from './Button.astro';
 import { Image } from 'astro:assets';
-import { site } from '../data/site';
+import { getSiteContent } from '../lib/site-content';
+
+const site = await getSiteContent();
 import { heroImage } from '../data/home';
 ---
 
@@ -25,7 +27,7 @@ import { heroImage } from '../data/home';
         Vietnam.
       </p>
       <div class="hero__actions">
-        <Button href={site.whatsappUrl}>WhatsApp us</Button>
+        {site.whatsappUrl && <Button href={site.whatsappUrl}>WhatsApp us</Button>}
         <!-- PLACEHOLDER target: no video file has been supplied yet (see WEBSITE_TECHSTACK §8) -->
         <Button variant="outline" href="#video">
           Watch video

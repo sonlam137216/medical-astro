@@ -37,8 +37,10 @@ jobs:
     env:
       JOB_ID: ${{ inputs.job_id }}
       RUN_ID: ${{ github.run_id }}
-      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-      SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+      # D1 is reached through Cloudflare's HTTP API. The token needs D1 edit rights (and what `wrangler deploy` needs).
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      D1_DATABASE_ID: ${{ vars.D1_DATABASE_ID }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -53,7 +55,7 @@ jobs:
 
       - name: Claim the job
         id: claim
-        run: node scripts/publish-job.mjs start
+        run: node --no-warnings scripts/publish-job.mjs start
 
       # The build reads the revision through the Worker environment file, like local builds do.
       - name: Write build settings
@@ -63,22 +65,20 @@ jobs:
           R2_PUBLIC_BASE_URL: ${{ vars.R2_PUBLIC_BASE_URL }}
         run: |
           {
-            echo "SUPABASE_URL=$SUPABASE_URL"
-            echo "SUPABASE_SECRET_KEY=$SUPABASE_SECRET_KEY"
+            echo "CLOUDFLARE_ACCOUNT_ID=$CLOUDFLARE_ACCOUNT_ID"
+            echo "CLOUDFLARE_API_TOKEN=$CLOUDFLARE_API_TOKEN"
+            echo "D1_DATABASE_ID=$D1_DATABASE_ID"
             echo "CONTENT_REVISION_ID=$REVISION_ID"
             echo "R2_PUBLIC_BASE_URL=$R2_PUBLIC_BASE_URL"
           } > .dev.vars
 
       - name: Build and deploy
         if: steps.claim.outputs.skip != 'true'
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: npm run deploy:${{ inputs.target }}
 
       - name: Mark deployed
         if: steps.claim.outputs.skip != 'true'
-        run: node scripts/publish-job.mjs finish
+        run: node --no-warnings scripts/publish-job.mjs finish
 
       # Runs when any step above failed or the run was cancelled. If the build failed, nothing was deployed,
       # so the previous version stays live.
@@ -86,4 +86,4 @@ jobs:
         if: failure() || cancelled()
         env:
           ERROR_MESSAGE: The build did not complete. See the workflow run for the log.
-        run: node scripts/publish-job.mjs fail
+        run: node --no-warnings scripts/publish-job.mjs fail

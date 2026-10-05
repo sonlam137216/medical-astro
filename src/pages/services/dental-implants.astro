@@ -7,15 +7,26 @@ import SectionIntro from '../../components/SectionIntro.astro';
 import Button from '../../components/Button.astro';
 import InfoCard from '../../components/cards/InfoCard.astro';
 import PlanVisit from '../../components/PlanVisit.astro';
-import { site } from '../../data/site';
+import { getPageSeo, getSiteContent } from '../../lib/site-content';
+import { getFaqs } from '../../lib/content';
 import { heroImage, options, answers, support, faq } from '../../data/implants';
 
 export const prerender = true;
+
+const site = await getSiteContent();
+
+// Answers are plain text; a blank line starts a new paragraph.
+const paragraphs = (text: string) => text.split(/\n{2,}/);
+const faqs = await getFaqs('dental-implants', faq.questions);
+const seo = await getPageSeo('/services/dental-implants', {
+  title: 'Dental implants · Melatec Dental Clinic',
+});
 ---
 
 <!-- Landing-page variant: the header swaps the utility text and CTA; the page has its own consultation block and no social row. -->
 <SiteLayout
-  title="Dental implants · Melatec Dental Clinic"
+  title={seo.title}
+  description={seo.description}
   consultation={false}
   social={false}
   header={{
@@ -35,9 +46,11 @@ export const prerender = true;
     </p>
     <Fragment slot="actions">
       <Button href="#consultation">Get your treatment plan</Button>
-      <Button variant="outline" href={site.whatsappUrl}>
-        Ask on WhatsApp
-      </Button>
+      {site.whatsappUrl && (
+        <Button variant="outline" href={site.whatsappUrl}>
+          Ask on WhatsApp
+        </Button>
+      )}
     </Fragment>
     <p slot="extra" class="muted">
       Personalised care · English-speaking support
@@ -109,11 +122,18 @@ export const prerender = true;
       <Fragment slot="title">{faq.title}</Fragment>
     </SectionIntro>
     <div class="faq">
-      {faq.questions.map((q) => (
+      {faqs.map((item) => (
         <details>
-          <summary>{q}</summary>
-          <!-- PLACEHOLDER: the design shows questions only -->
-          <p class="muted">Answer to be provided by Melatec.</p>
+          <summary>{item.question}</summary>
+          {item.answer && (
+            <Fragment>
+              {paragraphs(item.answer).map((paragraph) => (
+                <p>{paragraph}</p>
+              ))}
+            </Fragment>
+          )}
+          {/* PLACEHOLDER: the design shows questions only; sample questions have no answer yet. */}
+          {!item.answer && <p class="muted">Answer to be provided by Melatec.</p>}
         </details>
       ))}
     </div>

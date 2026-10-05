@@ -27,6 +27,17 @@
       },
     },
   ],
+  // The database (Cloudflare D1). Create it with `npx wrangler d1 create melatec` and put the printed id here.
+  // The all-zero id is a placeholder: local development works with it, deploying does not (on purpose).
+  // Migrations live in db/migrations (see db/README.md).
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "melatec",
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "db/migrations",
+    },
+  ],
   // Media files (images). Binding to a bucket that must exist for deploys; `wrangler dev` simulates it locally.
   "r2_buckets": [
     {
@@ -54,7 +65,15 @@
         "GITHUB_REPO": "sonlam137216/medical-astro",
         "GITHUB_WORKFLOW": "publish.yml",
       },
-      // Bindings are not inherited by environments.
+      // Bindings are not inherited by environments. Staging has its own database: it never touches production data.
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "melatec-staging",
+          "database_id": "09e15b8c-b43c-4878-bfe2-c37bef1c7d55",
+          "migrations_dir": "db/migrations",
+        },
+      ],
       "r2_buckets": [
         {
           "binding": "MEDIA",

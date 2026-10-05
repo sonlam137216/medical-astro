@@ -7,7 +7,7 @@ import {
   sourcePathFromReferer,
   validateConsultation,
 } from '../../lib/consultation';
-import { createServiceClient } from '../../lib/supabase';
+import { createDb } from '../../lib/db';
 
 // On-demand route (runs in the Worker). Handles personal data: never cache, never log field values.
 export const prerender = false;
@@ -98,14 +98,15 @@ export const POST: APIRoute = async ({ request }) => {
   // Bots that fill the hidden field get the same answer as people, and nothing is stored.
   if (result.honeypot) return reply(request, 200, { ok: true, message: MESSAGES.sent });
 
-  const supabase = createServiceClient(env);
-  if (!supabase) {
-    console.error('consultation: Supabase is not configured');
+  if (!env.DB) {
+    console.error('consultation: the DB binding is not configured');
     return reply(request, 503, { ok: false, message: MESSAGES.unavailable });
   }
 
   const { value } = result;
-  const { error } = await supabase.from('consultation_requests').insert({
+  // No admin is involved: the audit log records only where the request came from.
+  const db = createDb(env.DB, { actorId: null, audit: true });
+  const { error } = await db.from('consultation_requests').insert({
     submission_id: value.submissionId,
     full_name: value.fullName,
     phone: value.phone,

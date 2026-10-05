@@ -5,14 +5,7 @@ import globals from 'globals';
 
 export default [
   {
-    ignores: [
-      'dist/',
-      '.astro/',
-      '.wrangler/',
-      'node_modules/',
-      'worker-configuration.d.ts',
-      'src/types/database.ts',
-    ],
+    ignores: ['dist/', '.astro/', '.wrangler/', 'node_modules/', 'worker-configuration.d.ts'],
   },
   js.configs.recommended,
   ...tseslint.configs.recommended,

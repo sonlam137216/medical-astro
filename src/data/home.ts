@@ -1,6 +1,6 @@
 /**
  * Home page content, copied from the Figma "Melatec / Refined / Home" frame (2026-10-04).
- * Moves to Supabase (pages / page_sections + services, doctors ...) in Phase 5.
+ * Moves to the database (pages / page_sections + services, doctors ...) as the CMS grows (Phase 5).
  *
  * Many values in the Figma file are obvious dummy data (five identical service cards,
  * identical "C$1,250 / 40 clinics" cells, one photo reused for every doctor). They are

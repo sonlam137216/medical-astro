@@ -1,7 +1,10 @@
 ---
 import FormGuards from './FormGuards.astro';
 import Button from './Button.astro';
-import { site, footerTreatments } from '../data/site';
+import { footerTreatments } from '../data/site';
+import { getSiteContent } from '../lib/site-content';
+
+const site = await getSiteContent();
 
 // Consultation block used on the Dental Implants landing page (different copy and fields from the shared one).
 const interests = footerTreatments.map((t) => t.label); // PROVISIONAL option list
@@ -21,9 +24,13 @@ const interests = footerTreatments.map((t) => t.label); // PROVISIONAL option li
           Tell us what you need. Our team can help you understand treatment options and plan your
           visit to Vietnam.
         </p>
-        <p class="plan__whatsapp">
-          <a href={site.whatsappUrl}>WhatsApp&nbsp; {site.phoneDisplay}</a>
-        </p>
+        {site.whatsappUrl && (
+          <p class="plan__whatsapp">
+            <a href={site.whatsappUrl}>
+              WhatsApp{site.phoneDisplay && <>&nbsp; {site.phoneDisplay}</>}
+            </a>
+          </p>
+        )}
       </div>
 
       <!-- POST so personal data never lands in the URL. Same endpoint as the shared consultation form. -->

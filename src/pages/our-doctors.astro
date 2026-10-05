@@ -1,6 +1,7 @@
 ---
 import ProfileImage from '../components/ProfileImage.astro';
 import SiteLayout from '../layouts/SiteLayout.astro';
+import { getPageSeo } from '../lib/site-content';
 import PageHero from '../components/PageHero.astro';
 import Section from '../components/Section.astro';
 import { towerImage } from '../data/shared';
@@ -9,10 +10,12 @@ import { getDoctors } from '../lib/content';
 export const prerender = true;
 
 const doctorProfiles = await getDoctors();
+
+const seo = await getPageSeo('/our-doctors', { title: 'Our doctors · Melatec Dental Clinic' });
 ---
 
 <!-- Figma highlights "About us" in the nav on this page -->
-<SiteLayout title="Our doctors · Melatec Dental Clinic" current="/about">
+<SiteLayout title={seo.title} description={seo.description} current="/about">
   <PageHero label="Our doctors." image={towerImage} imageHeight={298} upper>
     <Fragment slot="title">Meet our team of experienced specialists</Fragment>
     <p>

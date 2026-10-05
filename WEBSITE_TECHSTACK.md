@@ -22,7 +22,7 @@ Cấu trúc Figma đã được đọc gồm các frame About, Services, Dental 
 | Hạng mục                    | Quyết định                                                                        |
 | --------------------------- | --------------------------------------------------------------------------------- |
 | Frontend                    | **Astro.js**                                                                      |
-| Database                    | **Supabase**                                                                      |
+| Database                    | **Cloudflare D1** (SQLite). Đổi từ Supabase ngày 2026-10-05 theo yêu cầu chủ dự án |
 | Hạ tầng website / API / CDN | **Cloudflare**                                                                    |
 | Lưu trữ media               | **Cloudflare R2**                                                                 |
 | Video streaming             | **Không cần; không tích hợp Cloudflare Stream hoặc xây hệ thống streaming video** |
@@ -41,8 +41,8 @@ Các phần dưới đây là kiến trúc và phạm vi triển khai đề xu�
 | Styling            | CSS variables / design tokens           | Giữ màu, font, spacing và responsive nhất quán           |
 | Hosting            | Cloudflare Workers + Static Assets      | Phục vụ trang dựng sẵn và các route động                 |
 | Server API         | Astro server endpoints trên Workers     | Form tư vấn, kiểm tra quyền, upload và thao tác quản trị |
-| Database           | Supabase PostgreSQL                     | Nội dung, cấu hình, media metadata và yêu cầu tư vấn     |
-| CMS authentication | Supabase Auth                           | Đăng nhập và quản lý quyền quản trị                      |
+| Database           | Cloudflare D1 (SQLite)                  | Nội dung, cấu hình, media metadata và yêu cầu tư vấn     |
+| CMS authentication | Tự xây: PBKDF2 + session trong D1       | Đăng nhập; một vai trò `admin`                           |
 | Media storage      | Cloudflare R2                           | Lưu ảnh, tài liệu công khai và file video                |
 | Media CDN          | Custom domain của R2 + Cloudflare Cache | Phân phối media cho khách quốc tế                        |
 | CMS                | Khu vực `/admin` trong ứng dụng Astro   | Biên tập, preview và xuất bản                            |
@@ -64,9 +64,9 @@ flowchart LR
     Visitor --> Media[CDN media qua custom domain]
     Media --> R2[Cloudflare R2]
     Visitor --> API[Workers API nhận form]
-    API --> DB[Supabase PostgreSQL]
+    API --> DB[Cloudflare D1]
     Editor[Nhân viên quản trị] --> CMS[CMS trong Astro]
-    CMS --> Auth[Supabase Auth]
+    CMS --> Auth[Đăng nhập và session trong D1]
     CMS --> AdminAPI[Workers API quản trị]
     AdminAPI --> DB
     AdminAPI --> R2
@@ -78,7 +78,7 @@ flowchart LR
 ### Trang public
 
 - Dựng sẵn các trang nội dung bằng Astro ở thời điểm build.
-- Lấy nội dung đã xuất bản từ Supabase trong quá trình build.
+- Lấy nội dung đã xuất bản (snapshot) từ D1 trong quá trình build, qua API Cloudflare.
 - Phục vụ HTML từ Cloudflare; không truy vấn database cho mỗi lượt mở trang public.
 - Nội dung quan trọng và SEO phải có trong HTML ban đầu.
 - Chỉ thêm JavaScript cho tương tác cần thiết.
@@ -91,9 +91,9 @@ flowchart LR
 
 ### Lợi ích cho traffic quốc tế
 
-Cloudflare phân phối static assets và cache trên mạng lưới toàn cầu. Tốc độ đọc trang public không phụ thuộc trực tiếp vào region của Supabase khi đã dựng sẵn nội dung.
+Cloudflare phân phối static assets và cache trên mạng lưới toàn cầu. Tốc độ đọc trang public không phụ thuộc vào database khi đã dựng sẵn nội dung.
 
-Các thao tác ghi dữ liệu và đọc dữ liệu động vẫn chịu độ trễ đến Supabase. Chọn region database dựa trên vị trí đội vận hành và traffic API thực tế. Chưa chốt region cụ thể.
+D1 là database tập trung (một primary); Worker có thể ở bất kỳ vị trí nào nên ghi và đọc động có độ trễ đến primary. D1 cho phép gợi ý vị trí khi tạo database (`--location`); chọn theo vị trí đội vận hành, vì phần động chủ yếu là `/admin`. Chưa chốt region cụ thể.
 
 ## 5. Quy trình nội dung và xuất bản CMS
 
@@ -163,7 +163,7 @@ Chưa có yêu cầu tài khoản khách hàng, booking theo slot thời gian, t
 
 ### Ảnh
 
-- R2 lưu file; Supabase lưu metadata và quan hệ với nội dung.
+- R2 lưu file; D1 lưu metadata và quan hệ với nội dung.
 - Dùng custom domain cho media, ví dụ `media.<domain>`; đây là ví dụ, chưa có domain thật.
 - Cấu hình Cloudflare Cache và cache headers phù hợp.
 - Tạo biến thể ảnh theo kích thước sử dụng; ưu tiên WebP/AVIF với fallback phù hợp.
@@ -181,7 +181,7 @@ Chưa có yêu cầu tài khoản khách hàng, booking theo slot thời gian, t
 
 ## 9. Form tư vấn
 
-Luồng đề xuất: khách gửi form → Workers API kiểm tra dữ liệu → lưu Supabase → thông báo cho nhân viên nếu đã cấu hình email → theo dõi trạng thái trong admin.
+Luồng đề xuất: khách gửi form → Workers API kiểm tra dữ liệu → lưu D1 → theo dõi trong admin (đã chốt: không gửi email).
 
 - Chỉ yêu cầu thông tin thực sự cần cho tư vấn; đối chiếu field với Figma.
 - Validation phía server, giới hạn kích thước request và chống gửi trùng ngoài ý muốn.
@@ -238,13 +238,13 @@ Cloudflare hỗ trợ phân phối toàn cầu, nhưng không bảo đảm một
 
 ## 12. Quyền truy cập, môi trường và vận hành
 
-- Dùng Supabase RLS và kiểm tra quyền phía server cho thao tác quản trị.
-- Publishable key có thể dùng phía client khi RLS đúng; secret key / `service_role` chỉ ở backend.
+- D1 không có API công khai và không có RLS: chỉ Worker (binding) và CI (token Cloudflare) vào được, nên mọi quyền do mã kiểm. Middleware xác thực mọi request `/admin/*`.
+- Token API Cloudflare có quyền D1 chỉ ở backend / CI secret.
 - Không tin role do client tự khai báo; không cho người dùng tự nâng quyền.
-- Giữ Supabase secrets, R2 credentials và build hook trong secret của runtime/CI; không commit vào repository.
+- Giữ token Cloudflare, R2 credentials và build hook trong secret của runtime/CI; không commit vào repository.
 - Tách cấu hình local, staging và production; không mặc định cho staging ghi dữ liệu production.
 - Quản lý schema bằng migration được lưu trong repo.
-- Có backup database và phương án bảo vệ/khôi phục media riêng; backup DB không thay thế backup R2.
+- Backup database: D1 Time Travel (7 ngày ở Free, 30 ngày ở Paid) và `wrangler d1 export`; backup DB không thay thế backup R2.
 - Log lỗi và publish jobs, hạn chế ghi thông tin cá nhân vào log.
 - Chọn nhà cung cấp email và cấu hình domain gửi thư khi triển khai thông báo.
 
@@ -261,32 +261,32 @@ Có thể bắt đầu với **0 USD/tháng cho hosting, database và media** kh
 | Cloudflare Static Assets       | Request phục vụ trực tiếp static assets miễn phí, không giới hạn số request theo bảng giá                             |
 | Workers Free                   | 100.000 request động/ngày; 10 ms CPU cho mỗi request HTTP                                                             |
 | Cloudflare Workers Builds Free | 3.000 phút build/tháng; một build chạy đồng thời                                                                      |
-| Supabase Free                  | 500 MB database/project, 50.000 MAU, 5 GB egress và 5 GB cached egress; tối đa hai project đang hoạt động             |
+| D1 Free                        | 5 GB tổng dung lượng, tối đa 500 MB/database, 10 database, 5 triệu dòng đọc/ngày, 100.000 dòng ghi/ngày               |
 | R2 Standard free tier          | 10 GB-month lưu trữ, 1 triệu thao tác Class A và 10 triệu thao tác Class B mỗi tháng; egress trực tiếp từ R2 miễn phí |
 
 Điều kiện và đánh đổi:
 
 - Static assets phải được phục vụ trực tiếp, tránh cho mọi lượt xem trang đi qua Worker để không tiêu quota API không cần thiết.
 - Kiểm tra CPU thực tế của route SSR/CMS/API: 10 ms là thời gian xử lý CPU, không phải tổng thời gian chờ mạng. Có thể cần Workers Paid trước khi vượt số request nếu xử lý quá nặng.
-- Supabase Free có thể pause sau một tuần không hoạt động và không có automatic backups. Trang đã dựng tĩnh vẫn đọc được, nhưng CMS, build và form phụ thuộc database sẽ bị ảnh hưởng khi project pause.
-- Tự thực hiện backup/export phù hợp nếu dùng Free; khi website cần tiếp nhận tư vấn ổn định, đánh giá nâng cấp Supabase.
+- D1 không bị pause khi không hoạt động. Hết quota ngày thì truy vấn bị từ chối đến hôm sau (không tính phí vượt ở Free).
+- **Đăng nhập admin tốn CPU** (băm mật khẩu PBKDF2 100.000 vòng). Workers Free giới hạn 10 ms CPU mỗi request: cần thử đăng nhập trên staging; nếu bị cắt, chuyển Workers Paid hoặc hạ số vòng băm (kém an toàn hơn).
+- Time Travel ở Free chỉ 7 ngày; xuất `consultation_requests` định kỳ vì không dựng lại được.
 - R2 cần kích hoạt subscription qua checkout; dùng vượt quota sẽ phát sinh phí. Free tier không phải cơ chế hard cap chi tiêu.
 - Theo dõi storage, thao tác R2 và build minutes; gộp các lần Publish gần nhau để tiết kiệm build.
 - Dùng subdomain `workers.dev` để thử nghiệm không cần mua domain. Domain riêng vẫn có phí đăng ký/gia hạn nếu chưa sở hữu; media R2 qua custom domain cần domain của mình.
 - Chưa tính phí domain, dịch vụ email, công phát triển hoặc subscription công cụ AI.
 - Không có chi phí dịch vụ streaming video trong stack. Có thể tạo biến thể ảnh lúc upload/build để tránh dịch vụ xử lý ảnh trả phí ở bản đầu.
 
-Nguồn: [Workers pricing](https://developers.cloudflare.com/workers/platform/pricing/), [Workers limits](https://developers.cloudflare.com/workers/platform/limits/), [Builds limits](https://developers.cloudflare.com/workers/ci-cd/builds/limits-and-pricing/), [Supabase pricing](https://supabase.com/pricing), [R2 pricing](https://developers.cloudflare.com/r2/pricing/), [R2 setup](https://developers.cloudflare.com/r2/get-started/).
+Nguồn: [Workers pricing](https://developers.cloudflare.com/workers/platform/pricing/), [Workers limits](https://developers.cloudflare.com/workers/platform/limits/), [Builds limits](https://developers.cloudflare.com/workers/ci-cd/builds/limits-and-pricing/), [D1 pricing](https://developers.cloudflare.com/d1/platform/pricing/), [D1 limits](https://developers.cloudflare.com/d1/platform/limits/), [R2 pricing](https://developers.cloudflare.com/r2/pricing/), [R2 setup](https://developers.cloudflare.com/r2/get-started/).
 
 ### Phương án nâng cấp trả phí
 
 | Dịch vụ                 | Tham khảo                                                                                     |
 | ----------------------- | --------------------------------------------------------------------------------------------- |
-| Supabase Pro            | Từ 25 USD/tháng với cấu hình cơ bản một project                                               |
-| Cloudflare Workers Paid | Tối thiểu 5 USD/tháng, cộng sử dụng vượt quota                                                |
+| Cloudflare Workers Paid | Tối thiểu 5 USD/tháng, cộng sử dụng vượt quota; gồm D1 (25 tỷ dòng đọc, 50 triệu dòng ghi, 5 GB mỗi tháng) |
 | R2 Standard             | 0,015 USD/GB/tháng cộng phí thao tác; có quota miễn phí, không thu phí egress trực tiếp từ R2 |
 
-Nếu nâng cấp cả Supabase Pro và Workers Paid, mức nền tảng cơ bản khoảng 30 USD/tháng cộng media và dịch vụ phụ trợ. Đây không phải chi phí tối thiểu bắt buộc. Ước tính chưa gồm domain, email, staging, xử lý ảnh/video, giám sát trả phí, thuế và chi phí phát triển.
+Nếu nâng cấp Workers Paid, mức nền tảng cơ bản khoảng 5 USD/tháng (D1 nằm trong gói này) cộng media và dịch vụ phụ trợ. Đây không phải chi phí tối thiểu bắt buộc. Ước tính chưa gồm domain, email, staging, xử lý ảnh/video, giám sát trả phí, thuế và chi phí phát triển.
 
 ## 14. Thứ tự triển khai đề xuất
 
@@ -294,7 +294,7 @@ Nếu nâng cấp cả Supabase Pro và Workers Paid, mức nền tảng cơ b�
 2. Khởi tạo Astro + TypeScript và cấu hình Cloudflare phù hợp.
 3. Xây tokens, layout và component dùng chung.
 4. Triển khai UI public với nội dung mẫu lấy từ nguồn được cung cấp.
-5. Thiết kế schema Supabase, migrations, Auth và RLS.
+5. Thiết kế schema D1, migrations và đăng nhập admin.
 6. Xây CMS, quản lý media R2 và preview.
 7. Xây quy trình draft → publish → build → deploy.
 8. Kết nối form tư vấn và thông báo nếu đã chọn email.
@@ -303,7 +303,7 @@ Nếu nâng cấp cả Supabase Pro và Workers Paid, mức nền tảng cơ b�
 ## 15. Những thông tin còn cần xác định
 
 - Danh sách trang đầy đủ và Figma Home / mobile chính thức nếu chưa nằm trong file.
-- Domain, tài khoản Cloudflare, Supabase project và quyền triển khai.
+- Domain, tài khoản Cloudflare và quyền triển khai (D1 `melatec` và `melatec-staging` chưa tạo).
 - Region database và thị trường quốc tế ưu tiên.
 - Số lượng ngôn ngữ.
 - Các vai trò CMS và ai được quyền Publish.
@@ -317,7 +317,7 @@ Các thông tin thiếu không ngăn việc triển khai UI và thiết kế ki�
 
 Hãy dùng tài liệu này làm bối cảnh triển khai, giữ các quyết định đã chốt ở mục 2. Trước khi viết code, đọc hướng dẫn repository nếu có, kiểm tra hiện trạng workspace, đọc style guide và đối chiếu Figma chính.
 
-Ưu tiên Astro dựng sẵn trang public, Cloudflare phân phối toàn cầu, Supabase phục vụ CMS/form và R2 lưu media. Giữ nội dung công khai độc lập với database ở mỗi lượt xem trang. Thiết kế CMS theo component và trường nội dung có cấu trúc.
+Ưu tiên Astro dựng sẵn trang public, Cloudflare phân phối toàn cầu, D1 phục vụ CMS/form và R2 lưu media. Giữ nội dung công khai độc lập với database ở mỗi lượt xem trang. Thiết kế CMS theo component và trường nội dung có cấu trúc.
 
 Không thêm Stripe, checkout, dịch vụ streaming video, tài khoản khách hàng hoặc hệ thống bệnh án vào phạm vi hiện tại. Video giới thiệu nếu có chỉ được phục vụ dưới dạng file từ R2. Các chi tiết còn là đề xuất cần được đánh giá theo code và yêu cầu thực tế. Pin phiên bản sau khi kiểm tra tương thích; không sao chép cấu hình runtime cũ một cách máy móc.
 
@@ -328,8 +328,8 @@ Không thêm Stripe, checkout, dịch vụ streaming video, tài khoản khách 
 - [Astro deployment trên Cloudflare](https://docs.astro.build/en/guides/deploy/cloudflare/)
 - [Cloudflare Workers Static Assets](https://developers.cloudflare.com/workers/static-assets/)
 - [R2 public buckets, custom domains và cache](https://developers.cloudflare.com/r2/buckets/public-buckets/)
-- [Supabase bảo mật dữ liệu](https://supabase.com/docs/guides/database/secure-data)
+- [Cloudflare D1](https://developers.cloudflare.com/d1/)
 - [Core Web Vitals](https://web.dev/articles/vitals)
-- [Supabase pricing](https://supabase.com/pricing)
+- [D1 pricing](https://developers.cloudflare.com/d1/platform/pricing/)
 - [Workers pricing](https://developers.cloudflare.com/workers/platform/pricing/)
 - [R2 pricing](https://developers.cloudflare.com/r2/pricing/)

@@ -1,0 +1,70 @@
+---
+import AdminLayout from '../../../../layouts/AdminLayout.astro';
+import EntityForm from '../../../../components/admin/EntityForm.astro';
+import { entityByKey } from '../../../../lib/cms/entities';
+import { loadOptions, loadRow, processPost, valuesFromRow } from '../../../../lib/cms/admin';
+import { UUID_RE } from '../../../../lib/cms/fields';
+
+export const prerender = false;
+
+const def = entityByKey(Astro.params.entity);
+const id = Astro.params.id ?? '';
+if (!def || !UUID_RE.test(id)) return new Response('Not found', { status: 404 });
+
+const db = Astro.locals.db;
+const row = await loadRow(db, def, id);
+if (!row) return new Response('Not found', { status: 404 });
+
+const result =
+  Astro.request.method === 'POST' ? await processPost(Astro.request, db, def, id) : null;
+if (result && 'redirect' in result) return result.redirect;
+if (result) Astro.response.status = result.status;
+
+const options = await loadOptions(db, def);
+const sp = Astro.url.searchParams;
+const heading = String(row[def.titleField] ?? def.singular);
+---
+
+<AdminLayout title={heading} current={`content:${def.key}`}>
+  <main class="admin-main">
+    <p>
+      <a href={`/admin/content/${def.key}`}>← {def.plural}</a>
+    </p>
+    <h1>{heading}</h1>
+    {sp.get('error') === 'in_use' && (
+      <p class="admin-notice admin-notice--error" role="alert">
+        This is still used by something else, so it cannot be deleted.
+      </p>
+    )}
+    {sp.get('error') === 'failed' && (
+      <p class="admin-notice admin-notice--error" role="alert">
+        Could not delete. Please try again.
+      </p>
+    )}
+    <EntityForm
+      def={def}
+      values={result?.values ?? valuesFromRow(def.fields, row)}
+      errors={result?.errors}
+      formError={result?.formError}
+      options={options}
+      submitLabel="Save changes"
+    />
+    {def.deletable && (
+      <form
+        class="admin-form admin-card"
+        method="post"
+        action={`/admin/content/${def.key}/${id}/delete`}
+      >
+        <h2 class="t-h3">Delete</h2>
+        <p class="admin-hint">
+          This removes it from the working copy. It disappears from the website after you publish.
+        </p>
+        <div>
+          <button class="admin-btn admin-btn--danger" type="submit">
+            Delete {def.singular}
+          </button>
+        </div>
+      </form>
+    )}
+  </main>
+</AdminLayout>
