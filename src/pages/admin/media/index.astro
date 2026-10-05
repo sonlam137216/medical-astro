@@ -1,0 +1,93 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import { MAX_ALT_LENGTH, mediaUrl, thumbnailKey } from '../../../lib/media';
+
+export const prerender = false;
+
+const { data: assets, error } = await Astro.locals.db
+  .from('media_assets')
+  .select('id, r2_key, width, height, alt_text, is_decorative, variant_widths')
+  .eq('kind', 'image')
+  .eq('status', 'active')
+  .order('created_at', { ascending: false })
+  .limit(200);
+const deleted = Astro.url.searchParams.has('deleted');
+---
+
+<AdminLayout title="Media" current="media">
+  <main class="admin-main">
+    <h1>Media</h1>
+
+    {deleted && (
+      <p class="admin-notice" role="status">
+        Image deleted.
+      </p>
+    )}
+
+    <form class="admin-form admin-card" data-media-upload>
+      <h2 class="t-h3">Upload an image</h2>
+      <label>
+        Image (JPEG, PNG or WebP, at least 480px wide)
+        <input type="file" name="file" accept="image/jpeg,image/png,image/webp" required />
+      </label>
+      <label>
+        Description for people who cannot see the image
+        <input
+          name="alt_text"
+          maxlength={MAX_ALT_LENGTH}
+          placeholder="For example: Dentist examining a patient's teeth"
+        />
+      </label>
+      <label class="admin-check">
+        <input type="checkbox" name="is_decorative" />
+        Decorative image (no description needed)
+      </label>
+      <div>
+        <button class="admin-btn" type="submit">
+          Upload
+        </button>
+      </div>
+      <p class="form__status" data-status role="status" aria-live="polite"></p>
+      <p class="admin-hint">
+        The image is resized in your browser to a few web sizes and location data is removed. Do not
+        upload photos of patients unless they have given written permission.
+      </p>
+      <noscript>
+        <p class="admin-notice admin-notice--error">Uploading needs JavaScript.</p>
+      </noscript>
+    </form>
+
+    {error && (
+      <p class="admin-notice admin-notice--error" role="alert">
+        Could not load images.
+      </p>
+    )}
+
+    {assets && assets.length > 0 ? (
+      <ul class="admin-media-grid">
+        {assets.map((a) => (
+          <li>
+            <a href={`/admin/media/${a.id}`}>
+              <img
+                src={mediaUrl(thumbnailKey(a.r2_key, a.variant_widths))}
+                alt={a.is_decorative ? '' : (a.alt_text ?? '')}
+                width={a.width ?? undefined}
+                height={a.height ?? undefined}
+                loading="lazy"
+              />
+              <span class="admin-hint">
+                {a.is_decorative ? 'Decorative' : a.alt_text ? a.alt_text : 'No description yet'}
+              </span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    ) : (
+      <p class="admin-muted">No images yet.</p>
+    )}
+  </main>
+</AdminLayout>
+
+<script>
+  import '../../../scripts/media-upload';
+</script>

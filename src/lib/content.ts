@@ -2,6 +2,7 @@ import { env } from 'cloudflare:workers';
 import { createClient } from '@supabase/supabase-js';
 import type { Img } from '../data/types';
 import { doctorProfiles } from '../data/shared';
+import { toPublicImage, type PublicImage } from './media';
 import { SNAPSHOT_SCHEMA_VERSION, isSnapshot, type Snapshot } from './snapshot';
 import type { Database } from '../types/database';
 
@@ -14,8 +15,8 @@ export interface PublicDoctor {
   bio: string | null;
   credentials: string[];
   languages: string[];
-  /** Absent for CMS doctors until media (R2) is connected; the UI then shows initials. */
-  image?: Img;
+  /** A static sample photo, or an image from the media library. Absent: the UI shows initials. */
+  image?: Img | PublicImage;
 }
 
 /** Build settings come from the Worker env (.dev.vars locally) or, when present, the process environment (CI). */
@@ -78,12 +79,27 @@ async function read(): Promise<Snapshot | null> {
 export async function getDoctors(): Promise<PublicDoctor[]> {
   const snapshot = await loadSnapshot();
   if (snapshot) {
+    const publicBase = setting('R2_PUBLIC_BASE_URL');
     return snapshot.doctors.map((d) => ({
       name: d.name,
       role: d.role,
       bio: d.bio,
       credentials: d.credentials,
       languages: d.languages,
+      image:
+        (d.image &&
+          toPublicImage(
+            {
+              r2_key: d.image.key,
+              width: d.image.width,
+              height: d.image.height,
+              alt_text: d.image.alt,
+              is_decorative: d.image.decorative,
+              variant_widths: d.image.widths,
+            },
+            publicBase,
+          )) ||
+        undefined,
     }));
   }
   return doctorProfiles.map((d) => ({ ...d, languages: ['English'] }));

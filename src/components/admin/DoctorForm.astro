@@ -2,15 +2,17 @@
 import type { DoctorFormValues } from '../../lib/doctor-admin';
 import type { DoctorErrors } from '../../lib/doctors';
 import { LIMITS } from '../../lib/doctors';
+import type { PickerImage } from '../../lib/media-picker';
 
 interface Props {
   values: DoctorFormValues;
   errors?: DoctorErrors;
   formError?: string;
   submitLabel: string;
+  images: PickerImage[];
 }
 
-const { values, errors = {}, formError, submitLabel } = Astro.props;
+const { values, errors = {}, formError, submitLabel, images } = Astro.props;
 ---
 
 <form class="admin-form admin-card" method="post">
@@ -98,6 +100,28 @@ const { values, errors = {}, formError, submitLabel } = Astro.props;
     />
     {errors.sort_order && <span class="admin-field-error">{errors.sort_order}</span>}
   </label>
+
+  <fieldset class="admin-picker-wrap">
+    <legend>Photo</legend>
+    <div class="admin-picker">
+      <label>
+        <input type="radio" name="image_id" value="" checked={values.image_id === ''} />
+        No photo
+      </label>
+      {images.map((img) => (
+        <label>
+          <input type="radio" name="image_id" value={img.id} checked={values.image_id === img.id} />
+          <img src={img.thumb} alt="" loading="lazy" />
+          <span>{img.label}</span>
+        </label>
+      ))}
+    </div>
+    <span class="admin-hint">
+      Upload photos in <a href="/admin/media">Media</a> first. Only use photos you have the right to
+      publish.
+    </span>
+    {errors.image_id && <span class="admin-field-error">{errors.image_id}</span>}
+  </fieldset>
 
   <label class="admin-check">
     <input type="checkbox" name="is_visible" checked={values.is_visible} />

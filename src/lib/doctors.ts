@@ -9,10 +9,18 @@ export interface DoctorValues {
   languages: string[];
   sort_order: number;
   is_visible: boolean;
+  image_id: string | null;
 }
 
 export type DoctorField =
-  'full_name' | 'slug' | 'role_title' | 'bio' | 'credentials' | 'languages' | 'sort_order';
+  | 'full_name'
+  | 'slug'
+  | 'role_title'
+  | 'bio'
+  | 'credentials'
+  | 'languages'
+  | 'sort_order'
+  | 'image_id';
 export type DoctorErrors = Partial<Record<DoctorField, string>>;
 
 export const LIMITS = {
@@ -26,6 +34,7 @@ export const LIMITS = {
 } as const;
 
 const SLUG_RE = /^[a-z0-9]+(-[a-z0-9]+)*$/;
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 // eslint-disable-next-line no-control-regex
 const CONTROL = /[\u0000-\u0009\u000b-\u001f\u007f]/g; // keeps \n
 
@@ -97,6 +106,10 @@ export function parseDoctorForm(
     errors.sort_order = `Use a whole number from 0 to ${LIMITS.sortOrder}.`;
   }
 
+  const imageId = oneLine(form.get('image_id'));
+  if (imageId !== '' && !UUID_RE.test(imageId))
+    errors.image_id = 'Please choose a photo from the list.';
+
   if (Object.keys(errors).length > 0) return { ok: false, errors };
 
   return {
@@ -110,6 +123,7 @@ export function parseDoctorForm(
       languages: languages.length > 0 ? languages : ['English'],
       sort_order,
       is_visible: form.has('is_visible'),
+      image_id: imageId === '' ? null : imageId.toLowerCase(),
     },
   };
 }

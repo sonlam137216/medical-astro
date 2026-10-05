@@ -1,13 +1,14 @@
 ---
-import { Image } from 'astro:assets';
-import type { Img } from '../../data/home';
+import type { Img } from '../../data/types';
+import type { PublicImage } from '../../lib/media';
+import ProfileImage from '../ProfileImage.astro';
 
 interface Props {
   name: string;
   role?: string | null;
   href?: string;
-  /** Missing for doctors managed in the CMS until media is connected: initials are shown instead. */
-  image?: Img;
+  /** A sample photo or a media-library image. Missing: initials are shown instead. */
+  image?: Img | PublicImage;
 }
 
 const { name, role, href, image } = Astro.props;
@@ -23,15 +24,12 @@ const initials = name
 
 <article class="card doctor">
   {image ? (
-    <Image
+    <ProfileImage
       class="card__media doctor__img"
-      src={image.src}
-      alt={image.alt}
+      image={image}
       width={282}
       height={280}
-      densities={[1, 2]}
       sizes="(max-width: 600px) 100vw, 282px"
-      loading="lazy"
     />
   ) : (
     <div class="card__media doctor__img doctor__initials" aria-hidden="true">

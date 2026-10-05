@@ -1,7 +1,12 @@
 import type { APIRoute } from 'astro';
 import { isSameOrigin } from '../../../lib/admin-auth';
 import { readBodyLimited } from '../../../lib/consultation';
-import { SNAPSHOT_SCHEMA_VERSION, buildSnapshot, hashSnapshot } from '../../../lib/snapshot';
+import {
+  SNAPSHOT_SCHEMA_VERSION,
+  buildSnapshot,
+  hashSnapshot,
+  snapshotProblems,
+} from '../../../lib/snapshot';
 import type { Json } from '../../../types/database';
 
 export const prerender = false;
@@ -20,6 +25,8 @@ export const POST: APIRoute = async ({ request, locals }) => {
   const { db, admin } = locals;
   try {
     const snapshot = await buildSnapshot(db);
+    // Nothing is published with an image that has no text alternative.
+    if (snapshotProblems(snapshot).length > 0) return to('error=problems');
     const hash = await hashSnapshot(snapshot);
 
     // Publishing the same content twice would only create noise.

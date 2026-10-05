@@ -198,13 +198,13 @@ isOneToOne: false
                   ]
                 },"media_assets": {
                   Row: {
-                    "alt_text": string | null,"created_at": string,"height": number | null,"id": string,"is_decorative": boolean,"kind": string,"mime_type": string,"poster_asset_id": string | null,"r2_key": string,"size_bytes": number,"status": string,"updated_at": string,"width": number | null
+                    "alt_text": string | null,"created_at": string,"height": number | null,"id": string,"is_decorative": boolean,"kind": string,"mime_type": string,"poster_asset_id": string | null,"r2_key": string,"size_bytes": number,"status": string,"updated_at": string,"variant_widths": (number)[],"width": number | null
                   }
                   Insert: {
-                    "alt_text"?: string | null,"created_at"?: string,"height"?: number | null,"id"?: string,"is_decorative"?: boolean,"kind": string,"mime_type": string,"poster_asset_id"?: string | null,"r2_key": string,"size_bytes": number,"status"?: string,"updated_at"?: string,"width"?: number | null
+                    "alt_text"?: string | null,"created_at"?: string,"height"?: number | null,"id"?: string,"is_decorative"?: boolean,"kind": string,"mime_type": string,"poster_asset_id"?: string | null,"r2_key": string,"size_bytes": number,"status"?: string,"updated_at"?: string,"variant_widths"?: (number)[],"width"?: number | null
                   }
                   Update: {
-                    "alt_text"?: string | null,"created_at"?: string,"height"?: number | null,"id"?: string,"is_decorative"?: boolean,"kind"?: string,"mime_type"?: string,"poster_asset_id"?: string | null,"r2_key"?: string,"size_bytes"?: number,"status"?: string,"updated_at"?: string,"width"?: number | null
+                    "alt_text"?: string | null,"created_at"?: string,"height"?: number | null,"id"?: string,"is_decorative"?: boolean,"kind"?: string,"mime_type"?: string,"poster_asset_id"?: string | null,"r2_key"?: string,"size_bytes"?: number,"status"?: string,"updated_at"?: string,"variant_widths"?: (number)[],"width"?: number | null
                   }
                   Relationships: [
                     {

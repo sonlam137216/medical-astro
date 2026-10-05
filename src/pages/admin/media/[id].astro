@@ -1,0 +1,147 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import { MAX_ALT_LENGTH, mediaUrl } from '../../../lib/media';
+import { readAlt } from '../../../lib/media-upload';
+import { isSameOrigin } from '../../../lib/admin-auth';
+import { readBodyLimited } from '../../../lib/consultation';
+
+export const prerender = false;
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const id = Astro.params.id ?? '';
+if (!UUID_RE.test(id)) return new Response('Not found', { status: 404 });
+
+const db = Astro.locals.db;
+let { data: asset } = await db.from('media_assets').select('*').eq('id', id).maybeSingle();
+if (!asset) return new Response('Not found', { status: 404 });
+
+let formError: string | undefined;
+let saved = false;
+if (Astro.request.method === 'POST') {
+  if (!isSameOrigin(Astro.request)) return new Response('Forbidden', { status: 403 });
+  const text = await readBodyLimited(Astro.request, 4 * 1024);
+  if (text === null) return new Response('Payload Too Large', { status: 413 });
+  const form = new URLSearchParams(text);
+  const isDecorative = form.has('is_decorative');
+  const alt = readAlt(form.get('alt_text') ?? '', isDecorative);
+  if (!alt.ok) {
+    formError = alt.error;
+    Astro.response.status = 422;
+    asset = { ...asset, alt_text: form.get('alt_text') ?? '', is_decorative: isDecorative };
+  } else {
+    const { error } = await db
+      .from('media_assets')
+      .update({ alt_text: alt.altText, is_decorative: isDecorative })
+      .eq('id', id);
+    if (error) {
+      console.error('media update failed', error.code);
+      formError = 'Could not save. Please try again.';
+      Astro.response.status = 500;
+    } else {
+      asset = { ...asset, alt_text: alt.altText, is_decorative: isDecorative };
+      saved = true;
+    }
+  }
+}
+
+const { data: doctors } = await db.from('doctors').select('id, full_name').eq('image_id', id);
+const sp = Astro.url.searchParams;
+---
+
+<AdminLayout title="Image" current="media">
+  <main class="admin-main">
+    <p>
+      <a href="/admin/media">← All images</a>
+    </p>
+    <h1>Image</h1>
+
+    {sp.has('uploaded') && (
+      <p class="admin-notice" role="status">
+        Uploaded.
+      </p>
+    )}
+    {saved && (
+      <p class="admin-notice" role="status">
+        Saved. Publish to show the change on the website.
+      </p>
+    )}
+    {sp.get('error') === 'inuse' && (
+      <p class="admin-notice admin-notice--error" role="alert">
+        This image is still used, so it cannot be deleted. Remove it from where it is used first.
+      </p>
+    )}
+    {sp.has('error') && sp.get('error') !== 'inuse' && (
+      <p class="admin-notice admin-notice--error" role="alert">
+        Could not delete. Please try again.
+      </p>
+    )}
+
+    <section class="admin-card">
+      <img
+        class="admin-media-preview"
+        src={mediaUrl(asset.r2_key)}
+        alt={asset.is_decorative ? '' : (asset.alt_text ?? '')}
+        width={asset.width ?? undefined}
+        height={asset.height ?? undefined}
+      />
+      <dl class="admin-dl" style="margin-top: 16px">
+        <dt>Size</dt>
+        <dd>
+          {asset.width} × {asset.height} px
+        </dd>
+        <dt>Web sizes</dt>
+        <dd>{asset.variant_widths.join(', ')} px</dd>
+        <dt>Stored</dt>
+        <dd>{Math.round(asset.size_bytes / 1024)} KB in total</dd>
+        <dt>Used by</dt>
+        <dd>
+          {doctors && doctors.length > 0
+            ? doctors.map((d, i) => (
+                <>
+                  {i > 0 && ', '}
+                  <a href={`/admin/doctors/${d.id}`}>{d.full_name}</a>
+                </>
+              ))
+            : 'Nothing yet'}
+        </dd>
+      </dl>
+    </section>
+
+    <form class="admin-form admin-card" method="post">
+      <h2 class="t-h3">Description</h2>
+      {formError && (
+        <p class="admin-notice admin-notice--error" role="alert">
+          {formError}
+        </p>
+      )}
+      <label>
+        Description for people who cannot see the image
+        <input
+          name="alt_text"
+          value={asset.alt_text ?? ''}
+          maxlength={MAX_ALT_LENGTH}
+          aria-invalid={formError ? 'true' : undefined}
+        />
+      </label>
+      <label class="admin-check">
+        <input type="checkbox" name="is_decorative" checked={asset.is_decorative} />
+        Decorative image (no description needed)
+      </label>
+      <div>
+        <button class="admin-btn" type="submit">
+          Save
+        </button>
+      </div>
+    </form>
+
+    <form class="admin-form admin-card" method="post" action={`/admin/media/${id}/delete`}>
+      <h2 class="t-h3">Delete</h2>
+      <p class="admin-hint">Only images that nothing uses can be deleted. This cannot be undone.</p>
+      <div>
+        <button class="admin-btn admin-btn--danger" type="submit">
+          Delete image
+        </button>
+      </div>
+    </form>
+  </main>
+</AdminLayout>

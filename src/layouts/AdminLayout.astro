@@ -6,7 +6,7 @@ interface Props {
   title: string;
   /** False on the sign-in page, where there is no session yet. */
   nav?: boolean;
-  current?: 'dashboard' | 'consultations' | 'doctors' | 'publish';
+  current?: 'dashboard' | 'consultations' | 'doctors' | 'media' | 'publish';
 }
 
 const { title, nav = true, current } = Astro.props;
@@ -44,6 +44,9 @@ if (nav) {
           </a>
           <a href="/admin/doctors" aria-current={current === 'doctors' ? 'page' : undefined}>
             Doctors
+          </a>
+          <a href="/admin/media" aria-current={current === 'media' ? 'page' : undefined}>
+            Media
           </a>
           <a href="/admin/publish" aria-current={current === 'publish' ? 'page' : undefined}>
             Publish

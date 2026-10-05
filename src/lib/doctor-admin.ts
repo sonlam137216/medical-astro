@@ -15,6 +15,7 @@ export interface DoctorFormValues {
   languages: string; // comma separated
   sort_order: string;
   is_visible: boolean;
+  image_id: string;
 }
 
 export const EMPTY_DOCTOR: DoctorFormValues = {
@@ -26,6 +27,7 @@ export const EMPTY_DOCTOR: DoctorFormValues = {
   languages: 'English',
   sort_order: '0',
   is_visible: true,
+  image_id: '',
 };
 
 type DoctorRow = {
@@ -37,6 +39,7 @@ type DoctorRow = {
   languages: string[];
   sort_order: number;
   is_visible: boolean;
+  image_id: string | null;
 };
 
 export function valuesFromRow(row: DoctorRow): DoctorFormValues {
@@ -49,6 +52,7 @@ export function valuesFromRow(row: DoctorRow): DoctorFormValues {
     languages: row.languages.join(', '),
     sort_order: String(row.sort_order),
     is_visible: row.is_visible,
+    image_id: row.image_id ?? '',
   };
 }
 
@@ -63,6 +67,7 @@ function valuesFromForm(form: URLSearchParams): DoctorFormValues {
     languages: get('languages'),
     sort_order: get('sort_order'),
     is_visible: form.has('is_visible'),
+    image_id: get('image_id'),
   };
 }
 
@@ -103,6 +108,13 @@ export async function processDoctorPost(
         errors: {
           slug: 'This address is already used by another doctor. Please choose a different one.',
         },
+      };
+    }
+    if (error.code === '23503') {
+      return {
+        status: 422,
+        values,
+        errors: { image_id: 'That photo no longer exists. Please choose another.' },
       };
     }
     console.error('doctor save failed', error.code);

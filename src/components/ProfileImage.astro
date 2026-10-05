@@ -1,0 +1,46 @@
+---
+import { Image } from 'astro:assets';
+import type { Img } from '../data/types';
+import type { PublicImage } from '../lib/media';
+
+// One image component for both kinds of source: a sample photo bundled with the site (optimised at build)
+// or an image from the media library (already resized into WebP files in R2).
+interface Props {
+  image: Img | PublicImage;
+  width: number;
+  height: number;
+  sizes: string;
+  class?: string;
+  /** Astro passes the parent's scoped-style marker (data-astro-cid-*) so the parent's CSS reaches the <img>. */
+  [attr: `data-${string}`]: unknown;
+}
+
+const { image, width, height, sizes, class: className, ...rest } = Astro.props;
+---
+
+{'srcset' in image ? (
+  <img
+    {...rest}
+    class={className}
+    src={image.url}
+    srcset={image.srcset}
+    sizes={sizes}
+    width={image.width}
+    height={image.height}
+    alt={image.alt}
+    loading="lazy"
+    decoding="async"
+  />
+) : (
+  <Image
+    {...rest}
+    class={className}
+    src={image.src}
+    alt={image.alt}
+    width={width}
+    height={height}
+    densities={[1, 2]}
+    sizes={sizes}
+    loading="lazy"
+  />
+)}

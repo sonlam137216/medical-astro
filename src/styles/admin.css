@@ -289,3 +289,96 @@
 a.admin-btn {
   text-decoration: none;
 }
+
+.admin-media-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.admin-media-grid a {
+  display: grid;
+  gap: 8px;
+  height: 100%;
+  padding: 10px;
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+}
+
+.admin-media-grid img {
+  width: 100%;
+  height: 140px;
+  object-fit: cover;
+  border-radius: 8px;
+  background: var(--color-soft);
+}
+
+.admin-media-preview {
+  max-width: 100%;
+  max-height: 420px;
+  width: auto;
+  height: auto;
+  border-radius: 8px;
+  background: var(--color-soft);
+}
+
+.admin-btn--danger {
+  background: var(--color-error);
+  border-color: var(--color-error);
+}
+
+/* Photo picker in forms: a grid of thumbnails with radio buttons. */
+.admin-picker {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.admin-picker label {
+  display: grid;
+  gap: 6px;
+  padding: 8px;
+  font-weight: 400;
+  font-size: 13px;
+  background: var(--color-white);
+  border: 2px solid var(--color-border);
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.admin-picker label:has(input:checked) {
+  border-color: var(--color-blue);
+}
+
+.admin-picker input {
+  width: auto;
+}
+
+.admin-picker img {
+  width: 100%;
+  height: 90px;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+.admin-picker-wrap {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  color: var(--color-heading);
+  font-weight: 500;
+}
+
+.admin-picker-wrap legend {
+  padding: 0;
+  margin-bottom: 6px;
+}

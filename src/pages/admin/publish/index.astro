@@ -1,6 +1,6 @@
 ---
 import AdminLayout from '../../../layouts/AdminLayout.astro';
-import { buildSnapshot, hashSnapshot } from '../../../lib/snapshot';
+import { buildSnapshot, hashSnapshot, snapshotProblems } from '../../../lib/snapshot';
 
 export const prerender = false;
 
@@ -8,6 +8,7 @@ const db = Astro.locals.db;
 
 const snapshot = await buildSnapshot(db);
 const hash = await hashSnapshot(snapshot);
+const problems = snapshotProblems(snapshot);
 
 const { data: revisions } = await db
   .from('content_revisions')
@@ -48,8 +49,21 @@ const published = sp.get('published');
     )}
     {sp.has('error') && (
       <p class="admin-notice admin-notice--error" role="alert">
-        Could not publish. Please try again.
+        Could not publish.{' '}
+        {problems.length > 0 ? 'Please fix the items below.' : 'Please try again.'}
       </p>
+    )}
+    {problems.length > 0 && (
+      <section class="admin-card" aria-labelledby="problems-title">
+        <h2 id="problems-title" class="t-h3">
+          Fix before publishing
+        </h2>
+        <ul>
+          {problems.map((p) => (
+            <li>{p}</li>
+          ))}
+        </ul>
+      </section>
     )}
 
     <section class="admin-card" aria-labelledby="state-title">
@@ -78,7 +92,7 @@ const published = sp.get('published');
           <input name="note" maxlength="500" placeholder="What changed?" />
         </label>
         <div>
-          <button class="admin-btn" type="submit" disabled={!hasChanges}>
+          <button class="admin-btn" type="submit" disabled={!hasChanges || problems.length > 0}>
             Publish
           </button>
         </div>

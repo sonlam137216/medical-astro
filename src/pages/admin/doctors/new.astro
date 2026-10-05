@@ -3,7 +3,11 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
 import DoctorForm from '../../../components/admin/DoctorForm.astro';
 import { EMPTY_DOCTOR, processDoctorPost } from '../../../lib/doctor-admin';
 
+import { listPickerImages } from '../../../lib/media-picker';
+
 export const prerender = false;
+
+const images = await listPickerImages(Astro.locals.db);
 
 const result =
   Astro.request.method === 'POST'
@@ -23,6 +27,7 @@ if (result) Astro.response.status = result.status;
       values={result?.values ?? EMPTY_DOCTOR}
       errors={result?.errors}
       formError={result?.formError}
+      images={images}
       submitLabel="Add doctor"
     />
   </main>

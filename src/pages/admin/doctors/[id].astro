@@ -3,7 +3,11 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
 import DoctorForm from '../../../components/admin/DoctorForm.astro';
 import { isUuid, processDoctorPost, valuesFromRow } from '../../../lib/doctor-admin';
 
+import { listPickerImages } from '../../../lib/media-picker';
+
 export const prerender = false;
+
+const images = await listPickerImages(Astro.locals.db);
 
 const id = Astro.params.id ?? '';
 if (!isUuid(id)) return new Response('Not found', { status: 404 });
@@ -33,6 +37,7 @@ if (result) Astro.response.status = result.status;
       values={result?.values ?? valuesFromRow(doctor)}
       errors={result?.errors}
       formError={result?.formError}
+      images={images}
       submitLabel="Save changes"
     />
   </main>

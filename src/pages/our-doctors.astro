@@ -1,5 +1,5 @@
 ---
-import { Image } from 'astro:assets';
+import ProfileImage from '../components/ProfileImage.astro';
 import SiteLayout from '../layouts/SiteLayout.astro';
 import PageHero from '../components/PageHero.astro';
 import Section from '../components/Section.astro';
@@ -34,15 +34,12 @@ const doctorProfiles = await getDoctors();
       {doctorProfiles.map((d) => (
         <li class="card profile">
           {d.image ? (
-            <Image
+            <ProfileImage
               class="profile__img"
-              src={d.image.src}
-              alt={d.image.alt}
+              image={d.image}
               width={282}
               height={422}
-              densities={[1, 2]}
               sizes="(max-width: 700px) 60vw, 282px"
-              loading="lazy"
             />
           ) : (
             <div class="profile__img profile__initials" aria-hidden="true">

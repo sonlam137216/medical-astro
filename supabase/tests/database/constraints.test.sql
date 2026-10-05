@@ -34,6 +34,9 @@ select throws_ok($$insert into public.site_settings (site_name) values ('Second'
 select throws_ok($$insert into public.site_settings (id, site_name) values (false, 'Other')$$, '23514', null, 'site settings id is always true');
 
 select throws_ok($$insert into public.media_assets (r2_key, kind, mime_type, size_bytes) values ('a.png', 'gif', 'image/png', 1)$$, '23514', null, 'media kind must be known');
+select lives_ok($$insert into public.media_assets (r2_key, kind, mime_type, size_bytes, variant_widths) values ('media/a/v1/960.webp', 'image', 'image/webp', 1, '{480,960}')$$, 'media variant widths can be stored');
+select throws_ok($$insert into public.media_assets (r2_key, kind, mime_type, size_bytes, variant_widths) values ('media/b/v1/960.webp', 'image', 'image/webp', 1, '{480,0}')$$, '23514', null, 'media variant widths must be positive');
+select throws_ok($$insert into public.media_assets (r2_key, kind, mime_type, size_bytes, variant_widths) values ('media/c/v1/960.webp', 'image', 'image/webp', 1, '{1,2,3,4,5,6,7,8,9}')$$, '23514', null, 'media variants are limited to 8');
 
 -- Consultation requests ----------------------------------------------------
 select lives_ok($$insert into public.consultation_requests (submission_id, full_name, phone, email)

@@ -21,6 +21,8 @@
       "simple": { "limit": 10, "period": 60 },
     },
   ],
+  // Media files (images). Binding to a bucket that must exist for deploys; `wrangler dev` simulates it locally.
+  "r2_buckets": [{ "binding": "MEDIA", "bucket_name": "melatec-media" }],
   "observability": {
     "enabled": true,
   },
@@ -30,6 +32,7 @@
     "staging": {
       "name": "melatec-website-staging",
       // Bindings are not inherited by environments.
+      "r2_buckets": [{ "binding": "MEDIA", "bucket_name": "melatec-media-staging" }],
       "ratelimits": [
         {
           "name": "CONSULTATION_LIMITER",
