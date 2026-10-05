@@ -1,6 +1,7 @@
 import type { APIRoute } from 'astro';
 import { isSameOrigin } from '../../../lib/admin-auth';
 import { readBodyLimited } from '../../../lib/consultation';
+import { queueBuild } from '../../../lib/publish';
 import {
   SNAPSHOT_SCHEMA_VERSION,
   buildSnapshot,
@@ -51,19 +52,8 @@ export const POST: APIRoute = async ({ request, locals }) => {
       .single();
     if (revisionError) throw new Error(`revision insert failed (${revisionError.code})`);
 
-    // At most one job may wait: a newer publish supersedes a waiting one.
-    const { error: supersedeError } = await db
-      .from('publish_jobs')
-      .update({ status: 'superseded' })
-      .eq('status', 'queued');
-    if (supersedeError) throw new Error(`supersede failed (${supersedeError.code})`);
-
-    const { error: jobError } = await db
-      .from('publish_jobs')
-      .insert({ revision_id: revision.id, requested_by: admin.id });
-    if (jobError) throw new Error(`job insert failed (${jobError.code})`);
-
-    return to(`published=${revision.revision_number}`);
+    const build = await queueBuild(db, admin, revision.id);
+    return to(`published=${revision.revision_number}&build=${build}`);
   } catch (error) {
     // Messages carry codes only, never content.
     console.error('publish failed', error instanceof Error ? error.message : 'unknown');

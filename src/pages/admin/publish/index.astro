@@ -1,4 +1,5 @@
 ---
+import { env } from 'cloudflare:workers';
 import AdminLayout from '../../../layouts/AdminLayout.astro';
 import { buildSnapshot, hashSnapshot, snapshotProblems } from '../../../lib/snapshot';
 
@@ -20,9 +21,30 @@ const hasChanges = !latest || latest.content_hash !== hash;
 
 const { data: jobs } = await db
   .from('publish_jobs')
-  .select('id, status, queued_at, finished_at, error, content_revisions(revision_number)')
+  .select(
+    'id, status, queued_at, finished_at, error, deploy_ref, revision_id, content_revisions(revision_number)',
+  )
   .order('created_at', { ascending: false })
   .limit(10);
+
+// The revision that is actually live: from the most recent successful deploy (not merely published).
+const { data: liveJob } = await db
+  .from('publish_jobs')
+  .select('finished_at, content_revisions(revision_number)')
+  .eq('status', 'deployed')
+  .order('finished_at', { ascending: false })
+  .limit(1)
+  .maybeSingle();
+const liveRevision = liveJob?.content_revisions?.revision_number ?? null;
+
+// A build can be retried when nothing for the newest revision is waiting, running or live.
+const latestJobs = (jobs ?? []).filter((j) => latest && j.revision_id === latest.id);
+const canRetry =
+  latest !== null && !latestJobs.some((j) => ['queued', 'building', 'deployed'].includes(j.status));
+const building = (jobs ?? []).some((j) => j.status === 'building');
+
+const runUrl = (ref: string | null) =>
+  ref && env.GITHUB_REPO ? `https://github.com/${env.GITHUB_REPO}/actions/runs/${ref}` : null;
 
 const when = new Intl.DateTimeFormat('en-GB', {
   dateStyle: 'medium',
@@ -31,6 +53,7 @@ const when = new Intl.DateTimeFormat('en-GB', {
 });
 const sp = Astro.url.searchParams;
 const published = sp.get('published');
+const build = sp.get('build');
 ---
 
 <AdminLayout title="Publish" current="publish">
@@ -39,7 +62,21 @@ const published = sp.get('published');
 
     {published && (
       <p class="admin-notice" role="status">
-        Revision {published} created and queued.
+        Revision {published} saved.{' '}
+        {build === 'triggered' && 'The build has been started. This page shows when it is live.'}
+        {build === 'not_configured' &&
+          'The build trigger is not set up here, so nothing was started (see PUBLISHING.md).'}
+      </p>
+    )}
+    {build === 'failed' && (
+      <p class="admin-notice admin-notice--error" role="alert">
+        The revision was saved, but the build could not be started. Use “Build again” below once the
+        build trigger is fixed.
+      </p>
+    )}
+    {sp.get('error') === 'busy' && (
+      <p class="admin-notice" role="status">
+        A build for the newest revision is already waiting, running or live.
       </p>
     )}
     {sp.has('unchanged') && (
@@ -47,7 +84,7 @@ const published = sp.get('published');
         Nothing changed since the last revision.
       </p>
     )}
-    {sp.has('error') && (
+    {sp.has('error') && sp.get('error') !== 'busy' && (
       <p class="admin-notice admin-notice--error" role="alert">
         Could not publish.{' '}
         {problems.length > 0 ? 'Please fix the items below.' : 'Please try again.'}
@@ -65,6 +102,34 @@ const published = sp.get('published');
         </ul>
       </section>
     )}
+
+    <section class="admin-card" aria-labelledby="live-title">
+      <h2 id="live-title" class="t-h3">
+        On the website
+      </h2>
+      <p style="margin-top: 8px">
+        {liveRevision === null
+          ? 'No revision has been built and deployed yet. The website shows sample content from the design.'
+          : `Revision ${liveRevision} is live${liveJob?.finished_at ? ` (deployed ${when.format(new Date(liveJob.finished_at))}, Vietnam time)` : ''}.`}
+        {latest &&
+          liveRevision !== null &&
+          latest.revision_number > liveRevision &&
+          ` Revision ${latest.revision_number} is saved but not live yet.`}
+      </p>
+      {building && (
+        <p class="admin-muted" style="margin-top: 8px">
+          A build is running now.
+        </p>
+      )}
+      {canRetry && (
+        <form method="post" action="/admin/publish/retry" style="margin-top: 12px">
+          <button class="admin-btn" type="submit">
+            Build again
+          </button>
+          <span class="admin-hint"> Starts a new build of revision {latest?.revision_number}.</span>
+        </form>
+      )}
+    </section>
 
     <section class="admin-card" aria-labelledby="state-title">
       <h2 id="state-title" class="t-h3">
@@ -98,9 +163,9 @@ const published = sp.get('published');
         </div>
       </form>
       <p class="admin-hint" style="margin-top: 12px">
-        Publishing saves an unchangeable copy (a revision) and queues a build. Building and
-        deploying are not automated yet: until they are, the website changes only after a developer
-        runs a deploy, which builds from the newest revision.
+        Publishing saves an unchangeable copy (a revision) and starts a build that deploys it. The
+        website changes only when that build succeeds; if it fails, the previous version stays live.
+        Builds usually take a few minutes.
       </p>
     </section>
 
@@ -127,6 +192,13 @@ const published = sp.get('published');
                     {j.status}
                   </span>
                   {j.error && <div class="admin-field-error">{j.error}</div>}
+                  {runUrl(j.deploy_ref) && (
+                    <div>
+                      <a href={runUrl(j.deploy_ref)!} rel="noopener noreferrer" target="_blank">
+                        Build log
+                      </a>
+                    </div>
+                  )}
                 </td>
               </tr>
             ))}

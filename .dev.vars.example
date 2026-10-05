@@ -13,5 +13,11 @@ R2_PUBLIC_BASE_URL=
 # Cloudflare Turnstile for the consultation form (Phase 4)
 TURNSTILE_SECRET_KEY=
 
-# Publish pipeline (Phase 6) — build hook is a secret, backend only
-DEPLOY_BUILD_HOOK_URL=
+# Publish pipeline (Phase 6). The admin's Publish button starts the "Publish" GitHub Actions workflow.
+# GITHUB_DISPATCH_TOKEN: fine-grained token with "Actions: read and write" on the repository. Backend secret only.
+# GITHUB_API_URL: for tests (a local mock); leave empty for the real GitHub API.
+GITHUB_DISPATCH_TOKEN=
+GITHUB_API_URL=
+
+# Read by the build only (written by the workflow): the revision to build. Leave empty to use the newest.
+CONTENT_REVISION_ID=

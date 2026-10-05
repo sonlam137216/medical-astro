@@ -33,15 +33,14 @@
       "binding": "MEDIA",
       "bucket_name": "melatec-media",
     },
-    {
-      "bucket_name": "melatec-media",
-      "binding": "melatec_media",
-    },
-    {
-      "bucket_name": "melatec-media-staging",
-      "binding": "melatec_media_staging",
-    },
   ],
+  // Publish pipeline: which GitHub workflow to start, and which Cloudflare environment it deploys to.
+  // Not secret. The token that may start the workflow is the secret GITHUB_DISPATCH_TOKEN.
+  "vars": {
+    "PUBLISH_TARGET": "production",
+    "GITHUB_REPO": "sonlam137216/medical-astro",
+    "GITHUB_WORKFLOW": "publish.yml",
+  },
   "observability": {
     "enabled": true,
   },
@@ -50,6 +49,11 @@
   "env": {
     "staging": {
       "name": "melatec-website-staging",
+      "vars": {
+        "PUBLISH_TARGET": "staging",
+        "GITHUB_REPO": "sonlam137216/medical-astro",
+        "GITHUB_WORKFLOW": "publish.yml",
+      },
       // Bindings are not inherited by environments.
       "r2_buckets": [
         {

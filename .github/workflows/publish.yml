@@ -1,0 +1,89 @@
+name: Publish
+
+# Started by the admin's Publish button (the Worker calls the GitHub API), not by pushes.
+# Builds the website from one saved revision and deploys it, recording progress in publish_jobs.
+on:
+  workflow_dispatch:
+    inputs:
+      job_id:
+        description: publish_jobs.id this run is for
+        required: true
+        type: string
+      revision_id:
+        description: content_revisions.id to build
+        required: true
+        type: string
+      target:
+        description: Cloudflare environment to deploy to
+        required: true
+        type: choice
+        options: [staging, production]
+
+# One build per environment at a time. A run started while another is running waits, and a newer waiting
+# run replaces an older waiting one (the database marks the older job superseded the same way).
+concurrency:
+  group: publish-${{ inputs.target }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    # Secrets live in the GitHub environment of the same name (staging / production).
+    environment: ${{ inputs.target }}
+    env:
+      JOB_ID: ${{ inputs.job_id }}
+      RUN_ID: ${{ github.run_id }}
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: npm ci
+
+      - name: Claim the job
+        id: claim
+        run: node scripts/publish-job.mjs start
+
+      # The build reads the revision through the Worker environment file, like local builds do.
+      - name: Write build settings
+        if: steps.claim.outputs.skip != 'true'
+        env:
+          REVISION_ID: ${{ inputs.revision_id }}
+          R2_PUBLIC_BASE_URL: ${{ vars.R2_PUBLIC_BASE_URL }}
+        run: |
+          {
+            echo "SUPABASE_URL=$SUPABASE_URL"
+            echo "SUPABASE_SECRET_KEY=$SUPABASE_SECRET_KEY"
+            echo "CONTENT_REVISION_ID=$REVISION_ID"
+            echo "R2_PUBLIC_BASE_URL=$R2_PUBLIC_BASE_URL"
+          } > .dev.vars
+
+      - name: Build and deploy
+        if: steps.claim.outputs.skip != 'true'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: npm run deploy:${{ inputs.target }}
+
+      - name: Mark deployed
+        if: steps.claim.outputs.skip != 'true'
+        run: node scripts/publish-job.mjs finish
+
+      # Runs when any step above failed or the run was cancelled. If the build failed, nothing was deployed,
+      # so the previous version stays live.
+      - name: Mark failed
+        if: failure() || cancelled()
+        env:
+          ERROR_MESSAGE: The build did not complete. See the workflow run for the log.
+        run: node scripts/publish-job.mjs fail
