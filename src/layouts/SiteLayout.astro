@@ -4,6 +4,7 @@ import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import ConsultationSection from '../components/ConsultationSection.astro';
 import SocialBar from '../components/SocialBar.astro';
+import { getMediaOrigin } from '../lib/content';
 
 interface Props {
   title: string;
@@ -25,7 +26,7 @@ const { title, description, consultation = true, social = true, current, header 
 ---
 
 <!-- noindex stays on until launch (Phase 7 replaces this with per-environment robots handling) -->
-<BaseLayout title={title} description={description} noindex>
+<BaseLayout title={title} description={description} noindex mediaOrigin={getMediaOrigin()}>
   <a class="skip-link visually-hidden" href="#main">
     Skip to content
   </a>

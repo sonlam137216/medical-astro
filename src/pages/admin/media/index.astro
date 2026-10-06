@@ -1,6 +1,7 @@
 ---
 import AdminLayout from '../../../layouts/AdminLayout.astro';
-import { MAX_ALT_LENGTH, mediaUrl, thumbnailKey } from '../../../lib/media';
+import { MAX_ALT_LENGTH, MAX_VIDEO_BYTES, mediaUrl, thumbnailKey } from '../../../lib/media';
+import { listPickerImages } from '../../../lib/media-picker';
 
 export const prerender = false;
 
@@ -11,6 +12,15 @@ const { data: assets, error } = await Astro.locals.db
   .eq('status', 'active')
   .order('created_at', { ascending: false })
   .limit(200);
+const { data: videos } = await Astro.locals.db
+  .from('media_assets')
+  .select('id, alt_text, size_bytes, poster_asset_id')
+  .eq('kind', 'video')
+  .eq('status', 'active')
+  .order('created_at', { ascending: false })
+  .limit(100);
+const posters = await listPickerImages(Astro.locals.db);
+const posterThumb = new Map(posters.map((p) => [p.id, p.thumb]));
 const deleted = Astro.url.searchParams.has('deleted');
 ---
 
@@ -57,6 +67,70 @@ const deleted = Astro.url.searchParams.has('deleted');
       </noscript>
     </form>
 
+    <form class="admin-form admin-card" data-video-upload>
+      <h2 class="t-h3">Upload a video</h2>
+      <label>
+        Video (MP4, up to {MAX_VIDEO_BYTES / 1024 / 1024} MB)
+        <input type="file" name="file" accept="video/mp4" required />
+      </label>
+      <label>
+        What the video shows
+        <input name="alt_text" maxlength={MAX_ALT_LENGTH} required />
+      </label>
+      <label>
+        Cover image (shown before the video plays)
+        <select name="poster">
+          <option value="">None: the browser shows the first frame</option>
+          {posters.map((p) => (
+            <option value={p.id}>{p.label}</option>
+          ))}
+        </select>
+      </label>
+      <div>
+        <button class="admin-btn" type="submit">
+          Upload video
+        </button>
+      </div>
+      <progress data-progress value="0" max="100" hidden></progress>
+      <p class="form__status" data-status role="status" aria-live="polite"></p>
+      <p class="admin-hint">
+        The video is stored as it is: it is not converted. Prepare it once before uploading, for
+        example{' '}
+        <code>
+          ffmpeg -i in.mov -c:v libx264 -crf 26 -preset slow -vf scale=-2:720 -c:a aac -b:a 96k
+          -movflags +faststart out.mp4
+        </code>
+        . "faststart" lets it start playing before it has fully downloaded. Do not upload recordings
+        of patients unless they have given written permission.
+      </p>
+      <noscript>
+        <p class="admin-notice admin-notice--error">Uploading needs JavaScript.</p>
+      </noscript>
+    </form>
+
+    {videos && videos.length > 0 && (
+      <>
+        <h2 class="t-h3">Videos</h2>
+        <ul class="admin-media-grid">
+          {videos.map((v) => (
+            <li>
+              <a href={`/admin/media/${v.id}`}>
+                {v.poster_asset_id && posterThumb.get(v.poster_asset_id) ? (
+                  <img src={posterThumb.get(v.poster_asset_id)} alt="" loading="lazy" />
+                ) : (
+                  <span class="admin-media-novideo">Video</span>
+                )}
+                <span class="admin-hint">
+                  {v.alt_text ?? 'No description yet'} · {(v.size_bytes / 1024 / 1024).toFixed(1)}{' '}
+                  MB
+                </span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </>
+    )}
+
     {error && (
       <p class="admin-notice admin-notice--error" role="alert">
         Could not load images.
@@ -90,4 +164,5 @@ const deleted = Astro.url.searchParams.has('deleted');
 
 <script>
   import '../../../scripts/media-upload';
+  import '../../../scripts/video-upload';
 </script>

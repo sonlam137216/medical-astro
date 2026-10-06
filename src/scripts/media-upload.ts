@@ -2,6 +2,8 @@
 // resize images, and doing it here also drops EXIF data (camera, location) before anything leaves the
 // computer. The server re-checks every file; nothing here is trusted.
 const WIDTHS = [480, 960, 1600];
+
+export {};
 const MAX_SOURCE_BYTES = 25 * 1024 * 1024;
 const ACCEPTED = ['image/jpeg', 'image/png', 'image/webp'];
 

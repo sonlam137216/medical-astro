@@ -4,11 +4,17 @@ import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import {
   allVariantKeys,
+  contentRange,
+  startsBeyond,
+  isServableKey,
+  isVideoKey,
   mediaUrl,
   parseKey,
   thumbnailKey,
   toPublicImage,
+  toPublicVideo,
   variantKey,
+  videoKey,
 } from '../src/lib/media.ts';
 import { readWebp } from '../src/lib/webp.ts';
 
@@ -109,4 +115,68 @@ test('readWebp reads lossless (VP8L) headers', () => {
     b[24] = (v >>> 24) & 255;
     assert.deepEqual(readWebp(b), { width: w, height: h });
   }
+});
+
+test('video keys are valid media keys, but not image keys', () => {
+  const key = videoKey(ID, 1);
+  assert.equal(key, `media/${ID}/v1/video.mp4`);
+  assert.equal(isVideoKey(key), true);
+  assert.equal(parseKey(key), null);
+  assert.equal(isServableKey(key), true);
+  assert.equal(isServableKey(variantKey(ID, 1, 480)), true);
+  for (const bad of [
+    `media/${ID}/v1/video.mov`,
+    `media/${ID}/v1/other.mp4`,
+    `media/${ID}/../video.mp4`,
+    `media/${ID}/v1/video.mp4/x`,
+    'media/video.mp4',
+  ]) {
+    assert.equal(isServableKey(bad), false, bad);
+  }
+  assert.deepEqual(allVariantKeys(key, []), [key]);
+});
+
+test('a video is public with its poster', () => {
+  const poster = {
+    r2_key: variantKey(ID, 1, 960),
+    width: 960,
+    height: 540,
+    alt_text: null,
+    is_decorative: true,
+    variant_widths: [480, 960],
+  };
+  const video = toPublicVideo(
+    { r2_key: videoKey(ID, 1), width: 1280, height: 720, alt_text: 'Clinic tour', poster },
+    'https://media.example.com',
+  )!;
+  assert.equal(video.url, `https://media.example.com/media/${ID}/v1/video.mp4`);
+  assert.equal(video.title, 'Clinic tour');
+  assert.equal(video.poster?.width, 960);
+  assert.equal(
+    toPublicVideo({
+      r2_key: variantKey(ID, 1, 480),
+      width: 1,
+      height: 1,
+      alt_text: '',
+      poster: null,
+    }),
+    null,
+  );
+});
+
+test('byte ranges: offset, open end, suffix, outside the file', () => {
+  assert.deepEqual(contentRange({ offset: 0, length: 100 }, 1000), { start: 0, end: 99 });
+  assert.deepEqual(contentRange({ offset: 900 }, 1000), { start: 900, end: 999 });
+  assert.deepEqual(contentRange({ offset: 900, length: 500 }, 1000), { start: 900, end: 999 });
+  assert.deepEqual(contentRange({ suffix: 100 }, 1000), { start: 900, end: 999 });
+  assert.deepEqual(contentRange({ suffix: 5000 }, 1000), { start: 0, end: 999 });
+  assert.equal(contentRange({ offset: 1000 }, 1000), null);
+  assert.equal(contentRange({ offset: 0 }, 0), null);
+});
+
+test('a Range starting past the end is detected', () => {
+  assert.equal(startsBeyond('bytes=1000-', 1000), true);
+  assert.equal(startsBeyond('bytes=999-', 1000), false);
+  assert.equal(startsBeyond('bytes=-50', 1000), false);
+  assert.equal(startsBeyond(null, 1000), false);
 });

@@ -1,6 +1,6 @@
 ---
 import AdminLayout from '../../../layouts/AdminLayout.astro';
-import { MAX_ALT_LENGTH, mediaUrl } from '../../../lib/media';
+import { MAX_ALT_LENGTH, mediaUrl, thumbnailKey } from '../../../lib/media';
 import { readAlt } from '../../../lib/media-upload';
 import { isSameOrigin } from '../../../lib/admin-auth';
 import { readBodyLimited } from '../../../lib/consultation';
@@ -22,8 +22,12 @@ if (Astro.request.method === 'POST') {
   const text = await readBodyLimited(Astro.request, 4 * 1024);
   if (text === null) return new Response('Payload Too Large', { status: 413 });
   const form = new URLSearchParams(text);
-  const isDecorative = form.has('is_decorative');
-  const alt = readAlt(form.get('alt_text') ?? '', isDecorative);
+  const isDecorative = asset.kind === 'video' ? false : form.has('is_decorative');
+  const alt = readAlt(
+    form.get('alt_text') ?? '',
+    isDecorative,
+    asset.kind === 'video' ? 'video' : 'image',
+  );
   if (!alt.ok) {
     formError = alt.error;
     Astro.response.status = 422;
@@ -44,16 +48,27 @@ if (Astro.request.method === 'POST') {
   }
 }
 
+const isVideo = asset.kind === 'video';
 const { data: doctors } = await db.from('doctors').select('id, full_name').eq('image_id', id);
+const poster = asset.poster_asset_id
+  ? (
+      await db
+        .from('media_assets')
+        .select('r2_key, variant_widths')
+        .eq('id', asset.poster_asset_id)
+        .maybeSingle()
+    ).data
+  : null;
+const noun = isVideo ? 'video' : 'image';
 const sp = Astro.url.searchParams;
 ---
 
-<AdminLayout title="Image" current="media">
+<AdminLayout title={isVideo ? 'Video' : 'Image'} current="media">
   <main class="admin-main">
     <p>
-      <a href="/admin/media">← All images</a>
+      <a href="/admin/media">← All media</a>
     </p>
-    <h1>Image</h1>
+    <h1>{isVideo ? 'Video' : 'Image'}</h1>
 
     {sp.has('uploaded') && (
       <p class="admin-notice" role="status">
@@ -67,7 +82,7 @@ const sp = Astro.url.searchParams;
     )}
     {sp.get('error') === 'inuse' && (
       <p class="admin-notice admin-notice--error" role="alert">
-        This image is still used, so it cannot be deleted. Remove it from where it is used first.
+        This {noun} is still used, so it cannot be deleted. Remove it from where it is used first.
       </p>
     )}
     {sp.has('error') && sp.get('error') !== 'inuse' && (
@@ -77,22 +92,46 @@ const sp = Astro.url.searchParams;
     )}
 
     <section class="admin-card">
-      <img
-        class="admin-media-preview"
-        src={mediaUrl(asset.r2_key)}
-        alt={asset.is_decorative ? '' : (asset.alt_text ?? '')}
-        width={asset.width ?? undefined}
-        height={asset.height ?? undefined}
-      />
+      {isVideo ? (
+        <video
+          class="admin-media-preview"
+          src={mediaUrl(asset.r2_key)}
+          poster={poster ? mediaUrl(thumbnailKey(poster.r2_key, poster.variant_widths)) : undefined}
+          controls
+          playsinline
+          preload="none"
+          aria-label={asset.alt_text ?? undefined}
+        />
+      ) : (
+        <img
+          class="admin-media-preview"
+          src={mediaUrl(asset.r2_key)}
+          alt={asset.is_decorative ? '' : (asset.alt_text ?? '')}
+          width={asset.width ?? undefined}
+          height={asset.height ?? undefined}
+        />
+      )}
       <dl class="admin-dl" style="margin-top: 16px">
-        <dt>Size</dt>
-        <dd>
-          {asset.width} × {asset.height} px
-        </dd>
-        <dt>Web sizes</dt>
-        <dd>{asset.variant_widths.join(', ')} px</dd>
+        {asset.width && asset.height && (
+          <>
+            <dt>Size</dt>
+            <dd>
+              {asset.width} × {asset.height} px
+            </dd>
+          </>
+        )}
+        {!isVideo && (
+          <>
+            <dt>Web sizes</dt>
+            <dd>{asset.variant_widths.join(', ')} px</dd>
+          </>
+        )}
         <dt>Stored</dt>
-        <dd>{Math.round(asset.size_bytes / 1024)} KB in total</dd>
+        <dd>
+          {isVideo
+            ? `${(asset.size_bytes / 1024 / 1024).toFixed(1)} MB`
+            : `${Math.round(asset.size_bytes / 1024)} KB in total`}
+        </dd>
         <dt>Used by</dt>
         <dd>
           {doctors && doctors.length > 0
@@ -115,7 +154,7 @@ const sp = Astro.url.searchParams;
         </p>
       )}
       <label>
-        Description for people who cannot see the image
+        {isVideo ? 'What the video shows' : 'Description for people who cannot see the image'}
         <input
           name="alt_text"
           value={asset.alt_text ?? ''}
@@ -123,10 +162,12 @@ const sp = Astro.url.searchParams;
           aria-invalid={formError ? 'true' : undefined}
         />
       </label>
-      <label class="admin-check">
-        <input type="checkbox" name="is_decorative" checked={asset.is_decorative} />
-        Decorative image (no description needed)
-      </label>
+      {!isVideo && (
+        <label class="admin-check">
+          <input type="checkbox" name="is_decorative" checked={asset.is_decorative} />
+          Decorative image (no description needed)
+        </label>
+      )}
       <div>
         <button class="admin-btn" type="submit">
           Save
@@ -136,10 +177,12 @@ const sp = Astro.url.searchParams;
 
     <form class="admin-form admin-card" method="post" action={`/admin/media/${id}/delete`}>
       <h2 class="t-h3">Delete</h2>
-      <p class="admin-hint">Only images that nothing uses can be deleted. This cannot be undone.</p>
+      <p class="admin-hint">
+        Only {noun}s that nothing uses can be deleted. This cannot be undone.
+      </p>
       <div>
         <button class="admin-btn admin-btn--danger" type="submit">
-          Delete image
+          Delete {noun}
         </button>
       </div>
     </form>

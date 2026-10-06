@@ -10,12 +10,14 @@ interface Props {
   width: number;
   height: number;
   sizes: string;
+  /** The image is the first thing people see: load it right away instead of lazily. */
+  priority?: boolean;
   class?: string;
   /** Astro passes the parent's scoped-style marker (data-astro-cid-*) so the parent's CSS reaches the <img>. */
   [attr: `data-${string}`]: unknown;
 }
 
-const { image, width, height, sizes, class: className, ...rest } = Astro.props;
+const { image, width, height, sizes, priority = false, class: className, ...rest } = Astro.props;
 ---
 
 {'srcset' in image ? (
@@ -28,7 +30,8 @@ const { image, width, height, sizes, class: className, ...rest } = Astro.props;
     width={image.width}
     height={image.height}
     alt={image.alt}
-    loading="lazy"
+    loading={priority ? 'eager' : 'lazy'}
+    fetchpriority={priority ? 'high' : undefined}
     decoding="async"
   />
 ) : (
@@ -41,6 +44,7 @@ const { image, width, height, sizes, class: className, ...rest } = Astro.props;
     height={height}
     densities={[1, 2]}
     sizes={sizes}
-    loading="lazy"
+    loading={priority ? 'eager' : 'lazy'}
+    fetchpriority={priority ? 'high' : undefined}
   />
 )}

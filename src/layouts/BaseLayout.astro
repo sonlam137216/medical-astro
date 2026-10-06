@@ -9,9 +9,11 @@ interface Props {
   description?: string;
   /** Keep true until the site is ready to be indexed (skeleton / staging / preview). */
   noindex?: boolean;
+  /** Origin of the media CDN, when pictures come from one: the browser connects to it early. */
+  mediaOrigin?: string | null;
 }
 
-const { title, description, noindex = false } = Astro.props;
+const { title, description, noindex = false, mediaOrigin = null } = Astro.props;
 ---
 
 <!doctype html>
@@ -25,6 +27,7 @@ const { title, description, noindex = false } = Astro.props;
     </script>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon" href="/favicon.ico" />
+    {mediaOrigin && <link rel="preconnect" href={mediaOrigin} />}
     <title>{title}</title>
     {description && <meta name="description" content={description} />}
     {noindex && <meta name="robots" content="noindex, nofollow" />}

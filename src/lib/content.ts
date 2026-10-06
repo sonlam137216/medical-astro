@@ -26,6 +26,17 @@ function setting(name: string): string | undefined {
   return fromWorker || processEnv?.[name] || undefined;
 }
 
+/** Origin of the media CDN (custom domain on the R2 bucket), if one is configured. Build time only. */
+export function getMediaOrigin(): string | null {
+  const base = setting('R2_PUBLIC_BASE_URL');
+  if (!base) return null;
+  try {
+    return new URL(base).origin;
+  } catch {
+    return null;
+  }
+}
+
 let cached: Promise<Snapshot | null> | undefined;
 
 /**

@@ -15,7 +15,8 @@ D1_DATABASE_ID=
 CLOUDFLARE_API_URL=
 
 # Cloudflare R2 media (Phase 5). Leave empty to serve media through the Worker route /media/* (local, staging);
-# set to the public base URL of the bucket (custom domain) so visitors never reach the Worker for images.
+# set to the public base URL of the bucket (custom domain) so visitors never reach the Worker for images or videos.
+# Setup and checks: MEDIA_CDN.md.
 R2_PUBLIC_BASE_URL=
 
 # Cloudflare Turnstile for the consultation form (Phase 4)

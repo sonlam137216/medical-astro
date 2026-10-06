@@ -1,0 +1,35 @@
+---
+import type { PublicVideo } from '../lib/media';
+
+// An MP4 from the media library. Nothing of the video is downloaded until the visitor presses play
+// (`preload="none"`); until then the cover image is shown. Space is reserved from the declared size so the
+// page does not jump. Do not autoplay: it would download the file for everyone.
+interface Props {
+  video: PublicVideo;
+  class?: string;
+  [attr: `data-${string}`]: unknown;
+}
+
+const { video, class: className, ...rest } = Astro.props;
+const poster = video.poster;
+// A 16:9 box when the size is unknown.
+const ratio = video.width && video.height ? `${video.width} / ${video.height}` : '16 / 9';
+---
+
+<video
+  {...rest}
+  class={className}
+  controls
+  playsinline
+  preload="none"
+  poster={poster?.url}
+  width={video.width ?? undefined}
+  height={video.height ?? undefined}
+  style={`aspect-ratio: ${ratio}; width: 100%; height: auto; background: var(--color-soft);`}
+  aria-label={video.title || undefined}
+>
+  <source src={video.url} type="video/mp4" />
+  <p>
+    Your browser cannot play this video. <a href={video.url}>Download it</a>.
+  </p>
+</video>

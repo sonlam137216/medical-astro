@@ -28,6 +28,7 @@ const CONTROL = /[\u0000-\u001f\u007f]/g;
 export function readAlt(
   raw: string,
   isDecorative: boolean,
+  noun: 'image' | 'video' = 'image',
 ): { ok: true; altText: string | null } | { ok: false; error: string } {
   const alt = raw.replace(CONTROL, ' ').replace(/\s+/g, ' ').trim();
   if (alt.length > MAX_ALT_LENGTH) {
@@ -36,7 +37,10 @@ export function readAlt(
   if (!isDecorative && alt === '') {
     return {
       ok: false,
-      error: 'Describe the image for people who cannot see it, or mark it as decorative.',
+      error:
+        noun === 'video'
+          ? 'Describe what the video shows, for people who cannot see it.'
+          : 'Describe the image for people who cannot see it, or mark it as decorative.',
     };
   }
   return { ok: true, altText: alt === '' ? null : alt };

@@ -317,6 +317,15 @@ a.admin-btn {
   background: var(--color-soft);
 }
 
+.admin-media-novideo {
+  display: grid;
+  place-items: center;
+  height: 140px;
+  border-radius: 8px;
+  background: var(--color-soft);
+  color: var(--color-muted, inherit);
+}
+
 .admin-media-preview {
   max-width: 100%;
   max-height: 420px;
