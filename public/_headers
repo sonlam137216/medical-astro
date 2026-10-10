@@ -1,0 +1,7 @@
+# Applied by Cloudflare to the static pages and files. (Worker responses, such as /admin and /api, set their own.)
+# No Content-Security-Policy yet: pages use small inline scripts, so a policy needs hashes first (see HANDOVER.md).
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  X-Frame-Options: DENY
+  Permissions-Policy: camera=(), microphone=(), geolocation=()

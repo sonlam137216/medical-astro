@@ -50,9 +50,9 @@ const more =
 
       <ul class="guide__list">
         {more.map((a) => (
-          <li class="guide__item">
-            <a href={a.href}>
-              {a.image && (
+          <li class:list={['guide__item', { 'guide__item--plain': !a.image }]}>
+            {a.image && (
+              <a href={a.href} tabindex="-1" aria-hidden="true">
                 <ProfileImage
                   class="guide__thumb"
                   image={a.image}
@@ -60,8 +60,8 @@ const more =
                   height={110}
                   sizes="170px"
                 />
-              )}
-            </a>
+              </a>
+            )}
             <div>
               <h3 class="guide__title">
                 <a href={a.href}>{a.title}</a>
@@ -114,6 +114,10 @@ const more =
     grid-template-columns: 170px 1fr;
     gap: 20px;
     align-items: start;
+  }
+
+  .guide__item--plain {
+    grid-template-columns: 1fr;
   }
 
   .guide__thumb {

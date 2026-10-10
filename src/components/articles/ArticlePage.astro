@@ -96,13 +96,13 @@ const description = article.seoDescription || article.excerpt || undefined;
         <ArticleBody blocks={blocks} />
 
         {article.reviewedBy && (
-          <aside class="review" aria-label="Clinical review">
+          <div class="review">
             <p class="review__by">Clinically reviewed by: {article.reviewedBy}</p>
             {reviewed && <p class="review__date">Reviewed on {reviewed}</p>}
             <a class="link-arrow" href="/our-doctors">
               View all doctors <span aria-hidden="true">→</span>
             </a>
-          </aside>
+          </div>
         )}
 
         {related.length > 0 && (
@@ -132,7 +132,7 @@ const description = article.seoDescription || article.excerpt || undefined;
         )}
       </article>
 
-      <aside class="side" aria-label="Services and consultation">
+      <div class="side">
         <section class="services card" aria-labelledby="services-title">
           <h2 id="services-title">Our services</h2>
           <ul>
@@ -146,7 +146,7 @@ const description = article.seoDescription || article.excerpt || undefined;
           </ul>
         </section>
         <SidebarConsultation />
-      </aside>
+      </div>
     </div>
   </Section>
 </SiteLayout>

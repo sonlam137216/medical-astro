@@ -26,7 +26,11 @@ const galleryColumns = [
   insideClinic.photos.filter((_, i) => i % 2 === 1),
 ];
 
-const seo = await getPageSeo('/about', { title: 'About us · Melatec Dental Clinic' });
+const seo = await getPageSeo('/about', {
+  title: 'About us · Melatec Dental Clinic',
+  description:
+    'Learn about Melatec Dental Clinic: modern dental technology, experienced dentists and personalised care for international patients in Vietnam.',
+});
 ---
 
 <SiteLayout title={seo.title} description={seo.description}>

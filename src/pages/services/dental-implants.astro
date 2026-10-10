@@ -21,6 +21,8 @@ const paragraphs = (text: string) => text.split(/\n{2,}/);
 const faqs = await getFaqs('dental-implants', faq.questions);
 const seo = await getPageSeo('/services/dental-implants', {
   title: 'Dental implants · Melatec Dental Clinic',
+  description:
+    'Single-tooth implants and All-on-4 and All-on-6 restorations, with a personalised treatment plan and estimate before you travel to Vietnam.',
 });
 // The Figma row has one filled card (30,000+) and three empty ones: only the filled one is shown.
 const [stat] = stats;
@@ -58,8 +60,8 @@ const [stat] = stats;
     </div>
   </section>
 
-  <Section tone="soft" labelledby="costs-title">
-    <SectionIntro label={costs.label} headingId="costs-title" align="center" lined>
+  <Section tone="soft" labelledby="prices-title">
+    <SectionIntro label={costs.label} headingId="prices-title" align="center" lined>
       <Fragment slot="title">{costs.title}</Fragment>
     </SectionIntro>
     <ul class="grid">

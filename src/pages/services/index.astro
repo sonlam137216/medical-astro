@@ -11,7 +11,11 @@ import { towerImage, serviceDetails } from '../../data/shared';
 
 export const prerender = true;
 
-const seo = await getPageSeo('/services', { title: 'Dental services · Melatec Dental Clinic' });
+const seo = await getPageSeo('/services', {
+  title: 'Dental services · Melatec Dental Clinic',
+  description:
+    'Implant, cosmetic, orthodontic and restorative dental care in a modern, patient-focused clinic in Vietnam.',
+});
 ---
 
 <SiteLayout title={seo.title} description={seo.description}>

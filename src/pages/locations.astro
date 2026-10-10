@@ -9,7 +9,11 @@ import { getPageSeo } from '../lib/site-content';
 
 export const prerender = true;
 
-const seo = await getPageSeo('/locations', { title: 'Our locations · Melatec Dental Clinic' });
+const seo = await getPageSeo('/locations', {
+  title: 'Our locations · Melatec Dental Clinic',
+  description:
+    'Find a Melatec Dental Clinic in Vietnam and get directions to the clinic nearest to you.',
+});
 ---
 
 <!-- Not in Figma (Home links to "See all locations"): the clinic cards of the Home page, as a list of their own. -->

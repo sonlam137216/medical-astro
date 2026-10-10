@@ -11,7 +11,11 @@ export const prerender = true;
 
 const doctorProfiles = await getDoctors();
 
-const seo = await getPageSeo('/our-doctors', { title: 'Our doctors · Melatec Dental Clinic' });
+const seo = await getPageSeo('/our-doctors', {
+  title: 'Our doctors · Melatec Dental Clinic',
+  description:
+    'Meet the dentists and specialists of Melatec Dental Clinic, who provide implant, cosmetic and restorative care in English.',
+});
 ---
 
 <!-- Figma highlights "About us" in the nav on this page -->

@@ -17,7 +17,11 @@ import TravelGuide from '../components/home/TravelGuide.astro';
 // Static page: built once, served directly from Cloudflare static assets.
 export const prerender = true;
 
-const seo = await getPageSeo('/', { title: 'Melatec Dental Clinic · Vietnam' });
+const seo = await getPageSeo('/', {
+  title: 'Melatec Dental Clinic · Vietnam',
+  description:
+    'Melatec Dental Clinic in Vietnam: dental implants, porcelain crowns, veneers and complete smile makeovers for international patients, with English-speaking specialists.',
+});
 ---
 
 <SiteLayout title={seo.title} description={seo.description} theme="sans">

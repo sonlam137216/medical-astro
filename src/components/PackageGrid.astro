@@ -13,11 +13,15 @@ interface Props {
 const { intro, tone = 'soft' } = Astro.props;
 ---
 
-<Section {tone} labelledby={intro ? 'packages-title' : undefined}>
-  {intro && (
+<Section {tone} labelledby="packages-title">
+  {intro ? (
     <SectionIntro label={intro.label} headingId="packages-title" align="center" lined>
       <Fragment slot="title">{intro.title}</Fragment>
     </SectionIntro>
+  ) : (
+    <h2 class="visually-hidden" id="packages-title">
+      Dental packages
+    </h2>
   )}
   <ul class="grid">
     {packageCards.map((p) => (

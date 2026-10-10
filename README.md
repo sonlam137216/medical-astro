@@ -42,6 +42,8 @@ npm run preview    # build rồi chạy wrangler dev
 | `npm run build`                              | Build ra `dist/` (trang tĩnh + Worker)                        |
 | `npm run preview`                            | Build rồi chạy `wrangler dev`                                 |
 | `npm run check`                              | Sinh type Worker rồi chạy `astro check`                       |
+| `npm run check:links`                        | Sau build: link nội bộ và anchor có trỏ đúng trang không      |
+| `npm run check:launch`                       | Sau build: dữ liệu mẫu còn lại (thoát lỗi cho đến khi hết)    |
 | `npm run lint`                               | ESLint                                                        |
 | `npm run format`                             | Prettier, ghi đè file                                         |
 | `npm run format:check`                       | Prettier, chỉ kiểm tra (CI dùng lệnh này)                     |
@@ -57,22 +59,27 @@ npm run preview    # build rồi chạy wrangler dev
 
 Hai lệnh deploy cần `wrangler login` và tài khoản Cloudflare. Chưa chạy lần nào.
 
-CI (`.github/workflows/ci.yml`) chạy `format:check`, `lint`, `test`, `check` và `build` cho mỗi pull request và mỗi lần push lên `main`.
+CI (`.github/workflows/ci.yml`) chạy `format:check`, `lint`, `test`, `check`, `build` và `check:links` cho mỗi pull request và mỗi lần push lên `main`.
 
 ## Các trang hiện có
 
-| Route                            | Nội dung (frame Figma)              |
-| -------------------------------- | ----------------------------------- |
-| `/`                              | Home                                |
-| `/about`                         | About                               |
-| `/services`                      | Services                            |
-| `/services/dental-implants`      | Dental Implants (landing page)      |
-| `/our-doctors`                   | Our Doctors                         |
-| `/dental-packages`               | Dental Packages / Single Treatments |
-| `/dental-packages/travel-combos` | Dental Packages / Travel Combos     |
-| `/api/health`                    | Route động mẫu, trả `{"ok":true}`   |
+| Route                                           | Nội dung (frame Figma)                      |
+| ----------------------------------------------- | ------------------------------------------- |
+| `/`                                             | Home                                        |
+| `/about`                                        | About                                       |
+| `/services`                                     | Services                                    |
+| `/services/dental-implants`                     | Dental Implants (landing page)              |
+| `/our-doctors`                                  | Our Doctors                                 |
+| `/dental-packages`                              | Dental Packages / Single Treatments         |
+| `/dental-packages/travel-combos`                | Dental Packages / Travel Combos             |
+| `/locations`                                    | Danh sách chi nhánh (tự bổ sung)            |
+| `/travel-guide`, `/travel-guide/<slug>`         | Travel Guide: danh sách và bài (từ CMS)     |
+| `/dental-knowledge`, `/dental-knowledge/<slug>` | Dental Knowledge: danh sách và bài (từ CMS) |
+| `/api/health`                                   | Route động mẫu, trả `{"ok":true}`           |
 
-Một số link trong menu và footer (ví dụ `/travel-guide`, `/dental-knowledge`) chưa có trang nên hiện 404. Các route này được đánh dấu `PROVISIONAL` trong `src/data/*.ts` vì Figma không ghi URL.
+Trang bài viết chỉ tồn tại cho bài đã đăng trong CMS. Ba link pháp lý của footer (`/privacy-policy`, `/cookie-settings`, `/legal-disclaimer`) chưa có trang vì chờ nội dung từ chủ dự án nên hiện 404 trong dữ liệu mẫu. Các route đánh dấu `PROVISIONAL` trong `src/data/*.ts` là URL tạm vì Figma không ghi.
+
+Trạng thái nghiệm thu, việc còn chờ và checklist deploy: xem [HANDOVER.md](./HANDOVER.md).
 
 ## Cấu trúc thư mục
 

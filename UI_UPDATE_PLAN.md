@@ -44,7 +44,7 @@ Trạng thái dùng cho từng phần: `Chưa bắt đầu` → `Đang đối ch
 | A3  | Admin bảng giá và so sánh quốc gia                  | A0, A1, A2                        | Chưa bắt đầu                                                                    |
 | A4  | Admin chi nhánh và điểm đến du lịch                 | A0                                | Chưa bắt đầu                                                                    |
 | A5  | Kết nối admin → snapshot → website và form          | A1–A4; tích hợp từng module       | Chưa bắt đầu                                                                    |
-| P10 | Nghiệm thu tổng thể và bàn giao                     | P1–P9 và A0–A5                    | Chưa bắt đầu                                                                    |
+| P10 | Nghiệm thu tổng thể và bàn giao                     | P1–P9 và A0–A5                    | Một phần: UI + CMS hiện có đã nghiệm thu; A0–A5 chưa làm nên chưa nghiệm thu    |
 
 ### P0 — Chốt bản thiết kế và lập bảng đối chiếu trực quan
 
@@ -257,6 +257,8 @@ Trạng thái dùng cho từng phần: `Chưa bắt đầu` → `Đang đối ch
 - [ ] Rà toàn bộ dữ liệu kinh doanh của bốn module: không còn giá/địa điểm/dịch vụ/gói mẫu được dùng trên production; mục thiếu phải được bổ sung hoặc ẩn có chủ đích.
 - [ ] Cập nhật README/CLAUDE/SOURCES theo trạng thái thực tế; bàn giao ảnh trước/sau, phần đã xong và phần còn chờ.
 - [ ] Deploy là bước riêng khi người dùng yêu cầu, không tự deploy từ việc duyệt plan.
+
+**Tiến độ 10/10/2026 (P10, phần UI và CMS hiện có):** chi tiết ở `HANDOVER.md`. Đã kiểm: 12 trang × 4 cỡ không tràn ngang; axe-core 4 lỗi, đã sửa, còn 0 (nhãn link rỗng khi bài Home không có ảnh, id `costs-title` trùng ở Dental Implants, thứ tự heading ở Single Treatments, `aside` lồng nhau ở trang bài); bàn phím (skip link, menu, FAQ); CLS tối đa 0,017; không có JS phía khách; thiếu `meta description` → đã thêm mô tả mặc định cho 10 trang; thiếu header bảo mật ở trang public → thêm `public/_headers`; admin (quyền truy cập, 18 trang, Publish) và form tư vấn (hợp lệ, trùng, sai, honeypot, origin, rate limit, XSS) kiểm lại trên D1 local; thêm script `scripts/check-launch.mjs` (`npm run check:launch`) liệt kê 20 loại dữ liệu mẫu còn trên site (cổng trước ra mắt, không nằm trong CI); ảnh nghiệm thu ở `references/final/`. **Chưa làm / không làm được:** LCP/INP thật (cần staging), nghiệm thu A0–A5 (chưa có module), CSP, sitemap/robots/JSON-LD, bỏ `noindex` (khi ra mắt), deploy.
 
 ## 4. Cách thực hiện từng phần
 
