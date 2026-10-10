@@ -2,6 +2,7 @@ import type { AdminDb } from '../admin-auth';
 import { isSameOrigin } from '../admin-auth';
 import { readBodyLimited } from '../consultation';
 import { SITE_FIELDS, SOCIAL_PLATFORMS } from './entities';
+import { validateRefs } from './admin';
 import {
   emptyValues,
   parseFields,
@@ -45,6 +46,9 @@ export async function processSitePost(request: Request, db: AdminDb): Promise<Si
   const parsed = parseFields(SITE_FIELDS, form);
   if (!parsed.ok) return { status: 422, values, errors: parsed.errors };
 
+  const refErrors = await validateRefs(db, SITE_FIELDS, parsed.value);
+  if (Object.keys(refErrors).length > 0) return { status: 422, values, errors: refErrors };
+
   const row: Row = { ...parsed.value };
   const social: { platform: string; url: string }[] = [];
   for (const p of SOCIAL_PLATFORMS) {
@@ -60,6 +64,13 @@ export async function processSitePost(request: Request, db: AdminDb): Promise<Si
       { onConflict: 'id' },
     );
   if (error) {
+    if (error.code === '23503') {
+      return {
+        status: 422,
+        values,
+        errors: { intro_video_id: 'This video no longer exists. Please choose again.' },
+      };
+    }
     console.error('site settings save failed', error.code);
     return { status: 500, values, errors: {}, formError: 'Could not save. Please try again.' };
   }

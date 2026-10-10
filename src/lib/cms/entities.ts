@@ -343,6 +343,15 @@ export const SITE_FIELDS: Field[] = [
     placeholder: 'Monday–Sunday · 8:00–20:00',
   },
   { type: 'text', name: 'copyright_text', label: 'Copyright line', max: 200 },
+  {
+    type: 'ref',
+    name: 'intro_video_id',
+    label: 'Home page video',
+    table: 'media_assets',
+    labelColumn: 'alt_text',
+    where: { kind: 'video', status: 'active' },
+    help: 'Shows the “Watch video” button and a player on the Home page. Upload an MP4 in Media first (add a cover image there so people see a picture before pressing play). Choose “None” to show no video.',
+  },
   ...SOCIAL_PLATFORMS.map((p): Field => ({
     type: 'weburl',
     name: `social_${p}`,

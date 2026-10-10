@@ -43,8 +43,8 @@ const site = await getSiteContent();
             WhatsApp us
           </Button>
         )}
-        <!-- PLACEHOLDER target: no video file has been supplied yet (see WEBSITE_TECHSTACK §8) -->
-        <Button href="#video">Watch video</Button>
+        {/* Only when a video is chosen in Site details: it scrolls to the player further down the page. */}
+        {site.video && <Button href="#video">Watch video</Button>}
       </div>
       <p class="hero__trust">
         Trusted by patients from 20+ countries

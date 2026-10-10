@@ -7,6 +7,7 @@
  * reproduced as designed and marked PLACEHOLDER. Do not publish them as real facts.
  */
 import type { Img } from './types';
+import { directionsUrl } from '../lib/maps';
 import hanoiTower from '../assets/images/photos/hanoi-turtle-tower.webp';
 import dentalImplant from '../assets/images/photos/dental-implant.webp';
 import digitalScan from '../assets/images/photos/dentist-digital-scan.webp';
@@ -118,7 +119,7 @@ export const insideClinic = {
 
 export const destinations = {
   label: 'Dental destinations in Vietnam',
-  cta: { label: 'See all locations', href: '/locations' }, // PROVISIONAL
+  cta: { label: 'See all locations', href: '/locations' },
   locations: [
     { name: 'Melatec Ha Noi', address: '26 Doan Thi Diem Street, O Cho Dua Ward, Ha Noi' },
     { name: 'Melatec Lao Cai', address: 'Lot 325, Nga 6 Roundabout, Kim Tan Ward, Lao Cai City' },
@@ -128,7 +129,8 @@ export const destinations = {
     },
   ].map((l) => ({
     ...l,
-    href: '#', // PROVISIONAL: map/directions link not provided
+    // A Google Maps search for the address; replace with a place link when the locations module (A4) exists.
+    href: directionsUrl(l.address) ?? '/locations',
     image: { src: hanoiTower, alt: `${l.name} (placeholder photo)` } satisfies Img,
   })),
 };

@@ -1,6 +1,7 @@
 ---
 import Logo from './Logo.astro';
 import { getSiteContent } from '../lib/site-content';
+import { pageLink } from '../lib/links';
 
 interface Props {
   /** Pathname of the current page, used to highlight the active link. */
@@ -9,6 +10,8 @@ interface Props {
   utility?: { label: string; href?: string };
   /** First top-bar button. Defaults to "Booking Now" (jumps to the consultation form). */
   cta?: { label: string; href?: string };
+  /** The page has its own `#consultation` block (see SiteLayout). */
+  consultationHere?: boolean;
 }
 
 const site = await getSiteContent();
@@ -16,7 +19,9 @@ const {
   current = Astro.url.pathname,
   utility = site.utility ?? undefined,
   cta = { label: 'Booking Now', href: '#consultation' },
+  consultationHere = true,
 } = Astro.props;
+const link = (href: string) => pageLink(href, consultationHere);
 const isActive = (href: string) => (href === '/' ? current === '/' : current.startsWith(href));
 ---
 
@@ -30,11 +35,11 @@ const isActive = (href: string) => (href === '/' ? current === '/' : current.sta
         {site.email && <a href={`mailto:${site.email}`}>{site.email}</a>}
       </p>
       <div class="topbar__actions">
-        <a class="topbar__btn" href={cta.href ?? '#consultation'}>
+        <a class="topbar__btn" href={link(cta.href ?? '#consultation')}>
           {cta.label}
         </a>
         {utility && utility.href && (
-          <a class="topbar__btn" href={utility.href}>
+          <a class="topbar__btn" href={link(utility.href)}>
             {utility.label}
           </a>
         )}
@@ -65,7 +70,7 @@ const isActive = (href: string) => (href === '/' ? current === '/' : current.sta
               <li>
                 <a
                   class:list={['menu__link', { 'is-active': isActive(link.href) }]}
-                  href={link.href}
+                  href={pageLink(link.href, consultationHere)}
                   aria-current={isActive(link.href) ? 'page' : undefined}
                 >
                   {link.label}

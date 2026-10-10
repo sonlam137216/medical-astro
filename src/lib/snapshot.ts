@@ -49,6 +49,16 @@ export interface SnapshotRedirect {
   status: 301 | 302;
 }
 
+/** The Home page video: one MP4 file plus its cover image. */
+export interface SnapshotVideo {
+  key: string;
+  width: number | null;
+  height: number | null;
+  /** Description of the video (required when it is uploaded). */
+  title: string | null;
+  poster: SnapshotImage | null;
+}
+
 export interface SnapshotSite {
   name: string;
   tagline: string | null;
@@ -60,6 +70,8 @@ export interface SnapshotSite {
   hours: string | null;
   copyright: string | null;
   social: { platform: string; url: string }[];
+  /** The video of the Home page; absent when none is chosen. */
+  video?: SnapshotVideo | null;
 }
 
 export interface SnapshotPage {
@@ -166,6 +178,34 @@ export async function buildSnapshot(db: AdminDb): Promise<Snapshot> {
             .map((s) => ({ platform: s.platform as string, url: s.url as string }))
         : [],
     };
+    if (site.intro_video_id) {
+      const { data: video, error: videoError } = await db
+        .from('media_assets')
+        .select('r2_key, width, height, alt_text, status, poster_asset_id')
+        .eq('id', site.intro_video_id)
+        .eq('kind', 'video')
+        .maybeSingle();
+      if (videoError) throw fail('the Home page video', videoError);
+      if (video && video.status === 'active') {
+        let poster: SnapshotImage | null = null;
+        if (video.poster_asset_id) {
+          const { data: cover, error: coverError } = await db
+            .from('media_assets')
+            .select(IMAGE_COLUMNS)
+            .eq('id', video.poster_asset_id)
+            .maybeSingle();
+          if (coverError) throw fail('the video cover image', coverError);
+          poster = toSnapshotImage(cover);
+        }
+        snapshot.site.video = {
+          key: video.r2_key,
+          width: video.width,
+          height: video.height,
+          title: video.alt_text,
+          poster,
+        };
+      }
+    }
   }
 
   const { data: nav, error: navError } = await db
@@ -318,6 +358,15 @@ export function snapshotProblems(snapshot: Snapshot, target: string = 'staging')
       );
     }
   }
+  const video = snapshot.site?.video;
+  if (video && !video.title?.trim()) {
+    problems.push('Home page video: it has no description. Add one in Media.');
+  }
+  if (video?.poster && !video.poster.decorative && !video.poster.alt) {
+    problems.push(
+      'Home page video: the cover image has no description. Add one in Media, or mark the image as decorative.',
+    );
+  }
   const today = new Date().toISOString().slice(0, 10);
   const categoryKinds = new Map((snapshot.articleCategories ?? []).map((c) => [c.slug, c.kind]));
   for (const a of snapshot.articles ?? []) {
@@ -377,6 +426,9 @@ export function isSnapshot(value: unknown): value is Snapshot {
   )
     return false;
   if (value.site !== undefined && !(isObject(value.site) && typeof value.site.name === 'string'))
+    return false;
+  const video = isObject(value.site) ? value.site.video : undefined;
+  if (video !== undefined && video !== null && !(isObject(video) && typeof video.key === 'string'))
     return false;
 
   const articles = (value.articles ?? []) as unknown[];

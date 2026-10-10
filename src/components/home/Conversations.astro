@@ -1,10 +1,17 @@
 ---
 import { Image } from 'astro:assets';
 import Section from '../Section.astro';
+import Video from '../Video.astro';
 import { conversations } from '../../data/home';
+import { getSiteContent } from '../../lib/site-content';
+
+// With a video chosen in Site details the player replaces the picture (the hero's "Watch video" button scrolls
+// here). Without one the section keeps its picture and shows no video controls or "View all videos" button:
+// there is no videos page.
+const { video } = await getSiteContent();
 ---
 
-<Section tone="soft" labelledby="conversations-title">
+<Section id={video ? 'video' : undefined} tone="soft" labelledby="conversations-title">
   <div class="split">
     <div class="split__text">
       <p class="t-label is-lined is-start">{conversations.label}</p>
@@ -16,23 +23,21 @@ import { conversations } from '../../data/home';
         Personal experiences.
       </h2>
       <p class="split__body">{conversations.body}</p>
-      <div>
-        <!-- PROVISIONAL target: no videos page exists (video is out of scope) -->
-        <a class="btn-outline-arrow" href="#">
-          View All Videos <span aria-hidden="true">⟶</span>
-        </a>
-      </div>
     </div>
-    <Image
-      class="split__img"
-      src={conversations.image.src}
-      alt={conversations.image.alt}
-      width={520}
-      height={440}
-      densities={[1, 2]}
-      sizes="(max-width: 960px) 100vw, 520px"
-      loading="lazy"
-    />
+    {video ? (
+      <Video class="split__img" video={video} />
+    ) : (
+      <Image
+        class="split__img"
+        src={conversations.image.src}
+        alt={conversations.image.alt}
+        width={520}
+        height={440}
+        densities={[1, 2]}
+        sizes="(max-width: 960px) 100vw, 520px"
+        loading="lazy"
+      />
+    )}
   </div>
 </Section>
 
@@ -50,6 +55,7 @@ import { conversations } from '../../data/home';
     aspect-ratio: 520 / 440;
     object-fit: cover;
     border-radius: var(--radius-image);
+    overflow: hidden;
   }
 
   .split__text {
@@ -62,23 +68,6 @@ import { conversations } from '../../data/home';
     max-width: 480px;
     margin-bottom: 8px;
     color: var(--color-muted);
-  }
-
-  .btn-outline-arrow {
-    display: inline-flex;
-    align-items: center;
-    gap: 12px;
-    min-height: 48px;
-    padding: 12px 24px;
-    background: var(--color-white);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-button);
-    font: 600 var(--text-small) / var(--text-small-lh) var(--font-display);
-    color: var(--color-title);
-  }
-
-  .btn-outline-arrow:hover {
-    border-color: var(--color-blue);
   }
 
   @media (max-width: 960px) {

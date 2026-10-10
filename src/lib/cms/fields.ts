@@ -35,7 +35,13 @@ export type Field =
     })
   | (FieldBase & { type: 'image' })
   /** One row of another table, chosen from a list. */
-  | (FieldBase & { type: 'ref'; table: string; labelColumn: string })
+  | (FieldBase & {
+      type: 'ref';
+      table: string;
+      labelColumn: string;
+      /** Only rows whose columns equal these values are offered (e.g. videos among all media). */
+      where?: Record<string, string>;
+    })
   | (FieldBase & { type: 'date' })
   /** A price: `name` holds the amount, `currencyName` the 3-letter currency. */
   | (FieldBase & { type: 'money'; currencyName: string });

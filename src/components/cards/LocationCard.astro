@@ -23,6 +23,7 @@ const {
   detail = false,
   action = 'link',
 } = Astro.props;
+const external = /^https?:\/\//i.test(href);
 ---
 
 <article class="card location">
@@ -42,8 +43,14 @@ const {
         <p class="location__text">
           <strong>{name}</strong>: {address}
         </p>
-        <a class="location__btn" href={href}>
+        <a
+          class="location__btn"
+          href={href}
+          target={external ? '_blank' : undefined}
+          rel={external ? 'noopener noreferrer' : undefined}
+        >
           {linkLabel}
+          {external && <span class="visually-hidden"> (opens in a new tab)</span>}
         </a>
       </>
     ) : (

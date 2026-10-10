@@ -23,6 +23,7 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "check:links": "node scripts/check-links.mjs",
     "deploy:staging": "CLOUDFLARE_ENV=staging astro build && wrangler deploy",
     "deploy:production": "astro build && wrangler deploy"
   },

@@ -39,12 +39,13 @@ export const discover = {
     name: 'Da Nang city',
     address:
       'A vibrant coastal city known for its beautiful beaches, modern lifestyle and easy access to iconic destinations such as Hoi An and Ba Na Hills — ideal for combining dental treatment with a relaxing getaway.',
-    href: '#', // PROVISIONAL
+    // The Da Nang cards are sample entries; the Travel Guide is where destination articles live.
+    href: '/travel-guide',
     linkLabel: 'Explore more',
     image: {
       src: daNang,
       alt: 'Da Nang city skyline and the dragon bridge over the river',
     } satisfies Img,
   })),
-  cta: { label: 'View all', href: '#' }, // PROVISIONAL
+  cta: { label: 'View all', href: '/travel-guide' },
 };

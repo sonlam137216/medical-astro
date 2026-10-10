@@ -1,8 +1,16 @@
 ---
 import Logo from './Logo.astro';
 import { getSiteContent } from '../lib/site-content';
+import { pageLink } from '../lib/links';
 
+interface Props {
+  /** The page has its own `#consultation` block (see SiteLayout). */
+  consultationHere?: boolean;
+}
+
+const { consultationHere = true } = Astro.props;
 const site = await getSiteContent();
+const link = (href: string) => pageLink(href, consultationHere);
 ---
 
 <footer class="footer">
@@ -19,7 +27,7 @@ const site = await getSiteContent();
         <ul>
           {site.footerTreatments.map((l) => (
             <li>
-              <a href={l.href}>{l.label}</a>
+              <a href={link(l.href)}>{l.label}</a>
             </li>
           ))}
         </ul>
@@ -30,7 +38,7 @@ const site = await getSiteContent();
         <ul>
           {site.footerExplore.map((l) => (
             <li>
-              <a href={l.href}>{l.label}</a>
+              <a href={link(l.href)}>{l.label}</a>
             </li>
           ))}
         </ul>
@@ -55,7 +63,7 @@ const site = await getSiteContent();
       <ul class="footer__legal">
         {site.footerLegal.map((l) => (
           <li>
-            <a href={l.href}>{l.label}</a>
+            <a href={link(l.href)}>{l.label}</a>
           </li>
         ))}
       </ul>

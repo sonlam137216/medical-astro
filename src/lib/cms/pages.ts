@@ -8,6 +8,7 @@ export const BUILTIN_PAGES = [
   { path: '/our-doctors', title: 'Our doctors' },
   { path: '/dental-packages', title: 'Dental packages' },
   { path: '/dental-packages/travel-combos', title: 'Travel combos' },
+  { path: '/locations', title: 'Our locations' },
   { path: '/travel-guide', title: 'Dental travel guide' },
   { path: '/dental-knowledge', title: 'Dental knowledge' },
 ] as const;

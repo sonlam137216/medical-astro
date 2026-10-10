@@ -27,7 +27,13 @@ const [stat] = stats;
 ---
 
 <!-- The page has its own consultation block and no social row. The header is the standard one (the new Figma has no landing-page header variant). -->
-<SiteLayout title={seo.title} description={seo.description} consultation={false} social={false}>
+<SiteLayout
+  title={seo.title}
+  description={seo.description}
+  consultation={false}
+  consultationAnchor
+  social={false}
+>
   <PageHero
     variant="banner"
     dark

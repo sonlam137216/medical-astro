@@ -3,6 +3,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
 import EntityForm from '../../components/admin/EntityForm.astro';
 import { SITE_FIELDS, type EntityDef } from '../../lib/cms/entities';
 import { loadSiteValues, processSitePost } from '../../lib/cms/site';
+import { loadOptions } from '../../lib/cms/admin';
 
 export const prerender = false;
 
@@ -26,6 +27,7 @@ const def: EntityDef = {
   order: [],
   deletable: false,
 };
+const options = await loadOptions(db, def);
 const saved = Astro.url.searchParams.has('saved');
 ---
 
@@ -46,7 +48,7 @@ const saved = Astro.url.searchParams.has('saved');
       values={result?.values ?? values}
       errors={result?.errors}
       formError={result?.formError}
-      options={{ images: [], refs: {} }}
+      options={options}
       submitLabel="Save"
     />
   </main>

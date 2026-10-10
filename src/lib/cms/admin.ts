@@ -37,16 +37,37 @@ export async function loadOptions(db: AdminDb, def: EntityDef): Promise<FormOpti
   const refs: Record<string, Option[]> = {};
   for (const f of def.fields) {
     if (f.type !== 'ref') continue;
-    const { data } = await anyDb(db)
-      .from(f.table)
-      .select(`id, ${f.labelColumn}`)
-      .order(f.labelColumn);
+    let query = anyDb(db).from(f.table).select(`id, ${f.labelColumn}`);
+    for (const [column, value] of Object.entries(f.where ?? {})) query = query.eq(column, value);
+    const { data } = await query.order(f.labelColumn);
     refs[f.name] = ((data ?? []) as Row[]).map((r) => ({
       value: String(r.id),
       label: String(r[f.labelColumn]),
     }));
   }
   return { images, refs };
+}
+
+/**
+ * A `ref` field with a `where` filter only offers matching rows in the list, but a hand-made request could
+ * send any id: check the chosen row really matches (and exists) before saving.
+ */
+export async function validateRefs(
+  db: AdminDb,
+  fields: readonly EntityDef['fields'][number][],
+  row: Row,
+): Promise<FieldErrors> {
+  const errors: FieldErrors = {};
+  for (const f of fields) {
+    if (f.type !== 'ref' || !f.where) continue;
+    const id = row[f.name];
+    if (typeof id !== 'string') continue;
+    let query = anyDb(db).from(f.table).select('id').eq('id', id);
+    for (const [column, value] of Object.entries(f.where)) query = query.eq(column, value);
+    const { data } = await query.maybeSingle();
+    if (!data) errors[f.name] = 'Please choose an item from the list.';
+  }
+  return errors;
 }
 
 export type PostResult =
@@ -73,6 +94,9 @@ export async function processPost(
 
   const parsed = parseFields(def.fields, form);
   if (!parsed.ok) return { status: 422, values, errors: parsed.errors };
+
+  const refErrors = await validateRefs(db, def.fields, parsed.value);
+  if (Object.keys(refErrors).length > 0) return { status: 422, values, errors: refErrors };
 
   if (def.key === 'articles') {
     const errors = await checkArticle(db, parsed.value);

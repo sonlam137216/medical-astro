@@ -38,6 +38,11 @@ export function getMediaOrigin(): string | null {
   }
 }
 
+/** Public base URL of the media bucket (custom domain), if one is configured. Build time only. */
+export function getPublicBase(): string | null {
+  return setting('R2_PUBLIC_BASE_URL') ?? null;
+}
+
 let cached: Promise<Snapshot | null> | undefined;
 
 /**

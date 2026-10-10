@@ -1,0 +1,66 @@
+---
+import SiteLayout from '../layouts/SiteLayout.astro';
+import PageHero from '../components/PageHero.astro';
+import Section from '../components/Section.astro';
+import LocationCard from '../components/cards/LocationCard.astro';
+import { towerImage } from '../data/shared';
+import { destinations } from '../data/home';
+import { getPageSeo } from '../lib/site-content';
+
+export const prerender = true;
+
+const seo = await getPageSeo('/locations', { title: 'Our locations · Melatec Dental Clinic' });
+---
+
+<!-- Not in Figma (Home links to "See all locations"): the clinic cards of the Home page, as a list of their own. -->
+<SiteLayout title={seo.title} description={seo.description}>
+  <PageHero variant="banner" dark label="Our locations" image={towerImage} imageHeight={340}>
+    <Fragment slot="title">Find a Melatec clinic</Fragment>
+  </PageHero>
+
+  <Section tone="soft" labelledby="locations-title">
+    <h2 class="visually-hidden" id="locations-title">
+      Clinics
+    </h2>
+    <ul class="grid">
+      {destinations.locations.map((l) => (
+        <li>
+          <LocationCard {...l} action="button" />
+        </li>
+      ))}
+    </ul>
+  </Section>
+</SiteLayout>
+
+<style>
+  .grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 24px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .grid li {
+    display: flex;
+    flex: 0 0 calc((100% - 48px) / 3);
+  }
+
+  .grid li > :global(*) {
+    flex: 1;
+  }
+
+  @media (max-width: 960px) {
+    .grid li {
+      flex-basis: calc((100% - 24px) / 2);
+    }
+  }
+
+  @media (max-width: 600px) {
+    .grid li {
+      flex-basis: 100%;
+    }
+  }
+</style>

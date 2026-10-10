@@ -7,7 +7,8 @@ import {
   utilityLink as sampleUtility,
   type NavLink,
 } from '../data/site';
-import { loadSnapshot } from './content';
+import { loadSnapshot, getPublicBase } from './content';
+import { toPublicVideo, type PublicVideo } from './media';
 
 // BUILD-TIME ONLY (see content.ts). Site-wide details and menus for the header, footer and contact blocks.
 //
@@ -25,12 +26,15 @@ export interface SiteContent {
   addressLine: string | null;
   hours: string | null;
   copyright: string | null;
-  social: { platform: string; name: string; href: string }[];
+  /** `href` is null before anything is published: the platform is shown without a link rather than a dead one. */
+  social: { platform: string; name: string; href: string | null }[];
   utility: NavLink | null;
   main: NavLink[];
   footerTreatments: NavLink[];
   footerExplore: NavLink[];
   footerLegal: NavLink[];
+  /** The Home page video, when one is published. Never a sample: with none, the video button and player are hidden. */
+  video: PublicVideo | null;
 }
 
 const PLATFORM_NAMES: Record<string, string> = {
@@ -47,7 +51,29 @@ export async function getSiteContent(): Promise<SiteContent> {
   const at = (location: string): NavLink[] =>
     (nav ?? []).filter((n) => n.location === location).map(({ label, href }) => ({ label, href }));
 
+  const v = s?.video;
+  const video = v
+    ? toPublicVideo(
+        {
+          r2_key: v.key,
+          width: v.width,
+          height: v.height,
+          alt_text: v.title,
+          poster: v.poster && {
+            r2_key: v.poster.key,
+            width: v.poster.width,
+            height: v.poster.height,
+            alt_text: v.poster.alt,
+            is_decorative: v.poster.decorative,
+            variant_widths: v.poster.widths,
+          },
+        },
+        getPublicBase(),
+      )
+    : null;
+
   return {
+    video,
     name: s?.name ?? sample.name,
     tagline: s ? s.tagline : sample.tagline,
     phoneDisplay: s ? s.phoneDisplay : sample.phoneDisplay,
@@ -63,7 +89,7 @@ export async function getSiteContent(): Promise<SiteContent> {
           name: PLATFORM_NAMES[l.platform] ?? l.platform,
           href: l.url,
         }))
-      : Object.entries(PLATFORM_NAMES).map(([platform, name]) => ({ platform, name, href: '#' })), // PLACEHOLDER
+      : Object.entries(PLATFORM_NAMES).map(([platform, name]) => ({ platform, name, href: null })), // PLACEHOLDER
     utility: nav ? (at('utility')[0] ?? null) : sampleUtility,
     main: nav ? at('header') : sampleMain,
     footerTreatments: nav ? at('footer_treatment') : sampleTreatments,

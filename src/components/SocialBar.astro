@@ -7,7 +7,7 @@ import linkedin from '../assets/images/social/linkedin.png';
 import { getSiteContent } from '../lib/site-content';
 
 const icons = { facebook, instagram, youtube, linkedin } as const;
-// Profile links come from Site details. Before anything is published they are '#' placeholders (Figma
+// Profile links come from Site details. Before anything is published they are shown without a link (Figma
 // shows the four icons but no URLs); published, a platform without a link is simply not shown.
 const links = (await getSiteContent()).social.flatMap((l) =>
   l.platform in icons
@@ -26,10 +26,31 @@ const links = (await getSiteContent()).social.flatMap((l) =>
       <ul>
         {links.map((l) => (
           <li>
-            <a class="social__card" href={l.href}>
-              <Image src={l.icon} alt="" width={44} height={44} densities={[1, 2]} loading="lazy" />
-              <span>{l.name}</span>
-            </a>
+            {l.href ? (
+              <a class="social__card" href={l.href}>
+                <Image
+                  src={l.icon}
+                  alt=""
+                  width={44}
+                  height={44}
+                  densities={[1, 2]}
+                  loading="lazy"
+                />
+                <span>{l.name}</span>
+              </a>
+            ) : (
+              <div class="social__card">
+                <Image
+                  src={l.icon}
+                  alt=""
+                  width={44}
+                  height={44}
+                  densities={[1, 2]}
+                  loading="lazy"
+                />
+                <span>{l.name}</span>
+              </div>
+            )}
           </li>
         ))}
       </ul>
