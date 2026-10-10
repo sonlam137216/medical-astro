@@ -1,0 +1,120 @@
+---
+import type { Block } from '../../lib/cms/articles';
+
+// Renders the parsed article body. The parser returns data, never HTML, so every piece of text goes through
+// Astro's escaping and the only attributes built from the body are the safe link targets it already vetted.
+interface Props {
+  blocks: Block[];
+}
+const { blocks } = Astro.props;
+const external = (href: string) => /^https?:\/\//i.test(href);
+---
+
+<div class="body">
+  {blocks.map((b) => {
+    if (b.type === 'heading') {
+      return b.level === 2 ? <h2 id={b.id}>{b.text}</h2> : <h3 id={b.id}>{b.text}</h3>;
+    }
+    if (b.type === 'paragraph') {
+      return (
+        <p>
+          {b.children.map((p) =>
+            p.href ? (
+              <a href={p.href} rel={external(p.href) ? 'noopener noreferrer' : undefined}>
+                {p.text}
+              </a>
+            ) : p.bold ? (
+              <strong>{p.text}</strong>
+            ) : (
+              p.text
+            ),
+          )}
+        </p>
+      );
+    }
+    if (b.type === 'quote') {
+      return (
+        <blockquote>
+          {b.children.map((p) =>
+            p.href ? (
+              <a href={p.href} rel={external(p.href) ? 'noopener noreferrer' : undefined}>
+                {p.text}
+              </a>
+            ) : p.bold ? (
+              <strong>{p.text}</strong>
+            ) : (
+              p.text
+            ),
+          )}
+        </blockquote>
+      );
+    }
+    const Tag = b.ordered ? 'ol' : 'ul';
+    return (
+      <Tag>
+        {b.items.map((item) => (
+          <li>
+            {item.map((p) =>
+              p.href ? (
+                <a href={p.href} rel={external(p.href) ? 'noopener noreferrer' : undefined}>
+                  {p.text}
+                </a>
+              ) : p.bold ? (
+                <strong>{p.text}</strong>
+              ) : (
+                p.text
+              ),
+            )}
+          </li>
+        ))}
+      </Tag>
+    );
+  })}
+</div>
+
+<style>
+  .body {
+    display: grid;
+    gap: 16px;
+    font-family: var(--font-sans);
+    font-size: var(--text-body);
+    line-height: var(--text-body-lh);
+    color: var(--color-navy);
+    overflow-wrap: anywhere;
+  }
+
+  .body :global(h2) {
+    margin-top: 16px;
+    font: 700 28px / 34px var(--font-serif);
+    color: var(--color-heading);
+    scroll-margin-top: 24px;
+  }
+
+  .body :global(h3) {
+    margin-top: 8px;
+    font: 600 20px / 28px var(--font-display);
+    color: var(--color-title);
+    scroll-margin-top: 24px;
+  }
+
+  .body :global(ul),
+  .body :global(ol) {
+    display: grid;
+    gap: 8px;
+    margin: 0;
+    padding-left: 24px;
+  }
+
+  .body :global(blockquote) {
+    margin: 0;
+    padding: 4px 0 4px 20px;
+    border-left: 3px solid var(--color-border);
+    color: var(--color-muted);
+  }
+
+  .body :global(a) {
+    color: var(--color-blue);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+</style>

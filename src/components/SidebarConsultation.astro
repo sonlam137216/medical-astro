@@ -1,0 +1,104 @@
+---
+import Button from './Button.astro';
+import FormGuards from './FormGuards.astro';
+import PhoneField from './PhoneField.astro';
+import { footerTreatments } from '../data/site';
+
+// Compact "Book a consultation" card for the article sidebar (Figma Single Post). Same endpoint and fields as the
+// other consultation forms; it also carries the #consultation anchor of this page (it has no bottom form).
+const services = footerTreatments.map((t) => t.label); // PROVISIONAL option list
+---
+
+<section class="side card" id="consultation" aria-labelledby="side-consult-title">
+  <h2 class="side__title" id="side-consult-title">
+    Book a consultation
+  </h2>
+  <form class="form" method="post" action="/api/consultation" data-form="consultation">
+    <FormGuards part="fields" />
+    <div class="field">
+      <label for="sb-name">Name</label>
+      <input id="sb-name" name="name" type="text" autocomplete="name" maxlength="120" required />
+    </div>
+    <PhoneField id="sb-phone" label="Phone" />
+    <div class="field">
+      <label for="sb-email">Email</label>
+      <input
+        id="sb-email"
+        name="email"
+        type="email"
+        autocomplete="email"
+        maxlength="254"
+        required
+      />
+    </div>
+    <div class="field">
+      <label for="sb-service">Services</label>
+      <select id="sb-service" name="service">
+        <option value="">Select a treatment</option>
+        {services.map((s) => (
+          <option value={s}>{s}</option>
+        ))}
+      </select>
+    </div>
+    <Button type="submit">Booking now</Button>
+    <FormGuards part="status" />
+    <p class="form__note">Your information is kept confidential.</p>
+  </form>
+</section>
+
+<style>
+  .side {
+    gap: 16px;
+    padding: 24px;
+    background: var(--color-white);
+    box-shadow: 0 6px 18px rgb(0 86 229 / 8%);
+  }
+
+  .side__title {
+    font: 700 24px / 30px var(--font-serif);
+    color: var(--color-heading);
+  }
+
+  .form {
+    display: grid;
+    gap: 14px;
+    --field-height: 44px;
+    --phone-code-width: 108px;
+    --field-label: var(--color-title);
+    --field-label-font: 700 12px / 18px var(--font-display);
+    --field-label-transform: uppercase;
+  }
+
+  .field {
+    display: grid;
+    gap: 6px;
+  }
+
+  .field label {
+    font: var(--field-label-font);
+    text-transform: var(--field-label-transform);
+    color: var(--field-label);
+  }
+
+  .field input,
+  .field select {
+    width: 100%;
+    height: 44px;
+    padding: 0 14px;
+    font: inherit;
+    color: var(--color-navy);
+    background: var(--color-white);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-control);
+  }
+
+  .form :global(.btn) {
+    justify-self: start;
+  }
+
+  .form__note {
+    font-size: var(--text-small);
+    line-height: var(--text-small-lh);
+    color: var(--color-muted);
+  }
+</style>

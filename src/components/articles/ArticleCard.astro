@@ -1,0 +1,86 @@
+---
+import type { PublicArticle } from '../../lib/content';
+import ProfileImage from '../ProfileImage.astro';
+
+// Card of the article lists (Figma: picture, serif blue title, summary, "Explore more"). The search text is kept
+// short on purpose (title, summary, category): the whole body would bloat the page.
+interface Props {
+  article: PublicArticle;
+}
+
+const { article } = Astro.props;
+const search = [article.title, article.excerpt, article.category?.name]
+  .filter(Boolean)
+  .join(' ')
+  .toLowerCase();
+---
+
+<article
+  class="card article"
+  data-article
+  data-search={search}
+  data-category={article.category?.slug ?? ''}
+>
+  {article.cover && (
+    <ProfileImage
+      class="card__media article__img"
+      image={article.cover}
+      width={384}
+      height={256}
+      sizes="(max-width: 640px) 100vw, 330px"
+    />
+  )}
+  <div class="card__body">
+    {article.category && <p class="article__category">{article.category.name}</p>}
+    <h3 class="article__title">
+      <a href={article.path}>{article.title}</a>
+    </h3>
+    {article.excerpt && <p class="article__excerpt">{article.excerpt}</p>}
+    <a class="link-arrow" href={article.path} aria-label={`Explore more: ${article.title}`}>
+      Explore more <span aria-hidden="true">→</span>
+    </a>
+  </div>
+</article>
+
+<style>
+  .article {
+    height: 100%;
+  }
+
+  .article__img {
+    aspect-ratio: 3 / 2;
+    object-fit: cover;
+  }
+
+  .card__body {
+    flex: 1;
+    align-content: start;
+    gap: 10px;
+  }
+
+  .article__category {
+    font: 700 12px / 18px var(--font-display);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-blue);
+  }
+
+  .article__title {
+    font: 700 24px / 30px var(--font-serif);
+    color: var(--color-title);
+  }
+
+  .article__title a:hover {
+    color: var(--color-blue);
+  }
+
+  .article__excerpt {
+    font-size: var(--text-small);
+    line-height: var(--text-small-lh);
+    color: var(--color-navy);
+  }
+
+  .link-arrow {
+    align-self: end;
+  }
+</style>

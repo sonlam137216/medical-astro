@@ -1,65 +1,79 @@
 ---
-import { Image } from 'astro:assets';
 import Section from '../Section.astro';
 import SectionIntro from '../SectionIntro.astro';
 import Button from '../Button.astro';
+import ProfileImage from '../ProfileImage.astro';
 import { travelGuide } from '../../data/home';
+import { getArticles, isSampleContent } from '../../lib/content';
 
-const { featured, more } = travelGuide;
+// Published travel guide articles: the newest one large, the next three beside it. Before the first publish the
+// design's sample article is shown; once something is published and there are no articles, the section is hidden
+// (sample articles must never look real on the live site).
+const published = await getArticles('travel_guide');
+const sample = await isSampleContent();
+const toCard = (a: (typeof published)[number]) => ({
+  title: a.title,
+  excerpt: a.excerpt ?? '',
+  href: a.path,
+  image: a.cover,
+});
+const featured = published[0] ? toCard(published[0]) : sample ? { ...travelGuide.featured } : null;
+const more =
+  published.length > 0 ? published.slice(1, 4).map(toCard) : sample ? travelGuide.more : [];
 ---
 
-<Section tone="soft" labelledby="guide-title">
-  <SectionIntro label={travelGuide.label} headingId="guide-title" lined>
-    <Fragment slot="title">{travelGuide.title}</Fragment>
-    <Button slot="action" variant="outline" href={travelGuide.cta.href}>
-      {travelGuide.cta.label}
-    </Button>
-  </SectionIntro>
+{featured && (
+  <Section tone="soft" labelledby="guide-title">
+    <SectionIntro label={travelGuide.label} headingId="guide-title" lined>
+      <Fragment slot="title">{travelGuide.title}</Fragment>
+      <Button slot="action" variant="outline" href={travelGuide.cta.href}>
+        {travelGuide.cta.label}
+      </Button>
+    </SectionIntro>
 
-  <div class="guide">
-    <article class="guide__featured">
-      <a href={featured.href}>
-        <Image
-          class="guide__img"
-          src={featured.image.src}
-          alt={featured.image.alt}
-          width={480}
-          height={330}
-          densities={[1, 2]}
-          sizes="(max-width: 900px) 100vw, 480px"
-          loading="lazy"
-        />
-        <h3 class="guide__title">{featured.title}</h3>
-      </a>
-      <p class="guide__excerpt">{featured.excerpt}</p>
-    </article>
-
-    <ul class="guide__list">
-      {more.map((a) => (
-        <li class="guide__item">
-          <a href={a.href}>
-            <Image
-              class="guide__thumb"
-              src={a.image.src}
-              alt={a.image.alt}
-              width={170}
-              height={110}
-              densities={[1, 2]}
-              sizes="170px"
-              loading="lazy"
+    <div class="guide">
+      <article class="guide__featured">
+        <a href={featured.href}>
+          {featured.image && (
+            <ProfileImage
+              class="guide__img"
+              image={featured.image}
+              width={480}
+              height={330}
+              sizes="(max-width: 900px) 100vw, 480px"
             />
-          </a>
-          <div>
-            <h3 class="guide__title">
-              <a href={a.href}>{a.title}</a>
-            </h3>
-            <p class="guide__excerpt">{a.excerpt}</p>
-          </div>
-        </li>
-      ))}
-    </ul>
-  </div>
-</Section>
+          )}
+          <h3 class="guide__title">{featured.title}</h3>
+        </a>
+        <p class="guide__excerpt">{featured.excerpt}</p>
+      </article>
+
+      <ul class="guide__list">
+        {more.map((a) => (
+          <li class="guide__item">
+            <a href={a.href}>
+              {a.image && (
+                <ProfileImage
+                  class="guide__thumb"
+                  image={a.image}
+                  width={170}
+                  height={110}
+                  sizes="170px"
+                />
+              )}
+            </a>
+            <div>
+              <h3 class="guide__title">
+                <a href={a.href}>{a.title}</a>
+              </h3>
+              <p class="guide__excerpt">{a.excerpt}</p>
+            </div>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </Section>
+)}
 
 <style>
   .guide {

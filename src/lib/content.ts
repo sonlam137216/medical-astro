@@ -219,3 +219,8 @@ export async function getArticleCategories(
     .filter((c) => c.kind === kind)
     .map((c) => ({ slug: c.slug, name: c.name }));
 }
+
+/** True before the first publish (or without database credentials): pages then use the built-in sample content. */
+export async function isSampleContent(): Promise<boolean> {
+  return (await loadSnapshot()) === null;
+}

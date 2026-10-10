@@ -192,8 +192,9 @@ export const smileStories = {
   } satisfies Img,
 };
 
-// PLACEHOLDER: the design repeats one sample article four times. Real articles come from the CMS (P7);
-// the section links to /travel-guide, which does not exist yet (P8).
+// PLACEHOLDER: the design repeats one sample article four times. Shown only before the first publish; after
+// that the section lists the published Travel Guide articles (or is hidden when there are none), see
+// components/home/TravelGuide.astro.
 const sampleArticle = {
   title: 'Hoan Kiem Lake: The Heart of Hanoi and Your Sanctuary for Recovery',
   excerpt:

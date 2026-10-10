@@ -206,3 +206,11 @@ export function articleProblems(i: ArticleCheckInput): Record<string, string> {
   }
   return errors;
 }
+
+/** '2026-06-29' -> 'June 29, 2026' (fixed to UTC so the build machine's time zone cannot shift the day). */
+export function formatArticleDate(iso: string | null | undefined): string | null {
+  if (!iso || !/^\d{4}-\d{2}-\d{2}$/.test(iso)) return null;
+  const date = new Date(`${iso}T00:00:00Z`);
+  if (Number.isNaN(date.getTime())) return null;
+  return new Intl.DateTimeFormat('en-US', { dateStyle: 'long', timeZone: 'UTC' }).format(date);
+}

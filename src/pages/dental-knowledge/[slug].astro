@@ -1,0 +1,20 @@
+---
+import ArticlePage from '../../components/articles/ArticlePage.astro';
+import { getArticles, type PublicArticle } from '../../lib/content';
+
+export const prerender = true;
+
+// One page per published article, built from the snapshot. No articles published: no pages.
+export async function getStaticPaths() {
+  const all = await getArticles('dental_knowledge');
+  return all.map((article) => ({ params: { slug: article.slug }, props: { article, all } }));
+}
+
+interface Props {
+  article: PublicArticle;
+  all: PublicArticle[];
+}
+const { article, all } = Astro.props;
+---
+
+<ArticlePage article={article} all={all} />

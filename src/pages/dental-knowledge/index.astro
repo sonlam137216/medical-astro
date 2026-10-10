@@ -1,0 +1,26 @@
+---
+import ArticleIndex from '../../components/articles/ArticleIndex.astro';
+import { getArticles, getArticleCategories } from '../../lib/content';
+import { getPageSeo } from '../../lib/site-content';
+
+export const prerender = true;
+
+const [articles, categories] = await Promise.all([
+  getArticles('dental_knowledge'),
+  getArticleCategories('dental_knowledge'),
+]);
+const seo = await getPageSeo('/dental-knowledge', {
+  title: 'Dental knowledge · Melatec Dental Clinic',
+});
+---
+
+<!-- Figma "Dental Knowledge". The intro line is not in Figma (it repeats the Services text there). -->
+<ArticleIndex
+  title={seo.title}
+  description={seo.description}
+  label="Dental knowledge"
+  heading="Trusted Knowledge for a Healthier Smile"
+  intro="Clear answers about dental treatments, each reviewed by our dental team, to help you decide with confidence."
+  articles={articles}
+  categories={categories}
+/>

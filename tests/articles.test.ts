@@ -2,6 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   articlePath,
+  formatArticleDate,
   articleProblems,
   bodyPlainText,
   parseArticleBody,
@@ -90,6 +91,13 @@ test('plain text for search drops the markers', () => {
 test('article addresses follow the kind', () => {
   assert.equal(articlePath('travel_guide', 'da-nang'), '/travel-guide/da-nang');
   assert.equal(articlePath('dental_knowledge', 'implants'), '/dental-knowledge/implants');
+});
+
+test('article dates are formatted in English and tolerate bad input', () => {
+  assert.equal(formatArticleDate('2026-06-29'), 'June 29, 2026');
+  assert.equal(formatArticleDate('2026-01-01'), 'January 1, 2026');
+  for (const v of [null, undefined, '', 'yesterday', '2026-13-40', '29/06/2026'])
+    assert.equal(formatArticleDate(v), null, String(v));
 });
 
 // ---- rules -----------------------------------------------------------------------------------------------
