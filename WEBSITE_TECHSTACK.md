@@ -1,6 +1,7 @@
 # Melatec — Tech stack và tài liệu bàn giao triển khai
 
-Cập nhật: 04/10/2026  
+Cập nhật: 10/10/2026 (đổi nguồn Figma; chưa cập nhật UI)
+
 Ngôn ngữ tài liệu: Tiếng Việt  
 Mục đích: Cung cấp bối cảnh và định hướng để Claude tiếp tục triển khai website.
 
@@ -10,12 +11,14 @@ Website Melatec giới thiệu dịch vụ nha khoa kết hợp hỗ trợ khác
 
 Thiết kế chính do người dùng cung cấp:
 
-- [Figma — Melatec](https://www.figma.com/design/wzMnrBvsmXVyfYIGmi0J7L/Untitled?node-id=0-1)
+- [Figma — Melatec](https://www.figma.com/design/9A1cfRPC1hncD00yh2t1BU/Untitled?node-id=0-1&p=f&t=BhkYqiP9QiBaOoOC-0)
 - Tài liệu UI trong workspace: [WEBSITE_STYLE_GUIDE.md](./WEBSITE_STYLE_GUIDE.md).
 
-Style guide có một liên kết Figma Home cũ thuộc file khác. Dùng link Figma ở trên làm nguồn thiết kế chính của yêu cầu hiện tại. Dùng style guide làm tài liệu hỗ trợ; nếu có khác biệt, ghi nhận và đối chiếu trước khi quyết định.
+**Nguồn thiết kế được đổi ngày 10/10/2026 theo yêu cầu chủ dự án.** Link Figma ở trên thay thế nguồn thiết kế cũ cho các thay đổi UI tiếp theo. Đợt này chỉ cập nhật tài liệu; UI hiện tại vẫn theo file cũ, chưa đối chiếu hoặc cập nhật theo file mới.
 
-Cấu trúc Figma đã được đọc gồm các frame About, Services, Dental Implants, Dental Packages / Single Treatments và Dental Packages / Travel Combos, cùng component dùng chung. Các frame đã đọc rộng 1440px. Chưa xác nhận đầy đủ thiết kế mobile, toàn bộ trang và các trạng thái tương tác.
+`WEBSITE_STYLE_GUIDE.md` hiện chưa có trong workspace (xem `CLAUDE.md`). Khi tài liệu này được bổ sung, dùng làm nguồn hỗ trợ; nếu có link Figma cũ hoặc khác biệt thiết kế, đối chiếu với Figma mới ở trên trước khi quyết định.
+
+**Thông tin lịch sử từ Figma cũ, cần kiểm tra lại trên file mới:** cấu trúc đã được đọc gồm các frame About, Services, Dental Implants, Dental Packages / Single Treatments và Dental Packages / Travel Combos, cùng component dùng chung. Các frame đã đọc rộng 1440px. Chưa xác nhận đầy đủ thiết kế mobile, toàn bộ trang và các trạng thái tương tác.
 
 ## 2. Yêu cầu đã được người dùng chốt
 

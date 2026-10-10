@@ -95,9 +95,11 @@ wrangler.jsonc      cấu hình Cloudflare (production và staging)
 
 ## Thiết kế
 
-Nguồn thiết kế chính là file Figma của dự án. Giá trị trong `src/styles/tokens.css` được đo từ Figma: màu lấy từ swatch của các color style, cỡ chữ và khoảng cách đọc từ panel thiết kế. Font serif của tiêu đề không được ghi tên trong Figma, đang dùng Cormorant Garamond vì độ rộng chữ khớp, cần chủ dự án xác nhận.
+Nguồn thiết kế chính là [Figma mới — Melatec](https://www.figma.com/design/9A1cfRPC1hncD00yh2t1BU/Untitled?node-id=0-1&p=f&t=BhkYqiP9QiBaOoOC-0), được chủ dự án cập nhật ngày **10/10/2026**. Đợt này chỉ cập nhật tài liệu; UI hiện tại vẫn theo thiết kế cũ, chưa đối chiếu hoặc cập nhật theo file mới.
 
-Figma chỉ có bản desktop 1440px. Responsive mobile/tablet và menu thu gọn là phần tự bổ sung.
+Các ghi nhận sau thuộc **Figma cũ** và cần kiểm tra lại trước khi cập nhật UI. Giá trị trong `src/styles/tokens.css` được đo từ Figma: màu lấy từ swatch của các color style, cỡ chữ và khoảng cách đọc từ panel thiết kế. Font serif của tiêu đề không được ghi tên trong Figma, đang dùng Cormorant Garamond vì độ rộng chữ khớp, cần chủ dự án xác nhận.
+
+Figma cũ đã đọc chỉ có bản desktop 1440px; chưa xác nhận các frame trong file mới. Responsive mobile/tablet và menu thu gọn là phần tự bổ sung.
 
 ## Lưu ý trước khi ra mắt
 
@@ -110,7 +112,7 @@ Figma chỉ có bản desktop 1440px. Responsive mobile/tablet và menu thu gọ
 ## Lộ trình
 
 1. ~~Khởi tạo Astro + Cloudflare~~ xong.
-2. ~~UI public theo Figma~~ xong ở mức bố cục, còn tinh chỉnh.
+2. UI public: đã dựng bố cục theo Figma cũ; tiếp theo đối chiếu Figma mới, cập nhật tokens/component và từng trang, rồi kiểm tra desktop/mobile.
 3. Database Cloudflare D1, migration, đăng nhập admin, chỉ một vai trò `admin`: **xong ở mức code và test local; chưa tạo D1 thật** (xem `db/README.md`).
 4. ~~Form tư vấn~~ xong ở mức code (validate phía server, lưu DB, chống spam, không gửi email).
 5. CMS `/admin` và media R2: đang làm (bác sĩ, site, menu, pages, redirects, FAQ, media đã có).

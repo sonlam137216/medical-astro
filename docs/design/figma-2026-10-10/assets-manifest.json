@@ -1,0 +1,1752 @@
+[
+  {
+    "file": "Asset 1 2.png",
+    "px": [340, 60],
+    "layer": "Asset 1 2",
+    "pages": [
+      "about",
+      "dental-knowledge",
+      "doctors",
+      "home",
+      "packages-combos",
+      "packages-single",
+      "service-template",
+      "services",
+      "single-post",
+      "travel-guide"
+    ],
+    "nodeIds": [
+      "2:11",
+      "178:9",
+      "178:29",
+      "178:49",
+      "178:69",
+      "178:89",
+      "178:109",
+      "178:129",
+      "178:169",
+      "178:149"
+    ]
+  },
+  {
+    "file": "Asset 2 1-1.png",
+    "px": [182, 172],
+    "layer": "Asset 2 1",
+    "pages": [
+      "about",
+      "dental-knowledge",
+      "doctors",
+      "home",
+      "packages-combos",
+      "packages-single",
+      "service-template",
+      "services",
+      "single-post",
+      "travel-guide"
+    ],
+    "nodeIds": [
+      "57:269",
+      "62:231",
+      "68:495",
+      "73:873",
+      "51:290",
+      "73:963",
+      "73:1560",
+      "108:289",
+      "113:877",
+      "108:613"
+    ]
+  },
+  {
+    "file": "Asset 2 1-2.png",
+    "px": [182, 172],
+    "layer": "Asset 2 1",
+    "pages": [
+      "about",
+      "dental-knowledge",
+      "doctors",
+      "home",
+      "packages-combos",
+      "packages-single",
+      "service-template",
+      "services",
+      "single-post",
+      "travel-guide"
+    ],
+    "nodeIds": [
+      "57:269",
+      "62:231",
+      "68:495",
+      "73:873",
+      "51:290",
+      "73:963",
+      "73:1560",
+      "108:289",
+      "113:877",
+      "108:613"
+    ]
+  },
+  {
+    "file": "Asset 2 1-3.png",
+    "px": [182, 172],
+    "layer": "Asset 2 1",
+    "pages": [
+      "about",
+      "dental-knowledge",
+      "doctors",
+      "home",
+      "packages-combos",
+      "packages-single",
+      "service-template",
+      "services",
+      "single-post",
+      "travel-guide"
+    ],
+    "nodeIds": [
+      "57:269",
+      "62:231",
+      "68:495",
+      "73:873",
+      "51:290",
+      "73:963",
+      "73:1560",
+      "108:289",
+      "113:877",
+      "108:613"
+    ]
+  },
+  {
+    "file": "Asset 2 1-4.png",
+    "px": [182, 172],
+    "layer": "Asset 2 1",
+    "pages": [
+      "about",
+      "dental-knowledge",
+      "doctors",
+      "home",
+      "packages-combos",
+      "packages-single",
+      "service-template",
+      "services",
+      "single-post",
+      "travel-guide"
+    ],
+    "nodeIds": [
+      "57:269",
+      "62:231",
+      "68:495",
+      "73:873",
+      "51:290",
+      "73:963",
+      "73:1560",
+      "108:289",
+      "113:877",
+      "108:613"
+    ]
+  },
+  {
+    "file": "Asset 2 1-5.png",
+    "px": [182, 172],
+    "layer": "Asset 2 1",
+    "pages": [
+      "about",
+      "dental-knowledge",
+      "doctors",
+      "home",
+      "packages-combos",
+      "packages-single",
+      "service-template",
+      "services",
+      "single-post",
+      "travel-guide"
+    ],
+    "nodeIds": [
+      "57:269",
+      "62:231",
+      "68:495",
+      "73:873",
+      "51:290",
+      "73:963",
+      "73:1560",
+      "108:289",
+      "113:877",
+      "108:613"
+    ]
+  },
+  {
+    "file": "Asset 2 1-6.png",
+    "px": [182, 172],
+    "layer": "Asset 2 1",
+    "pages": [
+      "about",
+      "dental-knowledge",
+      "doctors",
+      "home",
+      "packages-combos",
+      "packages-single",
+      "service-template",
+      "services",
+      "single-post",
+      "travel-guide"
+    ],
+    "nodeIds": [
+      "57:269",
+      "62:231",
+      "68:495",
+      "73:873",
+      "51:290",
+      "73:963",
+      "73:1560",
+      "108:289",
+      "113:877",
+      "108:613"
+    ]
+  },
+  {
+    "file": "Asset 2 1.png",
+    "px": [182, 172],
+    "layer": "Asset 2 1",
+    "pages": [
+      "about",
+      "dental-knowledge",
+      "doctors",
+      "home",
+      "packages-combos",
+      "packages-single",
+      "service-template",
+      "services",
+      "single-post",
+      "travel-guide"
+    ],
+    "nodeIds": [
+      "57:269",
+      "62:231",
+      "68:495",
+      "73:873",
+      "51:290",
+      "73:963",
+      "73:1560",
+      "108:289",
+      "113:877",
+      "108:613"
+    ]
+  },
+  {
+    "file": "adf7485a-0242-46c3-bfd9-3a5af6e06470 2.png",
+    "px": [2084, 694],
+    "layer": "adf7485a-0242-46c3-bfd9-3a5af6e06470 2",
+    "pages": ["home"],
+    "nodeIds": ["48:134"]
+  },
+  {
+    "file": "adf7485a-0242-46c3-bfd9-3a5af6e06470 3.png",
+    "px": [2084, 1102],
+    "layer": "adf7485a-0242-46c3-bfd9-3a5af6e06470 3",
+    "pages": ["doctors"],
+    "nodeIds": ["62:49"]
+  },
+  {
+    "file": "adf7485a-0242-46c3-bfd9-3a5af6e06470 4.png",
+    "px": [2084, 1102],
+    "layer": "adf7485a-0242-46c3-bfd9-3a5af6e06470 4",
+    "pages": ["services"],
+    "nodeIds": ["62:274"]
+  },
+  {
+    "file": "adf7485a-0242-46c3-bfd9-3a5af6e06470 5.png",
+    "px": [2094, 1108],
+    "layer": "adf7485a-0242-46c3-bfd9-3a5af6e06470 5",
+    "pages": ["service-template"],
+    "nodeIds": ["68:516"]
+  },
+  {
+    "file": "adf7485a-0242-46c3-bfd9-3a5af6e06470 6.png",
+    "px": [2084, 1102],
+    "layer": "adf7485a-0242-46c3-bfd9-3a5af6e06470 6",
+    "pages": ["packages-single"],
+    "nodeIds": ["73:877"]
+  },
+  {
+    "file": "adf7485a-0242-46c3-bfd9-3a5af6e06470 7.png",
+    "px": [2084, 1102],
+    "layer": "adf7485a-0242-46c3-bfd9-3a5af6e06470 7",
+    "pages": ["packages-combos"],
+    "nodeIds": ["73:1209"]
+  },
+  {
+    "file": "dr ngan smilux 1-1.png",
+    "px": [302, 450],
+    "layer": "dr ngan smilux 1",
+    "pages": ["about", "home"],
+    "nodeIds": ["10:166", "59:5", "59:11", "59:17", "59:25", "59:30", "59:35", "59:40"]
+  },
+  {
+    "file": "dr ngan smilux 1-10.png",
+    "px": [578, 864],
+    "layer": "dr ngan smilux 1",
+    "pages": ["doctors"],
+    "nodeIds": ["62:66", "62:117", "62:138", "62:99"]
+  },
+  {
+    "file": "dr ngan smilux 1-11.png",
+    "px": [578, 864],
+    "layer": "dr ngan smilux 1",
+    "pages": ["doctors"],
+    "nodeIds": ["62:66", "62:117", "62:138", "62:99"]
+  },
+  {
+    "file": "dr ngan smilux 1-2.png",
+    "px": [302, 450],
+    "layer": "dr ngan smilux 1",
+    "pages": ["about", "home"],
+    "nodeIds": ["10:166", "59:5", "59:11", "59:17", "59:25", "59:30", "59:35", "59:40"]
+  },
+  {
+    "file": "dr ngan smilux 1-3.png",
+    "px": [302, 450],
+    "layer": "dr ngan smilux 1",
+    "pages": ["about", "home"],
+    "nodeIds": ["10:166", "59:5", "59:11", "59:17", "59:25", "59:30", "59:35", "59:40"]
+  },
+  {
+    "file": "dr ngan smilux 1-4.png",
+    "px": [302, 450],
+    "layer": "dr ngan smilux 1",
+    "pages": ["about", "home"],
+    "nodeIds": ["10:166", "59:5", "59:11", "59:17", "59:25", "59:30", "59:35", "59:40"]
+  },
+  {
+    "file": "dr ngan smilux 1-5.png",
+    "px": [302, 450],
+    "layer": "dr ngan smilux 1",
+    "pages": ["about", "home"],
+    "nodeIds": ["10:166", "59:5", "59:11", "59:17", "59:25", "59:30", "59:35", "59:40"]
+  },
+  {
+    "file": "dr ngan smilux 1-6.png",
+    "px": [302, 450],
+    "layer": "dr ngan smilux 1",
+    "pages": ["about", "home"],
+    "nodeIds": ["10:166", "59:5", "59:11", "59:17", "59:25", "59:30", "59:35", "59:40"]
+  },
+  {
+    "file": "dr ngan smilux 1-7.png",
+    "px": [302, 450],
+    "layer": "dr ngan smilux 1",
+    "pages": ["about", "home"],
+    "nodeIds": ["10:166", "59:5", "59:11", "59:17", "59:25", "59:30", "59:35", "59:40"]
+  },
+  {
+    "file": "dr ngan smilux 1-8.png",
+    "px": [578, 864],
+    "layer": "dr ngan smilux 1",
+    "pages": ["doctors"],
+    "nodeIds": ["62:66", "62:117", "62:138", "62:99"]
+  },
+  {
+    "file": "dr ngan smilux 1-9.png",
+    "px": [578, 864],
+    "layer": "dr ngan smilux 1",
+    "pages": ["doctors"],
+    "nodeIds": ["62:66", "62:117", "62:138", "62:99"]
+  },
+  {
+    "file": "dr ngan smilux 1.png",
+    "px": [302, 450],
+    "layer": "dr ngan smilux 1",
+    "pages": ["about", "home"],
+    "nodeIds": ["10:166", "59:5", "59:11", "59:17", "59:25", "59:30", "59:35", "59:40"]
+  },
+  {
+    "file": "image 1.png",
+    "px": [1002, 900],
+    "layer": "image 1",
+    "pages": ["home"],
+    "nodeIds": ["6:44"]
+  },
+  {
+    "file": "image 10.png",
+    "px": [1080, 800],
+    "layer": "image 10",
+    "pages": ["home"],
+    "nodeIds": ["10:245"]
+  },
+  {
+    "file": "image 11-1.png",
+    "px": [578, 325],
+    "layer": "image 11",
+    "pages": ["home", "packages-combos"],
+    "nodeIds": ["11:265", "73:1262"]
+  },
+  {
+    "file": "image 11.png",
+    "px": [578, 325],
+    "layer": "image 11",
+    "pages": ["home", "packages-combos"],
+    "nodeIds": ["11:265", "73:1262"]
+  },
+  {
+    "file": "image 12.png",
+    "px": [578, 325],
+    "layer": "image 12",
+    "pages": ["home", "packages-combos"],
+    "nodeIds": ["11:284", "73:1267"]
+  },
+  {
+    "file": "image 13.png",
+    "px": [578, 325],
+    "layer": "image 13",
+    "pages": ["home", "packages-combos"],
+    "nodeIds": ["11:296", "73:1272"]
+  },
+  {
+    "file": "image 14.png",
+    "px": [578, 325],
+    "layer": "image 14",
+    "pages": ["home", "packages-combos"],
+    "nodeIds": ["11:302", "73:1277"]
+  },
+  {
+    "file": "image 19.png",
+    "px": [2084, 1090],
+    "layer": "image 19",
+    "pages": ["home"],
+    "nodeIds": ["48:16"]
+  },
+  {
+    "file": "image 20.png",
+    "px": [2082, 1112],
+    "layer": "image 20",
+    "pages": ["home"],
+    "nodeIds": ["48:153"]
+  },
+  {
+    "file": "image 21-1.png",
+    "px": [2078, 758],
+    "layer": "image 21",
+    "pages": [
+      "about",
+      "dental-knowledge",
+      "doctors",
+      "home",
+      "packages-combos",
+      "packages-single",
+      "service-template",
+      "services",
+      "single-post",
+      "travel-guide"
+    ],
+    "nodeIds": [
+      "57:244",
+      "62:206",
+      "68:470",
+      "73:848",
+      "51:288",
+      "73:938",
+      "73:1535",
+      "108:264",
+      "113:852",
+      "108:588"
+    ]
+  },
+  {
+    "file": "image 21-10.png",
+    "px": [2078, 758],
+    "layer": "image 21",
+    "pages": [
+      "about",
+      "dental-knowledge",
+      "doctors",
+      "home",
+      "packages-combos",
+      "packages-single",
+      "service-template",
+      "services",
+      "single-post",
+      "travel-guide"
+    ],
+    "nodeIds": [
+      "57:244",
+      "62:206",
+      "68:470",
+      "73:848",
+      "51:288",
+      "73:938",
+      "73:1535",
+      "108:264",
+      "113:852",
+      "108:588"
+    ]
+  },
+  {
+    "file": "image 21-2.png",
+    "px": [2082, 1314],
+    "layer": "image 21",
+    "pages": ["about", "doctors", "home", "services"],
+    "nodeIds": ["57:190", "62:152", "68:416", "48:168"]
+  },
+  {
+    "file": "image 21-3.png",
+    "px": [2078, 758],
+    "layer": "image 21",
+    "pages": [
+      "about",
+      "dental-knowledge",
+      "doctors",
+      "home",
+      "packages-combos",
+      "packages-single",
+      "service-template",
+      "services",
+      "single-post",
+      "travel-guide"
+    ],
+    "nodeIds": [
+      "57:244",
+      "62:206",
+      "68:470",
+      "73:848",
+      "51:288",
+      "73:938",
+      "73:1535",
+      "108:264",
+      "113:852",
+      "108:588"
+    ]
+  },
+  {
+    "file": "image 21-4.png",
+    "px": [2082, 1314],
+    "layer": "image 21",
+    "pages": ["about", "doctors", "home", "services"],
+    "nodeIds": ["57:190", "62:152", "68:416", "48:168"]
+  },
+  {
+    "file": "image 21-5.png",
+    "px": [2078, 758],
+    "layer": "image 21",
+    "pages": [
+      "about",
+      "dental-knowledge",
+      "doctors",
+      "home",
+      "packages-combos",
+      "packages-single",
+      "service-template",
+      "services",
+      "single-post",
+      "travel-guide"
+    ],
+    "nodeIds": [
+      "57:244",
+      "62:206",
+      "68:470",
+      "73:848",
+      "51:288",
+      "73:938",
+      "73:1535",
+      "108:264",
+      "113:852",
+      "108:588"
+    ]
+  },
+  {
+    "file": "image 21-6.png",
+    "px": [2078, 758],
+    "layer": "image 21",
+    "pages": [
+      "about",
+      "dental-knowledge",
+      "doctors",
+      "home",
+      "packages-combos",
+      "packages-single",
+      "service-template",
+      "services",
+      "single-post",
+      "travel-guide"
+    ],
+    "nodeIds": [
+      "57:244",
+      "62:206",
+      "68:470",
+      "73:848",
+      "51:288",
+      "73:938",
+      "73:1535",
+      "108:264",
+      "113:852",
+      "108:588"
+    ]
+  },
+  {
+    "file": "image 21-7.png",
+    "px": [2082, 1314],
+    "layer": "image 21",
+    "pages": ["about", "doctors", "home", "services"],
+    "nodeIds": ["57:190", "62:152", "68:416", "48:168"]
+  },
+  {
+    "file": "image 21-8.png",
+    "px": [2078, 758],
+    "layer": "image 21",
+    "pages": [
+      "about",
+      "dental-knowledge",
+      "doctors",
+      "home",
+      "packages-combos",
+      "packages-single",
+      "service-template",
+      "services",
+      "single-post",
+      "travel-guide"
+    ],
+    "nodeIds": [
+      "57:244",
+      "62:206",
+      "68:470",
+      "73:848",
+      "51:288",
+      "73:938",
+      "73:1535",
+      "108:264",
+      "113:852",
+      "108:588"
+    ]
+  },
+  {
+    "file": "image 21-9.png",
+    "px": [2078, 758],
+    "layer": "image 21",
+    "pages": [
+      "about",
+      "dental-knowledge",
+      "doctors",
+      "home",
+      "packages-combos",
+      "packages-single",
+      "service-template",
+      "services",
+      "single-post",
+      "travel-guide"
+    ],
+    "nodeIds": [
+      "57:244",
+      "62:206",
+      "68:470",
+      "73:848",
+      "51:288",
+      "73:938",
+      "73:1535",
+      "108:264",
+      "113:852",
+      "108:588"
+    ]
+  },
+  {
+    "file": "image 21.png",
+    "px": [2082, 1314],
+    "layer": "image 21",
+    "pages": ["about", "doctors", "home", "services"],
+    "nodeIds": ["57:190", "62:152", "68:416", "48:168"]
+  },
+  {
+    "file": "image 22-1.png",
+    "px": [48, 26],
+    "layer": "image 22",
+    "pages": [
+      "about",
+      "doctors",
+      "home",
+      "packages-combos",
+      "packages-single",
+      "service-template",
+      "services"
+    ],
+    "nodeIds": ["57:230", "62:192", "68:456", "73:741", "51:238", "73:923", "73:1520"]
+  },
+  {
+    "file": "image 22-2.png",
+    "px": [48, 26],
+    "layer": "image 22",
+    "pages": [
+      "about",
+      "doctors",
+      "home",
+      "packages-combos",
+      "packages-single",
+      "service-template",
+      "services"
+    ],
+    "nodeIds": ["57:230", "62:192", "68:456", "73:741", "51:238", "73:923", "73:1520"]
+  },
+  {
+    "file": "image 22-3.png",
+    "px": [2084, 1476],
+    "layer": "image 22",
+    "pages": ["about", "service-template"],
+    "nodeIds": ["55:64", "73:678"]
+  },
+  {
+    "file": "image 22-4.png",
+    "px": [2084, 1114],
+    "layer": "image 22",
+    "pages": ["home"],
+    "nodeIds": ["51:341"]
+  },
+  {
+    "file": "image 22-5.png",
+    "px": [48, 26],
+    "layer": "image 22",
+    "pages": [
+      "about",
+      "doctors",
+      "home",
+      "packages-combos",
+      "packages-single",
+      "service-template",
+      "services"
+    ],
+    "nodeIds": ["57:230", "62:192", "68:456", "73:741", "51:238", "73:923", "73:1520"]
+  },
+  {
+    "file": "image 22-6.png",
+    "px": [48, 26],
+    "layer": "image 22",
+    "pages": [
+      "about",
+      "doctors",
+      "home",
+      "packages-combos",
+      "packages-single",
+      "service-template",
+      "services"
+    ],
+    "nodeIds": ["57:230", "62:192", "68:456", "73:741", "51:238", "73:923", "73:1520"]
+  },
+  {
+    "file": "image 22-7.png",
+    "px": [48, 26],
+    "layer": "image 22",
+    "pages": [
+      "about",
+      "doctors",
+      "home",
+      "packages-combos",
+      "packages-single",
+      "service-template",
+      "services"
+    ],
+    "nodeIds": ["57:230", "62:192", "68:456", "73:741", "51:238", "73:923", "73:1520"]
+  },
+  {
+    "file": "image 22-8.png",
+    "px": [2084, 1476],
+    "layer": "image 22",
+    "pages": ["about", "service-template"],
+    "nodeIds": ["55:64", "73:678"]
+  },
+  {
+    "file": "image 22.png",
+    "px": [48, 26],
+    "layer": "image 22",
+    "pages": [
+      "about",
+      "doctors",
+      "home",
+      "packages-combos",
+      "packages-single",
+      "service-template",
+      "services"
+    ],
+    "nodeIds": ["57:230", "62:192", "68:456", "73:741", "51:238", "73:923", "73:1520"]
+  },
+  {
+    "file": "image 23-1.png",
+    "px": [112, 112],
+    "layer": "image 23",
+    "pages": ["about", "doctors", "home", "packages-single", "services"],
+    "nodeIds": ["57:233", "62:195", "68:459", "51:258", "73:926"]
+  },
+  {
+    "file": "image 23-2.png",
+    "px": [112, 112],
+    "layer": "image 23",
+    "pages": ["about", "doctors", "home", "packages-single", "services"],
+    "nodeIds": ["57:233", "62:195", "68:459", "51:258", "73:926"]
+  },
+  {
+    "file": "image 23-3.png",
+    "px": [112, 112],
+    "layer": "image 23",
+    "pages": ["about", "doctors", "home", "packages-single", "services"],
+    "nodeIds": ["57:233", "62:195", "68:459", "51:258", "73:926"]
+  },
+  {
+    "file": "image 23-4.png",
+    "px": [112, 112],
+    "layer": "image 23",
+    "pages": ["about", "doctors", "home", "packages-single", "services"],
+    "nodeIds": ["57:233", "62:195", "68:459", "51:258", "73:926"]
+  },
+  {
+    "file": "image 23-5.png",
+    "px": [112, 112],
+    "layer": "image 23",
+    "pages": ["about", "doctors", "home", "packages-single", "services"],
+    "nodeIds": ["57:233", "62:195", "68:459", "51:258", "73:926"]
+  },
+  {
+    "file": "image 23.png",
+    "px": [2084, 1090],
+    "layer": "image 23",
+    "pages": ["about"],
+    "nodeIds": ["54:2"]
+  },
+  {
+    "file": "image 24-1.png",
+    "px": [112, 112],
+    "layer": "image 24",
+    "pages": ["about", "doctors", "home", "packages-single", "services"],
+    "nodeIds": ["57:241", "62:203", "68:467", "51:272", "73:934"]
+  },
+  {
+    "file": "image 24-2.png",
+    "px": [112, 112],
+    "layer": "image 24",
+    "pages": ["about", "doctors", "home", "packages-single", "services"],
+    "nodeIds": ["57:241", "62:203", "68:467", "51:272", "73:934"]
+  },
+  {
+    "file": "image 24-3.png",
+    "px": [112, 112],
+    "layer": "image 24",
+    "pages": ["about", "doctors", "home", "packages-single", "services"],
+    "nodeIds": ["57:241", "62:203", "68:467", "51:272", "73:934"]
+  },
+  {
+    "file": "image 24-4.png",
+    "px": [112, 112],
+    "layer": "image 24",
+    "pages": ["about", "doctors", "home", "packages-single", "services"],
+    "nodeIds": ["57:241", "62:203", "68:467", "51:272", "73:934"]
+  },
+  {
+    "file": "image 24.png",
+    "px": [112, 112],
+    "layer": "image 24",
+    "pages": ["about", "doctors", "home", "packages-single", "services"],
+    "nodeIds": ["57:241", "62:203", "68:467", "51:272", "73:934"]
+  },
+  {
+    "file": "image 25-1.png",
+    "px": [144, 100],
+    "layer": "image 25",
+    "pages": ["about", "doctors", "home", "packages-single", "services"],
+    "nodeIds": ["57:242", "62:204", "68:468", "51:275", "73:935"]
+  },
+  {
+    "file": "image 25-2.png",
+    "px": [144, 100],
+    "layer": "image 25",
+    "pages": ["about", "doctors", "home", "packages-single", "services"],
+    "nodeIds": ["57:242", "62:204", "68:468", "51:275", "73:935"]
+  },
+  {
+    "file": "image 25-3.png",
+    "px": [144, 100],
+    "layer": "image 25",
+    "pages": ["about", "doctors", "home", "packages-single", "services"],
+    "nodeIds": ["57:242", "62:204", "68:468", "51:275", "73:935"]
+  },
+  {
+    "file": "image 25-4.png",
+    "px": [144, 100],
+    "layer": "image 25",
+    "pages": ["about", "doctors", "home", "packages-single", "services"],
+    "nodeIds": ["57:242", "62:204", "68:468", "51:275", "73:935"]
+  },
+  {
+    "file": "image 25.png",
+    "px": [144, 100],
+    "layer": "image 25",
+    "pages": ["about", "doctors", "home", "packages-single", "services"],
+    "nodeIds": ["57:242", "62:204", "68:468", "51:275", "73:935"]
+  },
+  {
+    "file": "image 26-1.png",
+    "px": [108, 108],
+    "layer": "image 26",
+    "pages": ["about", "doctors", "home", "packages-single", "services"],
+    "nodeIds": ["57:243", "62:205", "68:469", "51:278", "73:936"]
+  },
+  {
+    "file": "image 26-2.png",
+    "px": [108, 108],
+    "layer": "image 26",
+    "pages": ["about", "doctors", "home", "packages-single", "services"],
+    "nodeIds": ["57:243", "62:205", "68:469", "51:278", "73:936"]
+  },
+  {
+    "file": "image 26-3.png",
+    "px": [108, 108],
+    "layer": "image 26",
+    "pages": ["about", "doctors", "home", "packages-single", "services"],
+    "nodeIds": ["57:243", "62:205", "68:469", "51:278", "73:936"]
+  },
+  {
+    "file": "image 26-4.png",
+    "px": [108, 108],
+    "layer": "image 26",
+    "pages": ["about", "doctors", "home", "packages-single", "services"],
+    "nodeIds": ["57:243", "62:205", "68:469", "51:278", "73:936"]
+  },
+  {
+    "file": "image 26.png",
+    "px": [108, 108],
+    "layer": "image 26",
+    "pages": ["about", "doctors", "home", "packages-single", "services"],
+    "nodeIds": ["57:243", "62:205", "68:469", "51:278", "73:936"]
+  },
+  {
+    "file": "image 27.png",
+    "px": [770, 514],
+    "layer": "image 27",
+    "pages": ["about"],
+    "nodeIds": ["55:51"]
+  },
+  {
+    "file": "image 28.png",
+    "px": [770, 514],
+    "layer": "image 28",
+    "pages": ["about"],
+    "nodeIds": ["55:62"]
+  },
+  {
+    "file": "image 29.png",
+    "px": [958, 638],
+    "layer": "image 29",
+    "pages": ["about"],
+    "nodeIds": ["56:102"]
+  },
+  {
+    "file": "image 30.png",
+    "px": [752, 500],
+    "layer": "image 30",
+    "pages": ["about"],
+    "nodeIds": ["56:105"]
+  },
+  {
+    "file": "image 31.png",
+    "px": [750, 750],
+    "layer": "image 31",
+    "pages": ["about"],
+    "nodeIds": ["56:111"]
+  },
+  {
+    "file": "image 32.png",
+    "px": [958, 638],
+    "layer": "image 32",
+    "pages": ["about"],
+    "nodeIds": ["56:113"]
+  },
+  {
+    "file": "image 33-1.png",
+    "px": [1762, 992],
+    "layer": "image 33",
+    "pages": ["about", "services"],
+    "nodeIds": ["56:161", "68:409"]
+  },
+  {
+    "file": "image 33-2.png",
+    "px": [1762, 992],
+    "layer": "image 33",
+    "pages": ["about", "services"],
+    "nodeIds": ["56:161", "68:409"]
+  },
+  {
+    "file": "image 33-3.png",
+    "px": [1727, 972],
+    "layer": "image 33",
+    "pages": ["service-template"],
+    "nodeIds": ["73:750"]
+  },
+  {
+    "file": "image 33.png",
+    "px": [2084, 1090],
+    "layer": "image 33",
+    "pages": ["doctors"],
+    "nodeIds": ["62:51"]
+  },
+  {
+    "file": "image 34-1.png",
+    "px": [2084, 532],
+    "layer": "image 34",
+    "pages": ["about", "packages-combos", "packages-single", "services"],
+    "nodeIds": ["57:168", "62:368", "73:1048", "73:1339"]
+  },
+  {
+    "file": "image 34-2.png",
+    "px": [2084, 532],
+    "layer": "image 34",
+    "pages": ["about", "packages-combos", "packages-single", "services"],
+    "nodeIds": ["57:168", "62:368", "73:1048", "73:1339"]
+  },
+  {
+    "file": "image 34-3.png",
+    "px": [2084, 532],
+    "layer": "image 34",
+    "pages": ["about", "packages-combos", "packages-single", "services"],
+    "nodeIds": ["57:168", "62:368", "73:1048", "73:1339"]
+  },
+  {
+    "file": "image 34-4.png",
+    "px": [2084, 532],
+    "layer": "image 34",
+    "pages": ["about", "packages-combos", "packages-single", "services"],
+    "nodeIds": ["57:168", "62:368", "73:1048", "73:1339"]
+  },
+  {
+    "file": "image 34.png",
+    "px": [2084, 1090],
+    "layer": "image 34",
+    "pages": ["services"],
+    "nodeIds": ["62:273"]
+  },
+  {
+    "file": "image 35.png",
+    "px": [2090, 1094],
+    "layer": "image 35",
+    "pages": ["service-template"],
+    "nodeIds": ["68:514"]
+  },
+  {
+    "file": "image 36.png",
+    "px": [896, 636],
+    "layer": "image 36",
+    "pages": ["service-template"],
+    "nodeIds": ["73:815"]
+  },
+  {
+    "file": "image 37.png",
+    "px": [896, 636],
+    "layer": "image 37",
+    "pages": ["service-template"],
+    "nodeIds": ["73:817"]
+  },
+  {
+    "file": "image 38.png",
+    "px": [896, 636],
+    "layer": "image 38",
+    "pages": ["service-template"],
+    "nodeIds": ["73:819"]
+  },
+  {
+    "file": "image 39.png",
+    "px": [896, 636],
+    "layer": "image 39",
+    "pages": ["service-template"],
+    "nodeIds": ["73:820"]
+  },
+  {
+    "file": "image 40.png",
+    "px": [2084, 1090],
+    "layer": "image 40",
+    "pages": ["packages-single"],
+    "nodeIds": ["73:876"]
+  },
+  {
+    "file": "image 41-1.png",
+    "px": [2082, 1314],
+    "layer": "image 41",
+    "pages": ["packages-combos", "packages-single"],
+    "nodeIds": ["73:882", "73:1479"]
+  },
+  {
+    "file": "image 41-2.png",
+    "px": [2082, 1314],
+    "layer": "image 41",
+    "pages": ["packages-combos", "packages-single"],
+    "nodeIds": ["73:882", "73:1479"]
+  },
+  {
+    "file": "image 41.png",
+    "px": [2084, 1090],
+    "layer": "image 41",
+    "pages": ["packages-combos"],
+    "nodeIds": ["73:1208"]
+  },
+  {
+    "file": "image 42.png",
+    "px": [1156, 978],
+    "layer": "image 42",
+    "pages": ["packages-combos"],
+    "nodeIds": ["73:1241"]
+  },
+  {
+    "file": "image 43.png",
+    "px": [688, 458],
+    "layer": "image 43",
+    "pages": ["packages-combos"],
+    "nodeIds": ["73:1244"]
+  },
+  {
+    "file": "image 44.png",
+    "px": [688, 458],
+    "layer": "image 44",
+    "pages": ["packages-combos"],
+    "nodeIds": ["73:1247"]
+  },
+  {
+    "file": "image 45.png",
+    "px": [588, 392],
+    "layer": "image 45",
+    "pages": ["packages-combos"],
+    "nodeIds": ["73:1250"]
+  },
+  {
+    "file": "image 46.png",
+    "px": [566, 384],
+    "layer": "image 46",
+    "pages": ["packages-combos"],
+    "nodeIds": ["73:1253"]
+  },
+  {
+    "file": "image 47.png",
+    "px": [680, 382],
+    "layer": "image 47",
+    "pages": ["packages-combos"],
+    "nodeIds": ["73:1256"]
+  },
+  {
+    "file": "image 6.png",
+    "px": [476, 476],
+    "layer": "image 6",
+    "pages": ["home"],
+    "nodeIds": ["8:147"]
+  },
+  {
+    "file": "image 7.png",
+    "px": [476, 476],
+    "layer": "image 7",
+    "pages": ["home"],
+    "nodeIds": ["8:152"]
+  },
+  {
+    "file": "image 8-1.png",
+    "px": [476, 476],
+    "layer": "image 8",
+    "pages": ["home"],
+    "nodeIds": ["8:156", "48:141", "48:146"]
+  },
+  {
+    "file": "image 8-2.png",
+    "px": [476, 476],
+    "layer": "image 8",
+    "pages": ["home"],
+    "nodeIds": ["8:156", "48:141", "48:146"]
+  },
+  {
+    "file": "image 8.png",
+    "px": [476, 476],
+    "layer": "image 8",
+    "pages": ["home"],
+    "nodeIds": ["8:156", "48:141", "48:146"]
+  },
+  {
+    "file": "implant-smilux-clinic (1) 1-1.png",
+    "px": [544, 272],
+    "layer": "implant-smilux-clinic (1) 1",
+    "pages": ["home", "packages-combos", "packages-single", "service-template"],
+    "nodeIds": [
+      "3:47",
+      "163:10",
+      "163:31",
+      "163:52",
+      "163:72",
+      "73:548",
+      "73:569",
+      "73:590",
+      "73:1066",
+      "73:1132",
+      "73:1087",
+      "73:1153",
+      "73:1108",
+      "73:1174",
+      "73:1358",
+      "73:1378",
+      "73:1398",
+      "73:1418",
+      "73:1438",
+      "73:1458"
+    ]
+  },
+  {
+    "file": "implant-smilux-clinic (1) 1-10.png",
+    "px": [544, 272],
+    "layer": "implant-smilux-clinic (1) 1",
+    "pages": ["home", "packages-combos", "packages-single", "service-template"],
+    "nodeIds": [
+      "3:47",
+      "163:10",
+      "163:31",
+      "163:52",
+      "163:72",
+      "73:548",
+      "73:569",
+      "73:590",
+      "73:1066",
+      "73:1132",
+      "73:1087",
+      "73:1153",
+      "73:1108",
+      "73:1174",
+      "73:1358",
+      "73:1378",
+      "73:1398",
+      "73:1418",
+      "73:1438",
+      "73:1458"
+    ]
+  },
+  {
+    "file": "implant-smilux-clinic (1) 1-11.png",
+    "px": [544, 272],
+    "layer": "implant-smilux-clinic (1) 1",
+    "pages": ["home", "packages-combos", "packages-single", "service-template"],
+    "nodeIds": [
+      "3:47",
+      "163:10",
+      "163:31",
+      "163:52",
+      "163:72",
+      "73:548",
+      "73:569",
+      "73:590",
+      "73:1066",
+      "73:1132",
+      "73:1087",
+      "73:1153",
+      "73:1108",
+      "73:1174",
+      "73:1358",
+      "73:1378",
+      "73:1398",
+      "73:1418",
+      "73:1438",
+      "73:1458"
+    ]
+  },
+  {
+    "file": "implant-smilux-clinic (1) 1-12.png",
+    "px": [544, 272],
+    "layer": "implant-smilux-clinic (1) 1",
+    "pages": ["home", "packages-combos", "packages-single", "service-template"],
+    "nodeIds": [
+      "3:47",
+      "163:10",
+      "163:31",
+      "163:52",
+      "163:72",
+      "73:548",
+      "73:569",
+      "73:590",
+      "73:1066",
+      "73:1132",
+      "73:1087",
+      "73:1153",
+      "73:1108",
+      "73:1174",
+      "73:1358",
+      "73:1378",
+      "73:1398",
+      "73:1418",
+      "73:1438",
+      "73:1458"
+    ]
+  },
+  {
+    "file": "implant-smilux-clinic (1) 1-13.png",
+    "px": [544, 272],
+    "layer": "implant-smilux-clinic (1) 1",
+    "pages": ["home", "packages-combos", "packages-single", "service-template"],
+    "nodeIds": [
+      "3:47",
+      "163:10",
+      "163:31",
+      "163:52",
+      "163:72",
+      "73:548",
+      "73:569",
+      "73:590",
+      "73:1066",
+      "73:1132",
+      "73:1087",
+      "73:1153",
+      "73:1108",
+      "73:1174",
+      "73:1358",
+      "73:1378",
+      "73:1398",
+      "73:1418",
+      "73:1438",
+      "73:1458"
+    ]
+  },
+  {
+    "file": "implant-smilux-clinic (1) 1-14.png",
+    "px": [544, 272],
+    "layer": "implant-smilux-clinic (1) 1",
+    "pages": ["home", "packages-combos", "packages-single", "service-template"],
+    "nodeIds": [
+      "3:47",
+      "163:10",
+      "163:31",
+      "163:52",
+      "163:72",
+      "73:548",
+      "73:569",
+      "73:590",
+      "73:1066",
+      "73:1132",
+      "73:1087",
+      "73:1153",
+      "73:1108",
+      "73:1174",
+      "73:1358",
+      "73:1378",
+      "73:1398",
+      "73:1418",
+      "73:1438",
+      "73:1458"
+    ]
+  },
+  {
+    "file": "implant-smilux-clinic (1) 1-15.png",
+    "px": [544, 272],
+    "layer": "implant-smilux-clinic (1) 1",
+    "pages": ["home", "packages-combos", "packages-single", "service-template"],
+    "nodeIds": [
+      "3:47",
+      "163:10",
+      "163:31",
+      "163:52",
+      "163:72",
+      "73:548",
+      "73:569",
+      "73:590",
+      "73:1066",
+      "73:1132",
+      "73:1087",
+      "73:1153",
+      "73:1108",
+      "73:1174",
+      "73:1358",
+      "73:1378",
+      "73:1398",
+      "73:1418",
+      "73:1438",
+      "73:1458"
+    ]
+  },
+  {
+    "file": "implant-smilux-clinic (1) 1-16.png",
+    "px": [544, 272],
+    "layer": "implant-smilux-clinic (1) 1",
+    "pages": ["home", "packages-combos", "packages-single", "service-template"],
+    "nodeIds": [
+      "3:47",
+      "163:10",
+      "163:31",
+      "163:52",
+      "163:72",
+      "73:548",
+      "73:569",
+      "73:590",
+      "73:1066",
+      "73:1132",
+      "73:1087",
+      "73:1153",
+      "73:1108",
+      "73:1174",
+      "73:1358",
+      "73:1378",
+      "73:1398",
+      "73:1418",
+      "73:1438",
+      "73:1458"
+    ]
+  },
+  {
+    "file": "implant-smilux-clinic (1) 1-17.png",
+    "px": [544, 272],
+    "layer": "implant-smilux-clinic (1) 1",
+    "pages": ["home", "packages-combos", "packages-single", "service-template"],
+    "nodeIds": [
+      "3:47",
+      "163:10",
+      "163:31",
+      "163:52",
+      "163:72",
+      "73:548",
+      "73:569",
+      "73:590",
+      "73:1066",
+      "73:1132",
+      "73:1087",
+      "73:1153",
+      "73:1108",
+      "73:1174",
+      "73:1358",
+      "73:1378",
+      "73:1398",
+      "73:1418",
+      "73:1438",
+      "73:1458"
+    ]
+  },
+  {
+    "file": "implant-smilux-clinic (1) 1-18.png",
+    "px": [544, 272],
+    "layer": "implant-smilux-clinic (1) 1",
+    "pages": ["home", "packages-combos", "packages-single", "service-template"],
+    "nodeIds": [
+      "3:47",
+      "163:10",
+      "163:31",
+      "163:52",
+      "163:72",
+      "73:548",
+      "73:569",
+      "73:590",
+      "73:1066",
+      "73:1132",
+      "73:1087",
+      "73:1153",
+      "73:1108",
+      "73:1174",
+      "73:1358",
+      "73:1378",
+      "73:1398",
+      "73:1418",
+      "73:1438",
+      "73:1458"
+    ]
+  },
+  {
+    "file": "implant-smilux-clinic (1) 1-19.png",
+    "px": [544, 272],
+    "layer": "implant-smilux-clinic (1) 1",
+    "pages": ["home", "packages-combos", "packages-single", "service-template"],
+    "nodeIds": [
+      "3:47",
+      "163:10",
+      "163:31",
+      "163:52",
+      "163:72",
+      "73:548",
+      "73:569",
+      "73:590",
+      "73:1066",
+      "73:1132",
+      "73:1087",
+      "73:1153",
+      "73:1108",
+      "73:1174",
+      "73:1358",
+      "73:1378",
+      "73:1398",
+      "73:1418",
+      "73:1438",
+      "73:1458"
+    ]
+  },
+  {
+    "file": "implant-smilux-clinic (1) 1-2.png",
+    "px": [544, 272],
+    "layer": "implant-smilux-clinic (1) 1",
+    "pages": ["home", "packages-combos", "packages-single", "service-template"],
+    "nodeIds": [
+      "3:47",
+      "163:10",
+      "163:31",
+      "163:52",
+      "163:72",
+      "73:548",
+      "73:569",
+      "73:590",
+      "73:1066",
+      "73:1132",
+      "73:1087",
+      "73:1153",
+      "73:1108",
+      "73:1174",
+      "73:1358",
+      "73:1378",
+      "73:1398",
+      "73:1418",
+      "73:1438",
+      "73:1458"
+    ]
+  },
+  {
+    "file": "implant-smilux-clinic (1) 1-20.png",
+    "px": [544, 272],
+    "layer": "implant-smilux-clinic (1) 1",
+    "pages": ["home", "packages-combos", "packages-single", "service-template"],
+    "nodeIds": [
+      "3:47",
+      "163:10",
+      "163:31",
+      "163:52",
+      "163:72",
+      "73:548",
+      "73:569",
+      "73:590",
+      "73:1066",
+      "73:1132",
+      "73:1087",
+      "73:1153",
+      "73:1108",
+      "73:1174",
+      "73:1358",
+      "73:1378",
+      "73:1398",
+      "73:1418",
+      "73:1438",
+      "73:1458"
+    ]
+  },
+  {
+    "file": "implant-smilux-clinic (1) 1-21.png",
+    "px": [544, 272],
+    "layer": "implant-smilux-clinic (1) 1",
+    "pages": ["home", "packages-combos", "packages-single", "service-template"],
+    "nodeIds": [
+      "3:47",
+      "163:10",
+      "163:31",
+      "163:52",
+      "163:72",
+      "73:548",
+      "73:569",
+      "73:590",
+      "73:1066",
+      "73:1132",
+      "73:1087",
+      "73:1153",
+      "73:1108",
+      "73:1174",
+      "73:1358",
+      "73:1378",
+      "73:1398",
+      "73:1418",
+      "73:1438",
+      "73:1458"
+    ]
+  },
+  {
+    "file": "implant-smilux-clinic (1) 1-22.png",
+    "px": [544, 272],
+    "layer": "implant-smilux-clinic (1) 1",
+    "pages": ["home", "packages-combos", "packages-single", "service-template"],
+    "nodeIds": [
+      "3:47",
+      "163:10",
+      "163:31",
+      "163:52",
+      "163:72",
+      "73:548",
+      "73:569",
+      "73:590",
+      "73:1066",
+      "73:1132",
+      "73:1087",
+      "73:1153",
+      "73:1108",
+      "73:1174",
+      "73:1358",
+      "73:1378",
+      "73:1398",
+      "73:1418",
+      "73:1438",
+      "73:1458"
+    ]
+  },
+  {
+    "file": "implant-smilux-clinic (1) 1-23.png",
+    "px": [544, 272],
+    "layer": "implant-smilux-clinic (1) 1",
+    "pages": ["home", "packages-combos", "packages-single", "service-template"],
+    "nodeIds": [
+      "3:47",
+      "163:10",
+      "163:31",
+      "163:52",
+      "163:72",
+      "73:548",
+      "73:569",
+      "73:590",
+      "73:1066",
+      "73:1132",
+      "73:1087",
+      "73:1153",
+      "73:1108",
+      "73:1174",
+      "73:1358",
+      "73:1378",
+      "73:1398",
+      "73:1418",
+      "73:1438",
+      "73:1458"
+    ]
+  },
+  {
+    "file": "implant-smilux-clinic (1) 1-24.png",
+    "px": [544, 272],
+    "layer": "implant-smilux-clinic (1) 1",
+    "pages": ["home", "packages-combos", "packages-single", "service-template"],
+    "nodeIds": [
+      "3:47",
+      "163:10",
+      "163:31",
+      "163:52",
+      "163:72",
+      "73:548",
+      "73:569",
+      "73:590",
+      "73:1066",
+      "73:1132",
+      "73:1087",
+      "73:1153",
+      "73:1108",
+      "73:1174",
+      "73:1358",
+      "73:1378",
+      "73:1398",
+      "73:1418",
+      "73:1438",
+      "73:1458"
+    ]
+  },
+  {
+    "file": "implant-smilux-clinic (1) 1-3.png",
+    "px": [544, 272],
+    "layer": "implant-smilux-clinic (1) 1",
+    "pages": ["home", "packages-combos", "packages-single", "service-template"],
+    "nodeIds": [
+      "3:47",
+      "163:10",
+      "163:31",
+      "163:52",
+      "163:72",
+      "73:548",
+      "73:569",
+      "73:590",
+      "73:1066",
+      "73:1132",
+      "73:1087",
+      "73:1153",
+      "73:1108",
+      "73:1174",
+      "73:1358",
+      "73:1378",
+      "73:1398",
+      "73:1418",
+      "73:1438",
+      "73:1458"
+    ]
+  },
+  {
+    "file": "implant-smilux-clinic (1) 1-4.png",
+    "px": [544, 272],
+    "layer": "implant-smilux-clinic (1) 1",
+    "pages": ["home", "packages-combos", "packages-single", "service-template"],
+    "nodeIds": [
+      "3:47",
+      "163:10",
+      "163:31",
+      "163:52",
+      "163:72",
+      "73:548",
+      "73:569",
+      "73:590",
+      "73:1066",
+      "73:1132",
+      "73:1087",
+      "73:1153",
+      "73:1108",
+      "73:1174",
+      "73:1358",
+      "73:1378",
+      "73:1398",
+      "73:1418",
+      "73:1438",
+      "73:1458"
+    ]
+  },
+  {
+    "file": "implant-smilux-clinic (1) 1-5.png",
+    "px": [558, 278],
+    "layer": "implant-smilux-clinic (1) 1",
+    "pages": ["services"],
+    "nodeIds": ["62:289", "62:331", "62:341", "62:350", "62:360"]
+  },
+  {
+    "file": "implant-smilux-clinic (1) 1-6.png",
+    "px": [558, 278],
+    "layer": "implant-smilux-clinic (1) 1",
+    "pages": ["services"],
+    "nodeIds": ["62:289", "62:331", "62:341", "62:350", "62:360"]
+  },
+  {
+    "file": "implant-smilux-clinic (1) 1-7.png",
+    "px": [558, 278],
+    "layer": "implant-smilux-clinic (1) 1",
+    "pages": ["services"],
+    "nodeIds": ["62:289", "62:331", "62:341", "62:350", "62:360"]
+  },
+  {
+    "file": "implant-smilux-clinic (1) 1-8.png",
+    "px": [558, 278],
+    "layer": "implant-smilux-clinic (1) 1",
+    "pages": ["services"],
+    "nodeIds": ["62:289", "62:331", "62:341", "62:350", "62:360"]
+  },
+  {
+    "file": "implant-smilux-clinic (1) 1-9.png",
+    "px": [558, 278],
+    "layer": "implant-smilux-clinic (1) 1",
+    "pages": ["services"],
+    "nodeIds": ["62:289", "62:331", "62:341", "62:350", "62:360"]
+  },
+  {
+    "file": "implant-smilux-clinic (1) 1.png",
+    "px": [544, 272],
+    "layer": "implant-smilux-clinic (1) 1",
+    "pages": ["home", "packages-combos", "packages-single", "service-template"],
+    "nodeIds": [
+      "3:47",
+      "163:10",
+      "163:31",
+      "163:52",
+      "163:72",
+      "73:548",
+      "73:569",
+      "73:590",
+      "73:1066",
+      "73:1132",
+      "73:1087",
+      "73:1153",
+      "73:1108",
+      "73:1174",
+      "73:1358",
+      "73:1378",
+      "73:1398",
+      "73:1418",
+      "73:1438",
+      "73:1458"
+    ]
+  }
+]

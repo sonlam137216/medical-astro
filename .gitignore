@@ -29,3 +29,8 @@ pnpm-debug.log*
 
 # jetbrains setting folder
 .idea/
+
+# Figma exports kept locally only (large; re-export from Figma, see docs/design/figma-2026-10-10/assets-manifest.json)
+docs/design/figma-2026-10-10/assets/*.png
+# Old unsorted export from the previous Figma pass (mostly text layers), not used
+medical-images/

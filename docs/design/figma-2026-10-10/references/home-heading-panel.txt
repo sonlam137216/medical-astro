@@ -1,0 +1,465 @@
+Browser tab: 1434245730, Title: "Untitled – Figma", URL: "https://www.figma.com/design/9A1cfRPC1hncD00yh2t1BU/Untitled?node-id=3-41&t=u4Fi6xglimQelxOA-0".
+1 AXWebArea Untitled – Figma, URL: figma.com/design/9A1cfRPC1hncD00yh2t1BU/Untitled?node-id=3-41&t=u4Fi6xglimQelxOA-0
+	2 container react-page
+		3 container
+			4 container fullscreen-root
+				5 container Figma Design, 1 item selected
+			6 text Screenreader support for the board is currently disabled. To enable it via Accessibility settings, press ⌘K, type Accessibility Settings, and press Enter. To see available keyboard shortcuts, enter ⌃⇧Question mark .
+			7 container Comments on canvas
+				8 button Create new comment
+			9 container Left sidebar
+				10 toolbar Navigation Bar
+					11 pop up button (collapsed) Description: Main menu, ID: :r6:-trigger, Secondary Actions: Expand
+						12 image
+					13 button (expanded) Description: File, Secondary Actions: Collapse
+						14 image
+						15 text File
+					16 button (collapsed) Description: Agents, Secondary Actions: Expand
+						17 text Agents
+					18 button (collapsed) Description: Assets, Secondary Actions: Expand
+						19 image
+						20 text Assets
+					21 button (collapsed) Description: Tools, Secondary Actions: Expand
+						22 image
+						23 text Tools
+					24 button (collapsed) Description: Variables, Secondary Actions: Expand
+						25 image
+						26 text Variables
+				27 container left-panel-container
+					28 container
+						29 button Untitled, file name
+						30 text File name
+						31 pop up button (collapsed) Description: Edit file menu, ID: :rb:, Secondary Actions: Expand
+						32 button Minimize UI
+						33 heading Pages Find Add new page, Value: 2
+							34 button (expanded) Pages, Secondary Actions: Collapse
+							35 button Description: Find, ID: canvas-search-icon-button
+							36 button Add new page
+						37 container
+							38 container
+								39 table
+									40 row (selectable) Page 1
+										41 cell
+											42 button Page 1
+							43 slider Description: Resize handle, Value: 40
+						44 heading Layers, Value: 2
+							45 button (expanded) Layers, Secondary Actions: Collapse
+						46 table
+							47 container
+								48 row (selectable, collapsed) Group 180, Secondary Actions: Expand
+									49 container
+										50 cell
+											51 text Group 180
+								52 row (selectable, collapsed) Group 181, Secondary Actions: Expand
+									53 container
+										54 cell
+											55 text Group 181
+								56 row (selectable, collapsed) Group 179, Secondary Actions: Expand
+									57 container
+										58 cell
+											59 text Group 179
+								60 row (selectable, collapsed) Group 178, Secondary Actions: Expand
+									61 container
+										62 cell
+											63 text Group 178
+								64 row (selectable, collapsed) Group 177, Secondary Actions: Expand
+									65 container
+										66 cell
+											67 text Group 177
+								68 row (selectable, collapsed) Group 176, Secondary Actions: Expand
+									69 container
+										70 cell
+											71 text Group 176
+								72 row (selectable, collapsed) Group 175, Secondary Actions: Expand
+									73 container
+										74 cell
+											75 text Group 175
+								76 row (selectable, collapsed) Group 174, Secondary Actions: Expand
+									77 container
+										78 cell
+											79 text Group 174
+								80 row (selectable, collapsed) Group 173, Secondary Actions: Expand
+									81 container
+										82 cell
+											83 text Group 173
+								84 row (selectable) Rectangle 126
+									85 container
+										86 cell
+											87 text Rectangle 126
+								88 row (selectable) Rectangle 125
+									89 container
+										90 cell
+											91 text Rectangle 125
+								92 row (selectable) 04
+									93 container
+										94 cell
+											95 text 04
+								96 row (selectable) Ellipse 11
+									97 container
+										98 cell
+											99 text Ellipse 11
+								100 row (selectable) image 61
+									101 container
+										102 cell
+											103 text image 61
+								104 row (selectable) ✈️Travel & Get Treated
+									105 container
+										106 cell
+											107 text ✈️Travel & Get Treated
+								108 row (selectable) Plan your visit, meet your dentist and begin treatment in Vietnam.
+									109 container
+										110 cell
+											111 text Plan your visit, meet your dentist and begin treatment in Vietnam.
+								112 row (selectable) Rectangle 124
+									113 container
+										114 cell
+											115 text Rectangle 124
+								116 row (selectable) 03
+									117 container
+										118 cell
+											119 text 03
+								120 row (selectable) Ellipse 10
+									121 container
+										122 cell
+											123 text Ellipse 10
+								124 row (selectable) image 60
+									125 container
+										126 cell
+											127 text image 60
+								128 row (selectable) ✓Compare & Choose
+									129 container
+										130 cell
+											131 text ✓Compare & Choose
+								132 row (selectable) Compare your options and choose the clinic that suits you.
+									133 container
+										134 cell
+											135 text Compare your options and choose the clinic that suits you.
+								136 row (selectable) Rectangle 123
+									137 container
+										138 cell
+											139 text Rectangle 123
+								140 row (selectable) 02
+									141 container
+										142 cell
+											143 text 02
+								144 row (selectable) Ellipse 9
+									145 container
+										146 cell
+											147 text Ellipse 9
+								148 row (selectable) image 59
+									149 container
+										150 cell
+											151 text image 59
+								152 row (selectable) 💬Get Your Options
+									153 container
+										154 cell
+											155 text 💬Get Your Options
+								156 row (selectable) Receive treatment options, pricing and timelines from selected clinics
+									157 container
+										158 cell
+											159 text Receive treatment options, pricing and timelines from selected clinics
+								160 row (selectable) Rectangle 122
+									161 container
+										162 cell
+											163 text Rectangle 122
+								164 row (selectable) 01
+									165 container
+										166 cell
+											167 text 01
+								168 row (selectable) Ellipse 1
+									169 container
+										170 cell
+											171 text Ellipse 1
+								172 row (selectable) image 58
+									173 container
+										174 cell
+											175 text image 58
+								176 row (selectable) 📷Send Us a Photo
+									177 container
+										178 cell
+											179 text 📷Send Us a Photo
+								180 row (selectable) Share photos of your teeth and any X-rays you have.
+									181 container
+										182 cell
+											183 text Share photos of your teeth and any X-rays you have.
+								184 row (selectable) Rectangle 121
+									185 container
+										186 cell
+											187 text Rectangle 121
+								188 row (selectable, collapsed) Group 168, Secondary Actions: Expand
+									189 container
+										190 cell
+											191 text Group 168
+								192 row (selectable) Rectangle 118
+									193 container
+										194 cell
+											195 text Rectangle 118
+								196 row (selectable) Rectangle 117
+									197 container
+										198 cell
+											199 text Rectangle 117
+								200 row (selectable) Rectangle 116
+									201 container
+										202 cell
+											203 text Rectangle 116
+								204 row (selectable) Rectangle 115
+									205 container
+										206 cell
+											207 text Rectangle 115
+								208 row (selectable, collapsed) Group 162, Secondary Actions: Expand
+									209 container
+										210 cell
+											211 text Group 162
+								212 row (selectable) Ellipse 8
+									213 container
+										214 cell
+											215 text Ellipse 8
+								216 row (selectable) Rooted in the principles of the Hippocratic Oath, our dentists bring expertise, precision and genuine care to every treatment.
+									217 container
+										218 cell
+											219 text Rooted in the principles of the Hippocratic Oath, our dentists bring expertise, precision and genuine care to every treatment.
+								220 row (selectable) CLINICALLY REVIEWED BY: MELATEC DENTAL TEAM
+									221 container
+										222 cell
+											223 text CLINICALLY REVIEWED BY: MELATEC DENTAL TEAM
+								224 row (selectable) Rectangle 9
+									225 container
+										226 cell
+											227 text Rectangle 9
+								228 row (selectable, collapsed) Group 161, Secondary Actions: Expand
+									229 container
+										230 cell
+											231 text Group 161
+								232 row (selectable, collapsed) Group 160, Secondary Actions: Expand
+									233 container
+										234 cell
+											235 text Group 160
+								236 row (selectable, collapsed) Group 159, Secondary Actions: Expand
+									237 container
+										238 cell
+											239 text Group 159
+								240 row (selectable, collapsed) Group 158, Secondary Actions: Expand
+									241 container
+										242 cell
+											243 text Group 158
+								244 row (selectable) TABLE OF CONTENTS +
+									245 container
+										246 cell
+											247 text TABLE OF CONTENTS +
+								248 row (selectable) Rectangle 114
+									249 container
+										250 cell
+											251 text Rectangle 114
+								252 row (selectable, collapsed) Group 157, Secondary Actions: Expand
+									253 container
+										254 cell
+											255 text Group 157
+								256 row (selectable) image 56
+									257 container
+										258 cell
+											259 text image 56
+					260 slider Description: Resize handle, Value: 240
+			261 container Right sidebar
+				262 container
+					263 container
+						264 pop up button (collapsed) Description: Multiplayer tools, ID: self-avatar-with-tools-container, Secondary Actions: Expand
+							265 image
+						266 container Prototype view
+							267 button Description: Present, ID: :rt:
+							268 pop up button (collapsed) Description: Prototype view, ID: :rs:, Secondary Actions: Expand
+						269 button Share
+						270 tab group
+							271 tab (selected, settable, boolean) Design, Value: 1, ID: tab:r10:-0-trigger
+							272 tab (selectable, settable, boolean) Prototype, Value: 0, ID: tab:r10:-1-trigger
+						273 pop up button (collapsed) Description: 100%, zoom and view options, ID: :r13:, Secondary Actions: Expand
+							274 text 100%
+							275 image
+						276 container
+							277 heading Text, Value: 1
+								278 text Text
+							279 button Select matching layers
+							280 checkbox (settable, integer) Description: Create link, Value: 0, ID: :r1l:
+							281 text Create link
+							282 pop up button (collapsed) Description: Apply variable, Secondary Actions: Expand
+							283 pop up button (collapsed) Description: More actions, ID: :r1o:, Secondary Actions: Expand
+							284 heading Position, Value: 2
+								285 text Position
+							286 container Alignment
+								287 text Alignment
+								288 button Align left
+									289 image
+								290 button Align horizontal centers
+									291 image
+								292 button Align right
+									293 image
+								294 button Align top
+									295 image
+								296 button Align vertical centers
+									297 image
+								298 button Align bottom
+									299 image
+							300 container Position
+								301 text Position
+								302 stepper (settable, integer) Description: X-position, Value: -722
+								303 stepper (settable, integer) Description: Y-position, Value: 128
+							304 container Rotation
+								305 text Rotation
+								306 stepper (settable, integer) Description: Rotation, Value: 0, Details: 0Â°
+								307 button Rotate 90˚ right
+									308 image
+								309 button Flip horizontal
+									310 image
+								311 button Flip vertical
+									312 image
+							313 heading Layout, Value: 2
+								314 text Layout
+							315 container Resizing
+								316 text Resizing
+								317 Resizing
+									318 text Resizing
+									319 radio button (settable, integer) Description: Auto width, Value: 0, ID: :r1r:-WIDTH_AND_HEIGHT
+									320 radio button (settable, integer) Description: Auto height, Value: 0, ID: :r1r:-HEIGHT
+									321 radio button (settable, integer) Description: Fixed size, Value: 1, ID: :r1r:-NONE
+							322 container Dimensions
+								323 text Dimensions
+								324 container Width
+									325 text W
+									326 text field (settable) Description: Width, Value: 639
+								327 container Height
+									328 text H
+									329 text field (settable) Description: Height, Value: 108
+								330 checkbox (settable, integer) Description: Lock aspect ratio, Value: 0, ID: :r1u:
+								331 text Lock aspect ratio
+							332 heading Appearance, Value: 2
+								333 text Appearance
+							334 checkbox (settable, integer) Description: Hide, Value: 0, ID: :r1v:
+							335 text Hide
+							336 pop up button (collapsed) Description: Apply blend mode, ID: :r22:, Secondary Actions: Expand
+							337 container
+								338 image
+								339 text field (settable) 100%
+							340 container
+								341 text field (disabled) 0
+							342 heading Typography, Value: 2
+								343 text Typography
+							344 pop up button (collapsed) Description: Typography, Apply styles, Secondary Actions: Expand
+							345 combo box (collapsed) Description: Font family, Value: Montserrat, Secondary Actions: Expand
+								346 container
+									347 text Montserrat
+									348 image
+							349 text Font style
+							350 combo box (collapsed) Font style, Value: Bold, ID: :r2i:, Secondary Actions: Expand
+								351 text Bold
+								352 image
+							353 container
+								354 list Font size: 37 px
+								355 container Font size
+									356 combo box (collapsed, settable) Description: Font size: 37 px, Value: 37, Secondary Actions: Expand
+							357 container
+								358 image
+								359 text field (settable) Description: Line height, Value: Auto
+							360 container
+								361 image
+								362 text field (settable) Description: Letter spacing, Value: 0%
+							363 container Alignment
+								364 text Alignment
+								365 Horizontal
+									366 text Horizontal
+									367 radio button (settable, integer) Description: Align left, Value: 1, ID: :r2n:-LEFT
+									368 radio button (settable, integer) Description: Align center, Value: 0, ID: :r2n:-CENTER
+									369 radio button (settable, integer) Description: Align right, Value: 0, ID: :r2n:-RIGHT
+								370 Vertical
+									371 text Vertical
+									372 radio button (settable, integer) Description: Align top, Value: 1, ID: :r2o:-TOP
+									373 radio button (settable, integer) Description: Align middle, Value: 0, ID: :r2o:-CENTER
+									374 radio button (settable, integer) Description: Align bottom, Value: 0, ID: :r2o:-BOTTOM
+								375 pop up button (collapsed) Description: Type settings, Secondary Actions: Expand
+							376 heading Fill, Value: 2
+								377 text Fill
+							378 pop up button (collapsed) Description: Fill, Apply styles and variables, Secondary Actions: Expand
+							379 button Add fill
+							380 table
+								381 row (selectable) Solid color hex: 0013A9 Color 0013A9 100 % Toggle visibility Remove
+									382 cell
+										383 container
+											384 button Solid color hex: 0013A9
+											385 text Color
+											386 combo box (collapsed, settable) Description: Color, Value: 0013A9, ID: :r95:, Secondary Actions: Expand
+											387 text field (settable) %, Value: 100
+											388 text %
+									389 cell
+										390 checkbox (settable, integer) Description: Toggle visibility, Value: 1, ID: :r2u:
+										391 text Toggle visibility
+									392 cell
+										393 button Remove
+							394 button Stroke
+								395 heading Stroke, Value: 2
+									396 text Stroke
+							397 pop up button (collapsed) Description: Stroke, Apply styles and variables, Secondary Actions: Expand
+							398 button Add stroke
+							399 container
+								400 button Effects
+									401 heading Effects, Value: 2
+										402 text Effects
+								403 pop up button (collapsed) Description: Effects, Apply styles, Secondary Actions: Expand
+								404 button Add effect
+							405 heading Export, Value: 2
+								406 text Export
+							407 button Add export settings
+							408 table
+								409 row (selectable) Export constraints for content scale or width/height dimensions Export file type PNG Advanced export settings Remove
+									410 cell
+										411 container Export constraints for content scale or width/height dimensions
+											412 stepper (settable, integer) Description: Export constraints for content scale or width/height dimensions, Value: 0, Details: 1x
+											413 pop up button (collapsed) Description: Select an option, ID: :r3a:, Secondary Actions: Expand
+												414 image
+									415 cell
+										416 text Export file type
+										417 combo box (collapsed) Export file type, Value: PNG, ID: :r3f:, Secondary Actions: Expand
+											418 text PNG
+											419 image
+									420 cell
+										421 pop up button (collapsed) Description: Advanced export settings, Secondary Actions: Expand
+									422 cell
+										423 button Remove
+							424 button Export Every Perfect Journey Begins with a Radiant Smile
+							425 button (collapsed) Preview, Secondary Actions: Expand
+					426 slider Description: Resize handle, Value: 241
+		427 container Application toolbar
+			428 toolbar Editor
+				429 container Move
+					430 checkbox Description: Move, Value: 1
+						431 image
+					432 checkbox (collapsed) Description: Move tools, Value: 0, ID: :r7n:, Secondary Actions: Expand
+				433 container Frame
+					434 checkbox Description: Frame, Value: 0
+						435 image
+					436 checkbox (collapsed) Description: Region tools, Value: 0, ID: :r7s:, Secondary Actions: Expand
+				437 container Rectangle
+					438 checkbox Description: Rectangle, Value: 0
+						439 image
+					440 checkbox (collapsed) Description: Shape tools, Value: 0, ID: :r81:, Secondary Actions: Expand
+				441 container Pen
+					442 checkbox Description: Pen, Value: 0
+						443 image
+					444 checkbox (collapsed) Description: Creation tools, Value: 0, ID: :r86:, Secondary Actions: Expand
+				445 container Text
+					446 checkbox Description: Text, Value: 0
+						447 image
+					448 checkbox (collapsed) Description: Type tools, Value: 0, ID: :r8b:, Secondary Actions: Expand
+				449 checkbox Description: Comment, Value: 0
+					450 image
+				451 checkbox Description: Actions, Value: 0
+					452 image
+				453 Toolbelt Mode
+					454 text Toolbelt Mode
+					455 radio button (settable, integer) Description: Draw, Value: 0, ID: :r4a:-illustration
+					456 radio button (settable, integer) Description: Design, Value: 1, ID: :r4a:-design
+					457 radio button (settable, integer) Description: Motion, Value: 0, ID: :r4a:-metronome
+					458 radio button (settable, integer) Description: Dev Mode, Value: 0, ID: :r4a:-handoff
+		459 container Help/zoom toolbar
+			460 toolbar Help/zoom toolbar
+				461 pop up button (collapsed) Description: Help, ID: :r2:, Secondary Actions: Expand
+					462 image
+
+The focused UI element is 5 container Figma Design, 1 item selected
