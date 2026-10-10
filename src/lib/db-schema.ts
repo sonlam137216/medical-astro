@@ -4,9 +4,33 @@
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
 export interface Tables {
+  article_categories: {
+    Row: {
+      created_at: string;
+      id: string;
+      is_visible: boolean;
+      kind: string;
+      name: string;
+      slug: string;
+      sort_order: number;
+      updated_at: string;
+    };
+    Insert: {
+      created_at?: string;
+      id?: string;
+      is_visible?: boolean;
+      kind: string;
+      name: string;
+      slug: string;
+      sort_order?: number;
+      updated_at?: string;
+    };
+  };
   articles: {
     Row: {
+      author_name: string | null;
       body: string | null;
+      category_id: string | null;
       cover_image_id: string | null;
       created_at: string;
       destination_id: string | null;
@@ -15,6 +39,8 @@ export interface Tables {
       is_visible: boolean;
       kind: string;
       published_on: string | null;
+      reviewed_by: string | null;
+      reviewed_on: string | null;
       seo_description: string | null;
       seo_title: string | null;
       slug: string;
@@ -22,7 +48,9 @@ export interface Tables {
       updated_at: string;
     };
     Insert: {
+      author_name?: string | null;
       body?: string | null;
+      category_id?: string | null;
       cover_image_id?: string | null;
       created_at?: string;
       destination_id?: string | null;
@@ -31,6 +59,8 @@ export interface Tables {
       is_visible?: boolean;
       kind: string;
       published_on?: string | null;
+      reviewed_by?: string | null;
+      reviewed_on?: string | null;
       seo_description?: string | null;
       seo_title?: string | null;
       slug: string;
@@ -523,7 +553,28 @@ export interface TableInfo {
 }
 
 export const TABLES: Record<TableName, TableInfo> = {
-  articles: { bool: ['is_visible'], uuid: true },
+  article_categories: { bool: ['is_visible'], uuid: true },
+  articles: {
+    bool: ['is_visible'],
+    uuid: true,
+    refs: { category_id: 'article_categories', cover_image_id: 'media_assets' },
+    // The body can be tens of kilobytes: the audit log records the other columns only.
+    audit: [
+      'slug',
+      'kind',
+      'title',
+      'excerpt',
+      'category_id',
+      'cover_image_id',
+      'author_name',
+      'reviewed_by',
+      'reviewed_on',
+      'published_on',
+      'seo_title',
+      'seo_description',
+      'is_visible',
+    ],
+  },
   audit_logs: { json: ['changes'], audit: false },
   consultation_requests: {
     uuid: true,

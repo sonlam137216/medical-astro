@@ -4,6 +4,7 @@ import type { Img } from '../data/types';
 import { doctorProfiles } from '../data/shared';
 import { toPublicImage, type PublicImage } from './media';
 import { SNAPSHOT_SCHEMA_VERSION, isSnapshot, type Snapshot } from './snapshot';
+import { articlePath, type ArticleKind } from './cms/articles';
 
 // BUILD-TIME ONLY. Public pages are prerendered, so this runs while `astro build` runs and never per
 // visit. Do not call it from a request handler: that would query the database on every page view.
@@ -142,4 +143,79 @@ export async function getFaqs(group: string, sampleQuestions: string[]): Promise
   if (published.length > 0)
     return published.map((f) => ({ question: f.question, answer: f.answer }));
   return sampleQuestions.map((question) => ({ question, answer: null }));
+}
+
+export interface PublicArticle {
+  slug: string;
+  kind: ArticleKind;
+  /** Address of the detail page, e.g. /travel-guide/da-nang. */
+  path: string;
+  title: string;
+  excerpt: string | null;
+  /** Source text in the format of src/lib/cms/articles.ts; render it with parseArticleBody. */
+  body: string | null;
+  cover: PublicImage | null;
+  category: { slug: string; name: string } | null;
+  author: string | null;
+  reviewedBy: string | null;
+  reviewedOn: string | null;
+  publishedOn: string | null;
+  updatedOn: string | null;
+  seoTitle: string | null;
+  seoDescription: string | null;
+}
+
+/**
+ * Published articles of one kind, newest first. Empty before the first publish that includes articles: there
+ * is no sample article content, so pages that list articles show their sample cards (Home) or an empty state.
+ */
+export async function getArticles(kind: ArticleKind): Promise<PublicArticle[]> {
+  const snapshot = await loadSnapshot();
+  const publicBase = setting('R2_PUBLIC_BASE_URL');
+  const categories = new Map((snapshot?.articleCategories ?? []).map((c) => [c.slug, c.name]));
+  return (snapshot?.articles ?? [])
+    .filter((a) => a.kind === kind)
+    .map((a) => ({
+      slug: a.slug,
+      kind,
+      path: articlePath(kind, a.slug),
+      title: a.title,
+      excerpt: a.excerpt,
+      body: a.body,
+      cover:
+        (a.coverImage &&
+          toPublicImage(
+            {
+              r2_key: a.coverImage.key,
+              width: a.coverImage.width,
+              height: a.coverImage.height,
+              alt_text: a.coverImage.alt,
+              is_decorative: a.coverImage.decorative,
+              variant_widths: a.coverImage.widths,
+            },
+            publicBase,
+          )) ||
+        null,
+      category:
+        a.category && categories.has(a.category)
+          ? { slug: a.category, name: categories.get(a.category) as string }
+          : null,
+      author: a.author,
+      reviewedBy: a.reviewedBy,
+      reviewedOn: a.reviewedOn,
+      publishedOn: a.publishedOn,
+      updatedOn: a.updatedOn,
+      seoTitle: a.seoTitle,
+      seoDescription: a.seoDescription,
+    }));
+}
+
+/** Categories (filters) of one kind that are shown, in display order. */
+export async function getArticleCategories(
+  kind: ArticleKind,
+): Promise<{ slug: string; name: string }[]> {
+  const snapshot = await loadSnapshot();
+  return (snapshot?.articleCategories ?? [])
+    .filter((c) => c.kind === kind)
+    .map((c) => ({ slug: c.slug, name: c.name }));
 }

@@ -1,4 +1,5 @@
 import type { Field } from './fields';
+import { ARTICLE_KINDS, MAX_ARTICLE_BODY } from './articles';
 
 // Every kind of content the admin can edit with the generic list / add / edit pages, described as data.
 // Adding a module = adding an entry here (plus its part of the snapshot and its public pages).
@@ -114,6 +115,113 @@ export const ENTITIES: EntityDef[] = [
     order: [{ column: 'path' }],
     creatable: false,
     deletable: false,
+  },
+  {
+    key: 'article-categories',
+    table: 'article_categories',
+    singular: 'article category',
+    plural: 'Article categories',
+    intro:
+      'Groups for articles, for example the filters on the Dental Knowledge page. A category belongs to one kind of article. Deleting a category keeps its articles, which become uncategorised.',
+    titleField: 'name',
+    columns: [
+      { field: 'kind', label: 'Kind' },
+      { field: 'name', label: 'Name' },
+      { field: 'sort_order', label: 'Order' },
+      { field: 'is_visible', label: 'Shown' },
+    ],
+    fields: [
+      {
+        type: 'select',
+        name: 'kind',
+        label: 'Kind of article',
+        options: ARTICLE_KINDS,
+        default: 'dental_knowledge',
+      },
+      { type: 'text', name: 'name', label: 'Name', max: 120, required: true },
+      { type: 'slug', name: 'slug', label: 'Address name', from: 'name' },
+      sortOrder,
+      visible,
+    ],
+    order: [{ column: 'kind' }, { column: 'sort_order' }, { column: 'name' }],
+    deletable: true,
+  },
+  {
+    key: 'articles',
+    table: 'articles',
+    singular: 'article',
+    plural: 'Articles',
+    intro:
+      'Travel guide and Dental knowledge articles. Tick “Published” when an article is ready: drafts never reach the website. A published article needs text, a summary and a date, and Dental knowledge articles also need a clinical reviewer. Changes go live after you publish the website.',
+    titleField: 'title',
+    columns: [
+      { field: 'title', label: 'Title' },
+      { field: 'kind', label: 'Kind' },
+      { field: 'published_on', label: 'Date' },
+      { field: 'is_visible', label: 'Published' },
+    ],
+    fields: [
+      {
+        type: 'select',
+        name: 'kind',
+        label: 'Kind of article',
+        options: ARTICLE_KINDS,
+        default: 'travel_guide',
+      },
+      { type: 'text', name: 'title', label: 'Title', max: 200, required: true },
+      {
+        type: 'slug',
+        name: 'slug',
+        label: 'Address name',
+        from: 'title',
+        help: 'Used in the web address. Changing it after publishing breaks old links.',
+      },
+      {
+        type: 'textarea',
+        name: 'excerpt',
+        label: 'Short summary',
+        max: 500,
+        rows: 3,
+        help: 'Shown on the article cards and in search results.',
+      },
+      {
+        type: 'textarea',
+        name: 'body',
+        label: 'Article text',
+        max: MAX_ARTICLE_BODY,
+        rows: 20,
+        help: 'Write plain text. “## Heading” starts a section (listed in the table of contents), “### Heading” a smaller one, “- item” a bullet, “1. item” a numbered point, “> text” a quote, “**bold**” bold text and “[words](https://…)” a link. A blank line starts a new paragraph.',
+      },
+      { type: 'image', name: 'cover_image_id', label: 'Cover image' },
+      {
+        type: 'ref',
+        name: 'category_id',
+        label: 'Category',
+        table: 'article_categories',
+        labelColumn: 'name',
+      },
+      { type: 'text', name: 'author_name', label: 'Written by', max: 120 },
+      {
+        type: 'text',
+        name: 'reviewed_by',
+        label: 'Clinically reviewed by',
+        max: 160,
+        placeholder: 'Melatec Dental Team',
+        help: 'Required for Dental knowledge articles. Only name people or teams who really reviewed the text.',
+      },
+      { type: 'date', name: 'reviewed_on', label: 'Reviewed on' },
+      { type: 'date', name: 'published_on', label: 'Publication date' },
+      { type: 'text', name: 'seo_title', label: 'Search title', max: 200 },
+      { type: 'textarea', name: 'seo_description', label: 'Search description', max: 400, rows: 3 },
+      {
+        type: 'bool',
+        name: 'is_visible',
+        label: 'Published (visible on the website after you publish)',
+        default: false,
+      },
+    ],
+    order: [{ column: 'published_on', ascending: false }, { column: 'title' }],
+    deletable: true,
   },
   {
     key: 'redirects',

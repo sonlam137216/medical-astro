@@ -2,6 +2,7 @@ import type { AdminDb } from '../admin-auth';
 import { isSameOrigin } from '../admin-auth';
 import { readBodyLimited } from '../consultation';
 import { listPickerImages, type PickerImage } from '../media-picker';
+import { articleProblems } from './articles';
 import type { EntityDef } from './entities';
 import {
   emptyValues,
@@ -64,13 +65,19 @@ export async function processPost(
 ): Promise<PostResult> {
   if (!isSameOrigin(request)) return { redirect: new Response('Forbidden', { status: 403 }) };
 
-  const text = await readBodyLimited(request, 64 * 1024);
+  // An article body of 60,000 characters grows when URL-encoded (accents, spaces), so articles get more room.
+  const text = await readBodyLimited(request, def.key === 'articles' ? 320 * 1024 : 64 * 1024);
   if (text === null) return { redirect: new Response('Payload Too Large', { status: 413 }) };
   const form = new URLSearchParams(text);
   const values = valuesFromForm(def.fields, form);
 
   const parsed = parseFields(def.fields, form);
   if (!parsed.ok) return { status: 422, values, errors: parsed.errors };
+
+  if (def.key === 'articles') {
+    const errors = await checkArticle(db, parsed.value);
+    if (Object.keys(errors).length > 0) return { status: 422, values, errors };
+  }
 
   // `status_code` is the only numeric select; the column is an integer.
   const row: Row = { ...parsed.value };
@@ -117,6 +124,32 @@ export async function processPost(
     return { status: 404, values, errors: {}, formError: 'This item no longer exists.' };
   }
   return { redirect: redirectTo(`/admin/content/${def.key}?saved=1`) };
+}
+
+/** Rules that span fields or tables (see articleProblems), run before an article is saved. */
+async function checkArticle(db: AdminDb, value: Row): Promise<FieldErrors> {
+  let categoryKind: string | null = null;
+  if (typeof value.category_id === 'string') {
+    const { data } = await anyDb(db)
+      .from('article_categories')
+      .select('kind')
+      .eq('id', value.category_id)
+      .maybeSingle();
+    categoryKind = (data as { kind?: string } | null)?.kind ?? null;
+    if (!categoryKind)
+      return { category_id: 'This category no longer exists. Please choose again.' };
+  }
+  return articleProblems({
+    kind: String(value.kind ?? ''),
+    isVisible: value.is_visible === true,
+    title: String(value.title ?? ''),
+    excerpt: (value.excerpt as string | null) ?? null,
+    body: (value.body as string | null) ?? null,
+    publishedOn: (value.published_on as string | null) ?? null,
+    reviewedBy: (value.reviewed_by as string | null) ?? null,
+    categoryKind,
+    today: new Date().toISOString().slice(0, 10),
+  });
 }
 
 export async function loadRow(db: AdminDb, def: EntityDef, id: string): Promise<Row | null> {
