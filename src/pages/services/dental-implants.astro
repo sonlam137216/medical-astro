@@ -1,19 +1,20 @@
 ---
-import { Image } from 'astro:assets';
 import SiteLayout from '../../layouts/SiteLayout.astro';
 import PageHero from '../../components/PageHero.astro';
 import Section from '../../components/Section.astro';
 import SectionIntro from '../../components/SectionIntro.astro';
 import Button from '../../components/Button.astro';
 import InfoCard from '../../components/cards/InfoCard.astro';
+import PackageCard from '../../components/cards/PackageCard.astro';
+import TreatmentCosts from '../../components/home/TreatmentCosts.astro';
+import SeamlessJourney from '../../components/SeamlessJourney.astro';
 import PlanVisit from '../../components/PlanVisit.astro';
-import { getPageSeo, getSiteContent } from '../../lib/site-content';
+import { getPageSeo } from '../../lib/site-content';
 import { getFaqs } from '../../lib/content';
-import { heroImage, options, answers, support, faq } from '../../data/implants';
+import { stats } from '../../data/about';
+import { heroImage, hero, costs, comparison, why, faq } from '../../data/implants';
 
 export const prerender = true;
-
-const site = await getSiteContent();
 
 // Answers are plain text; a blank line starts a new paragraph.
 const paragraphs = (text: string) => text.split(/\n{2,}/);
@@ -21,100 +22,80 @@ const faqs = await getFaqs('dental-implants', faq.questions);
 const seo = await getPageSeo('/services/dental-implants', {
   title: 'Dental implants · Melatec Dental Clinic',
 });
+// The Figma row has one filled card (30,000+) and three empty ones: only the filled one is shown.
+const [stat] = stats;
 ---
 
 <!-- The page has its own consultation block and no social row. The header is the standard one (the new Figma has no landing-page header variant). -->
 <SiteLayout title={seo.title} description={seo.description} consultation={false} social={false}>
-  <PageHero label="Dental implants" image={heroImage} imageHeight={430} rounded>
-    <Fragment slot="title">
-      Plan your smile
-      <br />
-      before you fly.
-    </Fragment>
-    <p>
-      Explore single-tooth implants and full-arch restoration with a personalised treatment plan,
-      estimated cost and clear travel guidance.
-    </p>
-    <Fragment slot="actions">
-      <Button href="#consultation">Get your treatment plan</Button>
-      {site.whatsappUrl && (
-        <Button variant="outline" href={site.whatsappUrl}>
-          Ask on WhatsApp
-        </Button>
-      )}
-    </Fragment>
-    <p slot="extra" class="muted">
-      Personalised care · English-speaking support
-    </p>
+  <PageHero
+    variant="banner"
+    dark
+    label={hero.label}
+    image={heroImage}
+    imageHeight={440}
+    position="85% center"
+  >
+    <Fragment slot="title">{hero.title}</Fragment>
+    <p>{hero.body}</p>
+    <Button slot="actions" variant="light" href="#consultation">
+      Book free consultation
+    </Button>
   </PageHero>
 
-  <Section labelledby="options-title">
-    <SectionIntro label={options.label} headingId="options-title">
-      <Fragment slot="title">{options.title}</Fragment>
-      <p>{options.body}</p>
-    </SectionIntro>
-    <ul class="options">
-      {options.cards.map((c) => (
-        <li class="card option">
-          <div class="option__media">
-            <Image
-              src={c.image.src}
-              alt={c.image.alt}
-              width={336}
-              height={180}
-              densities={[1, 2]}
-              sizes="(max-width: 700px) 100vw, 336px"
-              loading="lazy"
-            />
-          </div>
-          <h3 class="t-h3">{c.title}</h3>
-          <p>{c.body}</p>
-          <p class="option__price">{c.price}</p>
-          <p class="t-small muted">{c.note}</p>
-          <div>
-            <Button variant="outline" href="#consultation">
-              Request an estimate
-            </Button>
-          </div>
-        </li>
-      ))}
-    </ul>
-  </Section>
+  <section class="stat" aria-label="Melatec at a glance">
+    <div class="container">
+      <p class="stat__card">
+        <span class="stat__value">{stat.value}</span>
+        <span class="stat__label">{stat.label}</span>
+      </p>
+    </div>
+  </section>
 
-  <Section tone="soft" labelledby="answers-title">
-    <SectionIntro label={answers.label} headingId="answers-title">
-      <Fragment slot="title">{answers.title}</Fragment>
+  <Section tone="soft" labelledby="costs-title">
+    <SectionIntro label={costs.label} headingId="costs-title" align="center" lined>
+      <Fragment slot="title">{costs.title}</Fragment>
     </SectionIntro>
-    <ul class="cards">
-      {answers.items.map((i) => (
+    <ul class="grid">
+      {costs.cards.map((c) => (
         <li>
-          <InfoCard {...i} />
+          <PackageCard {...c} href="#consultation" linkLabel="Request an estimate" />
         </li>
       ))}
     </ul>
   </Section>
 
-  <Section tone="soft" labelledby="support-title">
-    <SectionIntro label={support.label} headingId="support-title">
-      <Fragment slot="title">{support.title}</Fragment>
-      <p>{support.body}</p>
+  <TreatmentCosts label={comparison.label} rows={comparison.rows} align="center">
+    <Fragment slot="title">{comparison.title}</Fragment>
+  </TreatmentCosts>
+
+  <Section tone="navy" labelledby="why-title">
+    <SectionIntro label={why.label} headingId="why-title" align="center" lined inverse>
+      <Fragment slot="title">{why.title}</Fragment>
     </SectionIntro>
-    <ul class="cards">
-      {support.items.map((i) => (
+    <ul class="grid">
+      {why.items.map((i) => (
         <li>
-          <InfoCard {...i} />
+          <InfoCard {...i} tone="dark" />
         </li>
       ))}
     </ul>
   </Section>
 
-  <Section labelledby="faq-title">
-    <SectionIntro label={faq.label} headingId="faq-title">
+  <PlanVisit />
+
+  <SeamlessJourney />
+
+  <!-- Figma "Results: Real Stories. Real Smiles." (before/after carousel) is not built: the pictures show a real
+       patient, and consent and usage rights are not confirmed (see src/assets/images/SOURCES.md). -->
+
+  <Section tone="soft" labelledby="faq-title">
+    <SectionIntro label={faq.label} headingId="faq-title" align="center" lined>
       <Fragment slot="title">{faq.title}</Fragment>
     </SectionIntro>
     <div class="faq">
-      {faqs.map((item) => (
-        <details>
+      {faqs.map((item, i) => (
+        <details open={i === 0}>
           <summary>{item.question}</summary>
           {item.answer && (
             <Fragment>
@@ -129,12 +110,37 @@ const seo = await getPageSeo('/services/dental-implants', {
       ))}
     </div>
   </Section>
-
-  <PlanVisit />
 </SiteLayout>
 
 <style>
-  .options {
+  .stat {
+    padding-block: 40px 0;
+  }
+
+  .stat__card {
+    display: grid;
+    gap: 4px;
+    width: 260px;
+    margin-inline: auto;
+    padding: 20px 24px;
+    background: var(--color-white);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card);
+    box-shadow: 0 6px 18px rgb(0 86 229 / 8%);
+    text-align: center;
+  }
+
+  .stat__value {
+    font: 700 48px / 56px var(--font-serif);
+    color: var(--color-title);
+  }
+
+  .stat__label {
+    font: 500 var(--text-small) / var(--text-small-lh) var(--font-display);
+    color: var(--color-navy);
+  }
+
+  .grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 24px;
@@ -143,44 +149,32 @@ const seo = await getPageSeo('/services/dental-implants', {
     list-style: none;
   }
 
-  .option {
-    display: grid;
-    align-content: start;
-    gap: 16px;
-    padding: 24px;
+  .grid li {
+    display: flex;
   }
 
-  .option__media :global(img) {
-    width: 100%;
-    height: auto;
-    aspect-ratio: 336 / 180;
-    object-fit: cover;
-    border-radius: 12px;
+  .grid li > :global(*) {
+    flex: 1;
   }
 
-  .option__price {
-    font-family: var(--font-serif);
-    font-weight: 700;
-    font-size: 36px;
-    line-height: 44px;
-    color: var(--color-blue);
-  }
-
-  .cards {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 24px;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
-
+  /* Figma: each question is a bordered card; the open one is tinted. */
   .faq {
     display: grid;
+    gap: 12px;
+    max-width: 720px;
+    margin-inline: auto;
+    width: 100%;
   }
 
   .faq details {
-    padding-block: 18px;
+    padding: 16px 24px;
+    background: var(--color-white);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card);
+  }
+
+  .faq details[open] {
+    background: var(--color-card);
   }
 
   .faq summary {
@@ -189,7 +183,8 @@ const seo = await getPageSeo('/services/dental-implants', {
     gap: 16px;
     cursor: pointer;
     list-style: none;
-    color: var(--color-heading);
+    font: 700 var(--text-body) / var(--text-body-lh) var(--font-display);
+    color: var(--color-title);
   }
 
   .faq summary::-webkit-details-marker {
@@ -209,18 +204,18 @@ const seo = await getPageSeo('/services/dental-implants', {
 
   .faq details p {
     margin-top: 12px;
+    font-size: var(--text-small);
+    line-height: var(--text-small-lh);
   }
 
   @media (max-width: 1024px) {
-    .options,
-    .cards {
+    .grid {
       grid-template-columns: repeat(2, 1fr);
     }
   }
 
   @media (max-width: 640px) {
-    .options,
-    .cards {
+    .grid {
       grid-template-columns: 1fr;
     }
   }

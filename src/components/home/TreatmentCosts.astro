@@ -3,17 +3,28 @@ import Section from '../Section.astro';
 import SectionIntro from '../SectionIntro.astro';
 import { costComparison as c } from '../../data/home';
 
+// Shared by Home and the Dental Implants page. `rows` narrows the table to the treatments of the page,
+// `label` / the `title` slot override the Home heading.
+interface Props {
+  label?: string;
+  rows?: { name: string; note: string }[];
+  align?: 'start' | 'center';
+}
+const { label = c.label, rows = c.rows, align = 'start' } = Astro.props;
+
 // Vietnam is always shown first; the visitor picks which other country to compare against.
 const [home, ...others] = c.countries;
 const defaultCountry = others.includes('Australia') ? 'Australia' : others[0];
 ---
 
 <Section labelledby="costs-title">
-  <SectionIntro label={c.label} headingId="costs-title" lined>
+  <SectionIntro label={label} headingId="costs-title" lined {align}>
     <Fragment slot="title">
-      Exceptional dental care.
-      <br />
-      Made more accessible.
+      <slot name="title">
+        Exceptional dental care.
+        <br />
+        Made more accessible.
+      </slot>
     </Fragment>
   </SectionIntro>
 
@@ -54,7 +65,7 @@ const defaultCountry = others.includes('Australia') ? 'Australia' : others[0];
         </tr>
       </thead>
       <tbody>
-        {c.rows.map((row) => (
+        {rows.map((row) => (
           <tr>
             <th scope="row">
               <span class="row__name">{row.name}</span>

@@ -33,7 +33,7 @@ Trạng thái dùng cho từng phần: `Chưa bắt đầu` → `Đang đối ch
 | P2  | Header, footer, social và form dùng chung           | P1; nối danh mục form sau A1/A5   | Chờ kiểm tra                                                                    |
 | P3  | Home                                                | P2; dữ liệu A1–A5; bài viết P7/P8 | Chờ kiểm tra                                                                    |
 | P4  | About, Services và Our Doctors                      | P2; A1/A5                         | Chờ kiểm tra (còn: route chi tiết dịch vụ từ CMS, chờ A1)                       |
-| P5  | Dental Implants                                     | P2; A1–A3/A5                      | Chưa bắt đầu                                                                    |
+| P5  | Dental Implants                                     | P2; A1–A3/A5                      | Chờ kiểm tra (còn: mục Results, giá/so sánh từ A3, nội dung từ A1)              |
 | P6  | Dental Packages: Single Treatments và Travel Combos | P2; A1–A5                         | Chưa bắt đầu                                                                    |
 | P7  | Mô hình nội dung và CMS bài viết                    | P0, A0; quan hệ địa điểm A4       | Chưa bắt đầu                                                                    |
 | P8  | Travel Guide, Dental Knowledge và Single Post       | P2, P7                            | Chưa bắt đầu                                                                    |
@@ -119,6 +119,8 @@ Trạng thái dùng cho từng phần: `Chưa bắt đầu` → `Đang đối ch
 - [ ] Cập nhật nội dung, bố cục và vị trí form Get Your Implant Plan Before Your Flight.
 - [ ] Bổ sung Your Seamless Dental Journey và Results / Real Stories. Real Smiles.
 - [ ] Đồng bộ FAQ, thứ tự section và footer. Đáp án y khoa cần nội dung được phòng khám duyệt; nội dung mẫu trong Figma chỉ là tham chiếu.
+
+**Tiến độ 10/10/2026 (P5):** đã dựng lại trang theo thứ tự Figma (chưa commit): hero navy (ảnh implant 3D mới `implant-hero.webp`, xuất từ `image 35`), một thẻ số liệu (Figma chỉ có 30,000+, ba thẻ rỗng bị ẩn), 'What You Pay at Melatec' (3 `PackageCard`, nút 'Request an estimate' → form; bỏ bullet tiếng Việt, dùng lại chữ của bản cũ), 'Compared with Other Countries' (tái dùng `TreatmentCosts` của Home, nay nhận `label`, `rows`, `align` và slot `title`; 3 dòng implant; ô giá vẫn là mẫu 'C$1,250 · 40 clinics'), 'High-Quality Implant Care at a Smarter Cost' (navy, 6 thẻ — dùng chữ 'Clear answers' và 'Dental travel support' của bản cũ thay cho 6 thẻ 'Experienced team' giống hệt; tên 'MLT' đổi thành Melatec), `PlanVisit` bố cục lại (chữ + 3 bullet + nút WhatsApp bên trái, form trong thẻ trắng viền bên phải, nhãn in hoa), `SeamlessJourney`, FAQ dạng thẻ viền (câu đầu mở sẵn). Bỏ hai khối cũ không có trong Figma ('Find the right option', 'Clear answers' dạng thẻ nền nhạt). Đã chạy check/lint/format/test/build, chụp Chrome headless 1440 và 500 (không tràn ngang), kiểm lại Home. **Chưa làm:** mục 'Results — Real Stories. Real Smiles.' (ảnh trước/sau là người thật, chưa có xác nhận đồng ý; chỉ ghi chú trong code), giá/bảng so sánh thật (A3), nội dung từng dịch vụ và route theo mẫu (A1), đáp án FAQ (phòng khám cung cấp).
 
 **Đạt khi:** trang đủ các khối trên và đúng thứ tự trong Figma; form, bảng giá, FAQ và CTA được kiểm tra.
 

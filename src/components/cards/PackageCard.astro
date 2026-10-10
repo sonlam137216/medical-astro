@@ -9,9 +9,10 @@ interface Props {
   total: string;
   href: string;
   image: Img;
+  linkLabel?: string;
 }
 
-const { title, inclusions, total, href, image } = Astro.props;
+const { title, inclusions, total, href, image, linkLabel = 'Learn more' } = Astro.props;
 ---
 
 <article class="card package">
@@ -44,7 +45,7 @@ const { title, inclusions, total, href, image } = Astro.props;
     </ul>
     <p class="package__total">{total}</p>
     <a class="link-arrow" href={href}>
-      Learn more <span aria-hidden="true">→</span>
+      {linkLabel} <span aria-hidden="true">→</span>
     </a>
   </div>
 </article>

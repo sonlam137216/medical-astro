@@ -4,6 +4,7 @@ import Button from './Button.astro';
 import PhoneField from './PhoneField.astro';
 import { footerTreatments } from '../data/site';
 import { getSiteContent } from '../lib/site-content';
+import { plan } from '../data/implants';
 
 const site = await getSiteContent();
 
@@ -15,22 +16,22 @@ const interests = footerTreatments.map((t) => t.label); // PROVISIONAL option li
   <div class="container">
     <div class="plan">
       <div class="plan__info">
-        <p class="t-label">Let’s plan your visit</p>
+        <p class="plan__label">{plan.label}</p>
         <h2 class="t-h2" id="plan-title">
-          Your new smile
-          <br />
-          starts with a conversation.
+          {plan.title}
         </h2>
-        <p>
-          Tell us what you need. Our team can help you understand treatment options and plan your
-          visit to Vietnam.
-        </p>
+        <p>{plan.body}</p>
+        <ul class="plan__bullets">
+          {plan.bullets.map((b) => (
+            <li>{b}</li>
+          ))}
+        </ul>
         {site.whatsappUrl && (
-          <p class="plan__whatsapp">
-            <a href={site.whatsappUrl}>
-              WhatsApp{site.phoneDisplay && <>&nbsp; {site.phoneDisplay}</>}
-            </a>
-          </p>
+          <div>
+            <Button variant="outline" href={site.whatsappUrl}>
+              Ask on WhatsApp
+            </Button>
+          </div>
         )}
       </div>
 
@@ -62,7 +63,7 @@ const interests = footerTreatments.map((t) => t.label); // PROVISIONAL option li
           />
         </div>
         <PhoneField id="pv-phone" label="Phone / WhatsApp" class="form__wide" />
-        <div class="field">
+        <div class="field form__wide">
           <label for="pv-interest">Treatment interest</label>
           <select id="pv-interest" name="service">
             <option value="">Select a treatment</option>
@@ -87,13 +88,12 @@ const interests = footerTreatments.map((t) => t.label); // PROVISIONAL option li
     background: var(--color-white);
   }
 
+  /* Figma: copy and bullets on the left, the form in a bordered white card on the right. */
   .plan {
     display: grid;
     grid-template-columns: 1fr 1fr;
+    align-items: center;
     gap: 48px;
-    padding: 48px 40px;
-    background: var(--color-soft);
-    border-radius: var(--radius-panel);
   }
 
   .plan__info {
@@ -102,14 +102,60 @@ const interests = footerTreatments.map((t) => t.label); // PROVISIONAL option li
     gap: 20px;
   }
 
-  .plan__whatsapp a {
-    color: var(--color-blue);
+  .plan__label {
+    display: grid;
+    gap: 8px;
+    justify-items: start;
+    font: 700 var(--text-body) / var(--text-body-lh) var(--font-display);
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--color-title);
+  }
+
+  .plan__label::after {
+    content: '';
+    width: 64px;
+    height: 1px;
+    background: currentcolor;
+    opacity: 0.6;
+  }
+
+  .plan__bullets {
+    display: grid;
+    gap: 12px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .plan__bullets li {
+    position: relative;
+    padding-left: 22px;
+  }
+
+  .plan__bullets li::before {
+    content: '';
+    position: absolute;
+    top: 9px;
+    left: 0;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--color-title);
   }
 
   .form {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 24px;
+    gap: 20px;
+    padding: 32px;
+    background: var(--color-white);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card);
+    box-shadow: 0 6px 18px rgb(0 86 229 / 8%);
+    --field-label: var(--color-title);
+    --field-label-font: 700 var(--text-small) / var(--text-small-lh) var(--font-display);
+    --field-label-transform: uppercase;
   }
 
   .field {
@@ -118,7 +164,9 @@ const interests = footerTreatments.map((t) => t.label); // PROVISIONAL option li
   }
 
   .field label {
-    color: var(--color-heading);
+    font: var(--field-label-font);
+    text-transform: var(--field-label-transform);
+    color: var(--field-label);
   }
 
   .field input,
@@ -155,13 +203,13 @@ const interests = footerTreatments.map((t) => t.label); // PROVISIONAL option li
   @media (max-width: 900px) {
     .plan {
       grid-template-columns: 1fr;
-      padding: 32px 20px;
     }
   }
 
   @media (max-width: 560px) {
     .form {
       grid-template-columns: 1fr;
+      padding: 24px 20px;
     }
   }
 </style>
