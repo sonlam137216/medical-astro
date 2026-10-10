@@ -14,12 +14,14 @@ import hotelRoom from '../assets/images/photos/hotel-room.webp';
 import xray from '../assets/images/photos/panoramic-xray.webp';
 import beforeAfter from '../assets/images/photos/before-after.webp';
 import doctorPortrait from '../assets/images/doctors/doctor-portrait.webp';
+import lakeAndTrees from '../assets/images/photos/lake-and-trees.webp';
+import homeHero from '../assets/images/photos/home-hero.webp';
 
 export type { Img };
 
 export const heroImage: Img = {
-  src: hanoiTower,
-  alt: 'Hanoi Turtle Tower reflected in the lake at dusk',
+  src: homeHero,
+  alt: 'A dentist at a modern treatment chair, with the Hanoi Turtle Tower in the background',
 };
 
 export const patientSupport = [
@@ -29,10 +31,11 @@ export const patientSupport = [
   { number: '04', title: 'Dental Care Meets\nthe Vietnam Experience' },
 ];
 
-// PLACEHOLDER: five identical cards, Vietnamese blurb and "600$" are dummy values from the design.
+// PLACEHOLDER: five identical cards and "600$" are dummy values from the design; the four bullet lines are
+// English stand-ins for the design's Vietnamese sample text. Replaced by services from the CMS (A1).
 export const services = Array.from({ length: 5 }, () => ({
   title: 'Dental Implants',
-  body: 'Chi phí thấp hơn, chất lượng dịch vụ không đổi',
+  inclusions: Array.from({ length: 4 }, () => 'Lower cost, same quality of care'),
   total: 'TOTAL: 600$',
   href: '/services/dental-implants', // PROVISIONAL
   image: { src: dentalImplant, alt: 'Dental implant on a soft white background' } satisfies Img,
@@ -102,11 +105,11 @@ export const insideClinic = {
   label: 'Inside Melatec',
   title: 'A comfortable space for your care',
   tiles: [
-    'Clinic exterior',
-    'Waiting lounge',
-    'Consultation room',
-    'Treatment area',
-    'Recovery room',
+    'Melatec Dental Clinic Exterior',
+    'Waiting Lounge',
+    'Consultation Room',
+    'Treatment Area',
+    'Recovery Room',
   ].map((caption) => ({
     caption,
     image: { src: hotelRoom, alt: `${caption} (placeholder photo)` } satisfies Img,
@@ -150,17 +153,24 @@ export const doctors = {
 export const howItWorks = {
   label: 'How it works',
   steps: [
-    { title: '01 · Send Us a Photo', body: 'Share photos of your teeth and any X-rays you have.' },
     {
-      title: '02 · Get Your Options',
+      number: '01',
+      title: 'Send Us a Photo',
+      body: 'Share photos of your teeth and any X-rays you have.',
+    },
+    {
+      number: '02',
+      title: 'Get Your Options',
       body: 'Receive treatment options, pricing and timelines from selected clinics.',
     },
     {
-      title: '03 · Compare & Choose',
+      number: '03',
+      title: 'Compare & Choose',
       body: 'Compare your options and choose the clinic that suits you.',
     },
     {
-      title: '04 · Travel & Get Treated',
+      number: '04',
+      title: 'Travel & Get Treated',
       body: 'Plan your visit, meet your dentist and begin treatment in Vietnam.',
     },
   ].map((s) => ({ ...s, image: { src: xray, alt: '' } satisfies Img })), // PLACEHOLDER: same X-ray on every card
@@ -180,4 +190,25 @@ export const smileStories = {
     src: beforeAfter,
     alt: 'Before and after comparison of a patient’s smile',
   } satisfies Img,
+};
+
+// PLACEHOLDER: the design repeats one sample article four times. Real articles come from the CMS (P7);
+// the section links to /travel-guide, which does not exist yet (P8).
+const sampleArticle = {
+  title: 'Hoan Kiem Lake: The Heart of Hanoi and Your Sanctuary for Recovery',
+  excerpt:
+    'In the bustling center of Vietnam’s capital lies Hoan Kiem Lake, a serene oasis that serves as the spiritual and cultural heart of Hanoi.',
+  href: '/travel-guide', // PROVISIONAL
+  image: {
+    src: lakeAndTrees,
+    alt: 'Hoan Kiem Lake with trees in the foreground (placeholder photo)',
+  } satisfies Img,
+};
+
+export const travelGuide = {
+  label: 'Dental travel guide',
+  title: 'Discover the Beauty of VietNam',
+  cta: { label: 'Explore more', href: '/travel-guide' }, // PROVISIONAL
+  featured: sampleArticle,
+  more: [sampleArticle, sampleArticle, sampleArticle],
 };

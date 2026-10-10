@@ -1,0 +1,140 @@
+---
+import { Image } from 'astro:assets';
+import Section from '../Section.astro';
+import SectionIntro from '../SectionIntro.astro';
+import Button from '../Button.astro';
+import { travelGuide } from '../../data/home';
+
+const { featured, more } = travelGuide;
+---
+
+<Section tone="soft" labelledby="guide-title">
+  <SectionIntro label={travelGuide.label} headingId="guide-title" lined>
+    <Fragment slot="title">{travelGuide.title}</Fragment>
+    <Button slot="action" variant="outline" href={travelGuide.cta.href}>
+      {travelGuide.cta.label}
+    </Button>
+  </SectionIntro>
+
+  <div class="guide">
+    <article class="guide__featured">
+      <a href={featured.href}>
+        <Image
+          class="guide__img"
+          src={featured.image.src}
+          alt={featured.image.alt}
+          width={480}
+          height={330}
+          densities={[1, 2]}
+          sizes="(max-width: 900px) 100vw, 480px"
+          loading="lazy"
+        />
+        <h3 class="guide__title">{featured.title}</h3>
+      </a>
+      <p class="guide__excerpt">{featured.excerpt}</p>
+    </article>
+
+    <ul class="guide__list">
+      {more.map((a) => (
+        <li class="guide__item">
+          <a href={a.href}>
+            <Image
+              class="guide__thumb"
+              src={a.image.src}
+              alt={a.image.alt}
+              width={170}
+              height={110}
+              densities={[1, 2]}
+              sizes="170px"
+              loading="lazy"
+            />
+          </a>
+          <div>
+            <h3 class="guide__title">
+              <a href={a.href}>{a.title}</a>
+            </h3>
+            <p class="guide__excerpt">{a.excerpt}</p>
+          </div>
+        </li>
+      ))}
+    </ul>
+  </div>
+</Section>
+
+<style>
+  .guide {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    align-items: start;
+  }
+
+  .guide__featured {
+    display: grid;
+    gap: 12px;
+  }
+
+  .guide__featured a {
+    display: grid;
+    gap: 16px;
+  }
+
+  .guide__img {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 480 / 330;
+    object-fit: cover;
+    border-radius: var(--radius-card);
+  }
+
+  .guide__list {
+    display: grid;
+    gap: 24px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .guide__item {
+    display: grid;
+    grid-template-columns: 170px 1fr;
+    gap: 20px;
+    align-items: start;
+  }
+
+  .guide__thumb {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 170 / 110;
+    object-fit: cover;
+    border-radius: 12px;
+  }
+
+  .guide__title {
+    font: 600 var(--text-body) / var(--text-body-lh) var(--font-display);
+    color: var(--color-title);
+  }
+
+  .guide__title a:hover {
+    color: var(--color-blue);
+  }
+
+  .guide__excerpt {
+    margin-top: 6px;
+    font-size: var(--text-small);
+    line-height: var(--text-small-lh);
+    color: var(--color-muted);
+  }
+
+  @media (max-width: 900px) {
+    .guide {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 520px) {
+    .guide__item {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

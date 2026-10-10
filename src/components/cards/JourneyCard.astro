@@ -6,40 +6,76 @@ interface Props {
   title: string;
   body: string;
   image: Img;
+  /** Step number shown in a circle over the picture ("01"). */
+  number?: string;
 }
 
-const { title, body, image } = Astro.props;
+const { title, body, image, number } = Astro.props;
 ---
 
 <article class="card journey">
-  <Image
-    class="card__media journey__img"
-    src={image.src}
-    alt={image.alt}
-    width={282}
-    height={150}
-    densities={[1, 2]}
-    sizes="(max-width: 600px) 100vw, 282px"
-    loading="lazy"
-  />
+  <div class="journey__media">
+    <Image
+      class="card__media journey__img"
+      src={image.src}
+      alt={image.alt}
+      width={282}
+      height={150}
+      densities={[1, 2]}
+      sizes="(max-width: 600px) 100vw, 282px"
+      loading="lazy"
+    />
+    {number && (
+      <span class="journey__no" aria-hidden="true">
+        {number}
+      </span>
+    )}
+  </div>
   <div class="card__body">
-    <h3 class="journey__title">{title}</h3>
+    <h3 class="journey__title">
+      {number && <span class="visually-hidden">Step {Number(number)}: </span>}
+      {title}
+    </h3>
     <p class="t-small muted">{body}</p>
   </div>
 </article>
 
 <style>
+  .journey {
+    background: var(--color-white);
+  }
+
+  .journey__media {
+    position: relative;
+  }
+
   .journey__img {
     aspect-ratio: 282 / 150;
     object-fit: cover;
   }
 
+  .journey__no {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    background: var(--color-white);
+    border: 1px solid var(--color-blue);
+    border-radius: 50%;
+    font: 600 14px / 1 var(--font-display);
+    color: var(--color-blue);
+  }
+
   .card__body {
-    gap: 12px;
+    gap: 10px;
+    padding: 16px;
   }
 
   .journey__title {
-    font: 600 var(--text-button) / var(--text-button-lh) var(--font-sans);
-    color: var(--color-heading);
+    font: 600 var(--text-body) / var(--text-body-lh) var(--font-display);
+    color: var(--color-blue);
   }
 </style>

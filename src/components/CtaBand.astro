@@ -22,12 +22,10 @@ const {
 
 <section class="band" aria-labelledby="cta-title">
   <div class="container cta">
-    <div class="cta__text">
-      <p class="t-label cta__label">{label}</p>
-      <h2 class="t-h2 cta__title" id="cta-title">
-        {title}
-      </h2>
-    </div>
+    <p class="t-label is-lined cta__label">{label}</p>
+    <h2 class="t-h2 cta__title" id="cta-title">
+      {title}
+    </h2>
     <div class="cta__actions">
       {actions.map((a) => (
         <Button href={a.href} variant={a.variant ?? 'light'}>
@@ -39,21 +37,17 @@ const {
 </section>
 
 <style>
+  /* Figma: centred eyebrow with rules, serif title, two white buttons side by side, on the navy gradient. */
   .band {
-    padding-block: var(--section-pad-y);
-    background: var(--color-navy);
+    padding-block: calc(var(--section-pad-y) * 0.75);
+    background: var(--gradient-band);
   }
 
   .cta {
     display: grid;
-    grid-template-columns: 1fr 380px;
-    align-items: center;
-    gap: 40px;
-  }
-
-  .cta__text {
-    display: grid;
-    gap: 12px;
+    justify-items: center;
+    gap: 16px;
+    text-align: center;
   }
 
   .cta__label,
@@ -61,15 +55,15 @@ const {
     color: var(--color-white);
   }
 
-  .cta__actions {
-    display: grid;
-    gap: 16px;
-    justify-items: start;
+  .cta__title {
+    font-family: var(--font-serif);
   }
 
-  @media (max-width: 960px) {
-    .cta {
-      grid-template-columns: 1fr;
-    }
+  .cta__actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 16px;
+    margin-top: 8px;
   }
 </style>

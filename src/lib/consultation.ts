@@ -29,6 +29,7 @@ export type ValidationResult =
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 // Same shape as the database CHECK on `email`.
 const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+const COUNTRY_CODE_RE = /^\+[0-9]{1,4}$/;
 const PHONE_RE = /^\+?[0-9 ()\-.]+$/;
 // Same shape as the `url_path` domain.
 const URL_PATH_RE = /^\/([a-z0-9]+(-[a-z0-9]+)*(\/[a-z0-9]+(-[a-z0-9]+)*)*)?$/;
@@ -70,15 +71,25 @@ export function validateConsultation(
   if (fullName.length < FIELD_LIMITS.name.min) errors.name = 'Please enter your name.';
   else if (fullName.length > FIELD_LIMITS.name.max) errors.name = 'Name is too long.';
 
-  const phone = clean(raw.phone);
+  // The form has a separate country-code selector (e.g. "+84"). Combine it with the number unless the
+  // visitor already typed a full international number. A national leading zero is dropped.
+  const phoneCountry = clean(raw.phone_country);
+  let phone = clean(raw.phone);
+  if (phoneCountry && !COUNTRY_CODE_RE.test(phoneCountry)) {
+    errors.phone = 'Please choose a valid country code.';
+  } else if (phoneCountry && phone && !phone.startsWith('+')) {
+    phone = `${phoneCountry} ${phone.replace(/^0+/, '')}`;
+  }
   const phoneDigits = phone.replace(/\D/g, '').length;
-  if (!phone) errors.phone = 'Please enter your phone number.';
-  else if (
-    !PHONE_RE.test(phone) ||
-    phoneDigits < FIELD_LIMITS.phone.min ||
-    phone.length > FIELD_LIMITS.phone.max
-  )
-    errors.phone = 'Please enter a valid phone number, including the country code.';
+  if (!errors.phone) {
+    if (!phone) errors.phone = 'Please enter your phone number.';
+    else if (
+      !PHONE_RE.test(phone) ||
+      phoneDigits < FIELD_LIMITS.phone.min ||
+      phone.length > FIELD_LIMITS.phone.max
+    )
+      errors.phone = 'Please enter a valid phone number, including the country code.';
+  }
 
   const email = clean(raw.email);
   if (!email) errors.email = 'Please enter your email.';

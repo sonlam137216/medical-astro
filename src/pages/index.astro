@@ -12,6 +12,7 @@ import Destinations from '../components/home/Destinations.astro';
 import OurDoctors from '../components/home/OurDoctors.astro';
 import HowItWorks from '../components/home/HowItWorks.astro';
 import SmileStories from '../components/home/SmileStories.astro';
+import TravelGuide from '../components/home/TravelGuide.astro';
 
 // Static page: built once, served directly from Cloudflare static assets.
 export const prerender = true;
@@ -19,7 +20,7 @@ export const prerender = true;
 const seo = await getPageSeo('/', { title: 'Melatec Dental Clinic · Vietnam' });
 ---
 
-<SiteLayout title={seo.title} description={seo.description}>
+<SiteLayout title={seo.title} description={seo.description} theme="sans">
   <Hero />
   <PatientSupport />
   <Services />
@@ -31,4 +32,5 @@ const seo = await getPageSeo('/', { title: 'Melatec Dental Clinic · Vietnam' })
   <OurDoctors />
   <HowItWorks />
   <SmileStories />
+  <TravelGuide />
 </SiteLayout>

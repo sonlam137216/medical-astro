@@ -2,30 +2,51 @@
 import Section from '../Section.astro';
 import SectionIntro from '../SectionIntro.astro';
 import { costComparison as c } from '../../data/home';
+
+// Vietnam is always shown first; the visitor picks which other country to compare against.
+const [home, ...others] = c.countries;
+const defaultCountry = others.includes('Australia') ? 'Australia' : others[0];
 ---
 
 <Section labelledby="costs-title">
-  <SectionIntro label={c.label} headingId="costs-title">
+  <SectionIntro label={c.label} headingId="costs-title" lined>
     <Fragment slot="title">
       Exceptional dental care.
       <br />
       Made more accessible.
     </Fragment>
-    <p>{c.subtitle}</p>
   </SectionIntro>
 
+  <div class="compare" data-compare>
+    <label class="compare__label" for="compare-country">
+      Compare against prices in
+    </label>
+    <select class="compare__select" id="compare-country" data-compare-select>
+      {others.map((country) => (
+        <option value={country} selected={country === defaultCountry}>
+          {country}
+        </option>
+      ))}
+    </select>
+  </div>
+
   <div class="scroller" tabindex="0" role="region" aria-label="Treatment cost comparison">
-    <table class="table">
-      <colgroup>
-        <col class="col-first" />
-        <col span={6} class="col-country" />
-        <col />
-      </colgroup>
+    <table class="table" data-compare-table>
+      <caption class="visually-hidden">
+        Treatment prices in{home}compared with the selected country
+      </caption>
       <thead>
         <tr>
           <th scope="col">Treatment</th>
           {c.countries.map((country, i) => (
-            <th scope="col" class:list={{ 'is-vn': i === 0 }}>
+            <th
+              scope="col"
+              data-country={country}
+              class:list={{
+                'is-home': i === 0,
+                'is-selected': country === defaultCountry,
+              }}
+            >
               {country}
             </th>
           ))}
@@ -39,8 +60,14 @@ import { costComparison as c } from '../../data/home';
               <span class="row__name">{row.name}</span>
               <span class="row__note">{row.note}</span>
             </th>
-            {c.countries.map((_, i) => (
-              <td class:list={{ 'is-vn': i === 0 }}>
+            {c.countries.map((country, i) => (
+              <td
+                data-country={country}
+                class:list={{
+                  'is-home': i === 0,
+                  'is-selected': country === defaultCountry,
+                }}
+              >
                 {c.cell.price}
                 <br />
                 {c.cell.clinics}
@@ -60,7 +87,45 @@ import { costComparison as c } from '../../data/home';
   </details>
 </Section>
 
+<script>
+  // Highlights the column of the chosen country. The table already renders every country, so
+  // without JavaScript the default country stays highlighted and nothing is lost.
+  document.querySelectorAll<HTMLElement>('[data-compare]').forEach((box) => {
+    const select = box.querySelector('select');
+    const table = box.parentElement?.querySelector<HTMLTableElement>('[data-compare-table]');
+    if (!select || !table) return;
+    select.addEventListener('change', () => {
+      table.querySelectorAll<HTMLElement>('[data-country]').forEach((cell) => {
+        cell.classList.toggle('is-selected', cell.dataset.country === select.value);
+      });
+    });
+  });
+</script>
+
 <style>
+  .compare {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .compare__label {
+    font-size: var(--text-small);
+    color: var(--color-muted);
+  }
+
+  .compare__select {
+    min-width: 160px;
+    height: 40px;
+    padding: 0 14px;
+    font: 600 var(--text-small) / var(--text-small-lh) var(--font-display);
+    color: var(--color-title);
+    background: var(--color-white);
+    border: 1px solid var(--color-title);
+    border-radius: 10px;
+  }
+
   .scroller {
     overflow-x: auto;
     border: 1px solid var(--color-border);
@@ -69,7 +134,7 @@ import { costComparison as c } from '../../data/home';
 
   .table {
     width: 100%;
-    min-width: 1200px;
+    min-width: 960px;
     border-collapse: collapse;
     table-layout: fixed;
     font-size: var(--text-small);
@@ -77,47 +142,38 @@ import { costComparison as c } from '../../data/home';
     text-align: left;
   }
 
-  .col-first {
-    width: 262px;
-  }
-
-  .col-country {
-    width: 140px;
-  }
-
   thead th {
-    padding: 22px 8px;
-    background: var(--color-soft);
+    padding: 18px 10px;
     font-weight: 600;
-    color: var(--color-heading);
+    color: var(--color-title);
   }
 
   thead th:first-child,
   tbody th {
+    width: 220px;
     padding-left: 24px;
   }
 
-  tbody tr:nth-child(even) {
-    background: var(--color-soft);
+  tbody tr + tr {
+    border-top: 1px solid var(--color-border);
   }
 
   tbody th,
   tbody td {
-    padding: 24px 8px;
+    padding: 18px 10px;
     vertical-align: top;
     font-weight: 400;
     color: var(--color-muted);
   }
 
   tbody th {
-    width: 262px;
     padding-right: 16px;
   }
 
   .row__name {
     display: block;
     font-weight: 600;
-    color: var(--color-heading);
+    color: var(--color-title);
   }
 
   .row__note {
@@ -125,24 +181,34 @@ import { costComparison as c } from '../../data/home';
     margin-top: 4px;
   }
 
-  .is-vn {
-    color: var(--color-blue);
+  /* Vietnam column: solid blue band running through header and rows. */
+  .table .is-home {
+    background: var(--color-blue);
+    color: var(--color-white);
   }
 
-  tbody td.is-vn {
+  tbody td.is-home {
     font-weight: 600;
   }
 
+  /* Chosen comparison country: light blue column. */
+  .table .is-selected {
+    background: var(--color-border);
+    color: var(--color-blue-deep);
+  }
+
   .method summary {
-    display: flex;
-    justify-content: space-between;
+    display: inline-flex;
+    align-items: center;
     gap: 16px;
-    padding: 4px 0;
+    padding: 12px 20px;
     cursor: pointer;
     list-style: none;
-    font-size: var(--text-small);
-    line-height: var(--text-small-lh);
-    color: var(--color-heading);
+    font: 500 var(--text-body) / var(--text-body-lh) var(--font-display);
+    color: var(--color-title);
+    background: var(--color-white);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-button);
   }
 
   .method summary::-webkit-details-marker {

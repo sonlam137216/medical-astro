@@ -1,76 +1,147 @@
 ---
 import { Image } from 'astro:assets';
 import Section from '../Section.astro';
-import SectionIntro from '../SectionIntro.astro';
 import { insideClinic } from '../../data/home';
 ---
 
-<Section labelledby="clinic-title">
-  <SectionIntro label={insideClinic.label} headingId="clinic-title">
-    <Fragment slot="title">{insideClinic.title}</Fragment>
-  </SectionIntro>
+<Section tone="blue" labelledby="clinic-title">
+  <h2 class="visually-hidden" id="clinic-title">
+    Inside Melatec Dental Clinic
+  </h2>
 
-  <ul class="tiles">
-    {insideClinic.tiles.map((tile) => (
-      <li>
-        <figure class="tile">
-          <Image
-            class="tile__img"
-            src={tile.image.src}
-            alt={tile.image.alt}
-            width={221}
-            height={180}
-            densities={[1, 2]}
-            sizes="(max-width: 640px) 50vw, 221px"
-            loading="lazy"
-          />
-          <figcaption>{tile.caption}</figcaption>
-        </figure>
-      </li>
-    ))}
-  </ul>
+  <!-- Figma: a blue band with a row of photo tiles and an arrow at each end. -->
+  <div class="gallery" data-gallery>
+    <button class="gallery__arrow" type="button" aria-label="Previous photos" data-gallery-prev>
+      <span aria-hidden="true">←</span>
+    </button>
+    <ul class="gallery__track" tabindex="0" aria-label="Clinic photos" data-gallery-track>
+      {insideClinic.tiles.map((tile) => (
+        <li class="gallery__tile">
+          <figure>
+            <Image
+              class="gallery__img"
+              src={tile.image.src}
+              alt={tile.image.alt}
+              width={240}
+              height={220}
+              densities={[1, 2]}
+              sizes="240px"
+              loading="lazy"
+            />
+            <figcaption>{tile.caption}</figcaption>
+          </figure>
+        </li>
+      ))}
+    </ul>
+    <button class="gallery__arrow" type="button" aria-label="Next photos" data-gallery-next>
+      <span aria-hidden="true">→</span>
+    </button>
+  </div>
 </Section>
 
+<script>
+  document.querySelectorAll<HTMLElement>('[data-gallery]').forEach((gallery) => {
+    const track = gallery.querySelector<HTMLElement>('[data-gallery-track]');
+    if (!track) return;
+    const step = () => Math.max(track.clientWidth * 0.8, 240);
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const scroll = (dir: number) =>
+      track.scrollBy({ left: dir * step(), behavior: reduce ? 'auto' : 'smooth' });
+    gallery.querySelector('[data-gallery-prev]')?.addEventListener('click', () => scroll(-1));
+    gallery.querySelector('[data-gallery-next]')?.addEventListener('click', () => scroll(1));
+  });
+</script>
+
 <style>
-  .tiles {
+  .gallery {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 24px;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
-
-  .tile {
-    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
     gap: 16px;
-    margin: 0;
   }
 
-  .tile__img {
-    width: 100%;
-    height: auto;
-    aspect-ratio: 221 / 180;
-    object-fit: cover;
+  .gallery__track {
+    display: flex;
+    gap: 20px;
+    margin: 0;
+    padding: 4px;
+    overflow-x: auto;
+    list-style: none;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+
+  .gallery__track::-webkit-scrollbar {
+    display: none;
+  }
+
+  .gallery__tile {
+    flex: 0 0 calc((100% - 60px) / 4);
+    min-width: 200px;
+    scroll-snap-align: start;
+  }
+
+  .gallery__tile figure {
+    display: grid;
+    grid-template-rows: auto 1fr;
+    align-content: start;
+    height: 100%;
+    gap: 12px;
+    margin: 0;
+    padding: 12px;
+    background: var(--color-white);
     border-radius: var(--radius-card);
   }
 
+  .gallery__img {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 240 / 200;
+    object-fit: cover;
+    border-radius: 10px;
+  }
+
   figcaption {
-    font-size: var(--text-small);
-    line-height: var(--text-small-lh);
-    color: var(--color-heading);
+    text-align: center;
+    font: 600 var(--text-small) / var(--text-small-lh) var(--font-display);
+    color: var(--color-blue-deep);
   }
 
-  @media (max-width: 1024px) {
-    .tiles {
-      grid-template-columns: repeat(3, 1fr);
+  .gallery__arrow {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    background: var(--color-white);
+    border: 0;
+    border-radius: 50%;
+    font-size: 18px;
+    line-height: 1;
+    color: var(--color-blue);
+    cursor: pointer;
+  }
+
+  .gallery__arrow:hover {
+    background: var(--color-soft);
+  }
+
+  /* Without JS the arrows do nothing, so hide them and let the row scroll by touch or keyboard. */
+  :global(html:not(.js)) .gallery__arrow {
+    display: none;
+  }
+
+  @media (max-width: 700px) {
+    .gallery {
+      grid-template-columns: 1fr;
     }
-  }
 
-  @media (max-width: 640px) {
-    .tiles {
-      grid-template-columns: repeat(2, 1fr);
-      gap: 16px;
+    .gallery__arrow {
+      display: none;
+    }
+
+    .gallery__tile {
+      flex-basis: 70%;
     }
   }
 </style>

@@ -12,7 +12,7 @@ const people = (await getDoctors()).slice(0, 4);
 
 {people.length > 0 && (
   <Section labelledby="doctors-title">
-    <SectionIntro label={doctors.label} headingId="doctors-title">
+    <SectionIntro label={doctors.label} headingId="doctors-title" lined>
       <Fragment slot="title">Meet Our Specialists</Fragment>
       <p>{doctors.body}</p>
       <Button slot="action" variant="outline" href={doctors.cta.href}>
@@ -23,7 +23,7 @@ const people = (await getDoctors()).slice(0, 4);
     <ul class="grid">
       {people.map((p) => (
         <li>
-          <DoctorCard name={p.name} role={p.role} image={p.image} href="/our-doctors" />
+          <DoctorCard name={p.name} role={p.role} image={p.image} />
         </li>
       ))}
     </ul>

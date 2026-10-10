@@ -1,7 +1,7 @@
 ---
-// Figma section frame: full-width band, 120px side padding (the .container), 80px vertical, 40px gap.
+// Section band: full-width, side padding from the .container, 80px vertical, 40px gap.
 interface Props {
-  tone?: 'white' | 'soft' | 'navy';
+  tone?: 'white' | 'soft' | 'navy' | 'blue';
   id?: string;
   labelledby?: string;
   class?: string;
@@ -29,8 +29,15 @@ const { tone = 'white', id, labelledby, class: className } = Astro.props;
     background: var(--color-soft);
   }
 
+  /* Dark navy band (Figma: gradient #001A4F → #002B68). */
   .band--navy {
-    background: var(--color-navy);
+    background: var(--gradient-band);
+    color: var(--color-white);
+  }
+
+  /* Bright blue band (Home gallery, "How it works"). */
+  .band--blue {
+    background: var(--gradient-blue);
     color: var(--color-white);
   }
 

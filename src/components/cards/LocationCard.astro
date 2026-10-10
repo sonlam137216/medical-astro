@@ -10,9 +10,19 @@ interface Props {
   linkLabel?: string;
   /** Discover Vietnam cards use the 16/26 body style rather than small muted text. */
   detail?: boolean;
+  /** `button` (Home): bold name + address and a pill button. `link` (Travel Combos): name heading and an arrow link. */
+  action?: 'link' | 'button';
 }
 
-const { name, address, href, image, linkLabel = 'Directions', detail = false } = Astro.props;
+const {
+  name,
+  address,
+  href,
+  image,
+  linkLabel = 'Directions',
+  detail = false,
+  action = 'link',
+} = Astro.props;
 ---
 
 <article class="card location">
@@ -27,11 +37,24 @@ const { name, address, href, image, linkLabel = 'Directions', detail = false } =
     loading="lazy"
   />
   <div class="card__body">
-    <h3 class="t-h3">{name}</h3>
-    <p class:list={detail ? [] : ['t-small', 'muted']}>{address}</p>
-    <a class="link-arrow" href={href}>
-      {linkLabel} <span aria-hidden="true">→</span>
-    </a>
+    {action === 'button' ? (
+      <>
+        <p class="location__text">
+          <strong>{name}</strong>: {address}
+        </p>
+        <a class="location__btn" href={href}>
+          {linkLabel}
+        </a>
+      </>
+    ) : (
+      <>
+        <h3 class="t-h3">{name}</h3>
+        <p class:list={detail ? [] : ['t-small', 'muted']}>{address}</p>
+        <a class="link-arrow" href={href}>
+          {linkLabel} <span aria-hidden="true">→</span>
+        </a>
+      </>
+    )}
   </div>
 </article>
 
@@ -43,5 +66,29 @@ const { name, address, href, image, linkLabel = 'Directions', detail = false } =
 
   .card__body {
     gap: 12px;
+  }
+
+  .location__text {
+    font-size: var(--text-small);
+    line-height: var(--text-small-lh);
+    color: var(--color-muted);
+  }
+
+  .location__text strong {
+    font-weight: 700;
+    color: var(--color-navy);
+  }
+
+  .location__btn {
+    justify-self: start;
+    padding: 8px 22px;
+    border-radius: var(--radius-button);
+    background: var(--color-blue);
+    font: 500 var(--text-small) / var(--text-small-lh) var(--font-display);
+    color: var(--color-white);
+  }
+
+  .location__btn:hover {
+    background: var(--color-blue-deep);
   }
 </style>

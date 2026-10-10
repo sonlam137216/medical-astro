@@ -1,17 +1,25 @@
 ---
-// Label + h2 (+ optional paragraph) with an optional action (button) aligned to the right.
+// Eyebrow + h2 (+ optional paragraph) with an optional action (button) aligned to the right.
+// `align="center"` + `lined` give the centred "—— OUR SERVICES ——" heading used on most Figma sections.
 interface Props {
   label: string;
   headingId?: string;
   inverse?: boolean;
+  align?: 'start' | 'center';
+  /** Short rules next to the eyebrow (both sides when centred, trailing only when left-aligned). */
+  lined?: boolean;
 }
 
-const { label, headingId, inverse = false } = Astro.props;
+const { label, headingId, inverse = false, align = 'start', lined = false } = Astro.props;
 ---
 
-<div class:list={['intro', { 'intro--inverse': inverse }]}>
+<div class:list={['intro', `intro--${align}`, { 'intro--inverse': inverse }]}>
   <div class="intro__text">
-    <p class="t-label intro__label">{label}</p>
+    <p
+      class:list={['t-label', 'intro__label', { 'is-lined': lined, 'is-start': align === 'start' }]}
+    >
+      {label}
+    </p>
     <h2 class="t-h2 intro__title" id={headingId}>
       <slot name="title" />
     </h2>
@@ -36,6 +44,16 @@ const { label, headingId, inverse = false } = Astro.props;
     display: grid;
     gap: 12px;
     max-width: 1000px;
+  }
+
+  .intro--center {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .intro--center .intro__text {
+    justify-items: center;
   }
 
   .intro__body:empty,

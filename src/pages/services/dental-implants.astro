@@ -23,17 +23,8 @@ const seo = await getPageSeo('/services/dental-implants', {
 });
 ---
 
-<!-- Landing-page variant: the header swaps the utility text and CTA; the page has its own consultation block and no social row. -->
-<SiteLayout
-  title={seo.title}
-  description={seo.description}
-  consultation={false}
-  social={false}
-  header={{
-    utility: { label: 'English-speaking patient support' },
-    cta: { label: 'Free consultation', href: '#consultation' },
-  }}
->
+<!-- The page has its own consultation block and no social row. The header is the standard one (the new Figma has no landing-page header variant). -->
+<SiteLayout title={seo.title} description={seo.description} consultation={false} social={false}>
   <PageHero label="Dental implants" image={heroImage} imageHeight={430} rounded>
     <Fragment slot="title">
       Plan your smile
@@ -169,7 +160,7 @@ const seo = await getPageSeo('/services/dental-implants', {
 
   .option__price {
     font-family: var(--font-serif);
-    font-weight: 600;
+    font-weight: 700;
     font-size: 36px;
     line-height: 44px;
     color: var(--color-blue);

@@ -1,7 +1,10 @@
 ---
 interface Props {
-  /** `light` and `outline-light` are for navy bands (Figma "Take the first step"). */
-  variant?: 'primary' | 'outline' | 'light' | 'outline-light';
+  /**
+   * `light` and `outline-light` are for dark bands (Figma "Take the first step").
+   * `whatsapp` is the green button next to the hero copy.
+   */
+  variant?: 'primary' | 'outline' | 'light' | 'outline-light' | 'whatsapp';
   href?: string;
   type?: 'button' | 'submit';
   class?: string;
@@ -17,34 +20,61 @@ const attrs = href ? { href } : { type };
 </Tag>
 
 <style>
-  /* Figma: Button Primary / Outline — height 48, padding 16×14, gap 8, radius 8, text Melatec/button 14/20 */
+  /*
+   * Figma buttons: radius 15 on a 43 px box, Montserrat Medium; the label sits off-centre in several
+   * Figma frames, here it is always centred (owner: misaligned labels in the design are not copied).
+   * Our scale is ~1.18× Figma: height 48, radius 16, 16/24 text.
+   */
   .btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
-    padding: 14px 16px;
+    min-height: 48px;
+    padding: 12px 28px;
     border: 1px solid transparent;
-    border-radius: var(--radius-control);
-    font: 600 var(--text-button) / var(--text-button-lh) var(--font-sans);
+    border-radius: var(--radius-button);
+    font: 500 var(--text-button) / var(--text-button-lh) var(--font-display);
+    text-align: center;
     cursor: pointer;
     white-space: nowrap;
+    transition:
+      background-color 0.15s,
+      border-color 0.15s,
+      color 0.15s;
   }
 
   .btn--primary {
     background: var(--color-blue);
+    border-color: var(--color-blue);
     color: var(--color-white);
+  }
+
+  .btn--primary:hover {
+    background: var(--color-blue-deep);
+    border-color: var(--color-blue-deep);
   }
 
   .btn--outline {
     background: var(--color-white);
     border-color: var(--color-border);
+    color: var(--color-title);
+  }
+
+  .btn--outline:hover {
+    border-color: var(--color-blue);
     color: var(--color-blue);
   }
 
   .btn--light {
     background: var(--color-white);
-    color: var(--color-blue);
+    border-color: var(--color-white);
+    color: var(--color-blue-deep);
+  }
+
+  .btn--light:hover {
+    background: var(--color-soft);
+    border-color: var(--color-soft);
   }
 
   .btn--outline-light {
@@ -57,11 +87,13 @@ const attrs = href ? { href } : { type };
     background: rgb(255 255 255 / 12%);
   }
 
-  .btn--primary:hover {
-    background: var(--color-heading);
+  .btn--whatsapp {
+    background: var(--color-green);
+    border-color: var(--color-green);
+    color: var(--color-white);
   }
 
-  .btn--outline:hover {
-    border-color: var(--color-blue);
+  .btn--whatsapp:hover {
+    filter: brightness(0.92);
   }
 </style>

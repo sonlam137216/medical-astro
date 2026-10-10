@@ -10,7 +10,7 @@ const site = await getSiteContent();
     <div class="footer__grid">
       <div class="footer__brand">
         <Logo tone="light" />
-        <p class="t-h3 footer__name">{site.name}</p>
+        <p class="footer__name t-h3">{site.name}</p>
         {site.tagline && <p class="footer__tagline">{site.tagline}</p>}
       </div>
 
@@ -64,16 +64,17 @@ const site = await getSiteContent();
 </footer>
 
 <style>
-  /* Figma: Shared / Footer — navy, padding 120×64, 4 columns, bottom bar */
+  /* Figma Shared / Footer: dark blue gradient, Roboto, logo + 3 link columns, rule, legal row. */
   .footer {
-    background: var(--color-navy);
+    background: var(--gradient-band);
     color: var(--color-white);
-    padding-block: 64px;
+    padding-block: 64px 32px;
+    font-family: var(--font-roboto);
   }
 
   .footer__grid {
     display: grid;
-    grid-template-columns: 377px 278px 277px 1fr;
+    grid-template-columns: 1.3fr 1fr 1fr 1.25fr;
     gap: 0;
   }
 
@@ -85,25 +86,29 @@ const site = await getSiteContent();
   }
 
   .footer__name {
+    font-family: var(--font-roboto);
+    font-weight: 700;
     color: var(--color-white);
     margin-top: 8px;
   }
 
   .footer__tagline {
     max-width: 320px;
+    line-height: 24px;
   }
 
-  /* Link columns measure 14px in Figma (not 16): widths checked against the 1440 frame */
   .footer__col {
-    font-size: var(--text-small);
-    line-height: var(--text-small-lh);
+    font-size: var(--text-body);
+    line-height: 24px;
   }
 
   .footer__title {
-    font-size: var(--text-small);
-    line-height: var(--text-small-lh);
-    font-weight: 600;
     margin: 0 0 20px;
+    font-family: var(--font-roboto);
+    font-weight: 700;
+    font-size: 20px;
+    line-height: 28px;
+    text-transform: uppercase;
   }
 
   .footer__col ul {
@@ -118,7 +123,7 @@ const site = await getSiteContent();
     display: grid;
     gap: 12px;
     font-style: normal;
-    max-width: 260px;
+    max-width: 280px;
   }
 
   .footer a:hover {
@@ -130,20 +135,18 @@ const site = await getSiteContent();
     justify-content: space-between;
     gap: 24px;
     margin-top: 48px;
+    padding-top: 24px;
+    border-top: 1px solid rgb(255 255 255 / 35%);
     font-size: var(--text-small);
   }
 
   .footer__legal {
     display: flex;
     flex-wrap: wrap;
+    gap: 8px 32px;
     margin: 0;
     padding: 0;
     list-style: none;
-  }
-
-  .footer__legal li + li::before {
-    content: '·';
-    margin-inline: 12px;
   }
 
   @media (max-width: 1024px) {

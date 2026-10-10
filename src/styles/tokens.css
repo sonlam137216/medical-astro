@@ -1,63 +1,96 @@
 /*
  * Design tokens — single source of truth for colour, type, spacing and shape.
  *
- * Source: Figma "Melatec" file, Page 1 (read 2026-10-04).
- *  - Colour hex values were sampled from rendered swatches of the Figma colour styles
- *    (color/heading, color/muted, ...), so treat them as accurate to display rounding.
- *  - Type scale and layout numbers (sizes, line-heights, padding, gaps, radius) were read
- *    from the Figma design panel.
- *  - Font families: Inter is confirmed (label style). The serif used for hero/h2 is NOT
- *    labelled in Figma; Cormorant Garamond is the closest match by eye. Confirm with the owner.
- *  - Marked "(added)" = not in Figma (mobile/tablet behaviour), chosen by us.
+ * Source: the NEW Melatec Figma file (design owner switched files on 2026-10-10), read through the
+ * Figma design panel in Chrome on 2026-10-10. Hex values and font names/weights/sizes below are
+ * the numbers shown in the panel, not eyeballed.
+ *
+ * Scale: the Figma pages are 1042 px wide with ~880 px of content. This site renders the same
+ * layout in a 1040 px container (see --container), i.e. ~1.18× the Figma content width, so
+ * measured type sizes are multiplied by ~1.18 and rounded for legibility. Example: hero title
+ * Figma 37 → 44, Home section title 35 → 40, Cormorant section title 40 → 46.
+ * The owner does not require pixel-exact matching: text/buttons that look misaligned in Figma
+ * are corrected, and layouts may be adjusted (see docs/design/figma-2026-10-10/COMPARISON.md).
+ *
+ * Fonts (all confirmed in Figma):
+ *  - Montserrat: Home headings (Bold/SemiBold), nav, buttons, card text, hero.
+ *  - Cormorant Garamond Bold: section titles on inner pages, stats, hero on navy pages.
+ *  - Inter Regular: body copy on inner pages, "Learn more" links, TOTAL price.
+ *  - Roboto (Bold/Regular): footer, consultation form, CTA band button text.
+ *
+ * Admin note: styles/admin.css reuses --color-white/border/heading/error/soft/blue/navy/muted,
+ * --radius-control and --font-*; keep those names and meanings stable.
  */
 :root {
-  /* colour (Figma colour styles) */
-  --color-heading: #183c78;
-  --color-muted: #828282;
+  /* colour */
+  --color-blue: #0056e5; /* primary: top bar, eyebrow, price, filled buttons */
+  --color-blue-deep: #0441cf; /* button labels on white, hover state */
+  --color-title: #0013a9; /* Home headings, nav, hero title */
+  --color-heading: #183c78; /* serif section titles on inner pages */
+  --color-navy: #020f32; /* body text colour (and admin chrome) */
+  --color-muted: #57595b; /* secondary text (Figma 57595B) */
   --color-white: #ffffff;
-  --color-blue: #0441cf;
-  --color-border: #b2c9f3;
-  --color-navy: #020f32;
-  --color-soft: #f0f7fd;
+  --color-border: #b3c9f3;
+  --color-soft: #f0f7fd; /* alternating light band */
+  --color-card: #f7fbfe; /* Figma card fill F0F7FD at 58% over white */
+  --color-green: #18c262; /* WhatsApp button */
+  --color-band: #001a4f; /* dark band / footer, start of gradient */
+  --color-band-2: #002b68; /* dark band, end of gradient */
+  --gradient-band: linear-gradient(135deg, var(--color-band) 0%, var(--color-band-2) 100%);
+  --gradient-blue: linear-gradient(
+    160deg,
+    #0a63ff 0%,
+    #0049cf 100%
+  ); /* Home gallery and "How it works" bands */
   /* Not in Figma: form error state, added for Phase 4. */
   --color-error: #b3261e;
 
   /* font families */
+  --font-display: 'Montserrat Variable', 'Montserrat', system-ui, sans-serif;
   --font-serif: 'Cormorant Garamond', 'Times New Roman', serif;
   --font-sans: 'Inter Variable', system-ui, sans-serif;
+  --font-roboto: 'Roboto', system-ui, sans-serif; /* footer, consultation form */
 
-  /* type scale: size / line-height (Figma text styles Melatec/*) */
-  --text-hero: 60px;
-  --text-hero-lh: 66px;
-  --text-h2: 42px;
-  --text-h2-lh: 48px;
-  --text-h3: 23px;
-  --text-h3-lh: 31px;
-  --text-body: 16px;
+  /* type scale: size / line-height (Figma value × ~1.18, see header) */
+  --text-hero: 44px; /* Figma Montserrat Bold 37 */
+  --text-hero-lh: 54px;
+  --text-hero-serif: 52px; /* Figma Cormorant Bold 45 (hero on navy pages) */
+  --text-hero-serif-lh: 58px;
+  --text-h2: 46px; /* Figma Cormorant Bold 40 (inner-page section title) */
+  --text-h2-lh: 52px;
+  --text-h2-sans: 40px; /* Figma Montserrat SemiBold 35 (Home section title) */
+  --text-h2-sans-lh: 48px;
+  --text-h3: 22px; /* Figma Montserrat Medium 17–20 (card titles) */
+  --text-h3-lh: 30px;
+  --text-body: 16px; /* Figma 14–17 */
   --text-body-lh: 26px;
   --text-small: 14px;
   --text-small-lh: 22px;
-  --text-button: 14px;
-  --text-button-lh: 20px;
-  --text-label: 12px; /* unstyled in Figma: Inter SemiBold, line 18, tracking 12% */
+  --text-button: 16px; /* Figma Montserrat Medium 20 inside a 43 px high button */
+  --text-button-lh: 24px;
+  --text-eyebrow: 18px; /* Figma Montserrat Medium 20 / Roboto Bold 25, uppercase */
+  --text-eyebrow-lh: 24px;
+  --tracking-eyebrow: 0.04em;
+  --text-label: 12px; /* small number badges (01, 02 …) */
   --text-label-lh: 18px;
   --tracking-label: 0.12em;
 
-  /* layout (desktop frame is 1440 wide, content 1200, side padding 120) */
-  --container: 1200px;
+  /* layout */
+  --container: 1040px; /* content width; Figma frames are 1042 wide with ~880 of content */
   --gutter: 120px;
   --section-pad-y: 80px;
   --utility-bar-h: 38px;
   --nav-h: 88px;
 
   /* shape */
-  --radius-control: 8px; /* buttons, inputs */
-  --radius-card: 16px; /* cards (Service Card radius 16) */
+  --radius-control: 8px; /* form inputs (and admin controls) */
+  --radius-button: 16px; /* Figma buttons: radius 15 on a 43 px high box */
+  --radius-card: 16px; /* Figma cards: radius 15 */
   --radius-image: 24px; /* large photos (hero, before/after) */
   --radius-panel: 24px; /* consultation card */
 }
 
-/* (added) fluid fallbacks below the 1440 design; Figma only has desktop frames */
+/* (added) fluid fallbacks below the desktop design; Figma only has desktop frames */
 @media (max-width: 1200px) {
   :root {
     --gutter: 48px;
@@ -68,9 +101,13 @@
   :root {
     --gutter: 20px;
     --section-pad-y: 56px;
-    --text-hero: 40px;
-    --text-hero-lh: 46px;
-    --text-h2: 32px;
-    --text-h2-lh: 38px;
+    --text-hero: 34px;
+    --text-hero-lh: 42px;
+    --text-hero-serif: 38px;
+    --text-hero-serif-lh: 46px;
+    --text-h2: 34px;
+    --text-h2-lh: 40px;
+    --text-h2-sans: 30px;
+    --text-h2-sans-lh: 38px;
   }
 }

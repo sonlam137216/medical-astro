@@ -1,6 +1,7 @@
 ---
 import FormGuards from './FormGuards.astro';
 import Button from './Button.astro';
+import PhoneField from './PhoneField.astro';
 import { footerTreatments } from '../data/site';
 import { getSiteContent } from '../lib/site-content';
 
@@ -60,18 +61,7 @@ const interests = footerTreatments.map((t) => t.label); // PROVISIONAL option li
             required
           />
         </div>
-        <div class="field">
-          <label for="pv-phone">Phone / WhatsApp</label>
-          <input
-            id="pv-phone"
-            name="phone"
-            type="tel"
-            autocomplete="tel"
-            placeholder="Country code + number"
-            maxlength="40"
-            required
-          />
-        </div>
+        <PhoneField id="pv-phone" label="Phone / WhatsApp" class="form__wide" />
         <div class="field">
           <label for="pv-interest">Treatment interest</label>
           <select id="pv-interest" name="service">
@@ -149,7 +139,8 @@ const interests = footerTreatments.map((t) => t.label); // PROVISIONAL option li
 
   .form__actions,
   .form__status,
-  .form__note {
+  .form__note,
+  .form :global(.form__wide) {
     grid-column: 1 / -1;
   }
 

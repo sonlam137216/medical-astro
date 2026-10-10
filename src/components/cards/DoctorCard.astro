@@ -6,6 +6,7 @@ import ProfileImage from '../ProfileImage.astro';
 interface Props {
   name: string;
   role?: string | null;
+  /** Optional profile link. The Figma cards have none, so the Home and About pages leave it out. */
   href?: string;
   /** A sample photo or a media-library image. Missing: initials are shown instead. */
   image?: Img | PublicImage;
@@ -37,8 +38,8 @@ const initials = name
     </div>
   )}
   <div class="card__body">
+    {role && <p class="doctor__role">{role}</p>}
     <h3 class="doctor__name">{name}</h3>
-    {role && <p class="t-small muted">{role}</p>}
     {href && (
       <a class="link-arrow" href={href}>
         View profile <span aria-hidden="true">→</span>
@@ -48,6 +49,11 @@ const initials = name
 </article>
 
 <style>
+  .doctor {
+    background: var(--color-white);
+    border-color: var(--color-blue);
+  }
+
   .doctor__img {
     aspect-ratio: 282 / 280;
     object-fit: contain;
@@ -58,21 +64,33 @@ const initials = name
   .doctor__initials {
     display: grid;
     place-items: center;
-    font: 600 56px / 1 var(--font-serif);
+    font: 700 56px / 1 var(--font-serif);
     color: var(--color-heading);
     background: var(--color-soft);
   }
 
   .card__body {
-    gap: 8px;
+    gap: 4px;
+    padding: 4px 16px 20px;
+    text-align: center;
+  }
+
+  /* Figma: the role (small, blue) sits above the name (bold, dark blue). */
+  .doctor__role {
+    display: grid;
+    align-items: end;
+    min-height: calc(var(--text-small-lh) * 2);
+    font: 500 var(--text-small) / var(--text-small-lh) var(--font-display);
+    color: var(--color-blue);
   }
 
   .doctor__name {
-    font: 600 var(--text-button) / var(--text-button-lh) var(--font-sans);
-    color: var(--color-heading);
+    font: 600 var(--text-body) / var(--text-body-lh) var(--font-display);
+    color: var(--color-title);
   }
 
   .link-arrow {
+    justify-self: center;
     margin-top: 8px;
   }
 </style>

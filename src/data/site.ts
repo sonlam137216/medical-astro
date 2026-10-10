@@ -32,7 +32,7 @@ export const mainNav: NavLink[] = [
   { label: 'About us', href: '/about' }, // PROVISIONAL
   { label: 'Services', href: '/services' }, // PROVISIONAL
   { label: 'Dental Packages', href: '/dental-packages' }, // PROVISIONAL
-  { label: 'Travel Guide', href: '/travel-guide' }, // PROVISIONAL
+  { label: 'Dental Travel Guide', href: '/travel-guide' }, // PROVISIONAL
   { label: 'Contact', href: '#consultation' },
 ];
 
@@ -48,7 +48,7 @@ export const footerExplore: NavLink[] = [
   { label: 'About Us', href: '/about' },
   { label: 'Dental Packages', href: '/dental-packages' },
   { label: 'Dental Travel Guide', href: '/travel-guide' },
-  { label: 'Contacts', href: '#consultation' },
+  { label: 'Contact', href: '#consultation' },
 ];
 
 export const footerLegal: NavLink[] = [

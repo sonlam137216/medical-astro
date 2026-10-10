@@ -1,0 +1,81 @@
+---
+import { phoneCodes } from '../data/phone-codes';
+
+// Phone input with a country-code selector, shared by both consultation forms. The server joins
+// `phone_country` and `phone` (see validateConsultation). Colours come from CSS variables the form sets
+// (--field-bg / --field-color / --field-border), so the same markup works on light and dark panels.
+interface Props {
+  id: string;
+  label?: string;
+  placeholder?: string;
+  class?: string;
+}
+
+const { id, label = 'Phone', placeholder = 'Phone number', class: className } = Astro.props;
+---
+
+<div class:list={['field', className]}>
+  <label for={id}>{label}</label>
+  <div class="phone">
+    <select name="phone_country" aria-label="Country code" autocomplete="tel-country-code">
+      {phoneCodes.map((c) => (
+        <option value={c.code} title={c.name}>
+          {c.label}
+        </option>
+      ))}
+    </select>
+    <input
+      {id}
+      name="phone"
+      type="tel"
+      autocomplete="tel-national"
+      {placeholder}
+      maxlength="30"
+      required
+    />
+  </div>
+</div>
+
+<style>
+  .field {
+    display: grid;
+    gap: 8px;
+  }
+
+  .field label {
+    color: var(--field-label, var(--color-heading));
+    font: var(--field-label-font, inherit);
+    text-transform: var(--field-label-transform, none);
+  }
+
+  .phone {
+    display: grid;
+    grid-template-columns: 112px 1fr;
+    gap: 8px;
+  }
+
+  .phone select,
+  .phone input {
+    width: 100%;
+    height: 54px;
+    padding: 0 14px;
+    font: inherit;
+    color: var(--field-color, var(--color-navy));
+    background: var(--field-bg, var(--color-white));
+    border: 1px solid var(--field-border, var(--color-border));
+    border-radius: var(--field-radius, var(--radius-control));
+  }
+
+  .phone select option {
+    color: var(--color-navy);
+    background: var(--color-white);
+  }
+
+  .phone input::placeholder {
+    color: var(--field-placeholder, var(--color-muted));
+  }
+
+  .phone input[aria-invalid='true'] {
+    border-color: var(--color-error);
+  }
+</style>

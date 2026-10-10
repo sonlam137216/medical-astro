@@ -1,14 +1,13 @@
 ---
-import Button from './Button.astro';
 import Logo from './Logo.astro';
 import { getSiteContent } from '../lib/site-content';
 
 interface Props {
   /** Pathname of the current page, used to highlight the active link. */
   current?: string;
-  /** Right side of the utility bar. Defaults to the "Dental Knowledge" link. */
+  /** Second top-bar button. Defaults to the "Dental Knowledge" link from the site menu. */
   utility?: { label: string; href?: string };
-  /** Header call to action. Defaults to "Book consultation". */
+  /** First top-bar button. Defaults to "Booking Now" (jumps to the consultation form). */
   cta?: { label: string; href?: string };
 }
 
@@ -16,30 +15,31 @@ const site = await getSiteContent();
 const {
   current = Astro.url.pathname,
   utility = site.utility ?? undefined,
-  cta = { label: 'Book consultation', href: '#consultation' },
+  cta = { label: 'Booking Now', href: '#consultation' },
 } = Astro.props;
 const isActive = (href: string) => (href === '/' ? current === '/' : current.startsWith(href));
 ---
 
 <header class="header">
-  <div class="utility">
-    <div class="container utility__inner">
-      <p class="t-small utility__contact">
-        {site.phoneDisplay}
-        {site.phoneDisplay && site.email && (
-          <>
-            &nbsp; <span aria-hidden="true">·</span>&nbsp;
-          </>
+  <div class="topbar">
+    <div class="container topbar__inner">
+      <p class="topbar__contact">
+        {site.phoneDisplay && (
+          <a href={`tel:${site.phoneIntl?.replace(/\s/g, '') ?? ''}`}>{site.phoneDisplay}</a>
         )}
         {site.email && <a href={`mailto:${site.email}`}>{site.email}</a>}
       </p>
-      {utility && utility.href ? (
-        <a class="t-small" href={utility.href}>
-          {utility.label}
+      <div class="topbar__actions">
+        <a class="topbar__btn" href={cta.href ?? '#consultation'}>
+          {cta.label}
         </a>
-      ) : (
-        utility && <span class="t-small">{utility.label}</span>
-      )}
+        {utility && utility.href && (
+          <a class="topbar__btn" href={utility.href}>
+            {utility.label}
+          </a>
+        )}
+        {utility && !utility.href && <span class="topbar__btn">{utility.label}</span>}
+      </div>
     </div>
   </div>
 
@@ -47,7 +47,7 @@ const isActive = (href: string) => (href === '/' ? current === '/' : current.sta
     <div class="container nav__inner">
       <Logo />
 
-      <!-- Small-screen menu is an addition: Figma only has the 1440 desktop header -->
+      <!-- Small-screen menu is an addition: Figma only has the desktop header -->
       <div class="menu" data-menu>
         <button
           class="menu__toggle"
@@ -64,7 +64,7 @@ const isActive = (href: string) => (href === '/' ? current === '/' : current.sta
             {site.main.map((link) => (
               <li>
                 <a
-                  class:list={['t-small', 'menu__link', { 'is-active': isActive(link.href) }]}
+                  class:list={['menu__link', { 'is-active': isActive(link.href) }]}
                   href={link.href}
                   aria-current={isActive(link.href) ? 'page' : undefined}
                 >
@@ -73,9 +73,6 @@ const isActive = (href: string) => (href === '/' ? current === '/' : current.sta
               </li>
             ))}
           </ul>
-          <Button href={cta.href ?? '#consultation'} class="menu__cta">
-            {cta.label}
-          </Button>
         </nav>
       </div>
     </div>
@@ -98,18 +95,57 @@ const isActive = (href: string) => (href === '/' ? current === '/' : current.sta
 </script>
 
 <style>
-  .utility {
-    background: var(--color-navy);
+  /* Top bar: Figma #0056E5, contact on the left, two outlined pill buttons on the right. */
+  .topbar {
+    background: var(--color-blue);
     color: var(--color-white);
+    font-family: var(--font-display);
+    font-size: var(--text-small);
+    line-height: var(--text-small-lh);
   }
 
-  .utility__inner {
+  .topbar__inner {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 24px;
+    gap: 16px 24px;
+    flex-wrap: wrap;
     min-height: var(--utility-bar-h);
-    padding-block: 8px;
+    padding-block: 12px;
+  }
+
+  .topbar__contact {
+    display: grid;
+    margin: 0;
+  }
+
+  .topbar__contact a:hover {
+    text-decoration: underline;
+  }
+
+  .topbar__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .topbar__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 36px;
+    padding: 6px 18px;
+    color: var(--color-white);
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    box-shadow: 0 2px 6px rgb(0 19 169 / 25%);
+    text-align: center;
+    white-space: nowrap;
+    transition: background-color 0.15s;
+  }
+
+  a.topbar__btn:hover {
+    background: rgb(255 255 255 / 16%);
   }
 
   .nav {
@@ -122,12 +158,13 @@ const isActive = (href: string) => (href === '/' ? current === '/' : current.sta
     justify-content: space-between;
     gap: 24px;
     min-height: var(--nav-h);
-    padding-block: 20px;
+    padding-block: 16px;
   }
 
   .menu {
     display: flex;
     flex: 1;
+    justify-content: flex-end;
   }
 
   .menu__toggle {
@@ -144,7 +181,7 @@ const isActive = (href: string) => (href === '/' ? current === '/' : current.sta
     display: block;
     width: 22px;
     height: 2px;
-    background: var(--color-heading);
+    background: var(--color-title);
     content: '';
   }
 
@@ -166,24 +203,21 @@ const isActive = (href: string) => (href === '/' ? current === '/' : current.sta
     top: 7px;
   }
 
-  .menu__panel {
-    display: flex;
-    flex: 1;
-    align-items: center;
-    justify-content: space-between;
-    gap: 24px;
-  }
-
   .menu__list {
     display: flex;
-    gap: 24px;
-    margin: 0 auto 0 30px;
+    gap: 32px;
+    margin: 0;
     padding: 0;
     list-style: none;
   }
 
   .menu__link {
-    color: var(--color-heading);
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: var(--text-body);
+    line-height: var(--text-body-lh);
+    color: var(--color-title);
+    white-space: nowrap;
   }
 
   .menu__link:hover,
@@ -192,10 +226,6 @@ const isActive = (href: string) => (href === '/' ? current === '/' : current.sta
   }
 
   @media (max-width: 1024px) {
-    .utility__contact {
-      font-size: 12px;
-    }
-
     .menu {
       flex: 0;
       position: relative;
@@ -206,8 +236,6 @@ const isActive = (href: string) => (href === '/' ? current === '/' : current.sta
     }
 
     .menu__panel {
-      flex-direction: column;
-      align-items: stretch;
       position: absolute;
       right: 0;
       top: 100%;
@@ -222,7 +250,6 @@ const isActive = (href: string) => (href === '/' ? current === '/' : current.sta
     .menu__list {
       flex-direction: column;
       gap: 4px;
-      margin: 0 0 16px;
     }
 
     .menu__link {
@@ -236,11 +263,23 @@ const isActive = (href: string) => (href === '/' ? current === '/' : current.sta
     }
 
     :global(.js) .menu.is-open .menu__panel {
-      display: flex;
+      display: block;
     }
 
     :global(html:not(.js)) .menu__toggle {
       display: none;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .topbar__contact {
+      font-size: 12px;
+    }
+
+    .topbar__btn {
+      min-height: 32px;
+      padding: 4px 12px;
+      font-size: 12px;
     }
   }
 </style>

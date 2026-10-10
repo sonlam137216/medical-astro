@@ -53,18 +53,27 @@ p {
   background: var(--color-soft);
 }
 
-/* Type roles (Figma text styles) */
+/* Type roles (Figma text styles, see tokens.css for the scale) */
 .t-hero {
-  font-family: var(--font-serif);
-  font-weight: 600;
+  font-family: var(--font-display);
+  font-weight: 700;
   font-size: var(--text-hero);
   line-height: var(--text-hero-lh);
-  color: var(--color-heading);
+  color: var(--color-title);
+}
+
+/* Hero title on the dark navy page banners (Services, Doctors, Packages …) */
+.t-hero--serif {
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: var(--text-hero-serif);
+  line-height: var(--text-hero-serif-lh);
+  color: var(--color-white);
 }
 
 .t-h2 {
   font-family: var(--font-serif);
-  font-weight: 600;
+  font-weight: 700;
   font-size: var(--text-h2);
   line-height: var(--text-h2-lh);
   color: var(--color-heading);
@@ -82,13 +91,67 @@ p {
   line-height: var(--text-small-lh);
 }
 
+/* Section eyebrow ("OUR SERVICES"). `.is-lined` adds the short rule(s) seen in Figma. */
 .t-label {
-  font-weight: 600;
-  font-size: var(--text-label);
-  line-height: var(--text-label-lh);
-  letter-spacing: var(--tracking-label);
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: var(--text-eyebrow);
+  line-height: var(--text-eyebrow-lh);
+  letter-spacing: var(--tracking-eyebrow);
   text-transform: uppercase;
   color: var(--color-blue);
+}
+
+.t-label.is-lined {
+  display: inline-flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.t-label.is-lined::before,
+.t-label.is-lined::after {
+  content: '';
+  width: 56px;
+  height: 1px;
+  background: currentcolor;
+  opacity: 0.6;
+}
+
+/* Left-aligned eyebrows keep only the trailing rule off: the rule goes before the text only when centred. */
+.t-label.is-lined.is-start::before {
+  display: none;
+}
+
+/* Rule before the text only (hero eyebrows: "—— About us.") */
+.t-label.is-lined.is-lead::before {
+  display: block;
+}
+
+.t-label.is-lined.is-lead::after {
+  display: none;
+}
+
+/*
+ * Home uses a different heading face from the inner pages in Figma: Montserrat (SemiBold, dark blue)
+ * instead of Cormorant. Wrap a page in `.theme-sans` (SiteLayout theme="sans") to get that look;
+ * body copy switches to Montserrat as well.
+ */
+.theme-sans {
+  font-family: var(--font-display);
+}
+
+.theme-sans .t-h2 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--text-h2-sans);
+  line-height: var(--text-h2-sans-lh);
+  color: var(--color-title);
+}
+
+.theme-sans .t-h3 {
+  font-family: var(--font-display);
+  font-weight: 500;
+  color: var(--color-title);
 }
 
 .visually-hidden {
@@ -119,12 +182,12 @@ p {
   border-radius: var(--radius-control);
 }
 
-/* Card shell shared by Service / Doctor / Location / Journey cards (Figma: radius 16, 1px color/border, white) */
+/* Card shell shared by Service / Doctor / Location / Journey cards (Figma: radius 15, 1px B3C9F3, fill F0F7FD at 58%) */
 .card {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  background: var(--color-white);
+  background: var(--color-card);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-card);
 }
@@ -141,23 +204,45 @@ p {
   padding: 24px;
 }
 
+/* "TOTAL: 600$" (Figma: Inter Bold, 0056E5) */
+.price-total {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 26px;
+  line-height: 34px;
+  color: var(--color-blue);
+}
+
 .muted {
   color: var(--color-muted);
 }
 
-/* "Learn more →" / "Directions →" / "View profile →" (text style Melatec/button, colour blue) */
+/* "Learn more ⟶" / "Directions" / "View profile": text plus a round arrow (Figma: Inter Regular, 0013A9) */
 .link-arrow {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  font-weight: 600;
-  font-size: var(--text-button);
-  line-height: var(--text-button-lh);
-  color: var(--color-blue);
+  gap: 10px;
+  font-family: var(--font-sans);
+  font-weight: 400;
+  font-size: var(--text-body);
+  line-height: var(--text-body-lh);
+  color: var(--color-title);
 }
 
-.link-arrow:hover {
-  text-decoration: underline;
+.link-arrow > span[aria-hidden] {
+  display: inline-grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border: 1px solid currentcolor;
+  border-radius: 50%;
+  font-size: 13px;
+  line-height: 1;
+}
+
+.link-arrow:hover > span[aria-hidden] {
+  background: var(--color-title);
+  color: var(--color-white);
 }
 
 /* Consultation forms (see FormGuards.astro). Shared by every form that posts to /api/consultation. */

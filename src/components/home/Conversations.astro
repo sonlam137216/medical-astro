@@ -1,24 +1,13 @@
 ---
 import { Image } from 'astro:assets';
 import Section from '../Section.astro';
-import Button from '../Button.astro';
 import { conversations } from '../../data/home';
 ---
 
 <Section tone="soft" labelledby="conversations-title">
   <div class="split">
-    <Image
-      class="split__img"
-      src={conversations.image.src}
-      alt={conversations.image.alt}
-      width={568}
-      height={400}
-      densities={[1, 2]}
-      sizes="(max-width: 900px) 100vw, 568px"
-      loading="lazy"
-    />
     <div class="split__text">
-      <p class="t-label">{conversations.label}</p>
+      <p class="t-label is-lined is-start">{conversations.label}</p>
       <h2 class="t-h2" id="conversations-title">
         Real conversations.
         <br />
@@ -29,18 +18,28 @@ import { conversations } from '../../data/home';
       <p class="split__body">{conversations.body}</p>
       <div>
         <!-- PROVISIONAL target: no videos page exists (video is out of scope) -->
-        <Button variant="outline" href="#">
-          View all videos
-        </Button>
+        <a class="btn-outline-arrow" href="#">
+          View All Videos <span aria-hidden="true">⟶</span>
+        </a>
       </div>
     </div>
+    <Image
+      class="split__img"
+      src={conversations.image.src}
+      alt={conversations.image.alt}
+      width={520}
+      height={440}
+      densities={[1, 2]}
+      sizes="(max-width: 960px) 100vw, 520px"
+      loading="lazy"
+    />
   </div>
 </Section>
 
 <style>
   .split {
     display: grid;
-    grid-template-columns: 568px 1fr;
+    grid-template-columns: 1fr 1fr;
     align-items: center;
     gap: 64px;
   }
@@ -48,7 +47,7 @@ import { conversations } from '../../data/home';
   .split__img {
     width: 100%;
     height: auto;
-    aspect-ratio: 568 / 400;
+    aspect-ratio: 520 / 440;
     object-fit: cover;
     border-radius: var(--radius-image);
   }
@@ -60,8 +59,26 @@ import { conversations } from '../../data/home';
   }
 
   .split__body {
-    max-width: 540px;
+    max-width: 480px;
     margin-bottom: 8px;
+    color: var(--color-muted);
+  }
+
+  .btn-outline-arrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 48px;
+    padding: 12px 24px;
+    background: var(--color-white);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-button);
+    font: 600 var(--text-small) / var(--text-small-lh) var(--font-display);
+    color: var(--color-title);
+  }
+
+  .btn-outline-arrow:hover {
+    border-color: var(--color-blue);
   }
 
   @media (max-width: 960px) {

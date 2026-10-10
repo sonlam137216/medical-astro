@@ -13,6 +13,8 @@ interface Props {
   consultation?: boolean;
   /** Show the "Stay Connected" social row above the footer. */
   social?: boolean;
+  /** `sans` = Home look (Montserrat headings); default `serif` = inner pages (Cormorant headings). */
+  theme?: 'serif' | 'sans';
   /** Pathname used to highlight the active nav link (defaults to the request path). */
   current?: string;
   /** Header variations seen in Figma: the Dental Implants landing page swaps the utility text and CTA. */
@@ -22,7 +24,15 @@ interface Props {
   };
 }
 
-const { title, description, consultation = true, social = true, current, header } = Astro.props;
+const {
+  title,
+  description,
+  consultation = true,
+  social = true,
+  current,
+  header,
+  theme = 'serif',
+} = Astro.props;
 ---
 
 <!-- noindex stays on until launch (Phase 7 replaces this with per-environment robots handling) -->
@@ -31,7 +41,7 @@ const { title, description, consultation = true, social = true, current, header 
     Skip to content
   </a>
   <Header current={current} utility={header?.utility} cta={header?.cta} />
-  <main id="main">
+  <main id="main" class:list={{ 'theme-sans': theme === 'sans' }}>
     <slot />
   </main>
   {consultation && <ConsultationSection />}

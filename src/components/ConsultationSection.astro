@@ -1,6 +1,7 @@
 ---
 import Button from './Button.astro';
 import FormGuards from './FormGuards.astro';
+import PhoneField from './PhoneField.astro';
 import { footerTreatments } from '../data/site';
 import { getSiteContent } from '../lib/site-content';
 
@@ -12,33 +13,44 @@ const services = footerTreatments.map((t) => t.label); // PROVISIONAL option lis
 ---
 
 <section class="consult" id="consultation" aria-labelledby="consult-title">
-  <div class="container">
-    <div class="consult__card">
-      <div class="consult__info">
-        <p class="t-label">Visit us</p>
-        <h2 class="t-h2" id="consult-title">
-          Come see us in Viet Nam
-        </h2>
-        <p class="t-h3 consult__name">{site.name}</p>
-        <p class="consult__rating">★★★★★ 4.9/5 on Google Reviews</p>
+  <div class="container consult__inner">
+    <p class="t-label is-lined consult__eyebrow">Visit us</p>
+    <h2 class="t-h2 consult__title" id="consult-title">
+      Come see us in Viet Nam
+    </h2>
+
+    <div class="consult__grid">
+      <div class="consult__panel consult__info">
+        <p class="consult__name">{site.name}</p>
+        <p class="consult__rating">
+          <span aria-hidden="true">★★★★★</span>
+          <span class="visually-hidden">Rated</span> 4.9/5 on Google Reviews
+        </p>
         {site.addressLine && (
-          <p class="consult__line">{site.addressLine.replace(', Vietnam', '')}</p>
+          <p class="consult__line">
+            <span class="consult__key">Headquarters</span>
+            {site.addressLine.replace(', Vietnam', '')}
+          </p>
         )}
         {site.phoneIntl && (
           <p class="consult__line">
-            Phone / WhatsApp
-            <br />
+            <span class="consult__key">Phone / WhatsApp</span>
             {site.phoneIntl}
           </p>
         )}
-        {site.hours && <p class="consult__line">{site.hours}</p>}
-        <p class="consult__note">
-          Consultation support in English and flexible scheduling for overseas patients.
+        {site.hours && (
+          <p class="consult__line">
+            <span class="consult__key">Opening hours</span>
+            {site.hours}
+          </p>
+        )}
+        <p class="consult__line consult__note">
+          We provide consultation support in English and flexible scheduling for overseas patients.
         </p>
       </div>
 
-      <div class="consult__formwrap">
-        <h2 class="consult__formtitle">Book a consultation</h2>
+      <div class="consult__panel consult__formwrap">
+        <h3 class="consult__formtitle">Book a consultation</h3>
         <!--
           POST (never GET) so personal data can never end up in the URL. Works without JS (the endpoint
           answers with a small page); the script below upgrades it to an in-page submit.
@@ -58,18 +70,6 @@ const services = footerTreatments.map((t) => t.label); // PROVISIONAL option lis
             />
           </div>
           <div class="field">
-            <label for="cf-phone">Phone</label>
-            <input
-              id="cf-phone"
-              name="phone"
-              type="tel"
-              autocomplete="tel"
-              placeholder="Country code + number"
-              maxlength="40"
-              required
-            />
-          </div>
-          <div class="field">
             <label for="cf-email">Email</label>
             <input
               id="cf-email"
@@ -81,7 +81,8 @@ const services = footerTreatments.map((t) => t.label); // PROVISIONAL option lis
               required
             />
           </div>
-          <div class="field">
+          <PhoneField id="cf-phone" label="Phone" class="form__wide" />
+          <div class="field form__wide">
             <label for="cf-service">Services</label>
             <select id="cf-service" name="service">
               <option value="">Select a treatment</option>
@@ -91,7 +92,9 @@ const services = footerTreatments.map((t) => t.label); // PROVISIONAL option lis
             </select>
           </div>
           <div class="form__actions">
-            <Button type="submit">Request consultation</Button>
+            <Button type="submit" variant="light" class="consult__submit">
+              Request consultation
+            </Button>
           </div>
           <FormGuards part="status" />
           <p class="form__note">*Your information is kept strictly confidential.</p>
@@ -102,51 +105,102 @@ const services = footerTreatments.map((t) => t.label); // PROVISIONAL option lis
 </section>
 
 <style>
+  /* Figma: dark blue band, centred eyebrow + serif title, an info card and a form card side by side,
+     both translucent with a light outline. Roboto for the small text. */
   .consult {
     padding-block: var(--section-pad-y);
-    background: var(--color-white);
+    background: var(--gradient-band);
+    color: var(--color-white);
+    font-family: var(--font-roboto);
+    /* Brighter error colour so the invalid-field outline stays visible on the dark band. */
+    --color-error: #ff8a80;
   }
 
-  .consult__card {
+  .consult__inner {
+    display: grid;
+    justify-items: center;
+    gap: 16px;
+  }
+
+  .consult__eyebrow,
+  .consult__title {
+    color: var(--color-white);
+  }
+
+  .consult__grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 48px;
-    padding: 48px 40px;
-    background: var(--color-soft);
-    border-radius: 24px;
+    gap: 24px;
+    width: 100%;
+    margin-top: 24px;
+  }
+
+  .consult__panel {
+    padding: 32px;
+    background: rgb(255 255 255 / 6%);
+    border: 1px solid rgb(255 255 255 / 55%);
+    border-radius: var(--radius-panel);
   }
 
   .consult__info {
     display: grid;
     align-content: start;
-    gap: 20px;
+    gap: 0;
   }
 
-  .consult__name {
-    margin-top: 12px;
+  .consult__name,
+  .consult__formtitle {
+    margin: 0;
+    font-family: var(--font-serif);
+    font-weight: 700;
+    font-size: 32px;
+    line-height: 40px;
+    color: var(--color-white);
   }
 
   .consult__rating {
-    color: var(--color-blue);
+    margin: 8px 0 20px;
+    font-size: var(--text-small);
+  }
+
+  .consult__rating [aria-hidden] {
+    margin-right: 6px;
+    color: #ffc83d;
+  }
+
+  .consult__line {
+    display: grid;
+    gap: 2px;
+    padding-block: 16px;
+    border-top: 1px solid rgb(255 255 255 / 55%);
+  }
+
+  .consult__key {
+    font-size: var(--text-small);
+    opacity: 0.85;
   }
 
   .consult__note {
-    color: var(--color-muted);
+    font-size: var(--text-small);
   }
 
   .consult__formtitle {
-    font-family: var(--font-serif);
-    font-weight: 600;
-    font-size: 36px;
-    line-height: 44px;
-    color: var(--color-heading);
-    margin: 0 0 32px;
+    margin-bottom: 24px;
   }
 
   .form {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 24px;
+    gap: 20px;
+    /* Colours picked up by the inputs here and by PhoneField. */
+    --field-label: var(--color-white);
+    --field-label-font: 700 14px / 20px var(--font-roboto);
+    --field-label-transform: uppercase;
+    --field-color: var(--color-white);
+    --field-bg: rgb(255 255 255 / 8%);
+    --field-border: rgb(255 255 255 / 55%);
+    --field-placeholder: rgb(255 255 255 / 65%);
+    --field-radius: 10px;
   }
 
   .field {
@@ -155,27 +209,36 @@ const services = footerTreatments.map((t) => t.label); // PROVISIONAL option lis
   }
 
   .field label {
-    color: var(--color-heading);
+    color: var(--field-label);
+    font: var(--field-label-font);
+    text-transform: var(--field-label-transform);
   }
 
   .field input,
   .field select {
     width: 100%;
     height: 54px;
-    padding: 0 16px;
+    padding: 0 14px;
     font: inherit;
-    color: var(--color-navy);
-    background: var(--color-white);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-control);
+    color: var(--field-color);
+    background: var(--field-bg);
+    border: 1px solid var(--field-border);
+    border-radius: var(--field-radius);
   }
 
   .field input::placeholder {
-    color: var(--color-muted);
+    color: var(--field-placeholder);
+  }
+
+  .field select option {
+    color: var(--color-navy);
+    background: var(--color-white);
   }
 
   .form__actions,
-  .form__note {
+  .form__note,
+  .form__wide,
+  .form :global(.form__wide) {
     grid-column: 1 / -1;
   }
 
@@ -183,14 +246,29 @@ const services = footerTreatments.map((t) => t.label); // PROVISIONAL option lis
     display: flex;
   }
 
+  .consult :global(.consult__submit) {
+    font-family: var(--font-roboto);
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
   .form__note {
-    color: var(--color-muted);
+    font-size: var(--text-small);
+    font-style: italic;
+  }
+
+  .consult :global(.form__status[data-kind='ok']),
+  .consult :global(.form__status[data-kind='error']) {
+    color: var(--color-white);
   }
 
   @media (max-width: 900px) {
-    .consult__card {
+    .consult__grid {
       grid-template-columns: 1fr;
-      padding: 32px 20px;
+    }
+
+    .consult__panel {
+      padding: 24px 20px;
     }
   }
 

@@ -2,98 +2,126 @@
 import Button from './Button.astro';
 import { Image } from 'astro:assets';
 import { getSiteContent } from '../lib/site-content';
+import { heroImage } from '../data/home';
 
 const site = await getSiteContent();
-import { heroImage } from '../data/home';
 ---
 
-<section class="hero section section--soft">
-  <div class="container hero__split">
+<section class="hero" aria-labelledby="hero-title">
+  <!-- Figma: one wide photo, copy on the plain left side of it. The picture is the LCP element. -->
+  <Image
+    class="hero__bg"
+    src={heroImage.src}
+    alt={heroImage.alt}
+    width={2000}
+    height={1046}
+    widths={[900, 1400, 2000]}
+    sizes="100vw"
+    loading="eager"
+    fetchpriority="high"
+  />
+  <div class="container hero__inner">
     <div class="hero__content">
-      <p class="t-label">Melatec Dental Clinic · Vietnam</p>
-      <h1 class="t-hero">
-        Every Perfect Journey
-        <br />
-        Begins with a<br />
-        Radiant Smile
+      <p class="t-label is-lined is-lead">Melatec Dental Clinic. Viet Nam</p>
+      <h1 class="t-hero" id="hero-title">
+        Every Perfect Journey Begins with a Radiant Smile
       </h1>
-      <p class="hero__body">
-        Premium dentistry, thoughtfully tailored to you.
-        <br />
-        From dental implants and porcelain crowns to veneers and complete smile makeovers, every
-        treatment is guided by clinical precision and refined care.
-        <br />
-        English-speaking specialists, advanced technology and a truly personalized experience all in
-        Vietnam.
-      </p>
-      <div class="hero__actions">
-        {site.whatsappUrl && <Button href={site.whatsappUrl}>WhatsApp us</Button>}
-        <!-- PLACEHOLDER target: no video file has been supplied yet (see WEBSITE_TECHSTACK §8) -->
-        <Button variant="outline" href="#video">
-          Watch video
-        </Button>
+      <div class="hero__body">
+        <p>Premium dentistry, thoughtfully tailored to you.</p>
+        <p>
+          From dental implants and porcelain crowns to veneers and complete smile makeovers, every
+          treatment is guided by clinical precision and refined care.
+        </p>
+        <p>
+          English-speaking specialists, advanced technology and a truly personalized experience all
+          in Vietnam.
+        </p>
       </div>
-      <p class="hero__trust t-small">
+      <div class="hero__actions">
+        {site.whatsappUrl && (
+          <Button variant="whatsapp" href={site.whatsappUrl}>
+            WhatsApp us
+          </Button>
+        )}
+        <!-- PLACEHOLDER target: no video file has been supplied yet (see WEBSITE_TECHSTACK §8) -->
+        <Button href="#video">Watch video</Button>
+      </div>
+      <p class="hero__trust">
         Trusted by patients from 20+ countries
         <br />
         Australia · USA · UK · France · Japan · Korea
       </p>
     </div>
-    <Image
-      class="hero__img"
-      src={heroImage.src}
-      alt={heroImage.alt}
-      width={568}
-      height={560}
-      densities={[1, 2]}
-      sizes="(max-width: 900px) 100vw, 568px"
-      loading="eager"
-      fetchpriority="high"
-    />
   </div>
 </section>
 
 <style>
-  .hero__split {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+  .hero {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    background: #eaf3fc;
+  }
+
+  .hero__bg {
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 70% center;
+  }
+
+  .hero__inner {
+    display: flex;
     align-items: center;
-    gap: 64px;
+    min-height: clamp(560px, 46vw, 700px);
+    padding-block: 64px;
   }
 
   .hero__content {
     display: grid;
-    gap: 24px;
-    align-content: center;
+    gap: 20px;
+    max-width: 600px;
   }
 
   .hero__body {
-    color: var(--color-heading);
-    max-width: 520px;
+    display: grid;
+    gap: 6px;
+    color: var(--color-muted);
+    font-size: var(--text-body);
   }
 
   .hero__actions {
     display: flex;
     flex-wrap: wrap;
     gap: 16px;
-  }
-
-  .hero__img {
-    width: 100%;
-    height: auto;
-    aspect-ratio: 568 / 560;
-    object-fit: cover;
-    border-radius: var(--radius-image);
+    margin-top: 4px;
   }
 
   .hero__trust {
+    font-size: var(--text-small);
+    line-height: var(--text-small-lh);
     color: var(--color-muted);
   }
 
   @media (max-width: 900px) {
-    .hero__split {
-      grid-template-columns: 1fr;
-      gap: 40px;
+    .hero__bg {
+      object-position: 80% center;
+    }
+
+    /* On narrow screens the copy covers the picture, so lighten it for legibility. */
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      background: rgb(255 255 255 / 82%);
+    }
+
+    .hero__inner {
+      min-height: 0;
     }
   }
 </style>

@@ -31,7 +31,7 @@ const { title, body, total, href, image, linkLabel = 'Learn more', detail = fals
   <div class="card__body">
     <h3 class="t-h3">{title}</h3>
     <p class:list={detail ? [] : ['t-small', 'muted']}>{body}</p>
-    {total && <p class="t-small muted">{total}</p>}
+    {total && <p class="price-total">{total}</p>}
     <a class="link-arrow" href={href}>
       {linkLabel} <span aria-hidden="true">→</span>
     </a>

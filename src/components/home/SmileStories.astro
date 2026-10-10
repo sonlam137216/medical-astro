@@ -6,28 +6,30 @@ import { smileStories } from '../../data/home';
 ---
 
 <Section labelledby="stories-title">
-  <SectionIntro label={smileStories.label} headingId="stories-title">
+  <SectionIntro label={smileStories.label} headingId="stories-title" lined>
     <Fragment slot="title">Real Stories. Real Smiles.</Fragment>
   </SectionIntro>
 
   <div class="story">
     <div class="story__text">
       <p>{smileStories.summary}</p>
-      <div>
-        <p>{smileStories.detailsTitle}</p>
-        {smileStories.details.map((line) => (
-          <p>{line}</p>
-        ))}
+      <div class="story__details">
+        <p class="story__heading">{smileStories.detailsTitle}</p>
+        <ul>
+          {smileStories.details.map((line) => (
+            <li>{line}</li>
+          ))}
+        </ul>
       </div>
     </div>
     <Image
       class="story__img"
       src={smileStories.image.src}
       alt={smileStories.image.alt}
-      width={656}
-      height={486}
+      width={560}
+      height={440}
       densities={[1, 2]}
-      sizes="(max-width: 960px) 100vw, 656px"
+      sizes="(max-width: 960px) 100vw, 560px"
       loading="lazy"
     />
   </div>
@@ -36,21 +38,35 @@ import { smileStories } from '../../data/home';
 <style>
   .story {
     display: grid;
-    grid-template-columns: 1fr 656px;
+    grid-template-columns: 1fr 1.2fr;
     align-items: center;
     gap: 64px;
   }
 
   .story__text {
     display: grid;
-    gap: 32px;
+    gap: 28px;
     max-width: 420px;
+    color: var(--color-muted);
+  }
+
+  .story__heading {
+    margin-bottom: 8px;
+    font-weight: 700;
+    color: var(--color-blue);
+  }
+
+  .story__details ul {
+    display: grid;
+    gap: 6px;
+    margin: 0;
+    padding-left: 20px;
   }
 
   .story__img {
     width: 100%;
     height: auto;
-    aspect-ratio: 656 / 486;
+    aspect-ratio: 560 / 440;
     object-fit: cover;
     border-radius: var(--radius-image);
   }

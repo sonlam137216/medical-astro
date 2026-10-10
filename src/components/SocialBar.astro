@@ -17,14 +17,18 @@ const links = (await getSiteContent()).social.flatMap((l) =>
 ---
 
 {links.length > 0 && (
-  <section class="social" aria-label="Social media">
+  <section class="social" aria-labelledby="social-title">
     <div class="container social__inner">
-      <h2 class="t-h3">Stay Connected</h2>
+      <p class="t-label is-lined">Social media</p>
+      <h2 class="t-h2" id="social-title">
+        Find us and stay connected
+      </h2>
       <ul>
         {links.map((l) => (
           <li>
-            <a href={l.href} aria-label={l.name}>
-              <Image src={l.icon} alt="" width={32} height={32} densities={[1, 2]} loading="lazy" />
+            <a class="social__card" href={l.href}>
+              <Image src={l.icon} alt="" width={44} height={44} densities={[1, 2]} loading="lazy" />
+              <span>{l.name}</span>
             </a>
           </li>
         ))}
@@ -34,29 +38,46 @@ const links = (await getSiteContent()).social.flatMap((l) =>
 )}
 
 <style>
+  /* Figma: centred eyebrow + serif title, then one white bordered tile per network. */
   .social {
-    padding-block: 24px;
-    background: var(--color-white);
+    padding-block: var(--section-pad-y);
+    background: var(--color-soft);
   }
 
   .social__inner {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    gap: 24px;
+    display: grid;
+    justify-items: center;
+    gap: 16px;
+    text-align: center;
   }
 
   ul {
     display: flex;
-    gap: 32px;
-    margin: 0;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 24px;
+    margin: 24px 0 0;
     padding: 0;
     list-style: none;
   }
 
-  a {
-    display: block;
-    border-radius: 6px;
+  .social__card {
+    display: grid;
+    justify-items: center;
+    gap: 10px;
+    width: 140px;
+    padding: 20px 12px 16px;
+    background: var(--color-white);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card);
+    box-shadow: 0 2px 8px rgb(0 19 169 / 8%);
+    font-size: var(--text-small);
+    line-height: var(--text-small-lh);
+    color: var(--color-title);
+    transition: border-color 0.15s;
+  }
+
+  .social__card:hover {
+    border-color: var(--color-blue);
   }
 </style>

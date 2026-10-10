@@ -7,7 +7,7 @@ import { destinations } from '../../data/home';
 ---
 
 <Section tone="soft" labelledby="destinations-title">
-  <SectionIntro label={destinations.label} headingId="destinations-title">
+  <SectionIntro label={destinations.label} headingId="destinations-title" lined>
     <Fragment slot="title">
       Exceptional dental care in
       <br />
@@ -21,7 +21,7 @@ import { destinations } from '../../data/home';
   <ul class="grid">
     {destinations.locations.map((l) => (
       <li>
-        <LocationCard {...l} />
+        <LocationCard {...l} action="button" />
       </li>
     ))}
   </ul>
