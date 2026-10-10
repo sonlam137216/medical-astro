@@ -72,10 +72,11 @@ export const serviceDetails = Array.from({ length: 5 }, () => ({
   image: implantImage,
 }));
 
-// PLACEHOLDER: six identical cards, Vietnamese blurb and "600$" are dummy values in the design.
+// PLACEHOLDER: six identical cards and "600$" are dummy values in the design; the bullets are English
+// stand-ins for its Vietnamese sample text (same wording as the Home service cards).
 export const packageCards = Array.from({ length: 6 }, () => ({
   title: 'Dental Implants',
-  inclusions: Array.from({ length: 4 }, () => 'Chi phí thấp hơn, chất lượng dịch vụ không đổi'),
+  inclusions: Array.from({ length: 4 }, () => 'Lower cost, same quality of care'),
   total: 'TOTAL: 600$',
   href: '/services/dental-implants', // PROVISIONAL
   image: implantImage,

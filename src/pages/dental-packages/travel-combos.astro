@@ -6,7 +6,6 @@ import PageHero from '../../components/PageHero.astro';
 import Section from '../../components/Section.astro';
 import SectionIntro from '../../components/SectionIntro.astro';
 import Button from '../../components/Button.astro';
-import DestinationCard from '../../components/cards/DestinationCard.astro';
 import LocationCard from '../../components/cards/LocationCard.astro';
 import PackageGrid from '../../components/PackageGrid.astro';
 import CtaBand from '../../components/CtaBand.astro';
@@ -27,18 +26,23 @@ const seo = await getPageSeo('/dental-packages/travel-combos', {
   current="/dental-packages"
   social={false}
 >
-  <PageHero label="Our dental packages." image={towerImage} imageHeight={480} rounded upper>
+  <PageHero variant="banner" dark label="Our dental packages." image={towerImage} imageHeight={400}>
     <Fragment slot="title">Comprehensive dental care for every smile</Fragment>
     <p>
       Plan your dental care alongside a relaxing travel experience. Explore some of Vietnam’s most
       popular destinations while your treatment schedule is arranged around your trip.
     </p>
+    <!-- Not in Figma: link back to the single-treatment page (see the note on that page). -->
+    <Button slot="actions" variant="light" href="/dental-packages">
+      See single treatments
+    </Button>
   </PageHero>
 
   <Section labelledby="gallery-title">
     <h2 class="visually-hidden" id="gallery-title">
       Vietnam travel gallery
     </h2>
+    <!-- Figma collage: one tall picture and two stacked on the first rows, three small ones below. -->
     <ul class="gallery">
       {gallery.map((img) => (
         <li>
@@ -46,10 +50,10 @@ const seo = await getPageSeo('/dental-packages/travel-combos', {
             class="gallery__img"
             src={img.src}
             alt={img.alt}
-            width={384}
-            height={256}
+            width={640}
+            height={420}
             densities={[1, 2]}
-            sizes="(max-width: 640px) 100vw, 384px"
+            sizes="(max-width: 640px) 50vw, 640px"
             loading="lazy"
           />
         </li>
@@ -58,13 +62,13 @@ const seo = await getPageSeo('/dental-packages/travel-combos', {
   </Section>
 
   <Section tone="soft" labelledby="destinations-title">
-    <SectionIntro label={destinations.label} headingId="destinations-title">
+    <SectionIntro label={destinations.label} headingId="destinations-title" align="center" lined>
       <Fragment slot="title">{destinations.title}</Fragment>
     </SectionIntro>
     <ul class="destinations">
       {destinations.cards.map((c) => (
         <li>
-          <DestinationCard {...c} />
+          <LocationCard {...c} action="button" />
         </li>
       ))}
     </ul>
@@ -73,7 +77,7 @@ const seo = await getPageSeo('/dental-packages/travel-combos', {
   <CtaBand
     actions={[
       { label: 'Book a consultation', href: '#consultation' },
-      { label: 'Explore our services', href: '/services', variant: 'outline-light' },
+      { label: 'Explore our services', href: '/services' },
     ]}
   />
 
@@ -81,7 +85,7 @@ const seo = await getPageSeo('/dental-packages/travel-combos', {
 
   <Fragment slot="after-consultation">
     <Section tone="soft" labelledby="discover-title">
-      <SectionIntro label={discover.label} headingId="discover-title">
+      <SectionIntro label={discover.label} headingId="discover-title" align="center" lined>
         <Fragment slot="title">{discover.title}</Fragment>
       </SectionIntro>
       <ul class="discover">
@@ -91,7 +95,7 @@ const seo = await getPageSeo('/dental-packages/travel-combos', {
           </li>
         ))}
       </ul>
-      <div>
+      <div class="more">
         <Button variant="outline" href={discover.cta.href}>
           {discover.cta.label}
         </Button>
@@ -103,28 +107,66 @@ const seo = await getPageSeo('/dental-packages/travel-combos', {
 <style>
   .gallery {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 24px;
+    grid-template-columns: repeat(12, 1fr);
+    grid-template-rows: 190px 190px 160px;
+    gap: 16px;
     margin: 0;
     padding: 0;
     list-style: none;
   }
 
+  .gallery li:nth-child(1) {
+    grid-column: 1 / 8;
+    grid-row: 1 / 3;
+  }
+
+  .gallery li:nth-child(2) {
+    grid-column: 8 / 13;
+    grid-row: 1;
+  }
+
+  .gallery li:nth-child(3) {
+    grid-column: 8 / 13;
+    grid-row: 2;
+  }
+
+  .gallery li:nth-child(4) {
+    grid-column: 1 / 5;
+    grid-row: 3;
+  }
+
+  .gallery li:nth-child(5) {
+    grid-column: 5 / 9;
+    grid-row: 3;
+  }
+
+  .gallery li:nth-child(6) {
+    grid-column: 9 / 13;
+    grid-row: 3;
+  }
+
   .gallery__img {
+    display: block;
     width: 100%;
-    height: auto;
-    aspect-ratio: 384 / 256;
+    height: 100%;
     object-fit: cover;
     border-radius: var(--radius-card);
   }
 
+  /* Cards keep one size and the last row is centred, whatever the number of branches. */
   .destinations {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
     gap: 24px;
     margin: 0;
     padding: 0;
     list-style: none;
+  }
+
+  .destinations li {
+    display: flex;
+    flex: 0 0 calc((100% - 48px) / 3);
   }
 
   .discover {
@@ -136,7 +178,6 @@ const seo = await getPageSeo('/dental-packages/travel-combos', {
     list-style: none;
   }
 
-  .destinations li,
   .discover li {
     display: flex;
   }
@@ -146,22 +187,46 @@ const seo = await getPageSeo('/dental-packages/travel-combos', {
     flex: 1;
   }
 
-  @media (max-width: 1100px) {
-    .destinations {
-      grid-template-columns: repeat(2, 1fr);
-    }
+  .more {
+    display: flex;
+    justify-content: center;
   }
 
   @media (max-width: 960px) {
-    .gallery,
+    .destinations li {
+      flex-basis: calc((100% - 24px) / 2);
+    }
+
     .discover {
       grid-template-columns: repeat(2, 1fr);
+    }
+
+    .gallery {
+      grid-template-columns: repeat(2, 1fr);
+      grid-template-rows: none;
+      grid-auto-rows: 160px;
+    }
+
+    .gallery li:nth-child(n) {
+      grid-column: auto;
+      grid-row: auto;
+    }
+
+    .gallery li:nth-child(1) {
+      grid-column: 1 / -1;
+      grid-row: span 2;
+    }
+
+    .gallery li:nth-child(6) {
+      grid-column: 1 / -1;
     }
   }
 
   @media (max-width: 600px) {
-    .gallery,
-    .destinations,
+    .destinations li {
+      flex-basis: 100%;
+    }
+
     .discover {
       grid-template-columns: 1fr;
     }

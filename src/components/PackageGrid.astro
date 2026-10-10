@@ -7,14 +7,15 @@ import { packageCards } from '../data/shared';
 interface Props {
   /** Travel Combos shows a "Cost / Dental Tourism Package Prices" intro, Single Treatments does not. */
   intro?: { label: string; title: string };
+  tone?: 'white' | 'soft';
 }
 
-const { intro } = Astro.props;
+const { intro, tone = 'soft' } = Astro.props;
 ---
 
-<Section labelledby={intro ? 'packages-title' : undefined}>
+<Section {tone} labelledby={intro ? 'packages-title' : undefined}>
   {intro && (
-    <SectionIntro label={intro.label} headingId="packages-title">
+    <SectionIntro label={intro.label} headingId="packages-title" align="center" lined>
       <Fragment slot="title">{intro.title}</Fragment>
     </SectionIntro>
   )}

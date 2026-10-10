@@ -34,7 +34,7 @@ Trạng thái dùng cho từng phần: `Chưa bắt đầu` → `Đang đối ch
 | P3  | Home                                                | P2; dữ liệu A1–A5; bài viết P7/P8 | Chờ kiểm tra                                                                    |
 | P4  | About, Services và Our Doctors                      | P2; A1/A5                         | Chờ kiểm tra (còn: route chi tiết dịch vụ từ CMS, chờ A1)                       |
 | P5  | Dental Implants                                     | P2; A1–A3/A5                      | Chờ kiểm tra (còn: mục Results, giá/so sánh từ A3, nội dung từ A1)              |
-| P6  | Dental Packages: Single Treatments và Travel Combos | P2; A1–A5                         | Chưa bắt đầu                                                                    |
+| P6  | Dental Packages: Single Treatments và Travel Combos | P2; A1–A5                         | Chờ kiểm tra (còn: dữ liệu gói riêng cho từng trang, link Learn more — A2)      |
 | P7  | Mô hình nội dung và CMS bài viết                    | P0, A0; quan hệ địa điểm A4       | Chưa bắt đầu                                                                    |
 | P8  | Travel Guide, Dental Knowledge và Single Post       | P2, P7                            | Chưa bắt đầu                                                                    |
 | P9  | Liên kết, video và tương tác còn thiếu              | Các trang liên quan               | Chưa bắt đầu                                                                    |
@@ -131,6 +131,8 @@ Trạng thái dùng cho từng phần: `Chưa bắt đầu` → `Đang đối ch
 - [ ] Đối chiếu dữ liệu riêng của gói điều trị và combo; hiện hai trang đang dùng chung `PackageGrid`/dữ liệu gói mẫu.
 - [ ] Chốt lối truy cập giữa hai trang từ menu hoặc UI điều hướng, không tự thêm tab không có trong mẫu khi chưa thống nhất.
 - [ ] Nối các nút Learn more, Explore more và View all với trang/luồng phù hợp.
+
+**Tiến độ 10/10/2026 (P6):** cả hai trang dựng lại ở mức bố cục (chưa commit). Hero navy (`PageHero banner dark`, ảnh tháp Rùa rộng), `PackageGrid` nền nhạt và tiêu đề căn giữa có gạch (thêm prop `tone`), CtaBand hai nút trắng, `TourismSupport` mới. **Travel Combos:** collage 6 ảnh (1 lớn + 2 xếp chồng + 3 nhỏ; 2 cột trên mobile), 'Dental destination in Vietnam' dùng `LocationCard action="button"` với nút 'Directions' (thay 'Tìm đường đi'), lưới flex căn giữa dòng cuối, 'Dental Tourism Package Prices', và khối Discover Vietnam sau form tư vấn. Sửa so với Figma: 7 thẻ 'Chi nhánh' giống hệt được thay bằng 3 chi nhánh của Home (lưới tự căn giữa nếu có thêm); tiêu đề 'Find Us and Stay Connected' của Discover Vietnam (trùng tiêu đề Social) đổi thành 'Destinations to Explore During Your Stay'; bullet tiếng Việt trong thẻ gói đổi sang chữ mẫu tiếng Anh như Home. **Tự bổ sung (không có trong Figma):** nút 'See travel combos' / 'See single treatments' ở hero làm lối vào giữa hai trang — chủ dự án có thể đổi sang menu con hoặc tab. Đã chạy check/lint/format/test/build, chụp Chrome headless 1440 và 500 (không tràn ngang). **Chưa làm:** dữ liệu riêng cho gói điều trị và combo (cả hai vẫn dùng chung `packageCards`, A2), đích 'Learn more', 'Explore more', 'View all', 'Directions' (đang `#` hoặc trang mẫu), điểm đến Travel Combos tách khỏi chi nhánh (A4).
 
 **Đạt khi:** hai trang có bố cục đúng mẫu và luồng điều hướng đầy đủ; không dùng chung dữ liệu chỉ vì thuận tiện nếu nội dung được duyệt khác nhau.
 
