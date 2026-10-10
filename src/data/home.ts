@@ -25,6 +25,20 @@ export const heroImage: Img = {
   alt: 'A dentist at a modern treatment chair, with the Hanoi Turtle Tower in the background',
 };
 
+export const hero = {
+  label: 'Melatec Dental Clinic. Viet Nam',
+  title: 'Every Perfect Journey Begins with a Radiant Smile',
+  paragraphs: [
+    'Premium dentistry, thoughtfully tailored to you.',
+    'From dental implants and porcelain crowns to veneers and complete smile makeovers, every treatment is guided by clinical precision and refined care.',
+    'English-speaking specialists, advanced technology and a truly personalized experience all in Vietnam.',
+  ],
+  // PLACEHOLDER: a claim of the design ("20+ countries"); the owner must confirm it.
+  trust: 'Trusted by patients from 20+ countries\nAustralia · USA · UK · France · Japan · Korea',
+};
+
+export const servicesHeading = { label: 'Our services', title: 'Treatments for every smile' };
+
 export const patientSupport = [
   { number: '01', title: 'Affordable Care\nInternational Standards' },
   { number: '02', title: 'Experienced & Dedicated\nDental Specialists' },
@@ -44,6 +58,7 @@ export const services = Array.from({ length: 5 }, () => ({
 
 export const conversations = {
   label: 'Hear from our dentists & patients',
+  title: 'Real conversations.\nExpert insights.\nPersonal experiences.',
   body: 'Go behind the scenes of dental care in Vietnam through conversations with our dentists and international patients. Discover our approach to treatment, hear real experiences and learn what to expect before beginning your own dental journey.',
   // The photo in Figma has promotional Vietnamese text baked into it ("MIỄN … Thăm khám với BS chuyên môn").
   image: {
@@ -55,6 +70,7 @@ export const conversations = {
 // PLACEHOLDER: every cell in the Figma table is "C$1,250 / 40 clinics" and every saving is "—".
 export const costComparison = {
   label: 'Treatment costs',
+  title: 'Exceptional dental care.\nMade more accessible.',
   subtitle: 'Compare against prices in Australia',
   countries: ['Vietnam', 'United States', 'Australia', 'United Kingdom', 'Canada', 'New Zealand'],
   rows: [
@@ -71,6 +87,7 @@ export const costComparison = {
 
 export const whyMelatec = {
   label: 'Why Melatec Luxury Dental',
+  title: 'Premium dental journey, from first consultation to final smile',
   body: 'Experienced dentists, personalised care, advanced technology and dedicated support thoughtfully brought together for international patients seeking exceptional dental care in Vietnam.',
   items: [
     {
@@ -138,6 +155,7 @@ export const destinations = {
 // PLACEHOLDER: one portrait is reused for every doctor in the design.
 export const doctors = {
   label: 'Our doctors',
+  title: 'Meet Our Specialists',
   body: 'Rooted in the principles of the Hippocratic Oath, our dentists bring expertise, precision and genuine care to every treatment.',
   cta: { label: 'View our doctors', href: '/our-doctors' }, // PROVISIONAL
   people: [
@@ -154,6 +172,7 @@ export const doctors = {
 
 export const howItWorks = {
   label: 'How it works',
+  title: 'Dental Journey, Made Simple',
   steps: [
     {
       number: '01',
@@ -184,6 +203,7 @@ export const howItWorks = {
 // confirm the patient's written consent and usage rights before this goes public.
 export const smileStories = {
   label: 'Smile transformations',
+  title: 'Real Stories. Real Smiles.',
   summary:
     'The patient had multiple spaces between the teeth, including several areas with more noticeable gaps. The teeth were also discolored, with uneven coloration that affected the overall harmony of the smile',
   detailsTitle: 'Treatment Details',

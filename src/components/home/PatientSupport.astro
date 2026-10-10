@@ -1,16 +1,20 @@
 ---
-import { patientSupport } from '../../data/home';
+import { getSection } from '../../lib/content';
+
+const section = await getSection('home_support');
 ---
 
-<section class="support" aria-label="Why international patients choose Melatec">
-  <div class="container">
-    <ul class="support__grid">
-      {patientSupport.map((item) => (
-        <li class="support__card">{item.title}</li>
-      ))}
-    </ul>
-  </div>
-</section>
+{section && section.items.length > 0 && (
+  <section class="support" aria-label="Why international patients choose Melatec">
+    <div class="container">
+      <ul class="support__grid">
+        {section.items.map((item) => (
+          <li class="support__card pre-line">{item.title}</li>
+        ))}
+      </ul>
+    </div>
+  </section>
+)}
 
 <style>
   /* Figma: four outlined boxes, centred two-line text in blue. */

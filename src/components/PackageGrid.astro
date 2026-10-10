@@ -2,35 +2,40 @@
 import SectionIntro from './SectionIntro.astro';
 import Section from './Section.astro';
 import PackageCard from './cards/PackageCard.astro';
-import { packageCards } from '../data/shared';
+import { getPackages, type PackageKind } from '../lib/content';
 
 interface Props {
   /** Travel Combos shows a "Cost / Dental Tourism Package Prices" intro, Single Treatments does not. */
   intro?: { label: string; title: string };
   tone?: 'white' | 'soft';
+  /** Which cards: the Dental Packages page or the Travel Combos page. */
+  kind: PackageKind;
 }
 
-const { intro, tone = 'soft' } = Astro.props;
+const { intro, tone = 'soft', kind } = Astro.props;
+const packages = await getPackages(kind);
 ---
 
-<Section {tone} labelledby="packages-title">
-  {intro ? (
-    <SectionIntro label={intro.label} headingId="packages-title" align="center" lined>
-      <Fragment slot="title">{intro.title}</Fragment>
-    </SectionIntro>
-  ) : (
-    <h2 class="visually-hidden" id="packages-title">
-      Dental packages
-    </h2>
-  )}
-  <ul class="grid">
-    {packageCards.map((p) => (
-      <li>
-        <PackageCard {...p} />
-      </li>
-    ))}
-  </ul>
-</Section>
+{packages.length > 0 && (
+  <Section {tone} labelledby="packages-title">
+    {intro ? (
+      <SectionIntro label={intro.label} headingId="packages-title" align="center" lined>
+        <Fragment slot="title">{intro.title}</Fragment>
+      </SectionIntro>
+    ) : (
+      <h2 class="visually-hidden" id="packages-title">
+        Dental packages
+      </h2>
+    )}
+    <ul class="grid">
+      {packages.map((p) => (
+        <li>
+          <PackageCard {...p} />
+        </li>
+      ))}
+    </ul>
+  </Section>
+)}
 
 <style>
   .grid {

@@ -446,3 +446,31 @@ a.admin-btn {
 .admin-menu__list a:hover {
   background: rgb(255 255 255 / 12%);
 }
+
+/* A list of cards in a form ("items" field): each card is a boxed group of inputs. */
+.admin-items {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.admin-items legend {
+  padding: 0;
+  font-weight: 600;
+}
+
+.admin-item {
+  display: grid;
+  gap: 8px;
+  padding: 12px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+}
+
+.admin-item__title {
+  margin: 0;
+  font-weight: 600;
+  font-size: 0.875rem;
+}

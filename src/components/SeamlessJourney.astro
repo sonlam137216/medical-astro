@@ -1,7 +1,10 @@
 ---
 import { Image } from 'astro:assets';
 import Section from './Section.astro';
-import { seamlessJourney as j } from '../data/shared';
+
+import { getSection } from '../lib/content';
+
+const j = (await getSection('shared_journey'))!;
 ---
 
 <Section labelledby="journey-title">

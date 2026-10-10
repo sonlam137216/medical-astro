@@ -7,10 +7,13 @@ import ServiceCard from '../../components/cards/ServiceCard.astro';
 import CtaBand from '../../components/CtaBand.astro';
 import TourismSupport from '../../components/TourismSupport.astro';
 import SeamlessJourney from '../../components/SeamlessJourney.astro';
-import { towerImage, serviceDetails } from '../../data/shared';
+import { towerImage } from '../../data/shared';
+import { getSection, getServices } from '../../lib/content';
 
 export const prerender = true;
 
+const services = await getServices();
+const hero = (await getSection('services_hero'))!;
 const seo = await getPageSeo('/services', {
   title: 'Dental services · Melatec Dental Clinic',
   description:
@@ -19,12 +22,9 @@ const seo = await getPageSeo('/services', {
 ---
 
 <SiteLayout title={seo.title} description={seo.description}>
-  <PageHero variant="banner" dark label="Our services." image={towerImage} imageHeight={400}>
-    <Fragment slot="title">Comprehensive dental care for every smile</Fragment>
-    <p>
-      Providing advanced implant, cosmetic, orthodontic, and restorative dental care in a modern,
-      patient-focused clinical environment.
-    </p>
+  <PageHero variant="banner" dark label={hero.label} image={towerImage} imageHeight={400}>
+    <Fragment slot="title">{hero.title}</Fragment>
+    {hero.body && <p>{hero.body}</p>}
   </PageHero>
 
   <Section tone="soft" labelledby="dental-services-title">
@@ -32,9 +32,16 @@ const seo = await getPageSeo('/services', {
       Dental services
     </h2>
     <ul class="grid">
-      {serviceDetails.map((s) => (
-        <li>
-          <ServiceCard {...s} detail />
+      {services.map((s) => (
+        <li id={s.slug ?? undefined}>
+          <ServiceCard
+            title={s.title}
+            body={s.summary}
+            href={s.hasPage ? s.href : null}
+            image={s.image}
+            linkLabel="Explore services"
+            detail
+          />
         </li>
       ))}
     </ul>
@@ -51,10 +58,11 @@ const seo = await getPageSeo('/services', {
 </SiteLayout>
 
 <style>
-  /* Figma: equal cards, 2 on the first row (centred) and 3 on the second. */
+  /* 3 per row, the last row centred, whatever the number of services. */
   .grid {
-    display: grid;
-    grid-template-columns: repeat(6, 1fr);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
     gap: 24px;
     margin: 0;
     padding: 0;
@@ -63,15 +71,7 @@ const seo = await getPageSeo('/services', {
 
   .grid li {
     display: flex;
-    grid-column: span 2;
-  }
-
-  .grid li:nth-child(1) {
-    grid-column: 2 / span 2;
-  }
-
-  .grid li:nth-child(2) {
-    grid-column: 4 / span 2;
+    flex: 0 0 calc((100% - 48px) / 3);
   }
 
   .grid li > :global(*) {
@@ -79,20 +79,14 @@ const seo = await getPageSeo('/services', {
   }
 
   @media (max-width: 900px) {
-    .grid {
-      grid-template-columns: repeat(2, 1fr);
-    }
-
-    .grid li,
-    .grid li:nth-child(1),
-    .grid li:nth-child(2) {
-      grid-column: auto;
+    .grid li {
+      flex-basis: calc((100% - 24px) / 2);
     }
   }
 
   @media (max-width: 600px) {
-    .grid {
-      grid-template-columns: 1fr;
+    .grid li {
+      flex-basis: 100%;
     }
   }
 </style>

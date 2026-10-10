@@ -2,38 +2,42 @@
 import Section from '../Section.astro';
 import SectionIntro from '../SectionIntro.astro';
 import JourneyCard from '../cards/JourneyCard.astro';
-import { howItWorks } from '../../data/home';
+
+import { getSection } from '../../lib/content';
 import { getSiteContent } from '../../lib/site-content';
 
 const site = await getSiteContent();
+const howItWorks = await getSection('home_how');
 ---
 
-<Section tone="blue" labelledby="how-title">
-  <SectionIntro label={howItWorks.label} headingId="how-title" inverse lined>
-    <Fragment slot="title">Dental Journey, Made Simple</Fragment>
-  </SectionIntro>
+{howItWorks && (
+  <Section tone="blue" labelledby="how-title">
+    <SectionIntro label={howItWorks.label} headingId="how-title" inverse lined>
+      <Fragment slot="title">{howItWorks.title}</Fragment>
+    </SectionIntro>
 
-  <ol class="grid">
-    {howItWorks.steps.map((s) => (
-      <li>
-        <JourneyCard {...s} />
-      </li>
-    ))}
-  </ol>
+    <ol class="grid">
+      {howItWorks.steps.map((s) => (
+        <li>
+          <JourneyCard {...s} />
+        </li>
+      ))}
+    </ol>
 
-  <div class="help">
-    <p>
-      {howItWorks.helpTitle}
-      <br />
-      {howItWorks.helpBody}
-    </p>
-    {site.whatsappUrl && (
-      <a class="help__btn" href={site.whatsappUrl}>
-        Chat on WhatsApp <span aria-hidden="true">⟶</span>
-      </a>
-    )}
-  </div>
-</Section>
+    <div class="help">
+      <p>
+        {howItWorks.helpTitle}
+        {howItWorks.helpTitle && howItWorks.helpBody && <br />}
+        {howItWorks.helpBody}
+      </p>
+      {site.whatsappUrl && (
+        <a class="help__btn" href={site.whatsappUrl}>
+          Chat on WhatsApp <span aria-hidden="true">⟶</span>
+        </a>
+      )}
+    </div>
+  </Section>
+)}
 
 <style>
   .grid {

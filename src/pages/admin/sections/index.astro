@@ -1,0 +1,81 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import { SECTIONS, REQUIRED_SECTIONS } from '../../../lib/cms/sections';
+import { BUILTIN_PAGES } from '../../../lib/cms/pages';
+import { loadSectionStates } from '../../../lib/cms/section-admin';
+
+export const prerender = false;
+
+const { states, failed } = await loadSectionStates(Astro.locals.db);
+const sp = Astro.url.searchParams;
+const required = new Set<string>(REQUIRED_SECTIONS);
+const stateLabel = { custom: 'Edited', hidden: 'Hidden', builtin: 'Built-in text' } as const;
+const groups = BUILTIN_PAGES.map((p) => ({
+  page: p,
+  sections: SECTIONS.filter((s) => s.page === p.path),
+})).filter((g) => g.sections.length > 0);
+---
+
+<AdminLayout title="Page text" current="content:sections">
+  <main class="admin-main">
+    <h1>Page text</h1>
+    <p class="admin-muted">
+      The headings and paragraphs of each page. “Built-in text” is the sample wording that came with
+      the design: it is not checked by the clinic. Edit a section to write the real text, or hide
+      it. Changes go live after you publish the website.
+    </p>
+
+    {sp.has('saved') && (
+      <p class="admin-notice" role="status">
+        Saved. Publish to show the change on the website.
+      </p>
+    )}
+    {sp.has('reset') && (
+      <p class="admin-notice" role="status">
+        Back to the built-in text. Publish to show the change on the website.
+      </p>
+    )}
+    {sp.has('error') && (
+      <p class="admin-notice admin-notice--error" role="alert">
+        Something went wrong. Please try again.
+      </p>
+    )}
+    {failed && (
+      <p class="admin-notice admin-notice--error" role="alert">
+        Could not load the list.
+      </p>
+    )}
+
+    {groups.map((g) => (
+      <section class="admin-card admin-table-wrap">
+        <h2 class="t-h3">{g.page.title}</h2>
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Section</th>
+              <th>Where it appears</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {g.sections.map((s) => {
+              const state = states.get(s.key) ?? 'builtin';
+              return (
+                <tr>
+                  <td>
+                    <a href={`/admin/sections/${s.key}`}>{s.label}</a>
+                  </td>
+                  <td>{s.where}</td>
+                  <td>
+                    {stateLabel[state]}
+                    {state === 'builtin' && required.has(s.key) && ' · needed before launch'}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </section>
+    ))}
+  </main>
+</AdminLayout>

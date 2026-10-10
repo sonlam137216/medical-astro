@@ -11,6 +11,16 @@ export interface FieldBase {
   readonly?: boolean;
 }
 
+/** One column of an `items` field. `lines` values are stored as an array of text. */
+export interface ItemColumn {
+  name: string;
+  label: string;
+  kind: 'text' | 'textarea' | 'lines';
+  max: number;
+  required?: boolean;
+  help?: string;
+}
+
 export type Field =
   | (FieldBase & { type: 'text'; max: number; placeholder?: string })
   /** A link: a site path, #anchor, https/http URL, mailto: or tel: (same rule as the `link_href` domain). */
@@ -44,7 +54,21 @@ export type Field =
     })
   | (FieldBase & { type: 'date' })
   /** A price: `name` holds the amount, `currencyName` the 3-letter currency. */
-  | (FieldBase & { type: 'money'; currencyName: string });
+  | (FieldBase & { type: 'money'; currencyName: string })
+  /**
+   * A short list of cards or rows, each with the same columns; stored as an array of objects. The form shows
+   * `maxItems` slots (so it works without JavaScript); a slot with nothing in it is left out.
+   */
+  | (FieldBase & {
+      type: 'items';
+      maxItems: number;
+      itemLabel: string;
+      columns: ItemColumn[];
+    });
+
+/** Name of one input of an `items` slot in the submitted form. */
+export const itemInput = (field: string, index: number, column: string) =>
+  `${field}__${index}__${column}`;
 
 export type FieldType = Field['type'];
 
@@ -170,6 +194,48 @@ export function parseFields(fields: readonly Field[], form: URLSearchParams): Pa
         value[field.name] = items;
         break;
       }
+      case 'items': {
+        const items: Row[] = [];
+        for (let i = 0; i < field.maxItems; i++) {
+          const item: Row = {};
+          let filled = false;
+          for (const c of field.columns) {
+            const raw = typed(itemInput(field.name, i, c.name)) ?? '';
+            if (c.kind === 'lines') {
+              const lines = raw
+                .split(/\r?\n/)
+                .map(oneLine)
+                .filter((l) => l !== '');
+              if (lines.some((l) => l.length > c.max)) {
+                errors[field.name] =
+                  `${field.itemLabel} ${i + 1}: keep each line of “${c.label}” under ${c.max} characters.`;
+              }
+              if (lines.length > 0) filled = true;
+              item[c.name] = lines;
+            } else {
+              const v = c.kind === 'textarea' ? multiLine(raw) : oneLine(raw);
+              if (v.length > c.max) {
+                errors[field.name] =
+                  `${field.itemLabel} ${i + 1}: keep “${c.label}” under ${c.max} characters.`;
+              }
+              if (v !== '') filled = true;
+              item[c.name] = v;
+            }
+          }
+          if (!filled) continue;
+          for (const c of field.columns) {
+            const v = item[c.name];
+            if (c.required && (Array.isArray(v) ? v.length === 0 : v === '')) {
+              errors[field.name] = `${field.itemLabel} ${i + 1}: please fill in “${c.label}”.`;
+            }
+          }
+          items.push(item);
+        }
+        if (items.length === 0 && field.required)
+          errors[field.name] = `Please add at least one ${field.itemLabel.toLowerCase()}.`;
+        value[field.name] = items;
+        break;
+      }
       case 'slug': {
         const base = field.from ? oneLine(typed(field.from)) : '';
         const slug = oneLine(typed(field.name)).toLowerCase() || slugify(base);
@@ -273,6 +339,10 @@ export function emptyValues(fields: readonly Field[]): FormValues {
         values[f.name] = '';
         values[f.currencyName] = 'USD';
         break;
+      case 'items':
+        for (let i = 0; i < f.maxItems; i++)
+          for (const c of f.columns) values[itemInput(f.name, i, c.name)] = '';
+        break;
       default:
         values[f.name] = '';
     }
@@ -292,6 +362,18 @@ export function valuesFromRow(fields: readonly Field[], row: Row): FormValues {
       case 'lines':
         values[f.name] = Array.isArray(v) ? v.join('\n') : '';
         break;
+      case 'items':
+        (Array.isArray(v) ? (v as Row[]) : []).slice(0, f.maxItems).forEach((item, i) => {
+          for (const c of f.columns) {
+            const cell = item?.[c.name];
+            values[itemInput(f.name, i, c.name)] = Array.isArray(cell)
+              ? cell.join('\n')
+              : typeof cell === 'string'
+                ? cell
+                : '';
+          }
+        });
+        break;
       case 'money':
         values[f.name] = v === null || v === undefined ? '' : String(v);
         values[f.currencyName] =
@@ -309,7 +391,13 @@ export function valuesFromForm(fields: readonly Field[], form: URLSearchParams):
   const values = emptyValues(fields);
   for (const f of fields) {
     if (f.type === 'bool') values[f.name] = form.has(f.name);
-    else if (f.type === 'money') {
+    else if (f.type === 'items') {
+      for (let i = 0; i < f.maxItems; i++)
+        for (const c of f.columns) {
+          const key = itemInput(f.name, i, c.name);
+          values[key] = form.get(key) ?? '';
+        }
+    } else if (f.type === 'money') {
       values[f.name] = form.get(f.name) ?? '';
       values[f.currencyName] = form.get(f.currencyName) ?? 'USD';
     } else values[f.name] = form.get(f.name) ?? '';

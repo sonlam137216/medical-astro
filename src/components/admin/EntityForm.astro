@@ -1,11 +1,11 @@
 ---
 import type { EntityDef } from '../../lib/cms/entities';
-import type { FieldErrors, FormValues } from '../../lib/cms/fields';
+import { itemInput, type Field, type FieldErrors, type FormValues } from '../../lib/cms/fields';
 import type { FormOptions } from '../../lib/cms/admin';
 
 // Renders the form of any registered content type from its field list.
 interface Props {
-  def: EntityDef;
+  def: Pick<EntityDef, 'fields'>;
   values: FormValues;
   errors?: FieldErrors;
   formError?: string;
@@ -16,6 +16,13 @@ interface Props {
 const { def, values, errors = {}, formError, options, submitLabel } = Astro.props;
 const text = (name: string) => String(values[name] ?? '');
 const invalid = (name: string) => (errors[name] ? 'true' : undefined);
+// Slots of an `items` field to show: the filled ones plus two empty ones (at most the field's maximum).
+const slotsFor = (f: Extract<Field, { type: 'items' }>) => {
+  let last = -1;
+  for (let i = 0; i < f.maxItems; i++)
+    if (f.columns.some((c) => text(itemInput(f.name, i, c.name)) !== '')) last = i;
+  return Math.min(f.maxItems, last + 3);
+};
 ---
 
 <form class="admin-form admin-card" method="post">
@@ -65,6 +72,46 @@ const invalid = (name: string) => (errors[name] ? 'true' : undefined);
           </fieldset>
         )}
 
+        {f.type === 'items' && (
+          <fieldset class="admin-items">
+            <legend>{f.label}</legend>
+            {f.help && <span class="admin-hint">{f.help}</span>}
+            {Array.from({ length: slotsFor(f) }, (_, i) => (
+              <div class="admin-item">
+                <p class="admin-item__title">
+                  {f.itemLabel} {i + 1}
+                </p>
+                {f.columns.map((c) => (
+                  <label>
+                    {c.label}
+                    {c.kind === 'text' ? (
+                      <input
+                        name={itemInput(f.name, i, c.name)}
+                        value={text(itemInput(f.name, i, c.name))}
+                        maxlength={c.max}
+                      />
+                    ) : (
+                      <textarea
+                        name={itemInput(f.name, i, c.name)}
+                        rows={c.kind === 'lines' ? 4 : 3}
+                        maxlength={c.kind === 'textarea' ? c.max : undefined}
+                      >
+                        {text(itemInput(f.name, i, c.name))}
+                      </textarea>
+                    )}
+                    {c.help && <span class="admin-hint">{c.help}</span>}
+                  </label>
+                ))}
+              </div>
+            ))}
+            <span class="admin-hint">
+              Leave a card empty to leave it out. To add more than are shown, save and come back:
+              two empty cards are offered each time (up to {f.maxItems}).
+            </span>
+            {error && <span class="admin-field-error">{error}</span>}
+          </fieldset>
+        )}
+
         {f.type === 'money' && (
           <label>
             {f.label}
@@ -89,7 +136,7 @@ const invalid = (name: string) => (errors[name] ? 'true' : undefined);
           </label>
         )}
 
-        {f.type !== 'bool' && f.type !== 'image' && f.type !== 'money' && (
+        {f.type !== 'bool' && f.type !== 'image' && f.type !== 'money' && f.type !== 'items' && (
           <label>
             {f.label}
             {(f.type === 'text' ||

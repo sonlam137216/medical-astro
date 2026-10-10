@@ -1,0 +1,85 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import EntityForm from '../../../components/admin/EntityForm.astro';
+import { sectionByKey } from '../../../lib/cms/sections';
+import { valuesFromRow } from '../../../lib/cms/fields';
+import { SECTION_SAMPLES, type SectionKey } from '../../../data/sections';
+import {
+  VISIBLE_FIELD,
+  loadSection,
+  loadSectionOptions,
+  processSectionPost,
+} from '../../../lib/cms/section-admin';
+
+export const prerender = false;
+
+const def = sectionByKey(Astro.params.key);
+if (!def) return new Response('Not found', { status: 404 });
+
+const db = Astro.locals.db;
+const loaded = await loadSection(db, def);
+if (!loaded) return new Response('Could not load', { status: 500 });
+
+const result =
+  Astro.request.method === 'POST' ? await processSectionPost(Astro.request, db, def) : null;
+if (result && 'redirect' in result) return result.redirect;
+if (result) Astro.response.status = result.status;
+
+const options = await loadSectionOptions(db, def);
+// A section nobody has edited starts from the built-in text, so the admin changes words instead of retyping them.
+const builtIn = SECTION_SAMPLES[def.key as SectionKey] as unknown as Record<string, unknown>;
+const startValues = loaded.id
+  ? loaded.values
+  : {
+      ...loaded.values,
+      ...valuesFromRow(
+        def.fields.filter((f) => f.type !== 'image'),
+        builtIn,
+      ),
+    };
+const formDef = { fields: def.canHide === false ? def.fields : [VISIBLE_FIELD, ...def.fields] };
+const sp = Astro.url.searchParams;
+---
+
+<AdminLayout title={def.label} current="content:sections">
+  <main class="admin-main">
+    <p>
+      <a href="/admin/sections">← Page text</a>
+    </p>
+    <h1>{def.label}</h1>
+    <p class="admin-muted">{def.where}</p>
+    {sp.get('error') === 'failed' && (
+      <p class="admin-notice admin-notice--error" role="alert">
+        Could not go back to the built-in text. Please try again.
+      </p>
+    )}
+    {!loaded.id && (
+      <p class="admin-notice" role="status">
+        This section still shows the built-in sample text. Saving this form replaces all of its text
+        with what you enter here.
+      </p>
+    )}
+    <EntityForm
+      def={formDef}
+      values={result?.values ?? startValues}
+      errors={result?.errors}
+      formError={result?.formError}
+      options={options}
+      submitLabel="Save changes"
+    />
+    {loaded.id && (
+      <form class="admin-form admin-card" method="post" action={`/admin/sections/${def.key}/reset`}>
+        <h2 class="t-h3">Back to the built-in text</h2>
+        <p class="admin-hint">
+          Removes your text from the working copy. The sample wording that came with the design
+          shows again after you publish.
+        </p>
+        <div>
+          <button class="admin-btn admin-btn--danger" type="submit">
+            Use the built-in text
+          </button>
+        </div>
+      </form>
+    )}
+  </main>
+</AdminLayout>

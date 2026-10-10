@@ -11,7 +11,6 @@ import vietnam4 from '../assets/images/photos/vietnam-4.webp';
 import vietnam5 from '../assets/images/photos/vietnam-5.webp';
 import vietnam6 from '../assets/images/photos/vietnam-6.webp';
 import daNang from '../assets/images/photos/da-nang.webp';
-import { destinations as homeDestinations } from './home';
 
 export const gallery: Img[] = [
   { src: vietnam1, alt: 'A stone pagoda on a small island in a lake surrounded by trees' },
@@ -22,12 +21,10 @@ export const gallery: Img[] = [
   { src: vietnam6, alt: 'An illuminated bridge over a river city at dusk' },
 ];
 
-// Branch cards of the Figma page ("Chi nhánh: 26 Đoàn Thị Điểm…" repeated seven times). The three real branch
-// addresses of the Home page stand in for the repeated sample; the grid centres any number of cards.
+// Heading of the branch cards; the cards come from the Locations module (getLocations).
 export const destinations = {
   label: 'Dental destination in Vietnam',
   title: 'Exceptional dental care in destinations worth discovering',
-  cards: homeDestinations.locations,
 };
 
 export const discover = {

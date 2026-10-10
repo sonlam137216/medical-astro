@@ -2,14 +2,15 @@
 import FormGuards from './FormGuards.astro';
 import Button from './Button.astro';
 import PhoneField from './PhoneField.astro';
-import { footerTreatments } from '../data/site';
-import { getSiteContent } from '../lib/site-content';
-import { plan } from '../data/implants';
+import { getServiceLinks, getSiteContent } from '../lib/site-content';
+
+import { getSection } from '../lib/content';
 
 const site = await getSiteContent();
 
 // Consultation block used on the Dental Implants landing page (different copy and fields from the shared one).
-const interests = footerTreatments.map((t) => t.label); // PROVISIONAL option list
+const plan = (await getSection('implants_plan'))!;
+const interests = (await getServiceLinks()).map((t) => t.label);
 ---
 
 <section class="band" id="consultation" aria-labelledby="plan-title">

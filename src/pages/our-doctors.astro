@@ -5,11 +5,12 @@ import { getPageSeo } from '../lib/site-content';
 import PageHero from '../components/PageHero.astro';
 import Section from '../components/Section.astro';
 import { towerImage } from '../data/shared';
-import { getDoctors } from '../lib/content';
+import { getDoctors, getSection } from '../lib/content';
 
 export const prerender = true;
 
 const doctorProfiles = await getDoctors();
+const hero = (await getSection('doctors_hero'))!;
 
 const seo = await getPageSeo('/our-doctors', {
   title: 'Our doctors · Melatec Dental Clinic',
@@ -20,16 +21,13 @@ const seo = await getPageSeo('/our-doctors', {
 
 <!-- Figma highlights "About us" in the nav on this page -->
 <SiteLayout title={seo.title} description={seo.description} current="/about">
-  <PageHero variant="banner" dark label="Our doctors." image={towerImage} imageHeight={400}>
-    <Fragment slot="title">Meet our team of experienced specialists</Fragment>
-    <p>
-      From cosmetic dentistry and dental implants to restorative treatments and general dental care,
-      Melatec Dental Clinic provides comprehensive solutions for patients who want to improve their
-      smiles while enjoying their stay in Vietnam.
-    </p>
+  <PageHero variant="banner" dark label={hero.label} image={towerImage} imageHeight={400}>
+    <Fragment slot="title">{hero.title}</Fragment>
+    {hero.body && <p>{hero.body}</p>}
     <Fragment slot="extra">
-      <p class="hero-chip">15+ Years of Experience</p>
-      <p class="hero-chip">English-speaking doctors</p>
+      {hero.chips.map((chip) => (
+        <p class="hero-chip">{chip}</p>
+      ))}
     </Fragment>
   </PageHero>
 

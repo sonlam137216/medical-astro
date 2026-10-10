@@ -11,7 +11,7 @@ import {
   tableOfContents,
 } from '../../lib/cms/articles';
 import type { PublicArticle } from '../../lib/content';
-import { footerTreatments } from '../../data/site';
+import { getServiceLinks } from '../../lib/site-content';
 
 // One article (Figma "Single Post"): breadcrumb, title, update line, table of contents, body, reviewer card,
 // related articles, and a sidebar with the services and a consultation form.
@@ -21,6 +21,7 @@ interface Props {
 }
 
 const { article, all } = Astro.props;
+const serviceLinks = await getServiceLinks();
 const blocks = parseArticleBody(article.body);
 const toc = tableOfContents(blocks);
 const listLabel = article.kind === 'travel_guide' ? 'Dental Travel Guide' : 'Dental Knowledge';
@@ -136,7 +137,7 @@ const description = article.seoDescription || article.excerpt || undefined;
         <section class="services card" aria-labelledby="services-title">
           <h2 id="services-title">Our services</h2>
           <ul>
-            {footerTreatments.slice(0, 4).map((s) => (
+            {serviceLinks.slice(0, 4).map((s) => (
               <li>
                 <a class="link-arrow" href={s.href}>
                   {s.label} <span aria-hidden="true">→</span>

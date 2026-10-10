@@ -3,8 +3,10 @@ import Button from './Button.astro';
 import { Image } from 'astro:assets';
 import { getSiteContent } from '../lib/site-content';
 import { heroImage } from '../data/home';
+import { getSection } from '../lib/content';
 
 const site = await getSiteContent();
+const hero = (await getSection('home_hero'))!;
 ---
 
 <section class="hero" aria-labelledby="hero-title">
@@ -22,20 +24,14 @@ const site = await getSiteContent();
   />
   <div class="container hero__inner">
     <div class="hero__content">
-      <p class="t-label is-lined is-lead">Melatec Dental Clinic. Viet Nam</p>
+      <p class="t-label is-lined is-lead">{hero.label}</p>
       <h1 class="t-hero" id="hero-title">
-        Every Perfect Journey Begins with a Radiant Smile
+        {hero.title}
       </h1>
       <div class="hero__body">
-        <p>Premium dentistry, thoughtfully tailored to you.</p>
-        <p>
-          From dental implants and porcelain crowns to veneers and complete smile makeovers, every
-          treatment is guided by clinical precision and refined care.
-        </p>
-        <p>
-          English-speaking specialists, advanced technology and a truly personalized experience all
-          in Vietnam.
-        </p>
+        {hero.paragraphs.map((p) => (
+          <p>{p}</p>
+        ))}
       </div>
       <div class="hero__actions">
         {site.whatsappUrl && (
@@ -46,11 +42,7 @@ const site = await getSiteContent();
         {/* Only when a video is chosen in Site details: it scrolls to the player further down the page. */}
         {site.video && <Button href="#video">Watch video</Button>}
       </div>
-      <p class="hero__trust">
-        Trusted by patients from 20+ countries
-        <br />
-        Australia · USA · UK · France · Japan · Korea
-      </p>
+      {hero.trust && <p class="hero__trust pre-line">{hero.trust}</p>}
     </div>
   </div>
 </section>

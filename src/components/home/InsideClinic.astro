@@ -1,43 +1,48 @@
 ---
 import { Image } from 'astro:assets';
 import Section from '../Section.astro';
-import { insideClinic } from '../../data/home';
+
+import { getSection } from '../../lib/content';
+
+const insideClinic = await getSection('home_inside');
 ---
 
-<Section tone="blue" labelledby="clinic-title">
-  <h2 class="visually-hidden" id="clinic-title">
-    Inside Melatec Dental Clinic
-  </h2>
+{insideClinic && insideClinic.tiles.length > 0 && (
+  <Section tone="blue" labelledby="clinic-title">
+    <h2 class="visually-hidden" id="clinic-title">
+      {insideClinic.title}
+    </h2>
 
-  <!-- Figma: a blue band with a row of photo tiles and an arrow at each end. -->
-  <div class="gallery" data-gallery>
-    <button class="gallery__arrow" type="button" aria-label="Previous photos" data-gallery-prev>
-      <span aria-hidden="true">←</span>
-    </button>
-    <ul class="gallery__track" tabindex="0" aria-label="Clinic photos" data-gallery-track>
-      {insideClinic.tiles.map((tile) => (
-        <li class="gallery__tile">
-          <figure>
-            <Image
-              class="gallery__img"
-              src={tile.image.src}
-              alt={tile.image.alt}
-              width={240}
-              height={220}
-              densities={[1, 2]}
-              sizes="240px"
-              loading="lazy"
-            />
-            <figcaption>{tile.caption}</figcaption>
-          </figure>
-        </li>
-      ))}
-    </ul>
-    <button class="gallery__arrow" type="button" aria-label="Next photos" data-gallery-next>
-      <span aria-hidden="true">→</span>
-    </button>
-  </div>
-</Section>
+    <!-- Figma: a blue band with a row of photo tiles and an arrow at each end. -->
+    <div class="gallery" data-gallery>
+      <button class="gallery__arrow" type="button" aria-label="Previous photos" data-gallery-prev>
+        <span aria-hidden="true">←</span>
+      </button>
+      <ul class="gallery__track" tabindex="0" aria-label="Clinic photos" data-gallery-track>
+        {insideClinic.tiles.map((tile) => (
+          <li class="gallery__tile">
+            <figure>
+              <Image
+                class="gallery__img"
+                src={tile.image.src}
+                alt={tile.image.alt}
+                width={240}
+                height={220}
+                densities={[1, 2]}
+                sizes="240px"
+                loading="lazy"
+              />
+              <figcaption>{tile.caption}</figcaption>
+            </figure>
+          </li>
+        ))}
+      </ul>
+      <button class="gallery__arrow" type="button" aria-label="Next photos" data-gallery-next>
+        <span aria-hidden="true">→</span>
+      </button>
+    </div>
+  </Section>
+)}
 
 <script>
   document.querySelectorAll<HTMLElement>('[data-gallery]').forEach((gallery) => {

@@ -1,14 +1,16 @@
 ---
-import { Image } from 'astro:assets';
 import type { Img } from '../../data/home';
+import type { PublicImage } from '../../lib/media';
+import ProfileImage from '../ProfileImage.astro';
 
 interface Props {
   title: string;
-  body: string;
+  body?: string | null;
   /** Home cards show a "TOTAL: …" line; the Services page cards do not. */
   total?: string;
-  href: string;
-  image: Img;
+  /** Absent: the card has no link (the service has no page of its own). */
+  href?: string | null;
+  image?: Img | PublicImage;
   linkLabel?: string;
   /** Services page (Figma): centred serif title, short copy, outline pill button. */
   detail?: boolean;
@@ -18,21 +20,22 @@ const { title, body, total, href, image, linkLabel = 'Learn more', detail = fals
 ---
 
 <article class="card service">
-  <Image
-    class="card__media service__img"
-    src={image.src}
-    alt={image.alt}
-    width={384}
-    height={190}
-    densities={[1, 2]}
-    sizes="(max-width: 768px) 100vw, 384px"
-    loading="lazy"
-  />
+  {image ? (
+    <ProfileImage
+      class="card__media service__img"
+      image={image}
+      width={384}
+      height={190}
+      sizes="(max-width: 768px) 100vw, 384px"
+    />
+  ) : (
+    <div class="card__media service__img service__img--empty" aria-hidden="true"></div>
+  )}
   <div class:list={['card__body', { 'card__body--detail': detail }]}>
     <h3 class="t-h3">{title}</h3>
-    <p class:list={detail ? [] : ['t-small', 'muted']}>{body}</p>
+    {body && <p class:list={detail ? [] : ['t-small', 'muted']}>{body}</p>}
     {total && <p class="price-total">{total}</p>}
-    {detail ? (
+    {!href ? null : detail ? (
       <a class="service__pill" href={href}>
         {linkLabel} <span aria-hidden="true">→</span>
       </a>
@@ -45,6 +48,10 @@ const { title, body, total, href, image, linkLabel = 'Learn more', detail = fals
 </article>
 
 <style>
+  .service__img--empty {
+    background: var(--color-card);
+  }
+
   .service__img {
     aspect-ratio: 384 / 190;
     object-fit: cover;

@@ -1,12 +1,14 @@
 ---
-import { Image } from 'astro:assets';
 import type { Img } from '../../data/home';
+import type { PublicImage } from '../../lib/media';
+import ProfileImage from '../ProfileImage.astro';
 
 interface Props {
   name: string;
   address: string;
   href: string;
-  image: Img;
+  /** Absent (a published clinic without a photo): an empty frame keeps the cards aligned. */
+  image?: Img | PublicImage;
   linkLabel?: string;
   /** Discover Vietnam cards use the 16/26 body style rather than small muted text. */
   detail?: boolean;
@@ -27,16 +29,17 @@ const external = /^https?:\/\//i.test(href);
 ---
 
 <article class="card location">
-  <Image
-    class="card__media location__img"
-    src={image.src}
-    alt={image.alt}
-    width={384}
-    height={216}
-    densities={[1, 2]}
-    sizes="(max-width: 768px) 100vw, 384px"
-    loading="lazy"
-  />
+  {image ? (
+    <ProfileImage
+      class="card__media location__img"
+      image={image}
+      width={384}
+      height={216}
+      sizes="(max-width: 768px) 100vw, 384px"
+    />
+  ) : (
+    <div class="card__media location__img location__img--empty" aria-hidden="true"></div>
+  )}
   <div class="card__body">
     {action === 'button' ? (
       <>
@@ -69,6 +72,10 @@ const external = /^https?:\/\//i.test(href);
   .location__img {
     aspect-ratio: 384 / 216;
     object-fit: cover;
+  }
+
+  .location__img--empty {
+    background: var(--color-card);
   }
 
   .card__body {

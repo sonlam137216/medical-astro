@@ -1,33 +1,38 @@
 ---
 import Section from '../Section.astro';
-import { whyMelatec } from '../../data/home';
+
+import { getSection } from '../../lib/content';
+
+const whyMelatec = await getSection('home_why');
 ---
 
-<Section tone="soft" labelledby="why-title">
-  <div class="why">
-    <div class="why__intro">
-      <p class="t-label is-lined is-start">{whyMelatec.label}</p>
-      <h2 class="t-h2" id="why-title">
-        Premium dental journey, from first consultation to final smile
-      </h2>
-      <p class="why__body">{whyMelatec.body}</p>
-    </div>
+{whyMelatec && (
+  <Section tone="soft" labelledby="why-title">
+    <div class="why">
+      <div class="why__intro">
+        <p class="t-label is-lined is-start">{whyMelatec.label}</p>
+        <h2 class="t-h2" id="why-title">
+          {whyMelatec.title}
+        </h2>
+        {whyMelatec.body && <p class="why__body">{whyMelatec.body}</p>}
+      </div>
 
-    <ol class="why__list">
-      {whyMelatec.items.map((item) => (
-        <li class="why__item">
-          <span class="why__no" aria-hidden="true">
-            {Number(item.number)}
-          </span>
-          <div>
-            <h3 class="t-h3">{item.title}</h3>
-            <p>{item.body}</p>
-          </div>
-        </li>
-      ))}
-    </ol>
-  </div>
-</Section>
+      <ol class="why__list">
+        {whyMelatec.items.map((item) => (
+          <li class="why__item">
+            <span class="why__no" aria-hidden="true">
+              {Number(item.number)}
+            </span>
+            <div>
+              <h3 class="t-h3">{item.title}</h3>
+              <p>{item.body}</p>
+            </div>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </Section>
+)}
 
 <style>
   .why {

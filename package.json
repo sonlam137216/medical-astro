@@ -14,6 +14,7 @@
     "typegen": "wrangler types --env-file .dev.vars.example",
     "db:migrate": "wrangler d1 migrations apply DB --local",
     "db:seed": "wrangler d1 execute DB --local --file db/seed.sql",
+    "db:seed:staging": "wrangler d1 execute DB --remote --env staging --file db/seed.sql",
     "db:reset": "rm -rf .wrangler/state/v3/d1 && npm run db:migrate",
     "db:migrate:staging": "wrangler d1 migrations apply DB --remote --env staging",
     "db:migrate:production": "wrangler d1 migrations apply DB --remote",

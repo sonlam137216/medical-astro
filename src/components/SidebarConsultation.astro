@@ -2,11 +2,11 @@
 import Button from './Button.astro';
 import FormGuards from './FormGuards.astro';
 import PhoneField from './PhoneField.astro';
-import { footerTreatments } from '../data/site';
+import { getServiceLinks } from '../lib/site-content';
 
 // Compact "Book a consultation" card for the article sidebar (Figma Single Post). Same endpoint and fields as the
 // other consultation forms; it also carries the #consultation anchor of this page (it has no bottom form).
-const services = footerTreatments.map((t) => t.label); // PROVISIONAL option list
+const services = (await getServiceLinks()).map((t) => t.label);
 ---
 
 <section class="side card" id="consultation" aria-labelledby="side-consult-title">

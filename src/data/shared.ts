@@ -129,3 +129,30 @@ export const doctorProfiles = [
   ...d,
   image: { src: doctorPortrait, alt: `Portrait of ${d.name}` } satisfies Img,
 })); // PLACEHOLDER: one portrait for all
+
+// Page banners whose text is in the page itself rather than in a section of the design.
+export const servicesHero = {
+  label: 'Our services.',
+  title: 'Comprehensive dental care for every smile',
+  body: 'Providing advanced implant, cosmetic, orthodontic, and restorative dental care in a modern, patient-focused clinical environment.',
+};
+
+// PLACEHOLDER: "15+ Years of Experience" is a claim of the design; the owner must confirm it.
+export const doctorsHero = {
+  label: 'Our doctors.',
+  title: 'Meet our team of experienced specialists',
+  body: 'From cosmetic dentistry and dental implants to restorative treatments and general dental care, Melatec Dental Clinic provides comprehensive solutions for patients who want to improve their smiles while enjoying their stay in Vietnam.',
+  chips: ['15+ Years of Experience', 'English-speaking doctors'],
+};
+
+export const packagesHero = {
+  label: 'Our dental packages.',
+  title: 'Comprehensive dental care for every smile',
+  body: 'Providing advanced implant, cosmetic, orthodontic, and restorative dental care in a modern, patient-focused clinical environment.',
+};
+
+export const combosHero = {
+  label: 'Our dental packages.',
+  title: 'Comprehensive dental care for every smile',
+  body: 'Plan your dental care alongside a relaxing travel experience. Explore some of Vietnam’s most popular destinations while your treatment schedule is arranged around your trip.',
+};

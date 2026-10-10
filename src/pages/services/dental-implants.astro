@@ -10,14 +10,19 @@ import TreatmentCosts from '../../components/home/TreatmentCosts.astro';
 import SeamlessJourney from '../../components/SeamlessJourney.astro';
 import PlanVisit from '../../components/PlanVisit.astro';
 import { getPageSeo } from '../../lib/site-content';
-import { getFaqs } from '../../lib/content';
-import { stats } from '../../data/about';
-import { heroImage, hero, costs, comparison, why, faq } from '../../data/implants';
+import { getFaqs, getSection } from '../../lib/content';
+
+import { heroImage } from '../../data/implants';
 
 export const prerender = true;
 
 // Answers are plain text; a blank line starts a new paragraph.
 const paragraphs = (text: string) => text.split(/\n{2,}/);
+const hero = (await getSection('implants_hero'))!;
+const costs = (await getSection('implants_costs'))!;
+const why = (await getSection('implants_why'))!;
+const faq = (await getSection('implants_faq'))!;
+const statsSection = await getSection('about_stats');
 const faqs = await getFaqs('dental-implants', faq.questions);
 const seo = await getPageSeo('/services/dental-implants', {
   title: 'Dental implants · Melatec Dental Clinic',
@@ -25,7 +30,7 @@ const seo = await getPageSeo('/services/dental-implants', {
     'Single-tooth implants and All-on-4 and All-on-6 restorations, with a personalised treatment plan and estimate before you travel to Vietnam.',
 });
 // The Figma row has one filled card (30,000+) and three empty ones: only the filled one is shown.
-const [stat] = stats;
+const [stat] = statsSection?.items ?? [];
 ---
 
 <!-- The page has its own consultation block and no social row. The header is the standard one (the new Figma has no landing-page header variant). -->
@@ -51,14 +56,16 @@ const [stat] = stats;
     </Button>
   </PageHero>
 
-  <section class="stat" aria-label="Melatec at a glance">
-    <div class="container">
-      <p class="stat__card">
-        <span class="stat__value">{stat.value}</span>
-        <span class="stat__label">{stat.label}</span>
-      </p>
-    </div>
-  </section>
+  {stat && (
+    <section class="stat" aria-label="Melatec at a glance">
+      <div class="container">
+        <p class="stat__card">
+          <span class="stat__value">{stat.value}</span>
+          <span class="stat__label">{stat.label}</span>
+        </p>
+      </div>
+    </section>
+  )}
 
   <Section tone="soft" labelledby="prices-title">
     <SectionIntro label={costs.label} headingId="prices-title" align="center" lined>
@@ -67,15 +74,20 @@ const [stat] = stats;
     <ul class="grid">
       {costs.cards.map((c) => (
         <li>
-          <PackageCard {...c} href="#consultation" linkLabel="Request an estimate" />
+          <PackageCard
+            title={c.title}
+            inclusions={c.inclusions}
+            total={c.total}
+            image={c.image}
+            href="#consultation"
+            linkLabel="Request an estimate"
+          />
         </li>
       ))}
     </ul>
   </Section>
 
-  <TreatmentCosts label={comparison.label} rows={comparison.rows} align="center">
-    <Fragment slot="title">{comparison.title}</Fragment>
-  </TreatmentCosts>
+  <TreatmentCosts sectionKey="implants_comparison" align="center" />
 
   <Section tone="navy" labelledby="why-title">
     <SectionIntro label={why.label} headingId="why-title" align="center" lined inverse>

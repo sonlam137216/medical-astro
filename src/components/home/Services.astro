@@ -3,18 +3,27 @@ import Section from '../Section.astro';
 import SectionIntro from '../SectionIntro.astro';
 import Button from '../Button.astro';
 import PackageCard from '../cards/PackageCard.astro';
-import { services } from '../../data/home';
+import { getSection, getServices } from '../../lib/content';
+
+const services = await getServices();
+const heading = (await getSection('home_services'))!;
 ---
 
 <Section labelledby="services-title">
-  <SectionIntro label="Our services" headingId="services-title" align="center" lined>
-    <Fragment slot="title">Treatments for every smile</Fragment>
+  <SectionIntro label={heading.label} headingId="services-title" align="center" lined>
+    <Fragment slot="title">{heading.title}</Fragment>
   </SectionIntro>
 
   <ul class="grid">
     {services.map((s) => (
       <li>
-        <PackageCard {...s} />
+        <PackageCard
+          title={s.title}
+          inclusions={s.inclusions}
+          total={s.priceText}
+          href={s.href}
+          image={s.image}
+        />
       </li>
     ))}
   </ul>

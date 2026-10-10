@@ -11,11 +11,15 @@ import DoctorCard from '../components/cards/DoctorCard.astro';
 import CtaBand from '../components/CtaBand.astro';
 import SeamlessJourney from '../components/SeamlessJourney.astro';
 import { heroImage } from '../data/home';
-import { getDoctors } from '../lib/content';
-import { aboutHero, stats, personalisedCare, whyChoose, insideClinic } from '../data/about';
+import { getDoctors, getSection } from '../lib/content';
 
 export const prerender = true;
 
+const aboutHero = (await getSection('about_hero'))!;
+const statsSection = await getSection('about_stats');
+const personalisedCare = (await getSection('about_care'))!;
+const whyChoose = (await getSection('about_why'))!;
+const insideClinic = (await getSection('about_inside'))!;
 const doctors = (await getDoctors())
   .slice(0, 4)
   .map(({ name, role, image }) => ({ name, role, image }));
@@ -51,18 +55,20 @@ const seo = await getPageSeo('/about', {
     </Button>
   </PageHero>
 
-  <section class="stats" aria-label="Melatec at a glance">
-    <div class="container">
-      <ul class="stats__grid">
-        {stats.map((s) => (
-          <li class="stats__card">
-            <span class="stats__value">{s.value}</span>
-            <span class="stats__label">{s.label}</span>
-          </li>
-        ))}
-      </ul>
-    </div>
-  </section>
+  {statsSection && statsSection.items.length > 0 && (
+    <section class="stats" aria-label="Melatec at a glance">
+      <div class="container">
+        <ul class="stats__grid">
+          {statsSection.items.map((s) => (
+            <li class="stats__card">
+              <span class="stats__value">{s.value}</span>
+              <span class="stats__label">{s.label}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  )}
 
   <Section tone="soft" labelledby="care-title">
     <SectionIntro label={personalisedCare.label} headingId="care-title" align="center" lined>

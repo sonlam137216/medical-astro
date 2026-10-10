@@ -4,28 +4,33 @@ import SectionIntro from '../SectionIntro.astro';
 import Button from '../Button.astro';
 import LocationCard from '../cards/LocationCard.astro';
 import { destinations } from '../../data/home';
+import { getLocations } from '../../lib/content';
+
+const locations = await getLocations();
 ---
 
-<Section tone="soft" labelledby="destinations-title">
-  <SectionIntro label={destinations.label} headingId="destinations-title" lined>
-    <Fragment slot="title">
-      Exceptional dental care in
-      <br />
-      destinations worth discovering
-    </Fragment>
-    <Button slot="action" variant="outline" href={destinations.cta.href}>
-      {destinations.cta.label}
-    </Button>
-  </SectionIntro>
+{locations.length > 0 && (
+  <Section tone="soft" labelledby="destinations-title">
+    <SectionIntro label={destinations.label} headingId="destinations-title" lined>
+      <Fragment slot="title">
+        Exceptional dental care in
+        <br />
+        destinations worth discovering
+      </Fragment>
+      <Button slot="action" variant="outline" href={destinations.cta.href}>
+        {destinations.cta.label}
+      </Button>
+    </SectionIntro>
 
-  <ul class="grid">
-    {destinations.locations.map((l) => (
-      <li>
-        <LocationCard {...l} action="button" />
-      </li>
-    ))}
-  </ul>
-</Section>
+    <ul class="grid">
+      {locations.map((l) => (
+        <li>
+          <LocationCard {...l} action="button" />
+        </li>
+      ))}
+    </ul>
+  </Section>
+)}
 
 <style>
   .grid {

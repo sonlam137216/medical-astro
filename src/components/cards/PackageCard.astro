@@ -2,48 +2,58 @@
 import { Image } from 'astro:assets';
 import inclusionDot from '../../assets/images/icons/inclusion-dot.png';
 import type { Img } from '../../data/types';
+import type { PublicImage } from '../../lib/media';
+import ProfileImage from '../ProfileImage.astro';
 
 interface Props {
   title: string;
   inclusions: string[];
-  total: string;
+  /** The price line; absent: none is shown. */
+  total?: string | null;
+  /** A short condition under the price. */
+  note?: string | null;
   href: string;
-  image: Img;
+  /** Absent (a service without a photo): an empty frame keeps the cards aligned. */
+  image?: Img | PublicImage;
   linkLabel?: string;
 }
 
-const { title, inclusions, total, href, image, linkLabel = 'Learn more' } = Astro.props;
+const { title, inclusions, total, note, href, image, linkLabel = 'Learn more' } = Astro.props;
 ---
 
 <article class="card package">
-  <Image
-    class="card__media package__img"
-    src={image.src}
-    alt={image.alt}
-    width={384}
-    height={190}
-    densities={[1, 2]}
-    sizes="(max-width: 768px) 100vw, 384px"
-    loading="lazy"
-  />
+  {image ? (
+    <ProfileImage
+      class="card__media package__img"
+      image={image}
+      width={384}
+      height={190}
+      sizes="(max-width: 768px) 100vw, 384px"
+    />
+  ) : (
+    <div class="card__media package__img package__img--empty" aria-hidden="true"></div>
+  )}
   <div class="card__body">
     <h3 class="t-h3">{title}</h3>
-    <ul class="package__list">
-      {inclusions.map((item) => (
-        <li>
-          <Image
-            src={inclusionDot}
-            alt=""
-            width={20}
-            height={20}
-            densities={[1, 2]}
-            loading="lazy"
-          />
-          <span>{item}</span>
-        </li>
-      ))}
-    </ul>
-    <p class="package__total">{total}</p>
+    {inclusions.length > 0 && (
+      <ul class="package__list">
+        {inclusions.map((item) => (
+          <li>
+            <Image
+              src={inclusionDot}
+              alt=""
+              width={20}
+              height={20}
+              densities={[1, 2]}
+              loading="lazy"
+            />
+            <span>{item}</span>
+          </li>
+        ))}
+      </ul>
+    )}
+    {total && <p class="package__total">{total}</p>}
+    {total && note && <p class="package__note">{note}</p>}
     <a class="link-arrow" href={href}>
       {linkLabel} <span aria-hidden="true">→</span>
     </a>
@@ -55,6 +65,10 @@ const { title, inclusions, total, href, image, linkLabel = 'Learn more' } = Astr
     aspect-ratio: 384 / 190;
     object-fit: cover;
     object-position: center top;
+  }
+
+  .package__img--empty {
+    background: var(--color-card);
   }
 
   .package__list {
@@ -77,6 +91,13 @@ const { title, inclusions, total, href, image, linkLabel = 'Learn more' } = Astr
 
   .package__list li :global(img) {
     margin-top: 3px;
+  }
+
+  .package__note {
+    margin-top: -8px;
+    font-size: var(--text-small);
+    line-height: var(--text-small-lh);
+    color: var(--color-muted);
   }
 
   .package__total {

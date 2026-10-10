@@ -3,18 +3,19 @@ import Section from '../Section.astro';
 import SectionIntro from '../SectionIntro.astro';
 import Button from '../Button.astro';
 import DoctorCard from '../cards/DoctorCard.astro';
-import { doctors } from '../../data/home';
-import { getDoctors } from '../../lib/content';
+
+import { getDoctors, getSection } from '../../lib/content';
 
 // Four people at most; the full list is on /our-doctors.
 const people = (await getDoctors()).slice(0, 4);
+const doctors = (await getSection('home_doctors'))!;
 ---
 
 {people.length > 0 && (
   <Section labelledby="doctors-title">
     <SectionIntro label={doctors.label} headingId="doctors-title" lined>
-      <Fragment slot="title">Meet Our Specialists</Fragment>
-      <p>{doctors.body}</p>
+      <Fragment slot="title">{doctors.title}</Fragment>
+      {doctors.body && <p>{doctors.body}</p>}
       <Button slot="action" variant="outline" href={doctors.cta.href}>
         {doctors.cta.label}
       </Button>

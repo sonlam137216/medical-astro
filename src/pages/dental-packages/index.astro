@@ -7,9 +7,11 @@ import PackageGrid from '../../components/PackageGrid.astro';
 import CtaBand from '../../components/CtaBand.astro';
 import TourismSupport from '../../components/TourismSupport.astro';
 import { towerImage } from '../../data/shared';
+import { getSection } from '../../lib/content';
 
 export const prerender = true;
 
+const hero = (await getSection('packages_hero'))!;
 const seo = await getPageSeo('/dental-packages', {
   title: 'Dental packages · Melatec Dental Clinic',
   description:
@@ -19,19 +21,16 @@ const seo = await getPageSeo('/dental-packages', {
 
 <!-- Figma frame: "Dental Packages / Single Treatments" -->
 <SiteLayout title={seo.title} description={seo.description}>
-  <PageHero variant="banner" dark label="Our dental packages." image={towerImage} imageHeight={400}>
-    <Fragment slot="title">Comprehensive dental care for every smile</Fragment>
-    <p>
-      Providing advanced implant, cosmetic, orthodontic, and restorative dental care in a modern,
-      patient-focused clinical environment.
-    </p>
+  <PageHero variant="banner" dark label={hero.label} image={towerImage} imageHeight={400}>
+    <Fragment slot="title">{hero.title}</Fragment>
+    {hero.body && <p>{hero.body}</p>}
     <!-- Not in Figma: the two package pages have no link between them there. Remove if the owner prefers another entry point. -->
     <Button slot="actions" variant="light" href="/dental-packages/travel-combos">
       See travel combos
     </Button>
   </PageHero>
 
-  <PackageGrid />
+  <PackageGrid kind="single_treatment" />
 
   <CtaBand
     actions={[

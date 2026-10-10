@@ -4,11 +4,12 @@ import PageHero from '../components/PageHero.astro';
 import Section from '../components/Section.astro';
 import LocationCard from '../components/cards/LocationCard.astro';
 import { towerImage } from '../data/shared';
-import { destinations } from '../data/home';
+import { getLocations } from '../lib/content';
 import { getPageSeo } from '../lib/site-content';
 
 export const prerender = true;
 
+const locations = await getLocations();
 const seo = await getPageSeo('/locations', {
   title: 'Our locations · Melatec Dental Clinic',
   description:
@@ -26,17 +27,26 @@ const seo = await getPageSeo('/locations', {
     <h2 class="visually-hidden" id="locations-title">
       Clinics
     </h2>
-    <ul class="grid">
-      {destinations.locations.map((l) => (
-        <li>
-          <LocationCard {...l} action="button" />
-        </li>
-      ))}
-    </ul>
+    {locations.length > 0 ? (
+      <ul class="grid">
+        {locations.map((l) => (
+          <li>
+            <LocationCard {...l} action="button" />
+          </li>
+        ))}
+      </ul>
+    ) : (
+      <p class="empty">Our clinic locations will be listed here soon.</p>
+    )}
   </Section>
 </SiteLayout>
 
 <style>
+  .empty {
+    text-align: center;
+    color: var(--color-muted);
+  }
+
   .grid {
     display: flex;
     flex-wrap: wrap;

@@ -337,6 +337,7 @@ export interface Tables {
       description: string | null;
       id: string;
       image_id: string | null;
+      inclusions: string[];
       is_visible: boolean;
       kind: string;
       price_amount: number | null;
@@ -353,6 +354,7 @@ export interface Tables {
       description?: string | null;
       id?: string;
       image_id?: string | null;
+      inclusions?: string[];
       is_visible?: boolean;
       kind: string;
       price_amount?: number | null;
@@ -466,6 +468,7 @@ export interface Tables {
       description: string | null;
       id: string;
       image_id: string | null;
+      inclusions: string[];
       is_visible: boolean;
       price_text: string | null;
       seo_description: string | null;
@@ -481,6 +484,7 @@ export interface Tables {
       description?: string | null;
       id?: string;
       image_id?: string | null;
+      inclusions?: string[];
       is_visible?: boolean;
       price_text?: string | null;
       seo_description?: string | null;
@@ -588,7 +592,7 @@ export const TABLES: Record<TableName, TableInfo> = {
     uuid: true,
     audit: ['content_hash', 'note', 'snapshot_schema_version'],
   },
-  destinations: { bool: ['is_visible'], uuid: true },
+  destinations: { bool: ['is_visible'], uuid: true, refs: { image_id: 'media_assets' } },
   doctor_services: { audit: false },
   doctors: {
     bool: ['is_visible'],
@@ -597,15 +601,25 @@ export const TABLES: Record<TableName, TableInfo> = {
     refs: { image_id: 'media_assets' },
   },
   faqs: { bool: ['is_visible'], uuid: true },
-  locations: { bool: ['is_visible'], uuid: true },
+  locations: { bool: ['is_visible'], uuid: true, refs: { image_id: 'media_assets' } },
   media_assets: { bool: ['is_decorative'], json: ['variant_widths'], uuid: true },
   navigation_items: { bool: ['is_visible'], uuid: true },
   package_items: { uuid: true },
-  packages: { bool: ['is_visible'], uuid: true },
-  page_sections: { bool: ['is_visible'], json: ['data'], uuid: true },
+  packages: {
+    bool: ['is_visible'],
+    json: ['inclusions'],
+    uuid: true,
+    refs: { image_id: 'media_assets', service_id: 'services' },
+  },
+  page_sections: { bool: ['is_visible'], json: ['data'], uuid: true, refs: { page_id: 'pages' } },
   pages: { bool: ['noindex', 'is_enabled'], uuid: true },
   publish_jobs: { uuid: true, refs: { revision_id: 'content_revisions' } },
   redirects: { uuid: true },
-  services: { bool: ['is_visible'], uuid: true },
+  services: {
+    bool: ['is_visible'],
+    json: ['inclusions'],
+    uuid: true,
+    refs: { image_id: 'media_assets' },
+  },
   site_settings: { json: ['social_links'] },
 };

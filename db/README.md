@@ -42,14 +42,15 @@ Không cần Docker hay tài khoản. `wrangler` mô phỏng D1 trong `.wrangler
 
 ```bash
 npm run db:migrate   # áp dụng db/migrations vào D1 local
-npm run db:seed      # nạp db/seed.sql (chỉ local; không có giá, không bịa số)
+npm run db:seed      # nạp db/seed.sql vào D1 local (chạy lại được; không có giá, không bịa số)
+npm run db:seed:staging  # nạp db/seed.sql vào D1 staging (KHÔNG BAO GIỜ production)
 npm run db:reset     # xoá D1 local rồi migrate lại (mất cả tài khoản admin và dữ liệu thử)
 npm run admin:create -- you@example.com   # tạo admin local (hỏi mật khẩu, không hiện khi gõ)
 npm run preview      # build rồi chạy Worker + D1 local; đăng nhập ở http://localhost:8787/admin
 npm test             # test schema, lớp truy vấn, đăng nhập, script publish (chạy trên SQLite thật)
 ```
 
-`npm test` chạy migration thật trên SQLite trong bộ nhớ (`node:sqlite`) nên **không cần Cloudflare** để kiểm ràng buộc, audit, đăng nhập. Dữ liệu trong `db/seed.sql` lấy từ Figma và chưa được chủ dự án xác nhận.
+`npm test` chạy migration thật trên SQLite trong bộ nhớ (`node:sqlite`) nên **không cần Cloudflare** để kiểm ràng buộc, audit, đăng nhập. Dữ liệu trong `db/seed.sql` lấy từ Figma và chưa được chủ dự án xác nhận (site, menu, 3 chi nhánh, 4 bác sĩ, 5 dịch vụ, 3 gói implant không giá, 1 điểm đến, 4 câu FAQ chưa có đáp án, 10 trang). Seed không tạo `page_sections`: section chưa sửa dùng chữ gốc ở `src/data/sections.ts`, và production vẫn bị chặn cho đến khi chủ dự án viết lại hoặc tắt 7 section có số liệu chưa xác nhận.
 
 ## Viết migration
 

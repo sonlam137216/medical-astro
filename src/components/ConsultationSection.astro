@@ -2,14 +2,13 @@
 import Button from './Button.astro';
 import FormGuards from './FormGuards.astro';
 import PhoneField from './PhoneField.astro';
-import { footerTreatments } from '../data/site';
-import { getSiteContent } from '../lib/site-content';
+import { getServiceLinks, getSiteContent } from '../lib/site-content';
 
 const site = await getSiteContent();
 
 // Copy is from Figma "Shared / Consultation". The rating line is a claim made by the design;
 // the owner must confirm it is current and verifiable before launch.
-const services = footerTreatments.map((t) => t.label); // PROVISIONAL option list
+const services = (await getServiceLinks()).map((t) => t.label);
 ---
 
 <section class="consult" id="consultation" aria-labelledby="consult-title">

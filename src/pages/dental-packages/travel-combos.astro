@@ -11,9 +11,13 @@ import PackageGrid from '../../components/PackageGrid.astro';
 import CtaBand from '../../components/CtaBand.astro';
 import { towerImage } from '../../data/shared';
 import { gallery, destinations, discover } from '../../data/packages';
+import { getDestinations, getLocations, getSection } from '../../lib/content';
 
 export const prerender = true;
 
+const locations = await getLocations();
+const discoverCards = await getDestinations();
+const hero = (await getSection('combos_hero'))!;
 const seo = await getPageSeo('/dental-packages/travel-combos', {
   title: 'Travel combos · Melatec Dental Clinic',
   description:
@@ -28,12 +32,9 @@ const seo = await getPageSeo('/dental-packages/travel-combos', {
   current="/dental-packages"
   social={false}
 >
-  <PageHero variant="banner" dark label="Our dental packages." image={towerImage} imageHeight={400}>
-    <Fragment slot="title">Comprehensive dental care for every smile</Fragment>
-    <p>
-      Plan your dental care alongside a relaxing travel experience. Explore some of Vietnam’s most
-      popular destinations while your treatment schedule is arranged around your trip.
-    </p>
+  <PageHero variant="banner" dark label={hero.label} image={towerImage} imageHeight={400}>
+    <Fragment slot="title">{hero.title}</Fragment>
+    {hero.body && <p>{hero.body}</p>}
     <!-- Not in Figma: link back to the single-treatment page (see the note on that page). -->
     <Button slot="actions" variant="light" href="/dental-packages">
       See single treatments
@@ -63,18 +64,20 @@ const seo = await getPageSeo('/dental-packages/travel-combos', {
     </ul>
   </Section>
 
-  <Section tone="soft" labelledby="destinations-title">
-    <SectionIntro label={destinations.label} headingId="destinations-title" align="center" lined>
-      <Fragment slot="title">{destinations.title}</Fragment>
-    </SectionIntro>
-    <ul class="destinations">
-      {destinations.cards.map((c) => (
-        <li>
-          <LocationCard {...c} action="button" />
-        </li>
-      ))}
-    </ul>
-  </Section>
+  {locations.length > 0 && (
+    <Section tone="soft" labelledby="destinations-title">
+      <SectionIntro label={destinations.label} headingId="destinations-title" align="center" lined>
+        <Fragment slot="title">{destinations.title}</Fragment>
+      </SectionIntro>
+      <ul class="destinations">
+        {locations.map((c) => (
+          <li>
+            <LocationCard {...c} action="button" />
+          </li>
+        ))}
+      </ul>
+    </Section>
+  )}
 
   <CtaBand
     actions={[
@@ -83,7 +86,10 @@ const seo = await getPageSeo('/dental-packages/travel-combos', {
     ]}
   />
 
-  <PackageGrid intro={{ label: 'Cost', title: 'Dental Tourism Package Prices' }} />
+  <PackageGrid
+    kind="travel_combo"
+    intro={{ label: 'Cost', title: 'Dental Tourism Package Prices' }}
+  />
 
   <Fragment slot="after-consultation">
     <Section tone="soft" labelledby="discover-title">
@@ -91,7 +97,7 @@ const seo = await getPageSeo('/dental-packages/travel-combos', {
         <Fragment slot="title">{discover.title}</Fragment>
       </SectionIntro>
       <ul class="discover">
-        {discover.cards.map((c) => (
+        {discoverCards.map((c) => (
           <li>
             <LocationCard {...c} detail />
           </li>

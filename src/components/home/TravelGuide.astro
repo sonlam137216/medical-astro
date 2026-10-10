@@ -3,12 +3,13 @@ import Section from '../Section.astro';
 import SectionIntro from '../SectionIntro.astro';
 import Button from '../Button.astro';
 import ProfileImage from '../ProfileImage.astro';
-import { travelGuide } from '../../data/home';
-import { getArticles, isSampleContent } from '../../lib/content';
+
+import { getArticles, getSection, isSampleContent } from '../../lib/content';
 
 // Published travel guide articles: the newest one large, the next three beside it. Before the first publish the
 // design's sample article is shown; once something is published and there are no articles, the section is hidden
 // (sample articles must never look real on the live site).
+const travelGuide = (await getSection('home_travel'))!;
 const published = await getArticles('travel_guide');
 const sample = await isSampleContent();
 const toCard = (a: (typeof published)[number]) => ({

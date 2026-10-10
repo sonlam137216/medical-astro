@@ -7,7 +7,7 @@ import {
   utilityLink as sampleUtility,
   type NavLink,
 } from '../data/site';
-import { loadSnapshot, getPublicBase } from './content';
+import { loadSnapshot, getPublicBase, getServices } from './content';
 import { toPublicVideo, type PublicVideo } from './media';
 
 // BUILD-TIME ONLY (see content.ts). Site-wide details and menus for the header, footer and contact blocks.
@@ -108,4 +108,16 @@ export async function getPageSeo(
     title: page?.seoTitle || fallback.title,
     description: page?.seoDescription || fallback.description,
   };
+}
+
+/**
+ * Treatments offered to visitors (consultation forms, article sidebar): the published services, or, before any
+ * are published, the footer's treatment links.
+ */
+export async function getServiceLinks(): Promise<NavLink[]> {
+  const snapshot = await loadSnapshot();
+  if (snapshot?.services) {
+    return (await getServices()).map((s) => ({ label: s.title, href: s.href }));
+  }
+  return (await getSiteContent()).footerTreatments;
 }

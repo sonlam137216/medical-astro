@@ -1,5 +1,7 @@
 import type { AdminDb } from './admin-auth';
 import { articleProblems } from './cms/articles.ts';
+import { itemInput, parseFields, type Field } from './cms/fields.ts';
+import { REQUIRED_SECTIONS, sectionByKey } from './cms/sections.ts';
 
 // What the public site is built from. A snapshot is a complete copy of the published content; the build
 // reads one snapshot (never the working-copy tables), so a half-edited draft cannot leak into a build.
@@ -82,6 +84,54 @@ export interface SnapshotPage {
   noindex: boolean;
 }
 
+export interface SnapshotService {
+  slug: string;
+  title: string;
+  summary: string | null;
+  inclusions: string[];
+  /** Shown as written (for example "From $600"); null: no price is shown. */
+  priceText: string | null;
+  image: SnapshotImage | null;
+}
+
+export interface SnapshotPackage {
+  slug: string;
+  kind: string;
+  title: string;
+  inclusions: string[];
+  /** A reference price; null: the card shows no price. */
+  price: { amount: number; currency: string } | null;
+  priceConditions: string | null;
+  /** Slug of the related service, if one is chosen. */
+  service: string | null;
+  image: SnapshotImage | null;
+}
+
+export interface SnapshotDestination {
+  slug: string;
+  name: string;
+  summary: string | null;
+  image: SnapshotImage | null;
+}
+
+/** The edited text of one page section (see src/lib/cms/sections.ts); `images` holds its photos, by field name. */
+export interface SnapshotSection {
+  key: string;
+  /** False: the section is switched off and the page leaves it out. */
+  visible: boolean;
+  data: Record<string, unknown>;
+  images?: Record<string, SnapshotImage>;
+}
+
+export interface SnapshotLocation {
+  slug: string;
+  name: string;
+  address: string | null;
+  /** A link to a map; null: the build links to a map search for the address. */
+  directionsUrl: string | null;
+  image: SnapshotImage | null;
+}
+
 export interface SnapshotArticleCategory {
   slug: string;
   name: string;
@@ -115,6 +165,11 @@ export interface Snapshot {
   doctors?: SnapshotDoctor[];
   faqs?: SnapshotFaq[];
   redirects?: SnapshotRedirect[];
+  locations?: SnapshotLocation[];
+  services?: SnapshotService[];
+  packages?: SnapshotPackage[];
+  sections?: SnapshotSection[];
+  destinations?: SnapshotDestination[];
   articleCategories?: SnapshotArticleCategory[];
   articles?: SnapshotArticle[];
 }
@@ -124,6 +179,10 @@ export const REQUIRED_FOR_PRODUCTION: { key: keyof Snapshot; label: string }[] =
   { key: 'site', label: 'Site details (name, phone, address)' },
   { key: 'navigation', label: 'Menu links' },
   { key: 'doctors', label: 'Doctors' },
+  { key: 'locations', label: 'Locations (clinic names and addresses)' },
+  { key: 'services', label: 'Services' },
+  { key: 'packages', label: 'Packages (price cards)' },
+  { key: 'destinations', label: 'Travel destinations' },
 ];
 
 type ImageRow = {
@@ -324,6 +383,118 @@ export async function buildSnapshot(db: AdminDb): Promise<Snapshot> {
     });
   }
 
+  const { data: services, error: servicesError } = await db
+    .from('services')
+    .select(`slug, title, summary, inclusions, price_text, image:media_assets(${IMAGE_COLUMNS})`)
+    .eq('is_visible', true)
+    .order('sort_order', { ascending: true })
+    .order('title', { ascending: true });
+  if (servicesError) throw fail('services', servicesError);
+  if (services.length > 0) {
+    snapshot.services = services.map((s) => ({
+      slug: s.slug,
+      title: s.title,
+      summary: s.summary,
+      inclusions: s.inclusions,
+      priceText: s.price_text,
+      image: toSnapshotImage(s.image),
+    }));
+  }
+
+  const { data: packages, error: packagesError } = await db
+    .from('packages')
+    .select(
+      `slug, kind, title, inclusions, price_amount, currency, price_conditions, service:services(slug), image:media_assets(${IMAGE_COLUMNS})`,
+    )
+    .eq('is_visible', true)
+    .order('kind')
+    .order('sort_order', { ascending: true })
+    .order('title', { ascending: true });
+  if (packagesError) throw fail('packages', packagesError);
+  if (packages.length > 0) {
+    snapshot.packages = packages.map((p) => ({
+      slug: p.slug,
+      kind: p.kind,
+      title: p.title,
+      inclusions: p.inclusions,
+      price:
+        p.price_amount !== null && p.currency
+          ? { amount: p.price_amount, currency: p.currency }
+          : null,
+      priceConditions: p.price_conditions,
+      service: p.service?.slug ?? null,
+      image: toSnapshotImage(p.image),
+    }));
+  }
+
+  const { data: destinations, error: destinationsError } = await db
+    .from('destinations')
+    .select(`slug, name, summary, image:media_assets(${IMAGE_COLUMNS})`)
+    .eq('is_visible', true)
+    .order('sort_order', { ascending: true })
+    .order('name', { ascending: true });
+  if (destinationsError) throw fail('travel destinations', destinationsError);
+  if (destinations.length > 0) {
+    snapshot.destinations = destinations.map((d) => ({
+      slug: d.slug,
+      name: d.name,
+      summary: d.summary,
+      image: toSnapshotImage(d.image),
+    }));
+  }
+
+  // Page text. A row for a type the code no longer knows is left out; photos are looked up here so the build
+  // needs nothing but the snapshot.
+  const { data: sectionRows, error: sectionsError } = await db
+    .from('page_sections')
+    .select('type, is_visible, data')
+    .order('type');
+  if (sectionsError) throw fail('page text', sectionsError);
+  const sections: SnapshotSection[] = [];
+  for (const r of sectionRows) {
+    const def = sectionByKey(r.type);
+    if (!def) continue;
+    const entry: SnapshotSection = {
+      key: r.type,
+      visible: r.is_visible,
+      data: { ...(r.data as Record<string, unknown>) },
+    };
+    for (const f of def.fields) {
+      if (f.type !== 'image') continue;
+      const id = entry.data[f.name];
+      delete entry.data[f.name];
+      if (typeof id !== 'string' || id === '') continue;
+      const { data: asset, error: assetError } = await db
+        .from('media_assets')
+        .select(IMAGE_COLUMNS)
+        .eq('id', id)
+        .eq('kind', 'image')
+        .maybeSingle();
+      if (assetError) throw fail('a page text photo', assetError);
+      const image = toSnapshotImage(asset);
+      if (image) (entry.images ??= {})[f.name] = image;
+    }
+    sections.push(entry);
+  }
+  if (sections.length > 0) snapshot.sections = sections;
+
+  const { data: locations, error: locationsError } = await db
+    .from('locations')
+    .select(`slug, name, address_line, directions_url, image:media_assets(${IMAGE_COLUMNS})`)
+    .eq('is_visible', true)
+    .order('sort_order', { ascending: true })
+    .order('name', { ascending: true });
+  if (locationsError) throw fail('locations', locationsError);
+  if (locations.length > 0) {
+    snapshot.locations = locations.map((l) => ({
+      slug: l.slug,
+      name: l.name,
+      address: l.address_line,
+      directionsUrl: l.directions_url,
+      image: toSnapshotImage(l.image),
+    }));
+  }
+
   const { data: redirects, error: redirectsError } = await db
     .from('redirects')
     .select('from_path, to_path, status_code')
@@ -342,7 +513,39 @@ export async function buildSnapshot(db: AdminDb): Promise<Snapshot> {
 
 /** Sections a production build would still fill with sample content from the design. */
 export function sampleSections(snapshot: Snapshot): string[] {
-  return REQUIRED_FOR_PRODUCTION.filter((s) => snapshot[s.key] === undefined).map((s) => s.label);
+  const missing = REQUIRED_FOR_PRODUCTION.filter((s) => snapshot[s.key] === undefined).map(
+    (s) => s.label,
+  );
+  const have = new Set((snapshot.sections ?? []).map((s) => s.key));
+  for (const key of REQUIRED_SECTIONS) {
+    if (!have.has(key)) missing.push(`Page text: ${sectionByKey(key)?.label ?? key}`);
+  }
+  return missing;
+}
+
+/** The stored data of a section back through the same rules as the admin form. */
+function sectionDataProblems(fields: readonly Field[], data: Record<string, unknown>): string[] {
+  const form = new URLSearchParams();
+  for (const f of fields) {
+    const v = data[f.name];
+    if (f.type === 'lines' && Array.isArray(v)) form.set(f.name, v.join('\n'));
+    else if (f.type === 'items' && Array.isArray(v)) {
+      (v as Record<string, unknown>[]).slice(0, f.maxItems).forEach((item, i) => {
+        for (const c of f.columns) {
+          const cell = item?.[c.name];
+          form.set(
+            itemInput(f.name, i, c.name),
+            Array.isArray(cell) ? cell.join('\n') : typeof cell === 'string' ? cell : '',
+          );
+        }
+      });
+    } else if (typeof v === 'string') form.set(f.name, v);
+  }
+  const parsed = parseFields(
+    fields.filter((f) => f.type !== 'image'),
+    form,
+  );
+  return parsed.ok ? [] : Object.values(parsed.errors);
 }
 
 /**
@@ -388,6 +591,50 @@ export function snapshotProblems(snapshot: Snapshot, target: string = 'staging')
       );
     }
   }
+  for (const s of snapshot.services ?? []) {
+    if (s.image && !s.image.decorative && !s.image.alt) {
+      problems.push(
+        `Service “${s.title}”: the photo has no description. Add one in Media, or mark the image as decorative.`,
+      );
+    }
+  }
+  for (const section of snapshot.sections ?? []) {
+    const def = sectionByKey(section.key);
+    if (!def) continue;
+    if (section.visible) {
+      for (const message of sectionDataProblems(def.fields, section.data)) {
+        problems.push(`Page text “${def.label}”: ${message}`);
+      }
+    }
+    for (const image of Object.values(section.images ?? {})) {
+      if (!image.decorative && !image.alt) {
+        problems.push(
+          `Page text “${def.label}”: the photo has no description. Add one in Media, or mark the image as decorative.`,
+        );
+      }
+    }
+  }
+  for (const p of snapshot.packages ?? []) {
+    if (p.image && !p.image.decorative && !p.image.alt) {
+      problems.push(
+        `Package “${p.title}”: the photo has no description. Add one in Media, or mark the image as decorative.`,
+      );
+    }
+  }
+  for (const d of snapshot.destinations ?? []) {
+    if (d.image && !d.image.decorative && !d.image.alt) {
+      problems.push(
+        `Destination “${d.name}”: the photo has no description. Add one in Media, or mark the image as decorative.`,
+      );
+    }
+  }
+  for (const l of snapshot.locations ?? []) {
+    if (l.image && !l.image.decorative && !l.image.alt) {
+      problems.push(
+        `Location “${l.name}”: the photo has no description. Add one in Media, or mark the image as decorative.`,
+      );
+    }
+  }
   for (const r of snapshot.redirects ?? []) {
     if (r.from === r.to) problems.push(`Redirect ${r.from} points to itself.`);
     if (!/^(\/|https?:\/\/)/.test(r.to)) {
@@ -420,9 +667,20 @@ export function isSnapshot(value: unknown): value is Snapshot {
   if (!isObject(value) || Array.isArray(value)) return false;
   const arrayOrMissing = (v: unknown) => v === undefined || Array.isArray(v);
   if (
-    !['navigation', 'pages', 'doctors', 'faqs', 'redirects', 'articleCategories', 'articles'].every(
-      (k) => arrayOrMissing(value[k]),
-    )
+    ![
+      'navigation',
+      'pages',
+      'doctors',
+      'faqs',
+      'redirects',
+      'locations',
+      'services',
+      'packages',
+      'destinations',
+      'sections',
+      'articleCategories',
+      'articles',
+    ].every((k) => arrayOrMissing(value[k]))
   )
     return false;
   if (value.site !== undefined && !(isObject(value.site) && typeof value.site.name === 'string'))
@@ -447,6 +705,78 @@ export function isSnapshot(value: unknown): value is Snapshot {
   if (
     !categories.every(
       (c) => isObject(c) && typeof c.slug === 'string' && typeof c.name === 'string',
+    )
+  )
+    return false;
+
+  const services = (value.services ?? []) as unknown[];
+  if (
+    !services.every(
+      (x) =>
+        isObject(x) &&
+        typeof x.slug === 'string' &&
+        typeof x.title === 'string' &&
+        Array.isArray(x.inclusions) &&
+        (x.image === undefined ||
+          x.image === null ||
+          (isObject(x.image) && typeof x.image.key === 'string')),
+    )
+  )
+    return false;
+
+  const sections = (value.sections ?? []) as unknown[];
+  if (
+    !sections.every(
+      (x) =>
+        isObject(x) &&
+        typeof x.key === 'string' &&
+        typeof x.visible === 'boolean' &&
+        isObject(x.data) &&
+        (x.images === undefined ||
+          (isObject(x.images) &&
+            Object.values(x.images).every((i) => isObject(i) && typeof i.key === 'string'))),
+    )
+  )
+    return false;
+  const hasImage = (x: Record<string, unknown>) =>
+    x.image === undefined ||
+    x.image === null ||
+    (isObject(x.image) && typeof x.image.key === 'string');
+  const packages = (value.packages ?? []) as unknown[];
+  if (
+    !packages.every(
+      (x) =>
+        isObject(x) &&
+        typeof x.slug === 'string' &&
+        typeof x.kind === 'string' &&
+        typeof x.title === 'string' &&
+        Array.isArray(x.inclusions) &&
+        (x.price === null ||
+          (isObject(x.price) &&
+            typeof x.price.amount === 'number' &&
+            typeof x.price.currency === 'string')) &&
+        hasImage(x),
+    )
+  )
+    return false;
+  const destinations = (value.destinations ?? []) as unknown[];
+  if (
+    !destinations.every(
+      (x) => isObject(x) && typeof x.slug === 'string' && typeof x.name === 'string' && hasImage(x),
+    )
+  )
+    return false;
+
+  const locations = (value.locations ?? []) as unknown[];
+  if (
+    !locations.every(
+      (l) =>
+        isObject(l) &&
+        typeof l.slug === 'string' &&
+        typeof l.name === 'string' &&
+        (l.image === undefined ||
+          l.image === null ||
+          (isObject(l.image) && typeof l.image.key === 'string')),
     )
   )
     return false;

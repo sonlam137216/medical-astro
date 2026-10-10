@@ -1,41 +1,37 @@
 ---
-import { Image } from 'astro:assets';
 import Section from '../Section.astro';
 import Video from '../Video.astro';
-import { conversations } from '../../data/home';
+
+import { getSection } from '../../lib/content';
+import ProfileImage from '../ProfileImage.astro';
 import { getSiteContent } from '../../lib/site-content';
 
 // With a video chosen in Site details the player replaces the picture (the hero's "Watch video" button scrolls
 // here). Without one the section keeps its picture and shows no video controls or "View all videos" button:
 // there is no videos page.
 const { video } = await getSiteContent();
+const conversations = (await getSection('home_conversations'))!;
+const picture = conversations.chosenPhotos.image ?? conversations.image;
 ---
 
 <Section id={video ? 'video' : undefined} tone="soft" labelledby="conversations-title">
   <div class="split">
     <div class="split__text">
       <p class="t-label is-lined is-start">{conversations.label}</p>
-      <h2 class="t-h2" id="conversations-title">
-        Real conversations.
-        <br />
-        Expert insights.
-        <br />
-        Personal experiences.
+      <h2 class="t-h2 pre-line" id="conversations-title">
+        {conversations.title}
       </h2>
       <p class="split__body">{conversations.body}</p>
     </div>
     {video ? (
       <Video class="split__img" video={video} />
     ) : (
-      <Image
+      <ProfileImage
         class="split__img"
-        src={conversations.image.src}
-        alt={conversations.image.alt}
+        image={picture}
         width={520}
         height={440}
-        densities={[1, 2]}
         sizes="(max-width: 960px) 100vw, 520px"
-        loading="lazy"
       />
     )}
   </div>

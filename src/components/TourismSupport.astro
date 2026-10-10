@@ -2,21 +2,26 @@
 import Section from './Section.astro';
 import SectionIntro from './SectionIntro.astro';
 import InfoCard from './cards/InfoCard.astro';
-import { tourismSupport as t } from '../data/shared';
+
+import { getSection } from '../lib/content';
+
+const t = await getSection('shared_tourism');
 ---
 
-<Section tone="soft" labelledby="tourism-title">
-  <SectionIntro label={t.label} headingId="tourism-title" align="center" lined>
-    <Fragment slot="title">{t.title}</Fragment>
-  </SectionIntro>
-  <ul class="grid">
-    {t.items.map((item) => (
-      <li>
-        <InfoCard title={item.title} body={item.body} upper />
-      </li>
-    ))}
-  </ul>
-</Section>
+{t && t.items.length > 0 && (
+  <Section tone="soft" labelledby="tourism-title">
+    <SectionIntro label={t.label} headingId="tourism-title" align="center" lined>
+      <Fragment slot="title">{t.title}</Fragment>
+    </SectionIntro>
+    <ul class="grid">
+      {t.items.map((item) => (
+        <li>
+          <InfoCard title={item.title} body={item.body} upper />
+        </li>
+      ))}
+    </ul>
+  </Section>
+)}
 
 <style>
   .grid {

@@ -2,101 +2,120 @@
 import Section from '../Section.astro';
 import SectionIntro from '../SectionIntro.astro';
 import { costComparison as c } from '../../data/home';
+import { getSection } from '../../lib/content';
+import type { CostRow } from '../../data/sections';
 
-// Shared by Home and the Dental Implants page. `rows` narrows the table to the treatments of the page,
-// `label` / the `title` slot override the Home heading.
+// Shared by Home and the Dental Implants page: the same table with the rows, title and figures of each page's
+// "Page text" section. Before the section is edited the rows show the design's placeholder figures.
 interface Props {
-  label?: string;
-  rows?: { name: string; note: string }[];
+  sectionKey: 'home_costs' | 'implants_comparison';
   align?: 'start' | 'center';
 }
-const { label = c.label, rows = c.rows, align = 'start' } = Astro.props;
+const { sectionKey, align = 'start' } = Astro.props;
+
+type Row = CostRow;
+const data = await getSection(sectionKey);
 
 // Vietnam is always shown first; the visitor picks which other country to compare against.
 const [home, ...others] = c.countries;
 const defaultCountry = others.includes('Australia') ? 'Australia' : others[0];
+
+// "A$1,250 | 40 clinics" -> two lines. Empty: a dash. Built-in rows: the design's placeholder figures.
+const cellLines = (row: Row, i: number): string[] => {
+  if (!data?.edited) return [c.cell.price, c.cell.clinics];
+  const value = (row.cells?.[i] ?? '').trim();
+  return value ? value.split(/\s*\|\s*/) : ['—'];
+};
+const saving = (row: Row) => (data?.edited ? row.saving || '—' : c.saving);
+const methodParagraphs = (data?.methodology ?? '')
+  .split(/\n{2,}|\n/)
+  .filter((p) => p.trim() !== '');
 ---
 
-<Section labelledby="costs-title">
-  <SectionIntro label={label} headingId="costs-title" lined {align}>
-    <Fragment slot="title">
-      <slot name="title">
-        Exceptional dental care.
-        <br />
-        Made more accessible.
-      </slot>
-    </Fragment>
-  </SectionIntro>
+{data && (
+  <Section labelledby="costs-title">
+    <SectionIntro label={data.label} headingId="costs-title" lined {align}>
+      <Fragment slot="title">
+        <span class="pre-line">{data.title}</span>
+      </Fragment>
+    </SectionIntro>
 
-  <div class="compare" data-compare>
-    <label class="compare__label" for="compare-country">
-      Compare against prices in
-    </label>
-    <select class="compare__select" id="compare-country" data-compare-select>
-      {others.map((country) => (
-        <option value={country} selected={country === defaultCountry}>
-          {country}
-        </option>
-      ))}
-    </select>
-  </div>
+    <div class="compare" data-compare>
+      <label class="compare__label" for="compare-country">
+        Compare against prices in
+      </label>
+      <select class="compare__select" id="compare-country" data-compare-select>
+        {others.map((country) => (
+          <option value={country} selected={country === defaultCountry}>
+            {country}
+          </option>
+        ))}
+      </select>
+    </div>
 
-  <div class="scroller" tabindex="0" role="region" aria-label="Treatment cost comparison">
-    <table class="table" data-compare-table>
-      <caption class="visually-hidden">
-        Treatment prices in{home}compared with the selected country
-      </caption>
-      <thead>
-        <tr>
-          <th scope="col">Treatment</th>
-          {c.countries.map((country, i) => (
-            <th
-              scope="col"
-              data-country={country}
-              class:list={{
-                'is-home': i === 0,
-                'is-selected': country === defaultCountry,
-              }}
-            >
-              {country}
-            </th>
-          ))}
-          <th scope="col">Saving</th>
-        </tr>
-      </thead>
-      <tbody>
-        {rows.map((row) => (
+    <div class="scroller" tabindex="0" role="region" aria-label="Treatment cost comparison">
+      <table class="table" data-compare-table>
+        <caption class="visually-hidden">
+          Treatment prices in{home}compared with the selected country
+        </caption>
+        <thead>
           <tr>
-            <th scope="row">
-              <span class="row__name">{row.name}</span>
-              <span class="row__note">{row.note}</span>
-            </th>
+            <th scope="col">Treatment</th>
             {c.countries.map((country, i) => (
-              <td
+              <th
+                scope="col"
                 data-country={country}
                 class:list={{
                   'is-home': i === 0,
                   'is-selected': country === defaultCountry,
                 }}
               >
-                {c.cell.price}
-                <br />
-                {c.cell.clinics}
-              </td>
+                {country}
+              </th>
             ))}
-            <td>{c.saving}</td>
+            <th scope="col">Saving</th>
           </tr>
-        ))}
-      </tbody>
-    </table>
-  </div>
+        </thead>
+        <tbody>
+          {data.rows.map((row) => (
+            <tr>
+              <th scope="row">
+                <span class="row__name">{row.name}</span>
+                <span class="row__note">{row.note}</span>
+              </th>
+              {c.countries.map((country, i) => (
+                <td
+                  data-country={country}
+                  class:list={{
+                    'is-home': i === 0,
+                    'is-selected': country === defaultCountry,
+                  }}
+                >
+                  {cellLines(row, i).map((line, n) => (
+                    <>
+                      {n > 0 && <br />}
+                      {line}
+                    </>
+                  ))}
+                </td>
+              ))}
+              <td>{saving(row)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
 
-  <details class="method">
-    <summary>{c.methodologyTitle}</summary>
-    <!-- PLACEHOLDER: the Figma file only shows the collapsed row; methodology text must come from the owner -->
-    <p class="muted">Methodology to be provided by Melatec.</p>
-  </details>
-</Section>
+    <details class="method">
+      <summary>{c.methodologyTitle}</summary>
+      {methodParagraphs.length > 0 ? (
+        methodParagraphs.map((p) => <p class="muted">{p}</p>)
+      ) : (
+        <p class="muted">Methodology to be provided by Melatec.</p>
+      )}
+    </details>
+  </Section>
+)}
 
 <script>
   // Highlights the column of the chosen country. The table already renders every country, so

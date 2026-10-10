@@ -1,39 +1,51 @@
 ---
-import { Image } from 'astro:assets';
+import ProfileImage from '../ProfileImage.astro';
 import Section from '../Section.astro';
 import SectionIntro from '../SectionIntro.astro';
-import { smileStories } from '../../data/home';
+
+import { getSection } from '../../lib/content';
+
+// Built-in text: the sample photo. Once the section is edited the photo is the one chosen for it, and without one
+// the story is shown without a picture (the sample photo shows a real patient).
+const smileStories = await getSection('home_smile');
+const picture =
+  smileStories && (smileStories.edited ? smileStories.chosenPhotos.image : smileStories.image);
 ---
 
-<Section labelledby="stories-title">
-  <SectionIntro label={smileStories.label} headingId="stories-title" lined>
-    <Fragment slot="title">Real Stories. Real Smiles.</Fragment>
-  </SectionIntro>
+{smileStories && (
+  <Section labelledby="stories-title">
+    <SectionIntro label={smileStories.label} headingId="stories-title" lined>
+      <Fragment slot="title">{smileStories.title}</Fragment>
+    </SectionIntro>
 
-  <div class="story">
-    <div class="story__text">
-      <p>{smileStories.summary}</p>
-      <div class="story__details">
-        <p class="story__heading">{smileStories.detailsTitle}</p>
-        <ul>
-          {smileStories.details.map((line) => (
-            <li>{line}</li>
-          ))}
-        </ul>
+    <div class="story">
+      <div class="story__text">
+        <p>{smileStories.summary}</p>
+        <div class="story__details">
+          {smileStories.details.length > 0 && (
+            <>
+              <p class="story__heading">{smileStories.detailsTitle}</p>
+              <ul>
+                {smileStories.details.map((line) => (
+                  <li>{line}</li>
+                ))}
+              </ul>
+            </>
+          )}
+        </div>
       </div>
+      {picture && (
+        <ProfileImage
+          class="story__img"
+          image={picture}
+          width={560}
+          height={440}
+          sizes="(max-width: 960px) 100vw, 560px"
+        />
+      )}
     </div>
-    <Image
-      class="story__img"
-      src={smileStories.image.src}
-      alt={smileStories.image.alt}
-      width={560}
-      height={440}
-      densities={[1, 2]}
-      sizes="(max-width: 960px) 100vw, 560px"
-      loading="lazy"
-    />
-  </div>
-</Section>
+  </Section>
+)}
 
 <style>
   .story {

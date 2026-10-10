@@ -272,3 +272,8 @@ p {
   /* !important: component-scoped `.field input` rules would otherwise win on specificity. */
   border-color: var(--color-error) !important;
 }
+
+/* Text from the CMS where a new line is meant to start a new line (titles, short claims). */
+.pre-line {
+  white-space: pre-line;
+}
