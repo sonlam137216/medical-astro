@@ -24,21 +24,54 @@ const counts = await Promise.all(
 <AdminLayout title="Dashboard" current="dashboard">
   <main class="admin-main">
     <h1>Dashboard</h1>
-    <section class="admin-card" aria-labelledby="req-title">
-      <h2 id="req-title" class="t-h3">
-        Consultation requests
-      </h2>
+
+    <section aria-labelledby="req-title" class="admin-section">
+      <h2 id="req-title">Consultation requests</h2>
       <p class="admin-muted">The website sends no email, so check here for new requests.</p>
-      <dl class="admin-dl" style="margin-top: 16px">
+      <ul class="admin-stats">
         {STATUSES.map(([status, label], i) => (
-          <>
-            <dt>{label}</dt>
-            <dd>
-              <a href={`/admin/consultations?status=${status}`}>{counts[i]}</a>
-            </dd>
-          </>
+          <li>
+            <a
+              class:list={['admin-stat', { 'admin-stat--new': status === 'new' }]}
+              href={`/admin/consultations?status=${status}`}
+            >
+              <span class="admin-stat__value">{counts[i]}</span>
+              <span class="admin-stat__label">{label}</span>
+            </a>
+          </li>
         ))}
-      </dl>
+      </ul>
+    </section>
+
+    <section class="admin-card" aria-labelledby="quick-title">
+      <h2 id="quick-title">Edit the website</h2>
+      <ul class="admin-quick" style="margin-top: 14px">
+        <li>
+          <a href="/admin/sections">
+            Page text<small>Headings and paragraphs of each page</small>
+          </a>
+        </li>
+        <li>
+          <a href="/admin/content/services">
+            Services and packages<small>Cards, inclusions and prices</small>
+          </a>
+        </li>
+        <li>
+          <a href="/admin/doctors">
+            Doctors<small>Profiles and photos</small>
+          </a>
+        </li>
+        <li>
+          <a href="/admin/content/articles">
+            Articles<small>Travel guide and dental knowledge</small>
+          </a>
+        </li>
+        <li>
+          <a href="/admin/publish">
+            Publish<small>Send your changes to the website</small>
+          </a>
+        </li>
+      </ul>
     </section>
   </main>
 </AdminLayout>

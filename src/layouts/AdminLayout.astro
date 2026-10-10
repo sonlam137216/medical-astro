@@ -1,7 +1,7 @@
 ---
 import BaseLayout from './BaseLayout.astro';
 import '../styles/admin.css';
-import { ENTITIES } from '../lib/cms/entities';
+import { ENTITIES, entityByKey } from '../lib/cms/entities';
 
 interface Props {
   title: string;
@@ -21,21 +21,95 @@ if (nav) {
     .eq('status', 'new');
   newCount = count ?? 0;
 }
+
+interface Item {
+  label: string;
+  href: string;
+  /** Matches the `current` prop of the page. */
+  key: string;
+}
+
+// The website's content, in the order people usually need it. Entities added to the registry later still show
+// up (at the end of the group) without touching this file.
+const CONTENT_ORDER = [
+  'site',
+  'navigation',
+  'sections',
+  'pages',
+  'services',
+  'packages',
+  'doctors',
+  'locations',
+  'destinations',
+  'articles',
+  'article-categories',
+  'faqs',
+  'redirects',
+];
+const special: Record<string, Item> = {
+  site: { label: 'Site details', href: '/admin/site', key: 'content:site' },
+  sections: { label: 'Page text', href: '/admin/sections', key: 'content:sections' },
+  doctors: { label: 'Doctors', href: '/admin/doctors', key: 'doctors' },
+};
+const fromEntity = (key: string): Item | null => {
+  const def = entityByKey(key);
+  return def
+    ? { label: def.plural, href: `/admin/content/${def.key}`, key: `content:${def.key}` }
+    : null;
+};
+const known = new Set(CONTENT_ORDER);
+const content: Item[] = [
+  ...CONTENT_ORDER.map((k) => special[k] ?? fromEntity(k)).filter((i): i is Item => i !== null),
+  ...ENTITIES.filter((e) => !known.has(e.key)).map((e) => fromEntity(e.key) as Item),
+  { label: 'Media', href: '/admin/media', key: 'media' },
+];
+
+const icons = {
+  dashboard: 'M3 12l9-8 9 8M5 10v10h5v-6h4v6h5V10',
+  inbox: 'M3 13l2-8h14l2 8v6H3v-6zm0 0h5l1 3h6l1-3h5',
+  publish: 'M12 16V4m0 0L7 9m5-5l5 5M5 20h14',
+};
 ---
 
 <BaseLayout title={`${title} · Melatec admin`} noindex>
-  <div class="admin-shell">
-    {nav && (
-      <header class="admin-bar">
-        <span class="admin-bar__brand">Melatec admin</span>
-        <nav aria-label="Admin">
+  {nav ? (
+    <div class="admin-shell">
+      <aside class="admin-side" data-admin-side>
+        <div class="admin-side__top">
+          <a class="admin-side__brand" href="/admin">
+            <span class="admin-side__logo" aria-hidden="true">
+              M
+            </span>
+            <span>
+              Melatec
+              <small>Admin</small>
+            </span>
+          </a>
+          <button
+            class="admin-side__toggle"
+            type="button"
+            aria-expanded="false"
+            aria-controls="admin-nav"
+            data-admin-toggle
+          >
+            Menu
+          </button>
+        </div>
+
+        <nav class="admin-nav" id="admin-nav" aria-label="Admin">
           <a href="/admin" aria-current={current === 'dashboard' ? 'page' : undefined}>
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d={icons.dashboard} />
+            </svg>
             Dashboard
           </a>
           <a
             href="/admin/consultations"
             aria-current={current === 'consultations' ? 'page' : undefined}
           >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d={icons.inbox} />
+            </svg>
             Consultations
             {newCount > 0 && (
               <span class="admin-badge" aria-label={`${newCount} new`}>
@@ -43,37 +117,56 @@ if (nav) {
               </span>
             )}
           </a>
-          <a href="/admin/doctors" aria-current={current === 'doctors' ? 'page' : undefined}>
-            Doctors
-          </a>
-          <details class="admin-menu">
-            <summary class:list={{ active: current?.startsWith('content:') }}>Content</summary>
-            <div class="admin-menu__list">
-              <a href="/admin/site">Site details</a>
-              <a href="/admin/doctors">Doctors</a>
-              <a href="/admin/sections">Page text</a>
-              {ENTITIES.map((e) => (
-                <a href={`/admin/content/${e.key}`}>{e.plural}</a>
-              ))}
-            </div>
-          </details>
-          <a href="/admin/media" aria-current={current === 'media' ? 'page' : undefined}>
-            Media
-          </a>
+
+          <p class="admin-nav__group">Website content</p>
+          {content.map((item) => (
+            <a
+              class="admin-nav__sub"
+              href={item.href}
+              aria-current={current === item.key ? 'page' : undefined}
+            >
+              {item.label}
+            </a>
+          ))}
+
+          <p class="admin-nav__group">Go live</p>
           <a href="/admin/publish" aria-current={current === 'publish' ? 'page' : undefined}>
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d={icons.publish} />
+            </svg>
             Publish
           </a>
         </nav>
-        <div class="admin-bar__user">
-          <span>{Astro.locals.admin.email}</span>
+
+        <div class="admin-side__user">
+          <span class="admin-side__email" title={Astro.locals.admin.email}>
+            {Astro.locals.admin.email}
+          </span>
           <form method="post" action="/admin/auth/logout">
             <button class="admin-btn admin-btn--ghost" type="submit">
               Sign out
             </button>
           </form>
         </div>
-      </header>
-    )}
-    <slot />
-  </div>
+      </aside>
+
+      <div class="admin-content">
+        <slot />
+      </div>
+    </div>
+  ) : (
+    <div class="admin-shell admin-shell--bare">
+      <slot />
+    </div>
+  )}
 </BaseLayout>
+
+<script>
+  // On narrow screens the menu folds away behind a button. Without JavaScript it stays open.
+  const side = document.querySelector<HTMLElement>('[data-admin-side]');
+  const toggle = document.querySelector<HTMLButtonElement>('[data-admin-toggle]');
+  toggle?.addEventListener('click', () => {
+    const open = side?.classList.toggle('is-open') ?? false;
+    toggle.setAttribute('aria-expanded', String(open));
+  });
+</script>

@@ -128,12 +128,12 @@ const { values, errors = {}, formError, submitLabel, images } = Astro.props;
     Show on the website
   </label>
 
-  <div>
+  <div class="admin-form__bar">
     <button class="admin-btn" type="submit">
       {submitLabel}
     </button>
+    <span class="admin-hint">
+      Saving changes the working copy only. Changes appear on the public site after you publish.
+    </span>
   </div>
-  <p class="admin-hint">
-    Saving changes the working copy only. Changes appear on the public site after you publish.
-  </p>
 </form>

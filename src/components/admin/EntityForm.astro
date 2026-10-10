@@ -95,9 +95,7 @@ const slotsFor = (f: Extract<Field, { type: 'items' }>) => {
                         name={itemInput(f.name, i, c.name)}
                         rows={c.kind === 'lines' ? 4 : 3}
                         maxlength={c.kind === 'textarea' ? c.max : undefined}
-                      >
-                        {text(itemInput(f.name, i, c.name))}
-                      </textarea>
+                      >{text(itemInput(f.name, i, c.name))}</textarea>
                     )}
                     {c.help && <span class="admin-hint">{c.help}</span>}
                   </label>
@@ -225,12 +223,12 @@ const slotsFor = (f: Extract<Field, { type: 'items' }>) => {
     );
   })}
 
-  <div>
+  <div class="admin-form__bar">
     <button class="admin-btn" type="submit">
       {submitLabel}
     </button>
+    <span class="admin-hint">
+      Saving changes the working copy only. Changes appear on the website after you publish.
+    </span>
   </div>
-  <p class="admin-hint">
-    Saving changes the working copy only. Changes appear on the website after you publish.
-  </p>
 </form>
