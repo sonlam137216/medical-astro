@@ -11,6 +11,7 @@ import clinicWaitingB from '../assets/images/photos/clinic-waiting-b.webp';
 
 export const aboutHero = {
   label: 'About us.',
+  title: 'Welcome to Melatec Dental Clinic',
   paragraphs: [
     'Melatec Dental Clinic welcomes international patients seeking high-quality dental care in Vietnam. Combining modern dental technology, experienced dentists, personalized treatment plans, and attentive patient support, we aim to make every treatment journey smooth, comfortable, and transparent.',
     'From cosmetic dentistry and dental implants to restorative treatments and general dental care, Melatec Dental Clinic provides comprehensive solutions for patients who want to improve their smiles while enjoying their stay in Vietnam.',
@@ -47,8 +48,7 @@ export const personalisedCare = {
 export const whyChoose = {
   label: 'Why choose Melatec',
   title: 'Premium Care, Beautiful Smiles in Vietnam',
-  items: Array.from({ length: 6 }, (_, i) => ({
-    eyebrow: String(i + 1).padStart(2, '0'),
+  items: Array.from({ length: 6 }, () => ({
     title: 'Experienced team',
     body: 'Dentists with international training and a team of nurses and coordinators who speak English.',
   })),

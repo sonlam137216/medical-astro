@@ -16,7 +16,7 @@ const seo = await getPageSeo('/our-doctors', { title: 'Our doctors · Melatec De
 
 <!-- Figma highlights "About us" in the nav on this page -->
 <SiteLayout title={seo.title} description={seo.description} current="/about">
-  <PageHero label="Our doctors." image={towerImage} imageHeight={298} upper>
+  <PageHero variant="banner" dark label="Our doctors." image={towerImage} imageHeight={400}>
     <Fragment slot="title">Meet our team of experienced specialists</Fragment>
     <p>
       From cosmetic dentistry and dental implants to restorative treatments and general dental care,
@@ -24,25 +24,25 @@ const seo = await getPageSeo('/our-doctors', { title: 'Our doctors · Melatec De
       smiles while enjoying their stay in Vietnam.
     </p>
     <Fragment slot="extra">
-      <p>15+ Years of Experience</p>
-      <p>English-speaking doctors</p>
+      <p class="hero-chip">15+ Years of Experience</p>
+      <p class="hero-chip">English-speaking doctors</p>
     </Fragment>
   </PageHero>
 
-  <Section labelledby="profiles-title">
+  <Section tone="soft" labelledby="profiles-title">
     <h2 class="visually-hidden" id="profiles-title">
       Doctor profiles
     </h2>
     <ul class="profiles">
       {doctorProfiles.map((d) => (
-        <li class="card profile">
+        <li class="profile">
           {d.image ? (
             <ProfileImage
               class="profile__img"
               image={d.image}
               width={282}
               height={422}
-              sizes="(max-width: 700px) 60vw, 282px"
+              sizes="(max-width: 700px) 60vw, 240px"
             />
           ) : (
             <div class="profile__img profile__initials" aria-hidden="true">
@@ -55,17 +55,23 @@ const seo = await getPageSeo('/our-doctors', { title: 'Our doctors · Melatec De
             </div>
           )}
           <div class="profile__text">
-            <h3 class="t-h3">{d.name}</h3>
-            {d.role && <p class="t-small">{d.role}</p>}
+            {d.role && <p class="profile__role">{d.role}</p>}
+            <h3 class="profile__name">{d.name}</h3>
             {d.bio && <p class="t-small profile__bio">{d.bio}</p>}
-            <ul class="profile__creds">
-              {d.credentials.map((c) => (
-                <li class="t-small">{c}</li>
-              ))}
-              {d.languages.length > 0 && (
-                <li class="t-small">Languages: {d.languages.join(', ')}</li>
-              )}
-            </ul>
+            {d.credentials.length > 0 && (
+              <ul class="profile__creds">
+                {d.credentials.map((c) => (
+                  <li class="t-small">{c}</li>
+                ))}
+              </ul>
+            )}
+            {d.languages.length > 0 && (
+              <ul class="profile__langs" aria-label="Languages spoken">
+                {d.languages.map((l) => (
+                  <li>{l}</li>
+                ))}
+              </ul>
+            )}
           </div>
         </li>
       ))}
@@ -77,17 +83,22 @@ const seo = await getPageSeo('/our-doctors', { title: 'Our doctors · Melatec De
   .profiles {
     display: grid;
     gap: 24px;
-    margin: 0;
+    max-width: 880px;
+    margin: 0 auto;
     padding: 0;
     list-style: none;
   }
 
   .profile {
     display: grid;
-    grid-template-columns: 282px 1fr;
-    align-items: start;
+    grid-template-columns: 240px 1fr;
+    align-items: center;
     gap: 40px;
-    padding: 24px;
+    padding: 24px 32px 24px 24px;
+    background: var(--color-white);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card);
+    box-shadow: 0 6px 18px rgb(0 86 229 / 6%);
   }
 
   .profile__img {
@@ -109,30 +120,78 @@ const seo = await getPageSeo('/our-doctors', { title: 'Our doctors · Melatec De
 
   .profile__text {
     display: grid;
-    gap: 12px;
+    gap: 10px;
     align-content: start;
+    color: var(--color-navy);
+  }
+
+  /* Figma: role in serif blue above a bold navy name. */
+  .profile__role {
+    font: 700 22px / 28px var(--font-serif);
+    color: var(--color-blue);
+  }
+
+  .profile__name {
+    font: 700 24px / 30px var(--font-sans);
+    color: var(--color-heading);
   }
 
   .profile__bio {
-    max-width: 760px;
+    color: var(--color-muted);
   }
 
   .profile__creds {
     display: grid;
-    gap: 10px;
+    gap: 8px;
     margin: 4px 0 0;
     padding: 0;
     list-style: none;
   }
 
+  .profile__creds li {
+    position: relative;
+    padding-left: 22px;
+  }
+
+  .profile__creds li::before {
+    content: '';
+    position: absolute;
+    top: 7px;
+    left: 0;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--color-title);
+  }
+
+  .profile__langs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 6px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .profile__langs li {
+    padding: 6px 18px;
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    background: var(--color-card);
+    font: 700 var(--text-small) / 20px var(--font-sans);
+    color: var(--color-title);
+  }
+
   @media (max-width: 700px) {
     .profile {
       grid-template-columns: 1fr;
-      gap: 24px;
+      gap: 20px;
+      padding: 20px;
     }
 
     .profile__img {
-      max-width: 240px;
+      max-width: 220px;
+      justify-self: center;
     }
   }
 </style>

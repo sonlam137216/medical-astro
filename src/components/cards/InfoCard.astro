@@ -1,20 +1,23 @@
 ---
-// Numbered/eyebrow card used by "Dental tourism support", "Why choose Melatec", "Clear answers", etc.
+// Text card used by "Dental tourism support" (white) and "Why choose Melatec" (translucent on navy).
+// Figma titles are set in the serif face; the number eyebrow of the old design is optional now.
 interface Props {
-  eyebrow: string;
+  eyebrow?: string;
   title: string;
   body: string;
   /** Titles on the Services/Packages pages are set in capitals. */
   upper?: boolean;
+  /** `dark`: translucent card with a light outline, for navy bands. */
+  tone?: 'light' | 'dark';
 }
 
-const { eyebrow, title, body, upper = false } = Astro.props;
+const { eyebrow, title, body, upper = false, tone = 'light' } = Astro.props;
 ---
 
-<article class="card info">
-  <p class="info__eyebrow">{eyebrow}</p>
-  <h3 class:list={['t-h3', { 'is-upper': upper }]}>{title}</h3>
-  <p>{body}</p>
+<article class:list={['info', { 'info--dark': tone === 'dark', card: tone === 'light' }]}>
+  {eyebrow && <p class="info__eyebrow">{eyebrow}</p>}
+  <h3 class:list={['info__title', { 'is-upper': upper }]}>{title}</h3>
+  <p class="info__body">{body}</p>
 </article>
 
 <style>
@@ -33,7 +36,38 @@ const { eyebrow, title, body, upper = false } = Astro.props;
     color: var(--color-blue);
   }
 
+  .info__title {
+    font-family: var(--font-serif);
+    font-weight: 700;
+    font-size: 24px;
+    line-height: 30px;
+    color: var(--color-heading);
+  }
+
+  .info__body {
+    font-family: var(--font-sans);
+    font-size: var(--text-small);
+    line-height: var(--text-small-lh);
+    color: var(--color-navy);
+  }
+
   .is-upper {
     text-transform: uppercase;
+    font-size: 21px;
+    line-height: 28px;
+  }
+
+  .info--dark {
+    background: rgb(255 255 255 / 6%);
+    border: 1px solid rgb(179 201 243 / 60%);
+    border-radius: var(--radius-card);
+  }
+
+  .info--dark .info__title {
+    color: var(--color-white);
+  }
+
+  .info--dark .info__body {
+    color: rgb(255 255 255 / 88%);
   }
 </style>

@@ -10,7 +10,7 @@ interface Props {
   href: string;
   image: Img;
   linkLabel?: string;
-  /** Services page: body copy in the 16/26 text style instead of the small muted one. */
+  /** Services page (Figma): centred serif title, short copy, outline pill button. */
   detail?: boolean;
 }
 
@@ -28,13 +28,19 @@ const { title, body, total, href, image, linkLabel = 'Learn more', detail = fals
     sizes="(max-width: 768px) 100vw, 384px"
     loading="lazy"
   />
-  <div class="card__body">
+  <div class:list={['card__body', { 'card__body--detail': detail }]}>
     <h3 class="t-h3">{title}</h3>
     <p class:list={detail ? [] : ['t-small', 'muted']}>{body}</p>
     {total && <p class="price-total">{total}</p>}
-    <a class="link-arrow" href={href}>
-      {linkLabel} <span aria-hidden="true">→</span>
-    </a>
+    {detail ? (
+      <a class="service__pill" href={href}>
+        {linkLabel} <span aria-hidden="true">→</span>
+      </a>
+    ) : (
+      <a class="link-arrow" href={href}>
+        {linkLabel} <span aria-hidden="true">→</span>
+      </a>
+    )}
   </div>
 </article>
 
@@ -43,5 +49,53 @@ const { title, body, total, href, image, linkLabel = 'Learn more', detail = fals
     aspect-ratio: 384 / 190;
     object-fit: cover;
     object-position: center top;
+  }
+
+  .card__body--detail {
+    flex: 1;
+    grid-template-rows: auto 1fr auto;
+    justify-items: center;
+    gap: 12px;
+    padding: 8px 20px 24px;
+    text-align: center;
+  }
+
+  .card__body--detail .t-h3 {
+    font-family: var(--font-serif);
+    font-weight: 700;
+    font-size: 26px;
+    line-height: 32px;
+    color: var(--color-title);
+  }
+
+  .card__body--detail p {
+    font-family: var(--font-sans);
+    font-size: var(--text-small);
+    line-height: var(--text-small-lh);
+    color: var(--color-navy);
+  }
+
+  .service__pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 4px;
+    padding: 9px 22px;
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    background: var(--color-white);
+    font: 600 13px / 20px var(--font-display);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--color-title);
+    transition:
+      background-color 0.15s,
+      color 0.15s;
+  }
+
+  .service__pill:hover {
+    background: var(--color-title);
+    border-color: var(--color-title);
+    color: var(--color-white);
   }
 </style>

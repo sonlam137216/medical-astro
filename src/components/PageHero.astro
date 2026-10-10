@@ -19,6 +19,8 @@ interface Props {
   variant?: 'split' | 'banner';
   /** Banner only: navy overlay with white serif title (Services, Doctors, Packages) instead of the light Home/About look. */
   dark?: boolean;
+  /** Banner only: CSS object-position of the picture, to keep the subject clear of the copy. */
+  position?: string;
 }
 
 const {
@@ -30,6 +32,7 @@ const {
   headingId = 'page-title',
   variant = 'split',
   dark = false,
+  position = 'center',
 } = Astro.props;
 const banner = variant === 'banner';
 ---
@@ -40,12 +43,11 @@ const banner = variant === 'banner';
       class="banner__bg"
       src={image.src}
       alt={image.alt}
-      width={1440}
-      height={imageHeight}
-      densities={[1, 2]}
+      widths={[960, 1440, 2000]}
       sizes="100vw"
       loading="eager"
       fetchpriority="high"
+      style={`object-position: ${position};`}
     />
     <div class="container banner__inner" style={`min-height: ${imageHeight}px;`}>
       <div class="hero__text">
@@ -218,10 +220,36 @@ const banner = variant === 'banner';
     color: var(--color-white);
   }
 
+  /* Pills under the hero copy (Our Doctors: "15+ Years of Experience"). Pass <p class="hero-chip">. */
+  .hero__extra :global(.hero-chip) {
+    display: inline-flex;
+    justify-self: start;
+    padding: 8px 22px;
+    border-radius: 999px;
+    background: var(--color-white);
+    color: var(--color-heading);
+    font: 700 var(--text-body) / var(--text-body-lh) var(--font-serif);
+  }
+
+  .banner--dark .hero__extra:has(.hero-chip) {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
   @media (max-width: 960px) {
     .hero {
       grid-template-columns: 1fr;
       gap: 40px;
+    }
+
+    /* Copy covers most of the picture on narrow screens: strengthen the overlay for legibility. */
+    .banner::before {
+      background: rgb(255 255 255 / 80%);
+    }
+
+    .banner--dark::before {
+      background: rgb(0 26 79 / 78%);
     }
   }
 </style>

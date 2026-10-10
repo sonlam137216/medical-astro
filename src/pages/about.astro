@@ -10,7 +10,7 @@ import InfoCard from '../components/cards/InfoCard.astro';
 import DoctorCard from '../components/cards/DoctorCard.astro';
 import CtaBand from '../components/CtaBand.astro';
 import SeamlessJourney from '../components/SeamlessJourney.astro';
-import { towerImage } from '../data/shared';
+import { heroImage } from '../data/home';
 import { getDoctors } from '../lib/content';
 import { aboutHero, stats, personalisedCare, whyChoose, insideClinic } from '../data/about';
 
@@ -20,12 +20,25 @@ const doctors = (await getDoctors())
   .slice(0, 4)
   .map(({ name, role, image }) => ({ name, role, image }));
 
+// Figma lays the clinic photos out as two columns, the right one shifted down.
+const galleryColumns = [
+  insideClinic.photos.filter((_, i) => i % 2 === 0),
+  insideClinic.photos.filter((_, i) => i % 2 === 1),
+];
+
 const seo = await getPageSeo('/about', { title: 'About us · Melatec Dental Clinic' });
 ---
 
 <SiteLayout title={seo.title} description={seo.description}>
-  <PageHero label={aboutHero.label} image={towerImage} imageHeight={298} upper>
-    <Fragment slot="title">Welcome to Melatec</Fragment>
+  <PageHero
+    variant="banner"
+    label={aboutHero.label}
+    image={heroImage}
+    imageHeight={480}
+    upper
+    position="75% center"
+  >
+    <Fragment slot="title">{aboutHero.title}</Fragment>
     {aboutHero.paragraphs.map((p) => (
       <p>{p}</p>
     ))}
@@ -40,15 +53,15 @@ const seo = await getPageSeo('/about', { title: 'About us · Melatec Dental Clin
         {stats.map((s) => (
           <li class="stats__card">
             <span class="stats__value">{s.value}</span>
-            <span>{s.label}</span>
+            <span class="stats__label">{s.label}</span>
           </li>
         ))}
       </ul>
     </div>
   </section>
 
-  <Section labelledby="care-title">
-    <SectionIntro label={personalisedCare.label} headingId="care-title">
+  <Section tone="soft" labelledby="care-title">
+    <SectionIntro label={personalisedCare.label} headingId="care-title" align="center" lined>
       <Fragment slot="title">{personalisedCare.title}</Fragment>
     </SectionIntro>
     <div class="care">
@@ -61,11 +74,11 @@ const seo = await getPageSeo('/about', { title: 'About us · Melatec Dental Clin
             width={568}
             height={379}
             densities={[1, 2]}
-            sizes="(max-width: 900px) 100vw, 568px"
+            sizes="(max-width: 900px) 100vw, 520px"
             loading="lazy"
           />
           <div class="care__text">
-            <h3 class="t-h3">{row.title}</h3>
+            <h3 class="care__title">{row.title}</h3>
             <p>{row.body}</p>
           </div>
         </div>
@@ -73,50 +86,54 @@ const seo = await getPageSeo('/about', { title: 'About us · Melatec Dental Clin
     </div>
   </Section>
 
-  <Section tone="soft" labelledby="why-title">
-    <SectionIntro label={whyChoose.label} headingId="why-title">
+  <Section tone="navy" labelledby="why-title">
+    <SectionIntro label={whyChoose.label} headingId="why-title" align="center" lined inverse>
       <Fragment slot="title">{whyChoose.title}</Fragment>
     </SectionIntro>
     <ul class="cards">
       {whyChoose.items.map((i) => (
         <li>
-          <InfoCard {...i} />
+          <InfoCard {...i} tone="dark" />
         </li>
       ))}
     </ul>
   </Section>
 
   <Section labelledby="inside-title">
-    <SectionIntro label={insideClinic.label} headingId="inside-title">
+    <SectionIntro label={insideClinic.label} headingId="inside-title" align="center" lined>
       <Fragment slot="title">{insideClinic.title}</Fragment>
     </SectionIntro>
-    <ul class="photos">
-      {insideClinic.photos.map((p) => (
-        <li>
-          <Image
-            class="photos__img"
-            src={p.src}
-            alt={p.alt}
-            width={282}
-            height={216}
-            densities={[1, 2]}
-            sizes="(max-width: 640px) 50vw, 282px"
-            loading="lazy"
-          />
-        </li>
+    <div class="photos">
+      {galleryColumns.map((column) => (
+        <ul class="photos__col">
+          {column.map((p) => (
+            <li>
+              <Image
+                class="photos__img"
+                src={p.src}
+                alt={p.alt}
+                width={512}
+                height={384}
+                densities={[1, 2]}
+                sizes="(max-width: 640px) 100vw, 512px"
+                loading="lazy"
+              />
+            </li>
+          ))}
+        </ul>
       ))}
-    </ul>
+    </div>
   </Section>
 
   <CtaBand
     actions={[
       { label: 'Book a consultation', href: '#consultation' },
-      { label: 'Explore our services', href: '/services', variant: 'outline-light' },
+      { label: 'Explore our services', href: '/services' },
     ]}
   />
 
-  <Section labelledby="specialists-title">
-    <SectionIntro label="Our doctors" headingId="specialists-title">
+  <Section tone="soft" labelledby="specialists-title">
+    <SectionIntro label="Our doctors" headingId="specialists-title" align="center" lined>
       <Fragment slot="title">Meet Melatec’s Specialists</Fragment>
     </SectionIntro>
     <ul class="doctors">
@@ -126,7 +143,7 @@ const seo = await getPageSeo('/about', { title: 'About us · Melatec Dental Clin
         </li>
       ))}
     </ul>
-    <div>
+    <div class="more">
       <Button variant="outline" href="/our-doctors">
         View all doctors
       </Button>
@@ -138,7 +155,7 @@ const seo = await getPageSeo('/about', { title: 'About us · Melatec Dental Clin
 
 <style>
   .stats {
-    padding-block: 40px;
+    padding-block: 40px 0;
   }
 
   .stats__grid {
@@ -152,11 +169,13 @@ const seo = await getPageSeo('/about', { title: 'About us · Melatec Dental Clin
 
   .stats__card {
     display: grid;
+    align-content: start;
     gap: 4px;
     padding: 24px 20px;
-    background: var(--color-soft);
+    background: var(--color-white);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-card);
+    box-shadow: 0 6px 18px rgb(0 86 229 / 8%);
   }
 
   .stats__value {
@@ -164,7 +183,15 @@ const seo = await getPageSeo('/about', { title: 'About us · Melatec Dental Clin
     font-weight: 700;
     font-size: 48px;
     line-height: 56px;
-    color: var(--color-blue);
+    color: var(--color-title);
+  }
+
+  .stats__label {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: var(--text-small);
+    line-height: var(--text-small-lh);
+    color: var(--color-navy);
   }
 
   .care {
@@ -179,10 +206,6 @@ const seo = await getPageSeo('/about', { title: 'About us · Melatec Dental Clin
     gap: 64px;
   }
 
-  .care__row:nth-child(even) {
-    grid-template-columns: 1fr 1fr;
-  }
-
   .care__row:nth-child(even) .care__img {
     order: 2;
   }
@@ -192,19 +215,29 @@ const seo = await getPageSeo('/about', { title: 'About us · Melatec Dental Clin
     height: auto;
     aspect-ratio: 568 / 379;
     object-fit: cover;
-    border-radius: var(--radius-image);
+    border-radius: var(--radius-card);
   }
 
   .care__text {
     display: grid;
-    gap: 24px;
-    max-width: 480px;
+    gap: 16px;
+    max-width: 440px;
+    font-family: var(--font-display);
+    color: var(--color-navy);
+  }
+
+  .care__title {
+    font-family: var(--font-serif);
+    font-weight: 700;
+    font-size: 30px;
+    line-height: 36px;
+    color: var(--color-heading);
   }
 
   .cards {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 40px 24px;
+    gap: 24px;
     margin: 0;
     padding: 0;
     list-style: none;
@@ -212,17 +245,29 @@ const seo = await getPageSeo('/about', { title: 'About us · Melatec Dental Clin
 
   .photos {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    max-width: 800px;
+    margin-inline: auto;
+  }
+
+  .photos__col {
+    display: grid;
+    align-content: start;
     gap: 24px;
     margin: 0;
     padding: 0;
     list-style: none;
   }
 
+  .photos__col:nth-child(even) {
+    padding-top: 48px;
+  }
+
   .photos__img {
     width: 100%;
     height: auto;
-    aspect-ratio: 282 / 216;
+    aspect-ratio: 4 / 3;
     object-fit: cover;
     border-radius: var(--radius-card);
   }
@@ -244,9 +289,13 @@ const seo = await getPageSeo('/about', { title: 'About us · Melatec Dental Clin
     flex: 1;
   }
 
+  .more {
+    display: flex;
+    justify-content: center;
+  }
+
   @media (max-width: 1024px) {
     .stats__grid,
-    .photos,
     .doctors {
       grid-template-columns: repeat(2, 1fr);
     }
@@ -255,14 +304,17 @@ const seo = await getPageSeo('/about', { title: 'About us · Melatec Dental Clin
       grid-template-columns: repeat(2, 1fr);
     }
 
-    .care__row,
-    .care__row:nth-child(even) {
+    .care__row {
       grid-template-columns: 1fr;
       gap: 24px;
     }
 
     .care__row:nth-child(even) .care__img {
       order: 0;
+    }
+
+    .care__text {
+      max-width: none;
     }
   }
 
@@ -273,7 +325,28 @@ const seo = await getPageSeo('/about', { title: 'About us · Melatec Dental Clin
     }
 
     .stats__grid {
-      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+
+    .stats__card {
+      padding: 16px 14px;
+    }
+
+    .stats__value {
+      font-size: 36px;
+      line-height: 44px;
+    }
+
+    .photos {
+      gap: 16px;
+    }
+
+    .photos__col {
+      gap: 16px;
+    }
+
+    .photos__col:nth-child(even) {
+      padding-top: 24px;
     }
   }
 </style>

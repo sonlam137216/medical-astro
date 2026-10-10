@@ -6,13 +6,13 @@ import { tourismSupport as t } from '../data/shared';
 ---
 
 <Section tone="soft" labelledby="tourism-title">
-  <SectionIntro label={t.label} headingId="tourism-title">
+  <SectionIntro label={t.label} headingId="tourism-title" align="center" lined>
     <Fragment slot="title">{t.title}</Fragment>
   </SectionIntro>
   <ul class="grid">
     {t.items.map((item) => (
       <li>
-        <InfoCard {...item} upper />
+        <InfoCard title={item.title} body={item.body} upper />
       </li>
     ))}
   </ul>
@@ -29,7 +29,7 @@ import { tourismSupport as t } from '../data/shared';
   }
 
   .grid li {
-    min-height: 278px;
+    min-height: 200px;
   }
 
   @media (max-width: 960px) {

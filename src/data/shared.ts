@@ -5,7 +5,7 @@
 import type { Img } from './types';
 import dentalImplant from '../assets/images/photos/dental-implant.webp';
 import dentalChair from '../assets/images/photos/dental-chair-wide.webp';
-import hanoiTower from '../assets/images/photos/hanoi-turtle-tower.webp';
+import hanoiTower from '../assets/images/photos/hanoi-tower-wide.webp';
 import doctorPortrait from '../assets/images/doctors/doctor-portrait.webp';
 
 export const towerImage: Img = {

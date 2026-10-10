@@ -15,7 +15,7 @@ const seo = await getPageSeo('/services', { title: 'Dental services · Melatec D
 ---
 
 <SiteLayout title={seo.title} description={seo.description}>
-  <PageHero label="Our services." image={towerImage} imageHeight={298} upper>
+  <PageHero variant="banner" dark label="Our services." image={towerImage} imageHeight={400}>
     <Fragment slot="title">Comprehensive dental care for every smile</Fragment>
     <p>
       Providing advanced implant, cosmetic, orthodontic, and restorative dental care in a modern,
@@ -23,7 +23,7 @@ const seo = await getPageSeo('/services', { title: 'Dental services · Melatec D
     </p>
   </PageHero>
 
-  <Section labelledby="dental-services-title">
+  <Section tone="soft" labelledby="dental-services-title">
     <h2 class="visually-hidden" id="dental-services-title">
       Dental services
     </h2>
@@ -39,7 +39,7 @@ const seo = await getPageSeo('/services', { title: 'Dental services · Melatec D
   <CtaBand
     actions={[
       { label: 'Book a consultation', href: '#consultation' },
-      { label: 'Explore our doctors', href: '/our-doctors', variant: 'outline-light' },
+      { label: 'Explore our doctors', href: '/our-doctors' },
     ]}
   />
   <TourismSupport />
@@ -47,9 +47,10 @@ const seo = await getPageSeo('/services', { title: 'Dental services · Melatec D
 </SiteLayout>
 
 <style>
+  /* Figma: equal cards, 2 on the first row (centred) and 3 on the second. */
   .grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(6, 1fr);
     gap: 24px;
     margin: 0;
     padding: 0;
@@ -58,19 +59,34 @@ const seo = await getPageSeo('/services', { title: 'Dental services · Melatec D
 
   .grid li {
     display: flex;
+    grid-column: span 2;
+  }
+
+  .grid li:nth-child(1) {
+    grid-column: 2 / span 2;
+  }
+
+  .grid li:nth-child(2) {
+    grid-column: 4 / span 2;
   }
 
   .grid li > :global(*) {
     flex: 1;
   }
 
-  @media (max-width: 1024px) {
+  @media (max-width: 900px) {
     .grid {
       grid-template-columns: repeat(2, 1fr);
     }
+
+    .grid li,
+    .grid li:nth-child(1),
+    .grid li:nth-child(2) {
+      grid-column: auto;
+    }
   }
 
-  @media (max-width: 640px) {
+  @media (max-width: 600px) {
     .grid {
       grid-template-columns: 1fr;
     }
