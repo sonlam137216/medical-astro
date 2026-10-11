@@ -1,38 +1,98 @@
-// Search box and category chips of the article lists. Everything is already in the page; this only hides
-// cards. Without JavaScript the controls stay hidden (see ArticleIndex) and every article is listed.
+// Search box of the article lists. The list itself is plain pages and links; only the search needs a script,
+// because a page holds just some of the articles. The first time someone types, the small index of the kind
+// (`search.json`: title, summary, category, section headings) is fetched; matches replace the list until the
+// box is empty again. Without JavaScript the box stays hidden (see ArticleIndex) and the pages still work.
+interface Entry {
+  title: string;
+  excerpt: string;
+  category: string;
+  path: string;
+  topics: string;
+}
+
 const root = document.querySelector<HTMLElement>('[data-article-index]');
+const form = document.querySelector<HTMLFormElement>('[data-article-form]');
+const input = document.querySelector<HTMLInputElement>('[data-article-search]');
 
-if (root) {
-  const input = root.querySelector<HTMLInputElement>('[data-article-search]');
-  const form = root.querySelector<HTMLFormElement>('[data-article-form]');
-  const chips = [...root.querySelectorAll<HTMLButtonElement>('[data-chip]')];
-  const cards = [...root.querySelectorAll<HTMLElement>('[data-article]')];
-  const empty = root.querySelector<HTMLElement>('[data-no-match]');
-  const count = root.querySelector<HTMLElement>('[data-count]');
-  let category = '';
+if (root && form && input) {
+  const browse = root.querySelector<HTMLElement>('[data-browse]');
+  const results = root.querySelector<HTMLElement>('[data-search-results]');
+  const status = root.querySelector<HTMLElement>('[data-search-status]');
+  const list = root.querySelector<HTMLElement>('[data-search-list]');
+  let index: Promise<{ entry: Entry; text: string }[] | null> | undefined;
 
-  const apply = () => {
-    const words = (input?.value ?? '').toLowerCase().split(/\s+/).filter(Boolean);
-    let shown = 0;
-    for (const card of cards) {
-      const text = card.dataset.search ?? '';
-      const match =
-        (category === '' || card.dataset.category === category) &&
-        words.every((w) => text.includes(w));
-      card.parentElement?.toggleAttribute('hidden', !match);
-      if (match) shown++;
-    }
-    empty?.toggleAttribute('hidden', shown > 0 || cards.length === 0);
-    if (count) count.textContent = shown === 1 ? '1 article' : `${shown} articles`;
+  const load = () =>
+    (index ??= fetch(form.dataset.searchUrl ?? '')
+      .then((r) =>
+        r.ok
+          ? (r.json() as Promise<{ articles: Entry[] }>)
+          : Promise.reject(new Error(String(r.status))),
+      )
+      .then((data) =>
+        data.articles.map((entry) => ({
+          entry,
+          text: [entry.title, entry.excerpt, entry.category, entry.topics].join(' ').toLowerCase(),
+        })),
+      )
+      .catch(() => {
+        index = undefined; // try again on the next keystroke
+        return null;
+      }));
+
+  const show = (searching: boolean) => {
+    browse?.toggleAttribute('hidden', searching);
+    results?.toggleAttribute('hidden', !searching);
   };
 
-  input?.addEventListener('input', apply);
-  form?.addEventListener('submit', (event) => event.preventDefault());
-  for (const chip of chips) {
-    chip.addEventListener('click', () => {
-      category = chip.dataset.chip ?? '';
-      for (const other of chips) other.setAttribute('aria-pressed', String(other === chip));
-      apply();
-    });
-  }
+  const render = (matches: Entry[], failed = false) => {
+    if (!list || !status) return;
+    list.replaceChildren();
+    status.textContent = failed
+      ? 'Search is not available right now. Please try again.'
+      : matches.length === 0
+        ? 'No articles match your search. Try a different word.'
+        : matches.length === 1
+          ? '1 article found'
+          : `${matches.length} articles found`;
+    for (const m of matches.slice(0, 40)) {
+      const item = document.createElement('li');
+      if (m.category) {
+        const category = document.createElement('p');
+        category.className = 'result__category';
+        category.textContent = m.category;
+        item.appendChild(category);
+      }
+      const title = document.createElement('a');
+      title.className = 'result__title';
+      title.href = m.path;
+      title.textContent = m.title;
+      item.appendChild(title);
+      if (m.excerpt) {
+        const excerpt = document.createElement('p');
+        excerpt.className = 'result__excerpt';
+        excerpt.textContent = m.excerpt;
+        item.appendChild(excerpt);
+      }
+      list.appendChild(item);
+    }
+  };
+
+  let latest = 0;
+  const run = async () => {
+    const words = input.value.toLowerCase().split(/\s+/).filter(Boolean);
+    const ticket = ++latest;
+    if (words.length === 0) {
+      show(false);
+      return;
+    }
+    show(true);
+    const entries = await load();
+    if (ticket !== latest) return; // a newer keystroke is already being handled
+    if (!entries) return render([], true);
+    render(entries.filter((e) => words.every((w) => e.text.includes(w))).map((e) => e.entry));
+  };
+
+  input.addEventListener('input', run);
+  input.addEventListener('focus', () => void load(), { once: true });
+  form.addEventListener('submit', (event) => event.preventDefault());
 }

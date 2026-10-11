@@ -2,25 +2,15 @@
 import type { PublicArticle } from '../../lib/content';
 import ProfileImage from '../ProfileImage.astro';
 
-// Card of the article lists (Figma: picture, serif blue title, summary, "Explore more"). The search text is kept
-// short on purpose (title, summary, category): the whole body would bloat the page.
+// Card of the article lists (Figma: picture, serif blue title, summary, "Explore more").
 interface Props {
   article: PublicArticle;
 }
 
 const { article } = Astro.props;
-const search = [article.title, article.excerpt, article.category?.name]
-  .filter(Boolean)
-  .join(' ')
-  .toLowerCase();
 ---
 
-<article
-  class="card article"
-  data-article
-  data-search={search}
-  data-category={article.category?.slug ?? ''}
->
+<article class="card article">
   {article.cover && (
     <ProfileImage
       class="card__media article__img"

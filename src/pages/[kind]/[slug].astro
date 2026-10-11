@@ -1,0 +1,29 @@
+---
+import ArticlePage from '../../components/articles/ArticlePage.astro';
+import { ARTICLE_SEGMENTS } from '../../data/article-lists';
+import { relatedArticles } from '../../lib/cms/articles';
+import { getArticles, type PublicArticle } from '../../lib/content';
+
+export const prerender = true;
+
+// One page per published article, built from the snapshot. No articles published: no pages. Related articles
+// are chosen across both kinds (a travel article can lead to a dental one and the other way round).
+export async function getStaticPaths() {
+  const lists = await Promise.all(ARTICLE_SEGMENTS.map(([, kind]) => getArticles(kind)));
+  const all = lists.flat();
+  return ARTICLE_SEGMENTS.flatMap(([segment], i) =>
+    lists[i].map((article) => ({
+      params: { kind: segment, slug: article.slug },
+      props: { article, related: relatedArticles(article, all) },
+    })),
+  );
+}
+
+interface Props {
+  article: PublicArticle;
+  related: PublicArticle[];
+}
+const { article, related } = Astro.props;
+---
+
+<ArticlePage article={article} related={related} />

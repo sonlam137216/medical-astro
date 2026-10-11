@@ -1,12 +1,16 @@
 ---
 import type { Block } from '../../lib/cms/articles';
+import type { PublicImage } from '../../lib/media';
+import ProfileImage from '../ProfileImage.astro';
 
 // Renders the parsed article body. The parser returns data, never HTML, so every piece of text goes through
 // Astro's escaping and the only attributes built from the body are the safe link targets it already vetted.
 interface Props {
   blocks: Block[];
+  /** Pictures placed in the text, by media id. A picture that is not here (deleted) is left out. */
+  images?: Record<string, PublicImage>;
 }
-const { blocks } = Astro.props;
+const { blocks, images = {} } = Astro.props;
 const external = (href: string) => /^https?:\/\//i.test(href);
 ---
 
@@ -31,6 +35,20 @@ const external = (href: string) => /^https?:\/\//i.test(href);
           )}
         </p>
       );
+    }
+    if (b.type === 'image') {
+      const image = images[b.id];
+      return image ? (
+        <figure>
+          <ProfileImage
+            image={image}
+            width={800}
+            height={450}
+            sizes="(max-width: 960px) 100vw, 680px"
+          />
+          {b.caption && <figcaption>{b.caption}</figcaption>}
+        </figure>
+      ) : null;
     }
     if (b.type === 'quote') {
       return (
@@ -109,6 +127,25 @@ const external = (href: string) => /^https?:\/\//i.test(href);
     margin: 0;
     padding: 4px 0 4px 20px;
     border-left: 3px solid var(--color-border);
+    color: var(--color-muted);
+  }
+
+  .body :global(figure) {
+    display: grid;
+    gap: 8px;
+    margin: 8px 0;
+  }
+
+  .body :global(figure img) {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: var(--radius-card);
+  }
+
+  .body :global(figcaption) {
+    font-size: var(--text-small);
+    line-height: var(--text-small-lh);
     color: var(--color-muted);
   }
 

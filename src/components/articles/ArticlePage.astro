@@ -6,6 +6,7 @@ import ArticleBody from './ArticleBody.astro';
 import SidebarConsultation from '../SidebarConsultation.astro';
 import {
   ARTICLE_BASE_PATH,
+  categoryBasePath,
   formatArticleDate,
   parseArticleBody,
   tableOfContents,
@@ -17,26 +18,17 @@ import { getServiceLinks } from '../../lib/site-content';
 // related articles, and a sidebar with the services and a consultation form.
 interface Props {
   article: PublicArticle;
-  all: PublicArticle[];
+  /** Chosen by the route (relatedArticles): same category first, then the same kind, then the other kind. */
+  related: PublicArticle[];
 }
 
-const { article, all } = Astro.props;
+const { article, related } = Astro.props;
 const serviceLinks = await getServiceLinks();
 const blocks = parseArticleBody(article.body);
 const toc = tableOfContents(blocks);
 const listLabel = article.kind === 'travel_guide' ? 'Dental Travel Guide' : 'Dental Knowledge';
 const updated = formatArticleDate(article.updatedOn ?? article.publishedOn);
 const reviewed = formatArticleDate(article.reviewedOn);
-
-// Same category first, then the newest. The list is already newest first.
-const related = all
-  .filter((a) => a.slug !== article.slug)
-  .sort(
-    (a, b) =>
-      Number(b.category?.slug === article.category?.slug && b.category !== null) -
-      Number(a.category?.slug === article.category?.slug && a.category !== null),
-  )
-  .slice(0, 4);
 
 const title = article.seoTitle || `${article.title} · Melatec Dental Clinic`;
 const description = article.seoDescription || article.excerpt || undefined;
@@ -54,6 +46,13 @@ const description = article.seoDescription || article.excerpt || undefined;
             <li>
               <a href={ARTICLE_BASE_PATH[article.kind]}>{listLabel}</a>
             </li>
+            {article.category && (
+              <li>
+                <a href={categoryBasePath(article.kind, article.category.slug)}>
+                  {article.category.name}
+                </a>
+              </li>
+            )}
             <li aria-current="page">{article.title}</li>
           </ol>
         </nav>
@@ -94,7 +93,7 @@ const description = article.seoDescription || article.excerpt || undefined;
           </details>
         )}
 
-        <ArticleBody blocks={blocks} />
+        <ArticleBody blocks={blocks} images={article.bodyImages} />
 
         {article.reviewedBy && (
           <div class="review">

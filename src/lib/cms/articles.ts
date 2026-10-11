@@ -19,6 +19,71 @@ export const ARTICLE_BASE_PATH: Record<ArticleKind, string> = {
 export const articlePath = (kind: ArticleKind, slug: string) =>
   `${ARTICLE_BASE_PATH[kind]}/${slug}`;
 
+/**
+ * Words an article address (slug) cannot use: they are the folders of the list pages
+ * (`/travel-guide/page/2`, `/travel-guide/category/<name>`), so an article with that slug would never be reached.
+ */
+export const RESERVED_ARTICLE_SLUGS = ['page', 'category', 'search'];
+
+/**
+ * The redirect to add when an already published article changes address (a new slug, or the other kind), so old
+ * links keep working. Null when nothing moved, or the article was not live before or is not live after.
+ */
+export function movedArticleRedirect(
+  before: { kind: string; slug: string; isVisible: boolean },
+  after: { kind: string; slug: string; isVisible: boolean },
+): { from: string; to: string } | null {
+  // An article that is switched off in the same save has no new page to point to.
+  if (
+    !before.isVisible ||
+    !after.isVisible ||
+    !isArticleKind(before.kind) ||
+    !isArticleKind(after.kind)
+  )
+    return null;
+  const from = articlePath(before.kind, before.slug);
+  const to = articlePath(after.kind, after.slug);
+  return from === to ? null : { from, to };
+}
+
+// ---------------------------------------------------------------------------
+// List pages: pagination and categories (WordPress-style archives, all built at build time)
+// ---------------------------------------------------------------------------
+export const ARTICLES_PER_PAGE = 9;
+
+/** `/travel-guide`, `/travel-guide/page/2`; the same under a category folder. */
+export const listPagePath = (base: string, page: number) =>
+  page <= 1 ? base : `${base}/page/${page}`;
+
+export const categoryBasePath = (kind: ArticleKind, categorySlug: string) =>
+  `${ARTICLE_BASE_PATH[kind]}/category/${categorySlug}`;
+
+export function paginate<T>(items: T[], page: number, size = ARTICLES_PER_PAGE) {
+  const totalPages = Math.max(1, Math.ceil(items.length / size));
+  const current = Math.min(Math.max(1, Math.floor(page) || 1), totalPages);
+  return { items: items.slice((current - 1) * size, current * size), page: current, totalPages };
+}
+
+/**
+ * Articles worth reading next: the same kind and category first, then the same kind, then the other kind
+ * (a travel article can point to a dental one and the other way round). The input is already newest first and
+ * the sort is stable, so ties stay newest first.
+ */
+export function relatedArticles<
+  T extends { slug: string; kind: string; category: { slug: string } | null },
+>(current: T, all: T[], limit = 4): T[] {
+  const score = (a: T) => {
+    const sameKind = a.kind === current.kind;
+    const sameCategory =
+      sameKind && a.category !== null && a.category.slug === current.category?.slug;
+    return (sameKind ? 2 : 0) + (sameCategory ? 1 : 0);
+  };
+  return all
+    .filter((a) => !(a.slug === current.slug && a.kind === current.kind))
+    .sort((a, b) => score(b) - score(a))
+    .slice(0, limit);
+}
+
 export const MAX_ARTICLE_BODY = 60_000;
 
 // ---------------------------------------------------------------------------
@@ -34,6 +99,8 @@ export const MAX_ARTICLE_BODY = 60_000;
 //   > text              quote
 //   **bold**            bold text
 //   [text](https://…)   link (a page on this site starting with /, https://, http://, mailto: or tel:)
+//   ![caption](media:<id>)   a picture from the Media library, alone on its line (the caption may be empty;
+//                            the description for screen readers comes from the Media library)
 //
 // A blank line starts a new paragraph.
 
@@ -48,8 +115,12 @@ export type Block =
   | { type: 'heading'; level: 2 | 3; id: string; text: string }
   | { type: 'paragraph'; children: Inline[] }
   | { type: 'list'; ordered: boolean; items: Inline[][] }
-  | { type: 'quote'; children: Inline[] };
+  | { type: 'quote'; children: Inline[] }
+  /** A picture of the media library; the page looks `id` up in the published images of the article. */
+  | { type: 'image'; id: string; caption: string };
 
+const IMAGE_LINE =
+  /^!\[([^\]]{0,200})\]\(media:([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\)$/;
 const SAFE_HREF = /^(\/|https:\/\/|http:\/\/|mailto:|tel:|#)[^\s]*$/i;
 // The link target may hold one level of parentheses, e.g. https://example.com/page_(info).
 const INLINE = /\*\*([^*]+)\*\*|\[([^\]]+)\]\(((?:[^()\s]|\([^()\s]*\))+)\)/g;
@@ -113,11 +184,16 @@ export function parseArticleBody(source: string | null | undefined): Block[] {
       flushList();
       continue;
     }
+    const image = IMAGE_LINE.exec(line);
     const heading = /^(#{1,3})\s+(.+)$/.exec(line);
     const bullet = /^[-*]\s+(.+)$/.exec(line);
     const numbered = /^\d+[.)]\s+(.+)$/.exec(line);
     const quote = /^>\s?(.*)$/.exec(line);
-    if (heading) {
+    if (image) {
+      flushParagraph();
+      flushList();
+      blocks.push({ type: 'image', id: image[2], caption: image[1].trim() });
+    } else if (heading) {
       flushParagraph();
       flushList();
       // A single # is treated as a section heading: the page title already is the h1.
@@ -150,15 +226,22 @@ export const tableOfContents = (blocks: Block[]) =>
     b.type === 'heading' && b.level === 2 ? [{ id: b.id, text: b.text }] : [],
   );
 
+/** Ids of the pictures used in a body, each once. */
+export const bodyImageIds = (blocks: Block[]) => [
+  ...new Set(blocks.flatMap((b) => (b.type === 'image' ? [b.id] : []))),
+];
+
 /** Plain text of a body (for search): no markers, no links. */
 export function bodyPlainText(blocks: Block[]): string {
   const inline = (parts: Inline[]) => parts.map((p) => p.text).join('');
   return blocks
     .map((b) => {
       if (b.type === 'heading') return b.text;
+      if (b.type === 'image') return b.caption;
       if (b.type === 'list') return b.items.map(inline).join(' ');
       return inline(b.children);
     })
+    .filter((text) => text !== '')
     .join(' ');
 }
 
@@ -167,6 +250,8 @@ export function bodyPlainText(blocks: Block[]): string {
 // ---------------------------------------------------------------------------
 export interface ArticleCheckInput {
   kind: string;
+  /** Address name; checked only when given. */
+  slug?: string;
   isVisible: boolean;
   title: string;
   excerpt: string | null;
@@ -187,6 +272,9 @@ export interface ArticleCheckInput {
 export function articleProblems(i: ArticleCheckInput): Record<string, string> {
   const errors: Record<string, string> = {};
   if (!isArticleKind(i.kind)) errors.kind = 'Please choose the kind of article.';
+  if (i.slug !== undefined && RESERVED_ARTICLE_SLUGS.includes(i.slug)) {
+    errors.slug = `“${i.slug}” is used by the list pages. Please choose a different address name.`;
+  }
   if (i.categoryKind && i.categoryKind !== i.kind) {
     errors.category_id = 'This category belongs to the other kind of article. Choose another one.';
   }

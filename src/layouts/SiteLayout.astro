@@ -43,6 +43,7 @@ const {
 
 <!-- noindex stays on until launch (Phase 7 replaces this with per-environment robots handling) -->
 <BaseLayout title={title} description={description} noindex mediaOrigin={getMediaOrigin()}>
+  <slot name="head" slot="head" />
   <a class="skip-link visually-hidden" href="#main">
     Skip to content
   </a>

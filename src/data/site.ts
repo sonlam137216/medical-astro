@@ -48,6 +48,7 @@ export const footerExplore: NavLink[] = [
   { label: 'About Us', href: '/about' },
   { label: 'Dental Packages', href: '/dental-packages' },
   { label: 'Dental Travel Guide', href: '/travel-guide' },
+  { label: 'Dental Knowledge', href: '/dental-knowledge' },
   { label: 'Contact', href: '#consultation' },
 ];
 

@@ -1,7 +1,15 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
+  ARTICLES_PER_PAGE,
+  RESERVED_ARTICLE_SLUGS,
   articlePath,
+  bodyImageIds,
+  categoryBasePath,
+  listPagePath,
+  movedArticleRedirect,
+  paginate,
+  relatedArticles,
   formatArticleDate,
   articleProblems,
   bodyPlainText,
@@ -328,4 +336,206 @@ test('article audit rows never carry the body text', async () => {
   }[];
   assert.ok(rows.length > 0);
   assert.ok(rows.every((r) => !String(r.changes).includes('SECRET BODY TEXT')));
+});
+
+// ---- pictures in the text --------------------------------------------------------------------------------
+const PIC = '3f2b8c1e-7a4d-4b6e-9c10-2d5e8f7a9b01';
+
+test('a picture line becomes an image block; anything else with that shape stays text', () => {
+  const blocks = parseArticleBody(`Intro\n\n![Hoi An at night](media:${PIC})\n\n![](media:${PIC})`);
+  assert.deepEqual(
+    blocks.map((b) => b.type),
+    ['paragraph', 'image', 'image'],
+  );
+  assert.deepEqual(blocks[1], { type: 'image', id: PIC, caption: 'Hoi An at night' });
+  assert.deepEqual(blocks[2], { type: 'image', id: PIC, caption: '' });
+  assert.deepEqual(bodyImageIds(blocks), [PIC]);
+  // Not a media id, or sitting inside a sentence: ordinary text, never a request for a file.
+  for (const line of [
+    '![x](https://example.com/a.png)',
+    '![x](media:not-an-id)',
+    `text ![x](media:${PIC}) more`,
+  ]) {
+    assert.deepEqual(
+      parseArticleBody(line).map((b) => b.type),
+      ['paragraph'],
+      line,
+    );
+  }
+  assert.equal(bodyPlainText(blocks), 'Intro Hoi An at night');
+});
+
+// ---- list pages ------------------------------------------------------------------------------------------
+test('pagination clamps the page and reports the total', () => {
+  const items = Array.from({ length: 20 }, (_, i) => i);
+  const first = paginate(items, 1, 9);
+  assert.deepEqual(first, { items: items.slice(0, 9), page: 1, totalPages: 3 });
+  assert.deepEqual(paginate(items, 3, 9).items, [18, 19]);
+  assert.equal(paginate(items, 99, 9).page, 3);
+  assert.equal(paginate(items, -4, 9).page, 1);
+  assert.equal(paginate(items, Number.NaN, 9).page, 1);
+  assert.deepEqual(paginate([], 1), { items: [], page: 1, totalPages: 1 });
+  assert.equal(ARTICLES_PER_PAGE, 9);
+});
+
+test('list addresses: page 1 is the folder itself', () => {
+  assert.equal(listPagePath('/travel-guide', 1), '/travel-guide');
+  assert.equal(listPagePath('/travel-guide', 3), '/travel-guide/page/3');
+  const category = categoryBasePath('dental_knowledge', 'implants');
+  assert.equal(category, '/dental-knowledge/category/implants');
+  assert.equal(listPagePath(category, 2), '/dental-knowledge/category/implants/page/2');
+});
+
+test('the words used by list pages cannot be article addresses', () => {
+  for (const slug of RESERVED_ARTICLE_SLUGS) {
+    assert.ok(articleProblems({ ...complete, slug }).slug, slug);
+    assert.ok(articleProblems({ ...complete, slug, isVisible: false }).slug, `${slug} (draft)`);
+  }
+  assert.deepEqual(articleProblems({ ...complete, slug: 'page-two' }), {});
+  assert.deepEqual(articleProblems({ ...complete, slug: 'da-nang' }), {});
+});
+
+test('related articles: same category, then same kind, then the other kind', () => {
+  const make = (slug: string, kind: string, category: string | null) => ({
+    slug,
+    kind,
+    category: category ? { slug: category } : null,
+  });
+  const current = make('now', 'dental_knowledge', 'implants');
+  const all = [
+    make('travel', 'travel_guide', 'implants'), // same category slug, other kind: does not count as same category
+    make('other', 'dental_knowledge', 'veneers'),
+    make('same', 'dental_knowledge', 'implants'),
+    make('now', 'dental_knowledge', 'implants'), // itself
+    make('plain', 'dental_knowledge', null),
+  ];
+  assert.deepEqual(
+    relatedArticles(current, all).map((a) => a.slug),
+    ['same', 'other', 'plain', 'travel'],
+  );
+  assert.deepEqual(
+    relatedArticles(current, all, 2).map((a) => a.slug),
+    ['same', 'other'],
+  );
+  assert.deepEqual(relatedArticles(current, [make('now', 'dental_knowledge', null)]), []);
+});
+
+test('a published article that moves gets a redirect from its old address', () => {
+  const before = { kind: 'travel_guide', slug: 'old', isVisible: true };
+  assert.deepEqual(
+    movedArticleRedirect(before, { kind: 'travel_guide', slug: 'new', isVisible: true }),
+    {
+      from: '/travel-guide/old',
+      to: '/travel-guide/new',
+    },
+  );
+  assert.deepEqual(
+    movedArticleRedirect(before, { kind: 'dental_knowledge', slug: 'old', isVisible: true }),
+    { from: '/travel-guide/old', to: '/dental-knowledge/old' },
+  );
+  // Nothing moved, a draft never had a live address, and a page that is switched off has nowhere to go.
+  assert.equal(
+    movedArticleRedirect(before, { kind: 'travel_guide', slug: 'old', isVisible: true }),
+    null,
+  );
+  assert.equal(
+    movedArticleRedirect(
+      { ...before, isVisible: false },
+      { kind: 'travel_guide', slug: 'new', isVisible: true },
+    ),
+    null,
+  );
+  assert.equal(
+    movedArticleRedirect(before, { kind: 'travel_guide', slug: 'new', isVisible: false }),
+    null,
+  );
+});
+
+// ---- snapshot: pictures and category text ----------------------------------------------------------------
+const insertImage = (
+  raw: ReturnType<typeof testDb>['raw'],
+  id: string,
+  o: Record<string, unknown> = {},
+) => {
+  const row = {
+    id,
+    r2_key: `media/${id}/v1/480.webp`,
+    kind: 'image',
+    mime_type: 'image/webp',
+    size_bytes: 1,
+    width: 480,
+    height: 300,
+    variant_widths: '[480]',
+    alt_text: 'A beach',
+    ...o,
+  };
+  const cols = Object.keys(row);
+  raw
+    .prepare(
+      `INSERT INTO media_assets (${cols.join(', ')}) VALUES (${cols.map(() => '?').join(', ')})`,
+    )
+    .run(...(Object.values(row) as never[]));
+};
+
+test('pictures placed in the text travel with the snapshot', async () => {
+  const { raw, db } = setup();
+  insertImage(raw, PIC);
+  insertArticle(raw, {
+    slug: 'pics',
+    title: 'With pictures',
+    body: `## H\n\n![Sand](media:${PIC})`,
+  });
+  const snapshot = await buildSnapshot(db);
+  const article = snapshot.articles?.[0];
+  assert.equal(article?.bodyImages?.[PIC]?.key, `media/${PIC}/v1/480.webp`);
+  assert.equal(article?.bodyImages?.[PIC]?.alt, 'A beach');
+  assert.equal(isSnapshot(JSON.parse(JSON.stringify(snapshot))), true);
+  assert.deepEqual(snapshotProblems(snapshot), []);
+});
+
+test('a missing or undescribed picture in the text blocks publishing', async () => {
+  const { raw, db } = setup();
+  const noAlt = '11111111-1111-4111-8111-111111111111';
+  const gone = '22222222-2222-4222-8222-222222222222';
+  insertImage(raw, noAlt, { alt_text: null });
+  insertArticle(raw, {
+    slug: 'a',
+    title: 'Undescribed',
+    body: `## H\n\n![](media:${noAlt})`,
+  });
+  insertArticle(raw, { slug: 'b', title: 'Gone', body: `## H\n\n![](media:${gone})` });
+  const problems = snapshotProblems(await buildSnapshot(db));
+  assert.ok(problems.some((p) => p.includes('Undescribed') && p.includes('no description')));
+  assert.ok(problems.some((p) => p.includes('Gone') && p.includes('no longer in Media')));
+});
+
+test('an article with a reserved address blocks publishing', async () => {
+  const { raw, db } = setup();
+  insertArticle(raw, { slug: 'page', title: 'Sneaky' });
+  assert.ok(snapshotProblems(await buildSnapshot(db)).some((p) => p.includes('Sneaky')));
+});
+
+test('the category description reaches the snapshot', async () => {
+  const { raw, db } = setup();
+  raw
+    .prepare(
+      "INSERT INTO article_categories (id, slug, kind, name, description) VALUES ('c1', 'implants', 'dental_knowledge', 'Implants', 'All about implants')",
+    )
+    .run();
+  insertArticle(raw, {
+    slug: 'x',
+    kind: 'dental_knowledge',
+    category_id: 'c1',
+    reviewed_by: 'Team',
+  });
+  const snapshot = await buildSnapshot(db);
+  assert.equal(snapshot.articleCategories?.[0].description, 'All about implants');
+  assert.match(
+    failure(
+      raw,
+      "INSERT INTO article_categories (slug, kind, name, description) VALUES ('long', 'travel_guide', 'x', ?)",
+      'x'.repeat(501),
+    ),
+    /CHECK/,
+  );
 });

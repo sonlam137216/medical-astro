@@ -1,0 +1,21 @@
+---
+import ArticleListPage from '../../../../../components/articles/ArticleListPage.astro';
+import { listTargets } from '../../../../../lib/article-lists';
+
+export const prerender = true;
+
+// /dental-knowledge/category/<slug>/page/2 …
+export async function getStaticPaths() {
+  const targets = await listTargets({ categories: true, firstPages: false });
+  return targets
+    .filter((t) => t.category)
+    .map((t) => ({
+      params: { kind: t.segment, category: t.category as string, page: String(t.page) },
+      props: { kind: t.kind, category: t.category as string, page: t.page },
+    }));
+}
+
+const { kind, category, page } = Astro.props;
+---
+
+<ArticleListPage {kind} {category} {page} />

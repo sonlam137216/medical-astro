@@ -1,0 +1,21 @@
+---
+import ArticleListPage from '../../../../components/articles/ArticleListPage.astro';
+import { listTargets } from '../../../../lib/article-lists';
+
+export const prerender = true;
+
+// /dental-knowledge/category/<slug>: page 1 of a category that has articles.
+export async function getStaticPaths() {
+  const targets = await listTargets({ categories: true, firstPages: true });
+  return targets
+    .filter((t) => t.page === 1 && t.category)
+    .map((t) => ({
+      params: { kind: t.segment, category: t.category as string },
+      props: { kind: t.kind, category: t.category as string },
+    }));
+}
+
+const { kind, category } = Astro.props;
+---
+
+<ArticleListPage {kind} {category} page={1} />

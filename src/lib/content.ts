@@ -389,6 +389,8 @@ export interface PublicArticle {
   /** Source text in the format of src/lib/cms/articles.ts; render it with parseArticleBody. */
   body: string | null;
   cover: PublicImage | null;
+  /** Pictures placed in the body (`![caption](media:<id>)`), by media id. */
+  bodyImages: Record<string, PublicImage>;
   category: { slug: string; name: string } | null;
   author: string | null;
   reviewedBy: string | null;
@@ -430,6 +432,12 @@ export async function getArticles(kind: ArticleKind): Promise<PublicArticle[]> {
             publicBase,
           )) ||
         null,
+      bodyImages: Object.fromEntries(
+        Object.entries(a.bodyImages ?? {}).flatMap(([id, image]) => {
+          const photo = toPublicImageOrUndefined(image);
+          return photo ? [[id, photo] as const] : [];
+        }),
+      ),
       category:
         a.category && categories.has(a.category)
           ? { slug: a.category, name: categories.get(a.category) as string }
@@ -444,14 +452,14 @@ export async function getArticles(kind: ArticleKind): Promise<PublicArticle[]> {
     }));
 }
 
-/** Categories (filters) of one kind that are shown, in display order. */
+/** Categories of one kind that are shown, in display order (each has its own list page). */
 export async function getArticleCategories(
   kind: ArticleKind,
-): Promise<{ slug: string; name: string }[]> {
+): Promise<{ slug: string; name: string; description: string | null }[]> {
   const snapshot = await loadSnapshot();
   return (snapshot?.articleCategories ?? [])
     .filter((c) => c.kind === kind)
-    .map((c) => ({ slug: c.slug, name: c.name }));
+    .map((c) => ({ slug: c.slug, name: c.name, description: c.description ?? null }));
 }
 
 /** True before the first publish (or without database credentials): pages then use the built-in sample content. */

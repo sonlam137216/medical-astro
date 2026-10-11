@@ -7,6 +7,7 @@ import ServiceCard from '../../components/cards/ServiceCard.astro';
 import CtaBand from '../../components/CtaBand.astro';
 import TourismSupport from '../../components/TourismSupport.astro';
 import SeamlessJourney from '../../components/SeamlessJourney.astro';
+import LatestArticles from '../../components/articles/LatestArticles.astro';
 import { towerImage } from '../../data/shared';
 import { getSection, getServices } from '../../lib/content';
 
@@ -46,6 +47,8 @@ const seo = await getPageSeo('/services', {
       ))}
     </ul>
   </Section>
+
+  <LatestArticles />
 
   <CtaBand
     actions={[

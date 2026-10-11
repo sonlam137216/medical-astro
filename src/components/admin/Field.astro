@@ -116,81 +116,167 @@ const slotsFor = (f: Extract<Field, { type: 'items' }>) => {
   </label>
 )}
 
-{f.type !== 'bool' && f.type !== 'image' && f.type !== 'money' && f.type !== 'items' && (
-  <label>
-    {f.label}
-    {(f.type === 'text' ||
-      f.type === 'url' ||
-      f.type === 'path' ||
-      f.type === 'email' ||
-      f.type === 'weburl') && (
-      <input
-        name={f.name}
-        value={text(f.name)}
-        maxlength={'max' in f ? f.max : 200}
-        placeholder={'placeholder' in f ? f.placeholder : undefined}
-        required={f.required}
-        readonly={f.readonly}
-        type={f.type === 'email' ? 'email' : 'text'}
-        aria-invalid={invalid(f.name)}
-      />
-    )}
-    {f.type === 'slug' && (
-      <input
-        name={f.name}
-        value={text(f.name)}
-        maxlength="100"
-        placeholder={f.from ? 'Leave empty to create it from the name' : 'lowercase-with-hyphens'}
-        required={f.required}
-        aria-invalid={invalid(f.name)}
-      />
-    )}
-    {f.type === 'textarea' && <textarea
+{f.type === 'textarea' && f.editor === 'article' && (
+  <div class="admin-rte" data-article-editor>
+    <label class="admin-rte__label" for={`field-${f.name}`}>
+      {f.label}
+    </label>
+    <div class="admin-rte__bar" role="toolbar" aria-label="Text formatting" data-rte-tools hidden>
+      <button type="button" data-tool="h2" title="Section heading">
+        H2
+      </button>
+      <button type="button" data-tool="h3" title="Smaller heading">
+        H3
+      </button>
+      <button type="button" data-tool="bold" title="Bold">
+        <strong>B</strong>
+      </button>
+      <button type="button" data-tool="ul" title="Bullet list">
+        • List
+      </button>
+      <button type="button" data-tool="ol" title="Numbered list">
+        1. List
+      </button>
+      <button type="button" data-tool="quote" title="Quote">
+        “ Quote
+      </button>
+      <button type="button" data-tool="link" title="Link">
+        Link
+      </button>
+      <button type="button" data-tool="image" title="Picture from Media">
+        Picture
+      </button>
+      <span class="admin-rte__tabs" role="tablist" aria-label="View">
+        <button type="button" role="tab" data-view="write" aria-selected="true">
+          Write
+        </button>
+        <button type="button" role="tab" data-view="preview" aria-selected="false">
+          Preview
+        </button>
+      </span>
+    </div>
+    <textarea
+      id={`field-${f.name}`}
       name={f.name}
-      rows={f.rows ?? 5}
+      rows={f.rows ?? 20}
       maxlength={f.max}
       aria-invalid={invalid(f.name)}
-    >{text(f.name)}</textarea>}
-    {f.type === 'lines' && <textarea
-      name={f.name}
-      rows="5"
-      aria-invalid={invalid(f.name)}
-    >{text(f.name)}</textarea>}
-    {f.type === 'int' && (
-      <input
-        name={f.name}
-        type="number"
-        min={f.min}
-        max={f.max}
-        value={text(f.name)}
-        aria-invalid={invalid(f.name)}
-      />
-    )}
-    {f.type === 'date' && (
-      <input name={f.name} type="date" value={text(f.name)} aria-invalid={invalid(f.name)} />
-    )}
-    {f.type === 'select' && (
-      <select name={f.name} aria-invalid={invalid(f.name)}>
-        {f.options.map(([value, label]) => (
-          <option value={value} selected={text(f.name) === value}>
-            {label}
-          </option>
-        ))}
-      </select>
-    )}
-    {f.type === 'ref' && (
-      <select name={f.name} aria-invalid={invalid(f.name)}>
-        <option value="" selected={text(f.name) === ''}>
-          None
-        </option>
-        {(options.refs[f.name] ?? []).map((o) => (
-          <option value={o.value} selected={text(f.name) === o.value}>
-            {o.label}
-          </option>
-        ))}
-      </select>
-    )}
+      data-rte-text
+    >{text(f.name)}</textarea>
+    <div class="admin-rte__preview article-preview" data-rte-preview hidden></div>
+    <dialog class="admin-rte__pictures" data-rte-pictures aria-label="Choose a picture">
+      <!-- A div, not a form: this sits inside the article form, and forms cannot be nested. -->
+      <div class="admin-rte__pictures-body">
+        <p>
+          <strong>Choose a picture</strong>
+        </p>
+        {options.images.length === 0 && (
+          <p class="admin-hint">
+            No pictures yet. Upload them in <a href="/admin/media">Media</a> first.
+          </p>
+        )}
+        <div class="admin-picker">
+          {options.images.map((img) => (
+            <button type="button" data-picture={img.id} data-thumb={img.thumb}>
+              <img src={img.thumb} alt="" loading="lazy" />
+              <span>{img.label}</span>
+            </button>
+          ))}
+        </div>
+        <button class="admin-btn admin-btn--ghost" type="button" data-rte-cancel>
+          Cancel
+        </button>
+      </div>
+    </dialog>
     {f.help && <span class="admin-hint">{f.help}</span>}
     {error && <span class="admin-field-error">{error}</span>}
-  </label>
+  </div>
 )}
+
+{!(f.type === 'textarea' && f.editor) &&
+  f.type !== 'bool' &&
+  f.type !== 'image' &&
+  f.type !== 'money' &&
+  f.type !== 'items' && (
+    <label>
+      {f.label}
+      {(f.type === 'text' ||
+        f.type === 'url' ||
+        f.type === 'path' ||
+        f.type === 'email' ||
+        f.type === 'weburl') && (
+        <input
+          name={f.name}
+          value={text(f.name)}
+          maxlength={'max' in f ? f.max : 200}
+          placeholder={'placeholder' in f ? f.placeholder : undefined}
+          required={f.required}
+          readonly={f.readonly}
+          type={f.type === 'email' ? 'email' : 'text'}
+          aria-invalid={invalid(f.name)}
+        />
+      )}
+      {f.type === 'slug' && (
+        <input
+          name={f.name}
+          value={text(f.name)}
+          maxlength="100"
+          placeholder={f.from ? 'Leave empty to create it from the name' : 'lowercase-with-hyphens'}
+          required={f.required}
+          aria-invalid={invalid(f.name)}
+        />
+      )}
+      {f.type === 'textarea' && <textarea
+        name={f.name}
+        rows={f.rows ?? 5}
+        maxlength={f.max}
+        aria-invalid={invalid(f.name)}
+      >{text(f.name)}</textarea>}
+      {f.type === 'lines' && <textarea
+        name={f.name}
+        rows="5"
+        aria-invalid={invalid(f.name)}
+      >{text(f.name)}</textarea>}
+      {f.type === 'int' && (
+        <input
+          name={f.name}
+          type="number"
+          min={f.min}
+          max={f.max}
+          value={text(f.name)}
+          aria-invalid={invalid(f.name)}
+        />
+      )}
+      {f.type === 'date' && (
+        <input name={f.name} type="date" value={text(f.name)} aria-invalid={invalid(f.name)} />
+      )}
+      {f.type === 'select' && (
+        <select name={f.name} aria-invalid={invalid(f.name)}>
+          {f.options.map(([value, label]) => (
+            <option value={value} selected={text(f.name) === value}>
+              {label}
+            </option>
+          ))}
+        </select>
+      )}
+      {f.type === 'ref' && (
+        <select name={f.name} aria-invalid={invalid(f.name)}>
+          <option value="" selected={text(f.name) === ''}>
+            None
+          </option>
+          {(options.refs[f.name] ?? []).map((o) => (
+            <option value={o.value} selected={text(f.name) === o.value}>
+              {o.label}
+            </option>
+          ))}
+        </select>
+      )}
+      {f.help && <span class="admin-hint">{f.help}</span>}
+      {error && <span class="admin-field-error">{error}</span>}
+    </label>
+  )}
+
+<script>
+  // The article writing tools are loaded only on pages that have them.
+  if (document.querySelector('[data-article-editor]')) void import('../../scripts/article-editor');
+</script>

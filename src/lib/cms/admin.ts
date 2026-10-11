@@ -2,7 +2,7 @@ import type { AdminDb } from '../admin-auth';
 import { isSameOrigin } from '../admin-auth';
 import { readBodyLimited } from '../consultation';
 import { listPickerImages, type PickerImage } from '../media-picker';
-import { articleProblems } from './articles';
+import { articleProblems, movedArticleRedirect } from './articles';
 import type { EntityDef } from './entities';
 import {
   emptyValues,
@@ -107,6 +107,9 @@ export async function processPost(
   const row: Row = { ...parsed.value };
   if (typeof row.status_code === 'string') row.status_code = Number(row.status_code);
 
+  // Where a published article lived before this save: if the save moves it, the old address gets a redirect.
+  const before = def.key === 'articles' && id !== null ? await loadRow(db, def, id) : null;
+
   const table = anyDb(db).from(def.table);
   const { data, error } = await (id === null
     ? table.insert(row).select('id')
@@ -147,7 +150,35 @@ export async function processPost(
   if (!data || data.length === 0) {
     return { status: 404, values, errors: {}, formError: 'This item no longer exists.' };
   }
+  if (before) await redirectMovedArticle(db, before, row);
   return { redirect: redirectTo(`/admin/content/${def.key}?saved=1`) };
+}
+
+/**
+ * A published article whose address changes (new slug, or moved to the other kind) would leave old links dead:
+ * add a redirect from the old address to the new one. Also removes a redirect that starts at the new address (an
+ * article moved back), which would otherwise loop. Best effort: a failure here never loses the saved article.
+ */
+async function redirectMovedArticle(db: AdminDb, before: Row, after: Row) {
+  const moved = movedArticleRedirect(
+    { kind: String(before.kind), slug: String(before.slug), isVisible: before.is_visible === true },
+    { kind: String(after.kind), slug: String(after.slug), isVisible: after.is_visible === true },
+  );
+  if (!moved) return;
+  try {
+    await anyDb(db).from('redirects').delete().eq('from_path', moved.to);
+    const { error } = await anyDb(db)
+      .from('redirects')
+      .insert({ from_path: moved.from, to_path: moved.to, status_code: 301 });
+    if (error?.code === '23505') {
+      await anyDb(db)
+        .from('redirects')
+        .update({ to_path: moved.to, status_code: 301 })
+        .eq('from_path', moved.from);
+    }
+  } catch {
+    console.error('article redirect failed');
+  }
 }
 
 /** Rules that span fields or tables (see articleProblems), run before an article is saved. */
@@ -165,6 +196,7 @@ async function checkArticle(db: AdminDb, value: Row): Promise<FieldErrors> {
   }
   return articleProblems({
     kind: String(value.kind ?? ''),
+    slug: typeof value.slug === 'string' ? value.slug : undefined,
     isVisible: value.is_visible === true,
     title: String(value.title ?? ''),
     excerpt: (value.excerpt as string | null) ?? null,

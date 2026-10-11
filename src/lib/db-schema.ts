@@ -7,6 +7,7 @@ export interface Tables {
   article_categories: {
     Row: {
       created_at: string;
+      description: string | null;
       id: string;
       is_visible: boolean;
       kind: string;
@@ -17,6 +18,7 @@ export interface Tables {
     };
     Insert: {
       created_at?: string;
+      description?: string | null;
       id?: string;
       is_visible?: boolean;
       kind: string;

@@ -1,0 +1,101 @@
+---
+import AdminLayout from '../../../../layouts/AdminLayout.astro';
+import { ARTICLE_KINDS, categoryBasePath, isArticleKind } from '../../../../lib/cms/articles';
+import { entityByKey } from '../../../../lib/cms/entities';
+
+export const prerender = false;
+
+// Same list as the other content types, plus how many articles each category holds (published / all).
+const def = entityByKey('article-categories');
+if (!def) return new Response('Not found', { status: 404 });
+
+const sp = Astro.url.searchParams;
+const db = Astro.locals.db;
+const [{ data: categories, error }, { data: articles }] = await Promise.all([
+  db
+    .from('article_categories')
+    .select('id, name, slug, kind, sort_order, is_visible')
+    .order('kind')
+    .order('sort_order')
+    .order('name'),
+  db.from('articles').select('category_id, is_visible'),
+]);
+const counts = new Map<string, { all: number; published: number }>();
+for (const a of articles ?? []) {
+  if (!a.category_id) continue;
+  const c = counts.get(a.category_id) ?? { all: 0, published: 0 };
+  c.all++;
+  if (a.is_visible) c.published++;
+  counts.set(a.category_id, c);
+}
+const kindLabel = (k: string) => ARTICLE_KINDS.find(([key]) => key === k)?.[1] ?? k;
+---
+
+<AdminLayout title={def.plural} current="content:article-categories">
+  <main class="admin-main">
+    <div class="admin-actions">
+      <h1>{def.plural}</h1>
+      <a class="admin-btn" href="/admin/content/article-categories/new">
+        Add {def.singular}
+      </a>
+    </div>
+    <p class="admin-muted">{def.intro}</p>
+
+    {sp.has('saved') && (
+      <p class="admin-notice" role="status">
+        Saved. Publish to show the change on the website.
+      </p>
+    )}
+    {sp.has('deleted') && (
+      <p class="admin-notice" role="status">
+        Deleted. Publish to remove it from the website.
+      </p>
+    )}
+    {error && (
+      <p class="admin-notice admin-notice--error" role="alert">
+        Could not load the categories.
+      </p>
+    )}
+
+    <div class="admin-card admin-table-wrap">
+      {(categories ?? []).length > 0 ? (
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Kind</th>
+              <th>Articles</th>
+              <th>Web address</th>
+              <th>Order</th>
+              <th>Shown</th>
+            </tr>
+          </thead>
+          <tbody>
+            {(categories ?? []).map((c) => {
+              const n = counts.get(c.id) ?? { all: 0, published: 0 };
+              return (
+                <tr>
+                  <td>
+                    <a href={`/admin/content/article-categories/${c.id}`}>{c.name}</a>
+                  </td>
+                  <td>{kindLabel(c.kind)}</td>
+                  <td>
+                    <a href={`/admin/content/articles?category=${c.id}`}>
+                      {n.published} published
+                      {n.all > n.published ? `, ${n.all - n.published} draft` : ''}
+                    </a>
+                  </td>
+                  <td>{isArticleKind(c.kind) ? categoryBasePath(c.kind, c.slug) : '—'}</td>
+                  <td>{c.sort_order}</td>
+                  <td>{c.is_visible ? 'yes' : 'no'}</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      ) : (
+        <p class="admin-muted">Nothing here yet.</p>
+      )}
+    </div>
+  </main>
+</AdminLayout>

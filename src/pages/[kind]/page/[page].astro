@@ -1,0 +1,19 @@
+---
+import ArticleListPage from '../../../components/articles/ArticleListPage.astro';
+import { listTargets } from '../../../lib/article-lists';
+
+export const prerender = true;
+
+// /travel-guide/page/2 …: only the pages that exist (a list that fits on one page has none).
+export async function getStaticPaths() {
+  const targets = await listTargets({ categories: false, firstPages: false });
+  return targets.map((t) => ({
+    params: { kind: t.segment, page: String(t.page) },
+    props: { kind: t.kind, page: t.page },
+  }));
+}
+
+const { kind, page } = Astro.props;
+---
+
+<ArticleListPage {kind} {page} />

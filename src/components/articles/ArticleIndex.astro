@@ -4,31 +4,73 @@ import PageHero from '../PageHero.astro';
 import Section from '../Section.astro';
 import Button from '../Button.astro';
 import ArticleCard from './ArticleCard.astro';
+import Pagination from './Pagination.astro';
 import { towerImage } from '../../data/shared';
+import { listPagePath } from '../../lib/cms/articles';
 import type { PublicArticle } from '../../lib/content';
 
-// Shared by /travel-guide and /dental-knowledge (Figma: navy hero with a search box, optional category chips,
-// a 3-column grid of cards). Search and chips are added by a few lines of JavaScript; without it every article shows.
+// Shared by the Travel Guide and Dental Knowledge lists, their category pages and their later pages (Figma: navy
+// hero with a search box, category chips, a 3-column grid of cards). Everything but the search is plain links to
+// pages built at build time, so it works without JavaScript. The search loads a small index (`search.json`) the
+// first time someone types, because one page only holds some of the articles.
 interface Props {
   title: string;
   description?: string;
   label: string;
   heading: string;
   intro: string;
+  /** The articles of this page only. */
   articles: PublicArticle[];
-  categories: { slug: string; name: string }[];
+  /** Categories that have articles, as filters. */
+  categories: { slug: string; name: string; path: string }[];
+  /** Slug of the category page being shown; none: the whole list. */
+  activeCategory?: string | null;
+  /** Address of page 1 of this list (pagination links are built from it). */
+  listPath: string;
+  /** Address of the whole list of this kind (the "All articles" chip). */
+  rootPath: string;
+  page: number;
+  totalPages: number;
+  /** Number of articles of the kind: 0 shows the "on their way" message. */
+  kindTotal: number;
+  searchUrl: string;
   current?: string;
 }
 
-const { title, description, label, heading, intro, articles, categories, current } = Astro.props;
-const usedCategories = categories.filter((c) => articles.some((a) => a.category?.slug === c.slug));
+const {
+  title,
+  description,
+  label,
+  heading,
+  intro,
+  articles,
+  categories,
+  activeCategory = null,
+  listPath,
+  rootPath,
+  page,
+  totalPages,
+  kindTotal,
+  searchUrl,
+  current,
+} = Astro.props;
 ---
 
 <SiteLayout {title} {description} {current} consultation={false} social={false}>
+  {page > 1 && <link slot="head" rel="prev" href={listPagePath(listPath, page - 1)} />}
+  {page < totalPages && <link slot="head" rel="next" href={listPagePath(listPath, page + 1)} />}
+
   <PageHero variant="banner" dark {label} image={towerImage} imageHeight={340}>
     <Fragment slot="title">{heading}</Fragment>
     <p>{intro}</p>
-    <form slot="actions" class="search" role="search" data-article-form data-needs-js>
+    <form
+      slot="actions"
+      class="search"
+      role="search"
+      data-article-form
+      data-needs-js
+      data-search-url={searchUrl}
+    >
       <label class="visually-hidden" for="article-search">
         Search articles
       </label>
@@ -48,43 +90,57 @@ const usedCategories = categories.filter((c) => articles.some((a) => a.category?
       Articles
     </h2>
     <div data-article-index class="index">
-      {usedCategories.length > 0 && (
-        <div class="chips" role="group" aria-label="Filter by category" data-needs-js>
-          <button type="button" class="chip" data-chip="" aria-pressed="true">
-            All articles
-          </button>
-          {usedCategories.map((c) => (
-            <button type="button" class="chip" data-chip={c.slug} aria-pressed="false">
-              {c.name}
-            </button>
-          ))}
-        </div>
-      )}
-      <p class="visually-hidden" role="status" aria-live="polite" data-count></p>
+      <div data-search-results hidden>
+        <p class="results__status" role="status" aria-live="polite" data-search-status></p>
+        <ul class="results" data-search-list></ul>
+      </div>
 
-      {articles.length > 0 ? (
-        <ul class="grid">
-          {articles.map((a) => (
-            <li>
-              <ArticleCard article={a} />
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <div class="empty">
-          <h3 class="t-h2">Articles are on their way</h3>
-          <p>
-            We are preparing our first articles. In the meantime, our team is happy to answer your
-            questions.
-          </p>
-          <!-- These pages have no form of their own: go to the one on the Home page. -->
-          <Button href="/#consultation">Ask the team</Button>
-        </div>
-      )}
+      <div class="browse" data-browse>
+        {categories.length > 0 && (
+          <nav class="chips" aria-label="Filter by category">
+            <a
+              class="chip"
+              href={rootPath}
+              aria-current={activeCategory === null ? 'page' : undefined}
+            >
+              All articles
+            </a>
+            {categories.map((c) => (
+              <a
+                class="chip"
+                href={c.path}
+                aria-current={activeCategory === c.slug ? 'page' : undefined}
+              >
+                {c.name}
+              </a>
+            ))}
+          </nav>
+        )}
 
-      <p class="no-match" data-no-match hidden>
-        No articles match your search. Try a different word or choose another category.
-      </p>
+        {articles.length > 0 ? (
+          <ul class="grid">
+            {articles.map((a) => (
+              <li>
+                <ArticleCard article={a} />
+              </li>
+            ))}
+          </ul>
+        ) : (
+          kindTotal === 0 && (
+            <div class="empty">
+              <h3 class="t-h2">Articles are on their way</h3>
+              <p>
+                We are preparing our first articles. In the meantime, our team is happy to answer
+                your questions.
+              </p>
+              <!-- These pages have no form of their own: go to the one on the Home page. -->
+              <Button href="/#consultation">Ask the team</Button>
+            </div>
+          )
+        )}
+
+        <Pagination base={listPath} {page} {totalPages} />
+      </div>
     </div>
   </Section>
 </SiteLayout>
@@ -119,6 +175,15 @@ const usedCategories = categories.filter((c) => articles.some((a) => a.category?
     gap: 32px;
   }
 
+  .browse {
+    display: grid;
+    gap: 32px;
+  }
+
+  .browse[hidden] {
+    display: none;
+  }
+
   .chips {
     display: flex;
     flex-wrap: wrap;
@@ -143,7 +208,7 @@ const usedCategories = categories.filter((c) => articles.some((a) => a.category?
     border-color: var(--color-blue);
   }
 
-  .chip[aria-pressed='true'] {
+  .chip[aria-current='page'] {
     background: var(--color-blue);
     border-color: var(--color-blue);
     color: var(--color-white);
@@ -170,8 +235,7 @@ const usedCategories = categories.filter((c) => articles.some((a) => a.category?
     flex: 1;
   }
 
-  .empty,
-  .no-match {
+  .empty {
     display: grid;
     justify-items: center;
     gap: 16px;
@@ -180,8 +244,51 @@ const usedCategories = categories.filter((c) => articles.some((a) => a.category?
     text-align: center;
   }
 
-  .no-match[hidden] {
-    display: none;
+  /* Search results: built by article-filter.ts, so the rules reach its elements through :global. */
+  .results__status {
+    margin-bottom: 20px;
+    text-align: center;
+    color: var(--color-navy);
+  }
+
+  .results {
+    display: grid;
+    gap: 16px;
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 0;
+    list-style: none;
+  }
+
+  .results :global(li) {
+    display: grid;
+    gap: 6px;
+    padding: 20px 24px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card);
+    background: var(--color-white);
+  }
+
+  .results :global(.result__category) {
+    font: 700 12px / 18px var(--font-display);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-blue);
+  }
+
+  .results :global(.result__title) {
+    font: 700 22px / 28px var(--font-serif);
+    color: var(--color-title);
+  }
+
+  .results :global(.result__title:hover) {
+    color: var(--color-blue);
+  }
+
+  .results :global(.result__excerpt) {
+    font-size: var(--text-small);
+    line-height: var(--text-small-lh);
+    color: var(--color-navy);
   }
 
   @media (max-width: 960px) {

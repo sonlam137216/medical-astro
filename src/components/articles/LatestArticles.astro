@@ -1,0 +1,82 @@
+---
+import Section from '../Section.astro';
+import SectionIntro from '../SectionIntro.astro';
+import Button from '../Button.astro';
+import ArticleCard from './ArticleCard.astro';
+import { ARTICLE_BASE_PATH, type ArticleKind } from '../../lib/cms/articles';
+import { getArticles } from '../../lib/content';
+
+// "Learn more" strip for pages about a treatment: the newest published articles of a kind. It has no sample
+// content, so before any article is published the strip is simply not there.
+interface Props {
+  kind?: ArticleKind;
+  count?: number;
+  label?: string;
+  title?: string;
+}
+
+const {
+  kind = 'dental_knowledge',
+  count = 3,
+  label = 'Dental knowledge',
+  title = 'Learn more before you decide',
+} = Astro.props;
+const articles = (await getArticles(kind)).slice(0, count);
+---
+
+{articles.length > 0 && (
+  <Section tone="soft" labelledby={`latest-${kind}-title`}>
+    <SectionIntro {label} headingId={`latest-${kind}-title`} align="center" lined>
+      <Fragment slot="title">{title}</Fragment>
+    </SectionIntro>
+    <ul class="grid">
+      {articles.map((a) => (
+        <li>
+          <ArticleCard article={a} />
+        </li>
+      ))}
+    </ul>
+    <div class="more">
+      <Button variant="outline" href={ARTICLE_BASE_PATH[kind]}>
+        View all articles
+      </Button>
+    </div>
+  </Section>
+)}
+
+<style>
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .grid li {
+    display: flex;
+  }
+
+  .grid li > :global(*) {
+    flex: 1;
+  }
+
+  .more {
+    display: flex;
+    justify-content: center;
+    margin-top: 32px;
+  }
+
+  @media (max-width: 960px) {
+    .grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 600px) {
+    .grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

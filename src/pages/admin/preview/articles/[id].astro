@@ -1,0 +1,235 @@
+---
+import BaseLayout from '../../../../layouts/BaseLayout.astro';
+import ArticleBody from '../../../../components/articles/ArticleBody.astro';
+import ProfileImage from '../../../../components/ProfileImage.astro';
+import {
+  ARTICLE_KINDS,
+  articlePath,
+  articleProblems,
+  bodyImageIds,
+  formatArticleDate,
+  isArticleKind,
+  parseArticleBody,
+  tableOfContents,
+} from '../../../../lib/cms/articles';
+import { UUID_RE } from '../../../../lib/cms/fields';
+import { IMAGE_COLUMNS } from '../../../../lib/snapshot';
+import { toPublicImage, type PublicImage } from '../../../../lib/media';
+
+export const prerender = false;
+
+// What an article will look like, drawn from the working copy (drafts included). It is not the website's page:
+// the site's header and footer come from published content, which only exists at build time. This shows the
+// text, the pictures and the rules an article must meet before it can be published.
+const id = Astro.params.id ?? '';
+if (!UUID_RE.test(id)) return new Response('Not found', { status: 404 });
+
+const db = Astro.locals.db;
+const { data: row } = await db.from('articles').select('*').eq('id', id).maybeSingle();
+if (!row) return new Response('Not found', { status: 404 });
+
+const { data: category } = row.category_id
+  ? await db.from('article_categories').select('name, kind').eq('id', row.category_id).maybeSingle()
+  : { data: null };
+
+const blocks = parseArticleBody(row.body);
+const wanted = [...bodyImageIds(blocks), ...(row.cover_image_id ? [row.cover_image_id] : [])];
+const images: Record<string, PublicImage> = {};
+if (wanted.length > 0) {
+  const { data: found } = await db
+    .from('media_assets')
+    .select(`id, ${IMAGE_COLUMNS}`)
+    .eq('kind', 'image')
+    .in('id', wanted.slice(0, 80));
+  for (const a of found ?? []) {
+    const image = a.status === 'active' ? toPublicImage(a) : null;
+    if (image) images[a.id] = image;
+  }
+}
+const cover = row.cover_image_id ? (images[row.cover_image_id] ?? null) : null;
+
+const problems = Object.values(
+  articleProblems({
+    kind: row.kind,
+    slug: row.slug,
+    isVisible: true, // what the checks would say if it were published now
+    title: row.title,
+    excerpt: row.excerpt,
+    body: row.body,
+    publishedOn: row.published_on,
+    reviewedBy: row.reviewed_by,
+    categoryKind: category?.kind ?? null,
+    today: new Date().toISOString().slice(0, 10),
+  }),
+);
+for (const imageId of bodyImageIds(blocks)) {
+  if (!images[imageId]) problems.push('A picture in the text is no longer in Media.');
+}
+
+const toc = tableOfContents(blocks);
+const kindLabel = ARTICLE_KINDS.find(([key]) => key === row.kind)?.[1] ?? row.kind;
+const date = formatArticleDate(row.published_on);
+const reviewed = formatArticleDate(row.reviewed_on);
+---
+
+<BaseLayout title={`Preview: ${row.title}`} noindex>
+  <div class="bar">
+    <strong>Preview</strong>
+    <span>
+      {row.is_visible ? 'Published' : 'Draft'} · {kindLabel}
+      {isArticleKind(row.kind) && row.is_visible && <> · {articlePath(row.kind, row.slug)}</>}
+    </span>
+    <a href={`/admin/content/articles/${row.id}`}>← Back to editing</a>
+  </div>
+
+  <main class="page">
+    {problems.length > 0 && (
+      <div class="problems" role="status">
+        <p>
+          <strong>Not ready to publish yet:</strong>
+        </p>
+        <ul>
+          {problems.map((p) => (
+            <li>{p}</li>
+          ))}
+        </ul>
+        <p>A draft can still be saved like this. Fix these before ticking “Published”.</p>
+      </div>
+    )}
+
+    {category && <p class="category">{category.name}</p>}
+    <h1>{row.title}</h1>
+    <p class="meta">
+      {date && <span>Published: {date}</span>}
+      {row.author_name && <span>Written by: {row.author_name}</span>}
+    </p>
+    {row.excerpt && <p class="lead">{row.excerpt}</p>}
+    {cover && (
+      <ProfileImage image={cover} width={800} height={450} sizes="760px" class="cover" priority />
+    )}
+    {toc.length > 1 && (
+      <nav class="toc" aria-label="Table of contents">
+        <strong>Table of contents</strong>
+        <ol>
+          {toc.map((t) => (
+            <li>
+              <a href={`#${t.id}`}>{t.text}</a>
+            </li>
+          ))}
+        </ol>
+      </nav>
+    )}
+    <ArticleBody blocks={blocks} images={images} />
+    {row.reviewed_by && (
+      <p class="review">
+        <strong>Clinically reviewed by: {row.reviewed_by}</strong>
+        {reviewed && <span>Reviewed on {reviewed}</span>}
+      </p>
+    )}
+  </main>
+</BaseLayout>
+
+<style>
+  .bar {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 20px;
+    padding: 10px 20px;
+    background: var(--color-navy);
+    color: var(--color-white);
+    font: 500 14px / 20px var(--font-sans);
+  }
+
+  .bar a {
+    margin-left: auto;
+    color: var(--color-white);
+    text-decoration: underline;
+  }
+
+  .page {
+    display: grid;
+    gap: 20px;
+    width: min(760px, calc(100% - 32px));
+    margin: 32px auto 80px;
+  }
+
+  .problems {
+    padding: 14px 18px;
+    border: 1px solid #e0b4b4;
+    border-radius: 12px;
+    background: #fdf1f1;
+    color: #7a1f1f;
+  }
+
+  .problems ul {
+    margin: 8px 0;
+    padding-left: 20px;
+  }
+
+  .category {
+    font: 700 12px / 18px var(--font-display);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-blue);
+  }
+
+  h1 {
+    font: 700 var(--text-h2) / var(--text-h2-lh) var(--font-serif);
+    color: var(--color-heading);
+    overflow-wrap: anywhere;
+  }
+
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 16px;
+    font-size: var(--text-small);
+    color: var(--color-muted);
+  }
+
+  .lead {
+    font-size: 18px;
+    line-height: 28px;
+    color: var(--color-navy);
+  }
+
+  .page :global(.cover) {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    border-radius: var(--radius-card);
+  }
+
+  .toc {
+    display: grid;
+    gap: 6px;
+    padding: 14px 20px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-button);
+    font-size: var(--text-small);
+  }
+
+  .toc ol {
+    margin: 0;
+    padding-left: 20px;
+  }
+
+  .toc a {
+    color: var(--color-blue);
+  }
+
+  .review {
+    display: grid;
+    gap: 4px;
+    padding: 16px 20px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card);
+    background: var(--color-card);
+    font-size: var(--text-small);
+  }
+</style>

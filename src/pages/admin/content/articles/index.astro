@@ -1,0 +1,225 @@
+---
+import AdminLayout from '../../../../layouts/AdminLayout.astro';
+import { ARTICLE_KINDS, articlePath, isArticleKind } from '../../../../lib/cms/articles';
+
+export const prerender = false;
+
+// The article list, WordPress style: status tabs with counts, filters (kind, category), search and pages.
+// Articles are few and small without their text, so the list is read once and filtered here.
+const PAGE_SIZE = 20;
+const TABS = [
+  ['all', 'All'],
+  ['published', 'Published'],
+  ['draft', 'Drafts'],
+] as const;
+
+const sp = Astro.url.searchParams;
+const tab = TABS.some(([key]) => key === sp.get('status')) ? (sp.get('status') as string) : 'all';
+const kindParam = sp.get('kind') ?? '';
+const kind = isArticleKind(kindParam) ? kindParam : '';
+const categoryId = sp.get('category') ?? '';
+const q = (sp.get('q') ?? '').trim().slice(0, 100);
+const page = Math.max(1, Math.floor(Number(sp.get('page'))) || 1);
+
+const db = Astro.locals.db;
+const [{ data, error }, { data: categories }] = await Promise.all([
+  db
+    .from('articles')
+    .select(
+      'id, title, slug, kind, is_visible, published_on, updated_at, author_name, category_id, category:article_categories(name)',
+    )
+    .order('updated_at', { ascending: false })
+    .limit(1000),
+  db
+    .from('article_categories')
+    .select('id, name, kind')
+    .order('kind')
+    .order('sort_order')
+    .order('name'),
+]);
+const all = data ?? [];
+
+const words = q.toLowerCase().split(/\s+/).filter(Boolean);
+const matches = (a: (typeof all)[number]) =>
+  (kind === '' || a.kind === kind) &&
+  (categoryId === '' || a.category_id === categoryId) &&
+  words.every((w) => `${a.title} ${a.slug} ${a.author_name ?? ''}`.toLowerCase().includes(w));
+const scoped = all.filter(matches);
+const counts = {
+  all: scoped.length,
+  published: scoped.filter((a) => a.is_visible).length,
+  draft: scoped.filter((a) => !a.is_visible).length,
+};
+const rows = scoped.filter(
+  (a) => tab === 'all' || (tab === 'published' ? a.is_visible : !a.is_visible),
+);
+const lastPage = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
+const current = Math.min(page, lastPage);
+const shown = rows.slice((current - 1) * PAGE_SIZE, current * PAGE_SIZE);
+
+const link = (changes: Record<string, string | number>) => {
+  const next = new URLSearchParams();
+  const base: Record<string, string | number> = {
+    status: tab,
+    kind,
+    category: categoryId,
+    q,
+    page: 1,
+    ...changes,
+  };
+  for (const [key, value] of Object.entries(base)) {
+    if (
+      value !== '' &&
+      !(key === 'status' && value === 'all') &&
+      !(key === 'page' && value === 1)
+    ) {
+      next.set(key, String(value));
+    }
+  }
+  const query = next.toString();
+  return `/admin/content/articles${query ? `?${query}` : ''}`;
+};
+const kindLabel = (k: string) => ARTICLE_KINDS.find(([key]) => key === k)?.[1] ?? k;
+const day = (iso: string | null | undefined) => (iso ? iso.slice(0, 10) : '—');
+---
+
+<AdminLayout title="Articles" current="content:articles">
+  <main class="admin-main">
+    <div class="admin-actions">
+      <h1>Articles</h1>
+      <a class="admin-btn" href="/admin/content/articles/new">
+        Add article
+      </a>
+    </div>
+    <p class="admin-muted">
+      Travel guide and Dental knowledge articles. Tick “Published” in an article when it is ready:
+      drafts never reach the website. Changes go live after you publish the website.
+    </p>
+
+    {sp.has('saved') && (
+      <p class="admin-notice" role="status">
+        Saved. Publish to show the change on the website.
+      </p>
+    )}
+    {sp.has('deleted') && (
+      <p class="admin-notice" role="status">
+        Deleted. Publish to remove it from the website.
+      </p>
+    )}
+    {error && (
+      <p class="admin-notice admin-notice--error" role="alert">
+        Could not load the articles.
+      </p>
+    )}
+
+    <nav class="admin-tabs" aria-label="Filter by status">
+      {TABS.map(([key, label]) => (
+        <a href={link({ status: key })} aria-current={key === tab ? 'page' : undefined}>
+          {label} ({counts[key]})
+        </a>
+      ))}
+    </nav>
+
+    <form class="admin-filters" method="get" action="/admin/content/articles">
+      {tab !== 'all' && <input type="hidden" name="status" value={tab} />}
+      <label>
+        <span class="visually-hidden">Search articles</span>
+        <input type="search" name="q" value={q} placeholder="Search title, address or author" />
+      </label>
+      <label>
+        <span class="visually-hidden">Kind of article</span>
+        <select name="kind">
+          <option value="">All kinds</option>
+          {ARTICLE_KINDS.map(([key, label]) => (
+            <option value={key} selected={kind === key}>
+              {label}
+            </option>
+          ))}
+        </select>
+      </label>
+      <label>
+        <span class="visually-hidden">Category</span>
+        <select name="category">
+          <option value="">All categories</option>
+          {(categories ?? []).map((c) => (
+            <option value={c.id} selected={categoryId === c.id}>
+              {c.name} ({kindLabel(c.kind)})
+            </option>
+          ))}
+        </select>
+      </label>
+      <button class="admin-btn admin-btn--ghost" type="submit">
+        Filter
+      </button>
+      {(q || kind || categoryId) && <a href={link({ q: '', kind: '', category: '' })}>Clear</a>}
+    </form>
+
+    <div class="admin-card admin-table-wrap">
+      {shown.length > 0 ? (
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Title</th>
+              <th>Kind</th>
+              <th>Category</th>
+              <th>Author</th>
+              <th>Status</th>
+              <th>Date</th>
+              <th>Last edited</th>
+            </tr>
+          </thead>
+          <tbody>
+            {shown.map((a) => (
+              <tr>
+                <td>
+                  <a href={`/admin/content/articles/${a.id}`}>{a.title}</a>
+                  <br />
+                  <small class="admin-muted">
+                    <a href={`/admin/content/articles/${a.id}`}>Edit</a> ·{' '}
+                    <a href={`/admin/preview/articles/${a.id}`} target="_blank" rel="noopener">
+                      Preview
+                    </a>
+                    {a.is_visible && isArticleKind(a.kind) && (
+                      <>
+                        {' '}
+                        ·{' '}
+                        <span title="Live after the next publish">
+                          {articlePath(a.kind, a.slug)}
+                        </span>
+                      </>
+                    )}
+                  </small>
+                </td>
+                <td>{kindLabel(a.kind)}</td>
+                <td>{a.category?.name ?? '—'}</td>
+                <td>{a.author_name ?? '—'}</td>
+                <td>
+                  <span class="admin-status" data-status={a.is_visible ? 'done' : 'in_progress'}>
+                    {a.is_visible ? 'Published' : 'Draft'}
+                  </span>
+                </td>
+                <td>{a.published_on ?? '—'}</td>
+                <td>{day(a.updated_at)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      ) : (
+        <p class="admin-muted">
+          {all.length === 0 ? 'No articles yet.' : 'No articles match these filters.'}
+        </p>
+      )}
+    </div>
+
+    {lastPage > 1 && (
+      <p>
+        {current > 1 && <a href={link({ page: current - 1 })}>← Previous</a>}
+        <span class="admin-muted">
+          {' '}
+          Page {current} of {lastPage} ({rows.length} articles){' '}
+        </span>
+        {current < lastPage && <a href={link({ page: current + 1 })}>Next →</a>}
+      </p>
+    )}
+  </main>
+</AdminLayout>

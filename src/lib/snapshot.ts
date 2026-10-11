@@ -1,5 +1,5 @@
 import type { AdminDb } from './admin-auth';
-import { articleProblems } from './cms/articles.ts';
+import { articleProblems, bodyImageIds, parseArticleBody } from './cms/articles.ts';
 import { itemInput, parseFields, type Field } from './cms/fields.ts';
 import { REQUIRED_SECTIONS, sectionByKey } from './cms/sections.ts';
 
@@ -136,6 +136,8 @@ export interface SnapshotArticleCategory {
   slug: string;
   name: string;
   kind: string;
+  /** Shown on the category page; null: the page uses the text of the whole list. */
+  description?: string | null;
 }
 
 export interface SnapshotArticle {
@@ -146,6 +148,8 @@ export interface SnapshotArticle {
   /** Text in the format described in src/lib/cms/articles.ts; rendered as escaped data, never as HTML. */
   body: string | null;
   coverImage: SnapshotImage | null;
+  /** The pictures used in `body` (`![caption](media:<id>)`), by media id. A picture that is gone is missing here. */
+  bodyImages?: Record<string, SnapshotImage>;
   /** Slug of an entry of `articleCategories`. */
   category: string | null;
   author: string | null;
@@ -336,7 +340,7 @@ export async function buildSnapshot(db: AdminDb): Promise<Snapshot> {
   // so nothing is dropped without anyone noticing.
   const { data: categories, error: categoriesError } = await db
     .from('article_categories')
-    .select('slug, name, kind')
+    .select('slug, name, kind, description')
     .eq('is_visible', true)
     .order('kind')
     .order('sort_order')
@@ -360,9 +364,34 @@ export async function buildSnapshot(db: AdminDb): Promise<Snapshot> {
     .order('title');
   if (articlesError) throw fail('articles', articlesError);
   if (categories.length > 0) snapshot.articleCategories = categories;
+
+  // Pictures placed in the article text. Looked up in small batches (D1 allows 100 parameters per statement).
+  // A picture that was deleted or archived is simply not in the map; snapshotProblems reports it.
+  const bodyImageRows = new Map<string, SnapshotImage>();
+  const wantedImages = [
+    ...new Set(articles.flatMap((a) => bodyImageIds(parseArticleBody(a.body)))),
+  ];
+  for (let i = 0; i < wantedImages.length; i += 80) {
+    const { data: found, error: foundError } = await db
+      .from('media_assets')
+      .select(`id, ${IMAGE_COLUMNS}`)
+      .eq('kind', 'image')
+      .in('id', wantedImages.slice(i, i + 80));
+    if (foundError) throw fail('article pictures', foundError);
+    for (const row of found) {
+      const image = toSnapshotImage(row);
+      if (image) bodyImageRows.set(row.id, image);
+    }
+  }
+
   if (articles.length > 0) {
     snapshot.articles = articles.map((a) => {
       const category = a.category_id ? (categorySlugs.get(a.category_id) ?? null) : null;
+      const bodyImages: Record<string, SnapshotImage> = {};
+      for (const id of bodyImageIds(parseArticleBody(a.body))) {
+        const image = bodyImageRows.get(id);
+        if (image) bodyImages[id] = image;
+      }
       return {
         slug: a.slug,
         kind: a.kind,
@@ -370,6 +399,7 @@ export async function buildSnapshot(db: AdminDb): Promise<Snapshot> {
         excerpt: a.excerpt,
         body: a.body,
         coverImage: toSnapshotImage(a.cover),
+        ...(Object.keys(bodyImages).length > 0 ? { bodyImages } : {}),
         // A hidden category is not offered as a filter, so its articles show as uncategorised.
         category: category && shownCategories.has(category) ? category : null,
         author: a.author_name,
@@ -575,6 +605,7 @@ export function snapshotProblems(snapshot: Snapshot, target: string = 'staging')
   for (const a of snapshot.articles ?? []) {
     const found = articleProblems({
       kind: a.kind,
+      slug: a.slug,
       isVisible: true,
       title: a.title,
       excerpt: a.excerpt,
@@ -585,6 +616,18 @@ export function snapshotProblems(snapshot: Snapshot, target: string = 'staging')
       today,
     });
     for (const message of Object.values(found)) problems.push(`Article “${a.title}”: ${message}`);
+    for (const id of bodyImageIds(parseArticleBody(a.body))) {
+      const image = a.bodyImages?.[id];
+      if (!image) {
+        problems.push(
+          `Article “${a.title}”: a picture in the text is no longer in Media (deleted or archived). Choose another one or remove the line.`,
+        );
+      } else if (!image.decorative && !image.alt) {
+        problems.push(
+          `Article “${a.title}”: a picture in the text has no description. Add one in Media, or mark the image as decorative.`,
+        );
+      }
+    }
     if (a.coverImage && !a.coverImage.decorative && !a.coverImage.alt) {
       problems.push(
         `Article “${a.title}”: the cover image has no description. Add one in Media, or mark the image as decorative.`,
@@ -698,7 +741,10 @@ export function isSnapshot(value: unknown): value is Snapshot {
       typeof a.title === 'string' &&
       (a.coverImage === undefined ||
         a.coverImage === null ||
-        (isObject(a.coverImage) && typeof a.coverImage.key === 'string')),
+        (isObject(a.coverImage) && typeof a.coverImage.key === 'string')) &&
+      (a.bodyImages === undefined ||
+        (isObject(a.bodyImages) &&
+          Object.values(a.bodyImages).every((i) => isObject(i) && typeof i.key === 'string'))),
   );
   if (!articlesValid) return false;
   const categories = (value.articleCategories ?? []) as unknown[];

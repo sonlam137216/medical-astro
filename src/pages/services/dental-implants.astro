@@ -9,6 +9,7 @@ import PackageCard from '../../components/cards/PackageCard.astro';
 import TreatmentCosts from '../../components/home/TreatmentCosts.astro';
 import SeamlessJourney from '../../components/SeamlessJourney.astro';
 import PlanVisit from '../../components/PlanVisit.astro';
+import LatestArticles from '../../components/articles/LatestArticles.astro';
 import { getPageSeo } from '../../lib/site-content';
 import { getFaqs, getSection } from '../../lib/content';
 
@@ -108,6 +109,8 @@ const [stat] = statsSection?.items ?? [];
 
   <!-- Figma "Results: Real Stories. Real Smiles." (before/after carousel) is not built: the pictures show a real
        patient, and consent and usage rights are not confirmed (see src/assets/images/SOURCES.md). -->
+
+  <LatestArticles />
 
   <Section tone="soft" labelledby="faq-title">
     <SectionIntro label={faq.label} headingId="faq-title" align="center" lined>

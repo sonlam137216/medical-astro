@@ -29,7 +29,8 @@ export type Field =
   | (FieldBase & { type: 'text'; max: number; placeholder?: string })
   /** A link: a site path, #anchor, https/http URL, mailto: or tel: (same rule as the `link_href` domain). */
   | (FieldBase & { type: 'url'; max: number; placeholder?: string })
-  | (FieldBase & { type: 'textarea'; max: number; rows?: number })
+  /** `editor: 'article'`: the article writing tools (toolbar, picture picker, preview) are drawn around it. */
+  | (FieldBase & { type: 'textarea'; max: number; rows?: number; editor?: 'article' })
   /** An email address (same rule as the database check). */
   | (FieldBase & { type: 'email'; max: number })
   /** A web address starting with https:// or http:// (for example a social profile). */

@@ -34,6 +34,7 @@ const { title, description, noindex = false, mediaOrigin = null } = Astro.props;
     <title>{title}</title>
     {description && <meta name="description" content={description} />}
     {noindex && <meta name="robots" content="noindex, nofollow" />}
+    <slot name="head" />
   </head>
   <body>
     <slot />

@@ -30,7 +30,19 @@ const heading = String(row[def.titleField] ?? def.singular);
     <p>
       <a href={`/admin/content/${def.key}`}>← {def.plural}</a>
     </p>
-    <h1>{heading}</h1>
+    <div class="admin-actions">
+      <h1>{heading}</h1>
+      {def.key === 'articles' && (
+        <a
+          class="admin-btn admin-btn--ghost"
+          href={`/admin/preview/articles/${id}`}
+          target="_blank"
+          rel="noopener"
+        >
+          Preview
+        </a>
+      )}
+    </div>
     {sp.get('error') === 'in_use' && (
       <p class="admin-notice admin-notice--error" role="alert">
         This is still used by something else, so it cannot be deleted.

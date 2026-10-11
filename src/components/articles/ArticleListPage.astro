@@ -1,0 +1,60 @@
+---
+import ArticleIndex from './ArticleIndex.astro';
+import { ARTICLE_LISTS } from '../../data/article-lists';
+import {
+  ARTICLE_BASE_PATH,
+  categoryBasePath,
+  paginate,
+  type ArticleKind,
+} from '../../lib/cms/articles';
+import { usedCategories } from '../../lib/article-lists';
+import { getArticles } from '../../lib/content';
+import { getPageSeo } from '../../lib/site-content';
+
+// One page of an article list: the whole list of a kind or one of its categories, at a given page number.
+// The routes under src/pages/[kind] decide which pages exist; this builds the content of each.
+interface Props {
+  kind: ArticleKind;
+  page: number;
+  /** Slug of a category page; none: the whole list. */
+  category?: string | null;
+}
+
+const { kind, page, category = null } = Astro.props;
+const text = ARTICLE_LISTS[kind];
+const rootPath = ARTICLE_BASE_PATH[kind];
+
+const all = await getArticles(kind);
+const categories = await usedCategories(kind, all);
+const active = category ? (categories.find((c) => c.slug === category) ?? null) : null;
+const shown = active ? all.filter((a) => a.category?.slug === active.slug) : all;
+const paged = paginate(shown, page);
+const listPath = active ? categoryBasePath(kind, active.slug) : rootPath;
+
+const seo = await getPageSeo(rootPath, { title: text.seoTitle, description: text.seoDescription });
+const baseTitle = active ? `${active.name} · ${text.label} · Melatec Dental Clinic` : seo.title;
+const title = paged.page > 1 ? `${baseTitle} · Page ${paged.page}` : baseTitle;
+const description = active ? (active.description ?? seo.description) : seo.description;
+---
+
+<ArticleIndex
+  {title}
+  {description}
+  label={text.label}
+  heading={active ? active.name : text.heading}
+  intro={active?.description ?? text.intro}
+  articles={paged.items}
+  categories={categories.map((c) => ({
+    slug: c.slug,
+    name: c.name,
+    path: categoryBasePath(kind, c.slug),
+  }))}
+  activeCategory={active?.slug ?? null}
+  {listPath}
+  {rootPath}
+  page={paged.page}
+  totalPages={paged.totalPages}
+  kindTotal={all.length}
+  searchUrl={`${rootPath}/search.json`}
+  current={rootPath}
+/>

@@ -1,0 +1,120 @@
+---
+import { listPagePath } from '../../lib/cms/articles';
+
+// "← Newer · 1 2 3 · Older →" for the article lists. Plain links to pages built at build time, so it works
+// without JavaScript. `base` is the address of page 1.
+interface Props {
+  base: string;
+  page: number;
+  totalPages: number;
+}
+
+const { base, page, totalPages } = Astro.props;
+
+// Every page when there are few; otherwise the first, the last and the ones around the current page.
+const numbers: (number | null)[] = [];
+for (let n = 1; n <= totalPages; n++) {
+  const near = n === 1 || n === totalPages || Math.abs(n - page) <= 1;
+  if (near) numbers.push(n);
+  else if (numbers[numbers.length - 1] !== null) numbers.push(null);
+}
+---
+
+{totalPages > 1 && (
+  <nav class="pagination" aria-label="Pagination">
+    {page > 1 ? (
+      <a class="pagination__step" href={listPagePath(base, page - 1)} rel="prev">
+        <span aria-hidden="true">←</span> Newer
+      </a>
+    ) : (
+      <span class="pagination__step is-off" aria-hidden="true">
+        <span>←</span> Newer
+      </span>
+    )}
+    <ol class="pagination__pages">
+      {numbers.map((n) =>
+        n === null ? (
+          <li aria-hidden="true">…</li>
+        ) : (
+          <li>
+            <a
+              class="pagination__page"
+              href={listPagePath(base, n)}
+              aria-current={n === page ? 'page' : undefined}
+              aria-label={`Page ${n}`}
+            >
+              {n}
+            </a>
+          </li>
+        ),
+      )}
+    </ol>
+    {page < totalPages ? (
+      <a class="pagination__step" href={listPagePath(base, page + 1)} rel="next">
+        Older <span aria-hidden="true">→</span>
+      </a>
+    ) : (
+      <span class="pagination__step is-off" aria-hidden="true">
+        Older <span>→</span>
+      </span>
+    )}
+  </nav>
+)}
+
+<style>
+  .pagination {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 12px 20px;
+  }
+
+  .pagination__pages {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    color: var(--color-muted);
+  }
+
+  .pagination__page {
+    display: grid;
+    place-items: center;
+    min-width: 44px;
+    height: 44px;
+    padding: 0 10px;
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    background: var(--color-white);
+    font: 500 var(--text-small) / 1 var(--font-display);
+    color: var(--color-title);
+  }
+
+  .pagination__page:hover {
+    border-color: var(--color-blue);
+  }
+
+  .pagination__page[aria-current='page'] {
+    background: var(--color-blue);
+    border-color: var(--color-blue);
+    color: var(--color-white);
+  }
+
+  .pagination__step {
+    font: 600 var(--text-small) / var(--text-small-lh) var(--font-display);
+    color: var(--color-blue);
+  }
+
+  .pagination__step.is-off {
+    visibility: hidden;
+  }
+
+  @media (max-width: 600px) {
+    .pagination__step.is-off {
+      display: none;
+    }
+  }
+</style>
