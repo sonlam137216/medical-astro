@@ -3,7 +3,9 @@
 // uploading an item hands it to `onSelect` and closes the window. The window is added to the page body, not to
 // the form being edited, so nothing in it is ever submitted with that form.
 import { fitReport, fitWarnings, IMAGE_SLOTS, slotHint, type SlotKey } from '../lib/image-slots';
+import { VIDEO_SPEC_HINT } from '../lib/video-advice';
 import { isDuplicate, uploadImage, uploadVideo } from './media-client';
+import { setupVideoCover, type VideoCover } from './video-cover';
 
 export interface PickedMedia {
   id: string;
@@ -142,6 +144,9 @@ export function openMediaModal(options: Options) {
   add(poster, el('option', { value: '' }, 'None: the browser shows the first frame'));
   add(posterLabel, poster);
   posterLabel.hidden = kind !== 'video';
+  // Advice about the chosen video and the cover-frame picker (video-cover.ts).
+  const coverHost = el('div', { class: 'admin-cover-host' });
+  let cover: VideoCover | null = null;
 
   const progress = el('progress', { value: '0', max: '100' });
   progress.hidden = true;
@@ -167,7 +172,7 @@ export function openMediaModal(options: Options) {
     'p',
     { class: 'admin-hint' },
     kind === 'video'
-      ? 'The video is stored as it is: it is not converted, and it must be prepared for web playback (see the Media page). Do not upload recordings of patients unless they have given written permission.'
+      ? `The video is stored as it is: it is not converted. ${VIDEO_SPEC_HINT} If its index is at the end of the file (the usual export), it is moved to the front in your browser. Do not upload recordings of patients unless they have given written permission.`
       : 'The image is resized in your browser to a few web sizes and location data is removed. Do not upload photos of patients unless they have given written permission.',
   );
   if (slot) add(upload, el('p', { class: 'admin-hint' }, slotHint(slot)));
@@ -177,6 +182,7 @@ export function openMediaModal(options: Options) {
     altLabel,
     decorativeLabel,
     posterLabel,
+    coverHost,
     go,
     progress,
     uploadStatus,
@@ -298,6 +304,14 @@ export function openMediaModal(options: Options) {
     allowDuplicate = false;
     duplicate = null;
     duplicateBox.hidden = true;
+    cover?.destroy();
+    cover = null;
+    const chosenFile = file.files?.[0];
+    if (kind === 'video' && chosenFile) {
+      void fillPosters().then(() => {
+        if (file.files?.[0] === chosenFile) cover = setupVideoCover(chosenFile, coverHost, poster);
+      });
+    }
     dropText.textContent = file.files?.[0]?.name ?? dropText.textContent;
   });
   for (const type of ['dragenter', 'dragover']) {
@@ -322,11 +336,21 @@ export function openMediaModal(options: Options) {
     if (!chosen)
       return showUpload(`Choose ${kind === 'video' ? 'a video' : 'an image'} first.`, true);
     go.disabled = true;
+    // The cover: a library image, or the frame picked from the video (turned into an image first).
+    let posterId: string | undefined = poster.value || undefined;
+    if (kind === 'video' && cover) {
+      const resolved = await cover.resolvePoster(alt.value, (message) => showUpload(message));
+      if (!resolved.ok) {
+        go.disabled = false;
+        return showUpload(resolved.error, true);
+      }
+      posterId = resolved.posterId;
+    }
     const result =
       kind === 'video'
         ? await uploadVideo(chosen, {
             altText: alt.value,
-            poster: poster.value || undefined,
+            poster: posterId,
             onProgress: (percent) => {
               progress.hidden = false;
               progress.value = percent;

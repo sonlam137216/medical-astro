@@ -2,6 +2,7 @@
 import AdminLayout from '../../../layouts/AdminLayout.astro';
 import { MAX_ALT_LENGTH, MAX_VIDEO_BYTES, mediaUrl, thumbnailKey } from '../../../lib/media';
 import { listPickerImages } from '../../../lib/media-picker';
+import { VIDEO_SPEC_HINT } from '../../../lib/video-advice';
 
 export const prerender = false;
 
@@ -87,6 +88,7 @@ const deleted = Astro.url.searchParams.has('deleted');
             ))}
           </select>
         </label>
+        <div data-cover-host></div>
         <div>
           <button class="admin-btn" type="submit">
             Upload video
@@ -95,13 +97,14 @@ const deleted = Astro.url.searchParams.has('deleted');
         <progress data-progress value="0" max="100" hidden></progress>
         <p class="form__status" data-status role="status" aria-live="polite"></p>
         <p class="admin-hint">
-          The video is stored as it is: it is not converted. Prepare it once before uploading, for
-          example{' '}
+          The video is stored as it is: it is not converted. {VIDEO_SPEC_HINT} A file that is too
+          big or too heavy can be made smaller with, for example{' '}
           <code>
             ffmpeg -i in.mov -c:v libx264 -crf 26 -preset slow -vf scale=-2:720 -c:a aac -b:a 96k
             -movflags +faststart out.mp4
           </code>
-          . "faststart" lets it start playing before it has fully downloaded. Do not upload
+          . If the index of the file is at the end (the usual export), it is moved to the front in
+          your browser so the video can start playing before it has fully downloaded. Do not upload
           recordings of patients unless they have given written permission.
         </p>
         <noscript>

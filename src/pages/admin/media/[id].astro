@@ -2,6 +2,7 @@
 import AdminLayout from '../../../layouts/AdminLayout.astro';
 import { MAX_ALT_LENGTH, mediaUrl, thumbnailKey } from '../../../lib/media';
 import { readAlt } from '../../../lib/media-upload';
+import { coverMismatch } from '../../../lib/video-advice';
 import { isSameOrigin } from '../../../lib/admin-auth';
 import { readBodyLimited } from '../../../lib/consultation';
 
@@ -54,12 +55,13 @@ const poster = asset.poster_asset_id
   ? (
       await db
         .from('media_assets')
-        .select('r2_key, variant_widths')
+        .select('r2_key, variant_widths, width, height')
         .eq('id', asset.poster_asset_id)
         .maybeSingle()
     ).data
   : null;
 const noun = isVideo ? 'video' : 'image';
+const badCover = isVideo && poster ? coverMismatch(asset, poster) : false;
 const sp = Astro.url.searchParams;
 ---
 
@@ -103,6 +105,14 @@ const sp = Astro.url.searchParams;
     {sp.has('error') && sp.get('error') !== 'inuse' && sp.get('error') !== 'focus' && (
       <p class="admin-notice admin-notice--error" role="alert">
         Could not delete. Please try again.
+      </p>
+    )}
+
+    {badCover && (
+      <p class="admin-notice admin-notice--error" role="status">
+        The cover image has different proportions from the video, so visitors will see black bars
+        around it before the video plays. Use a frame of the video as the cover, or a 16:9 picture
+        for a 16:9 video.
       </p>
     )}
 

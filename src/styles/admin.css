@@ -1480,3 +1480,32 @@ html.js .no-js-only {
   gap: 8px;
   margin-top: 8px;
 }
+
+/* ---- Video: advice and the cover-frame picker -------------------------------------------------------------- */
+.admin-cover-host {
+  display: grid;
+  gap: 8px;
+}
+
+.admin-cover-host:empty {
+  display: none;
+}
+
+.admin-cover__picker {
+  display: grid;
+  gap: 8px;
+  max-width: 420px;
+}
+
+.admin-cover__video {
+  display: block;
+  width: 100%;
+  max-height: 260px;
+  border: 1px solid var(--a-line-strong);
+  border-radius: 8px;
+  background: #000;
+}
+
+.admin-cover__picker input[type='range'] {
+  width: 100%;
+}

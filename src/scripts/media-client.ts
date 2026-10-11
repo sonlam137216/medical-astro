@@ -4,6 +4,7 @@
 // they are. The server re-checks every file; nothing here is trusted. Keep the limits in step with
 // src/lib/media.ts.
 import { averageColor } from '../lib/image-color';
+import { makeFaststart } from '../lib/mp4-faststart';
 
 const IMAGE_WIDTHS = [480, 960, 1600];
 const MAX_IMAGE_BYTES = 25 * 1024 * 1024;
@@ -224,6 +225,17 @@ export async function uploadVideo(
     );
   }
   options.onStatus?.('Preparing…');
+  // A video exported the usual way has its index at the end; move it to the front (no re-encoding). A file this
+  // cannot handle is sent as it is and the server says what is wrong with it.
+  let upload = file;
+  try {
+    const fast = await makeFaststart(file);
+    if (fast.kind === 'fixed') {
+      upload = new File([fast.blob], file.name, { type: 'video/mp4' });
+    }
+  } catch {
+    // Reading the file failed half way: the plain upload will report it.
+  }
   const size = await readVideoSize(file);
   const query = new URLSearchParams({ alt_text: options.altText });
   if (options.poster) query.set('poster', options.poster);
@@ -250,6 +262,6 @@ export async function uploadVideo(
     };
     request.onerror = () => resolve(fail('Upload failed. Check your connection and try again.'));
     options.onStatus?.('Uploading…');
-    request.send(file);
+    request.send(upload);
   });
 }
