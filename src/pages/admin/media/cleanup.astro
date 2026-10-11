@@ -1,0 +1,106 @@
+---
+import { env } from 'cloudflare:workers';
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import { isSameOrigin } from '../../../lib/admin-auth';
+import { CLEANUP_GRACE_DAYS, planCleanup, type StoredObject } from '../../../lib/media-cleanup';
+
+export const prerender = false;
+
+// "Clean up unused files": the files in the media bucket that no picture or video uses any more. The page lists
+// what it would remove; the button removes it. Nothing here touches the database rows.
+const MAX_PAGES = 20; // 20,000 files is far beyond this site; stop rather than scan for ever.
+
+async function scan() {
+  const objects: StoredObject[] = [];
+  let cursor: string | undefined;
+  let complete = true;
+  for (let page = 0; ; page++) {
+    if (page >= MAX_PAGES) {
+      complete = false;
+      break;
+    }
+    const listed = await env.MEDIA.list({ prefix: 'media/', cursor, limit: 1000 });
+    for (const o of listed.objects) {
+      objects.push({ key: o.key, size: o.size, uploaded: o.uploaded.getTime() });
+    }
+    if (!listed.truncated) break;
+    cursor = listed.cursor;
+  }
+  const { data: assets } = await Astro.locals.db
+    .from('media_assets')
+    .select('r2_key, kind, variant_widths');
+  return { plan: planCleanup(objects, assets ?? [], Date.now()), complete, total: objects.length };
+}
+
+let removed: { files: number; bytes: number } | null = null;
+let failed = false;
+if (Astro.request.method === 'POST') {
+  if (!isSameOrigin(Astro.request)) return new Response('Forbidden', { status: 403 });
+  const { plan } = await scan();
+  try {
+    for (let i = 0; i < plan.remove.length; i += 500) {
+      await env.MEDIA.delete(plan.remove.slice(i, i + 500).map((o) => o.key));
+    }
+    removed = { files: plan.remove.length, bytes: plan.bytes };
+  } catch {
+    console.error('media cleanup: delete failed');
+    failed = true;
+  }
+}
+
+const { plan, complete, total } = await scan();
+const mb = (bytes: number) => (bytes / 1024 / 1024).toFixed(1);
+---
+
+<AdminLayout title="Unused files" current="media">
+  <main class="admin-main">
+    <p>
+      <a href="/admin/media">← All media</a>
+    </p>
+    <h1>Unused files</h1>
+
+    {removed && (
+      <p class="admin-notice" role="status">
+        Removed {removed.files} file{removed.files === 1 ? '' : 's'} ({mb(removed.bytes)} MB).
+      </p>
+    )}
+    {failed && (
+      <p class="admin-notice admin-notice--error" role="alert">
+        Could not remove the files. Please try again.
+      </p>
+    )}
+    {!complete && (
+      <p class="admin-notice admin-notice--error" role="alert">
+        The bucket is larger than this page scans. Only the first {total} files were checked.
+      </p>
+    )}
+
+    <section class="admin-card admin-form">
+      <p>
+        When a picture is replaced, its old files stay in storage so the live website keeps working
+        until the next Publish is deployed. Files that nothing uses and that are older than{' '}
+        {`${CLEANUP_GRACE_DAYS} days`} can be removed. Files of pictures and videos that are in the
+        library are never touched.
+      </p>
+      <dl class="admin-dl">
+        <dt>Files in storage</dt>
+        <dd>{total}</dd>
+        <dt>Unused, can be removed</dt>
+        <dd>
+          {plan.remove.length} ({mb(plan.bytes)} MB)
+        </dd>
+        <dt>Unused, kept for now (newer than {`${CLEANUP_GRACE_DAYS} days`})</dt>
+        <dd>{plan.recent.length}</dd>
+      </dl>
+      {plan.remove.length > 0 ? (
+        <form method="post">
+          <button class="admin-btn admin-btn--danger" type="submit">
+            Remove {plan.remove.length} unused file{plan.remove.length === 1 ? '' : 's'}
+          </button>
+        </form>
+      ) : (
+        <p class="admin-hint">Nothing to remove.</p>
+      )}
+    </section>
+  </main>
+</AdminLayout>

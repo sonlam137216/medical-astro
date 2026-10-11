@@ -41,9 +41,15 @@ const {
 const frameSize = slot ? (IMAGE_SLOTS[slot].frames[frame] ?? IMAGE_SLOTS[slot].frames[0]) : null;
 const width = givenWidth ?? frameSize?.width ?? 800;
 const height = givenHeight ?? frameSize?.height ?? 450;
-const style = slot
-  ? frameStyle(IMAGE_SLOTS[slot], 'focus' in image ? image.focus : null, frame)
-  : undefined;
+// A library picture also gets its average colour behind it while the file loads.
+const color = 'color' in image ? image.color : undefined;
+const style =
+  [
+    slot ? frameStyle(IMAGE_SLOTS[slot], 'focus' in image ? image.focus : null, frame) : '',
+    color ? `background-color: ${color}` : '',
+  ]
+    .filter(Boolean)
+    .join('; ') || undefined;
 ---
 
 {'srcset' in image ? (

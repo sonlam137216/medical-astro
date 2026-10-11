@@ -17,6 +17,14 @@ const json = (
     label?: string;
     width?: number;
     height?: number;
+    /** The same picture is already in the library (HTTP 409). */
+    duplicate?: {
+      id: string;
+      thumb: string;
+      label: string;
+      width: number | null;
+      height: number | null;
+    };
   },
 ) =>
   new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } });
@@ -26,7 +34,33 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
   const parsed = await parseUpload(request);
   if (!parsed.ok) return json(parsed.status, { ok: false, error: parsed.error });
-  const { variants, altText, isDecorative } = parsed.value;
+  const { variants, altText, isDecorative, color, hash, allowDuplicate } = parsed.value;
+
+  // The same file uploaded before? Say so instead of filling the library with copies (the editor can still
+  // upload it again on purpose).
+  if (hash && !allowDuplicate) {
+    const { data: same } = await locals.db
+      .from('media_assets')
+      .select('id, r2_key, alt_text, is_decorative, variant_widths, width, height')
+      .eq('content_hash', hash)
+      .eq('kind', 'image')
+      .eq('status', 'active')
+      .limit(1);
+    const found = same?.[0];
+    if (found) {
+      return json(409, {
+        ok: false,
+        error: 'This picture is already in the library.',
+        duplicate: {
+          id: found.id,
+          thumb: mediaUrl(thumbnailKey(found.r2_key, found.variant_widths)),
+          label: found.is_decorative ? 'Decorative' : (found.alt_text ?? 'No description yet'),
+          width: found.width,
+          height: found.height,
+        },
+      });
+    }
+  }
 
   const id = crypto.randomUUID();
   const version = 1;
@@ -63,6 +97,8 @@ export const POST: APIRoute = async ({ request, locals }) => {
     alt_text: altText,
     is_decorative: isDecorative,
     variant_widths: variants.map((v) => v.width),
+    dominant_color: color,
+    content_hash: hash,
   });
   if (error) {
     await env.MEDIA.delete(keys).catch(() => undefined);

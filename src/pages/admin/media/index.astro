@@ -133,6 +133,11 @@ const deleted = Astro.url.searchParams.has('deleted');
       </>
     )}
 
+    <p class="admin-hint">
+      <a href="/admin/media/cleanup">Clean up unused files</a> (old versions of replaced pictures,
+      files left by failed uploads).
+    </p>
+
     {error && (
       <p class="admin-notice admin-notice--error" role="alert">
         Could not load images.

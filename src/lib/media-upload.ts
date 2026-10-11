@@ -1,3 +1,4 @@
+import { readColor } from './image-color';
 import { MAX_ALT_LENGTH, MAX_UPLOAD_BYTES, MAX_VARIANT_BYTES, VARIANT_WIDTHS } from './media';
 import { readWebp } from './webp';
 
@@ -14,6 +15,12 @@ export interface ParsedUpload {
   variants: UploadedVariant[]; // ascending by width
   altText: string | null;
   isDecorative: boolean;
+  /** Average colour of the picture ('#rrggbb') measured by the browser; null when not sent or not valid. */
+  color: string | null;
+  /** SHA-256 (hex) of the original file, to spot a second upload of the same picture. */
+  hash: string | null;
+  /** The editor chose to upload a picture that is already in the library. */
+  allowDuplicate: boolean;
 }
 
 export type UploadResult =
@@ -46,7 +53,16 @@ export function readAlt(
   return { ok: true, altText: alt === '' ? null : alt };
 }
 
-export async function parseUpload(request: Request): Promise<UploadResult> {
+const HASH = /^[0-9a-f]{64}$/;
+
+/**
+ * `needAlt: false` is for replacing the file of a picture that already has its description.
+ */
+export async function parseUpload(
+  request: Request,
+  options: { needAlt?: boolean } = {},
+): Promise<UploadResult> {
+  const { needAlt = true } = options;
   const length = Number(request.headers.get('content-length'));
   if (!Number.isFinite(length) || length <= 0) return fail(411, 'Missing request size.');
   if (length > MAX_UPLOAD_BYTES) return fail(413, 'The upload is too large.');
@@ -59,7 +75,9 @@ export async function parseUpload(request: Request): Promise<UploadResult> {
   }
 
   const isDecorative = form.has('is_decorative');
-  const alt = readAlt(String(form.get('alt_text') ?? ''), isDecorative);
+  const alt = needAlt
+    ? readAlt(String(form.get('alt_text') ?? ''), isDecorative)
+    : ({ ok: true, altText: null } as const);
   if (!alt.ok) return fail(422, alt.error);
 
   const variants: UploadedVariant[] = [];
@@ -86,5 +104,16 @@ export async function parseUpload(request: Request): Promise<UploadResult> {
     if (Math.abs(v.height - expected) > 2) return fail(422, 'Image sizes do not match each other.');
   }
 
-  return { ok: true, value: { variants, altText: alt.altText, isDecorative } };
+  const hash = String(form.get('hash') ?? '').toLowerCase();
+  return {
+    ok: true,
+    value: {
+      variants,
+      altText: alt.altText,
+      isDecorative,
+      color: readColor(form.get('color')),
+      hash: HASH.test(hash) ? hash : null,
+      allowDuplicate: form.has('allow_duplicate'),
+    },
+  };
 }

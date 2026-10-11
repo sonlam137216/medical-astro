@@ -1,4 +1,5 @@
 import type { AdminDb } from './admin-auth';
+import { readColor } from './image-color.ts';
 import { toFocus } from './image-slots.ts';
 import { articleProblems, bodyImageIds, parseArticleBody } from './cms/articles.ts';
 import { itemInput, parseFields, type Field } from './cms/fields.ts';
@@ -24,6 +25,8 @@ export interface SnapshotImage {
   widths: number[];
   /** Part of the picture to keep in view when it is cropped; absent: the place's default. */
   focus?: { x: number; y: number };
+  /** Average colour ('#rrggbb') shown behind the picture while it loads; absent for transparent pictures. */
+  color?: string;
 }
 
 export interface SnapshotDoctor {
@@ -201,16 +204,18 @@ type ImageRow = {
   variant_widths: number[];
   focal_x: number | null;
   focal_y: number | null;
+  dominant_color: string | null;
   status: string;
 } | null;
 
 /** Columns to embed for an image relation, e.g. `image:media_assets(${IMAGE_COLUMNS})`. */
 export const IMAGE_COLUMNS =
-  'r2_key, width, height, alt_text, is_decorative, variant_widths, focal_x, focal_y, status';
+  'r2_key, width, height, alt_text, is_decorative, variant_widths, focal_x, focal_y, dominant_color, status';
 
 export function toSnapshotImage(row: ImageRow): SnapshotImage | null {
   if (!row || row.status !== 'active' || !row.width || !row.height) return null;
   const focus = toFocus(row.focal_x, row.focal_y);
+  const color = readColor(row.dominant_color);
   return {
     key: row.r2_key,
     width: row.width,
@@ -220,6 +225,7 @@ export function toSnapshotImage(row: ImageRow): SnapshotImage | null {
     widths: row.variant_widths,
     // Only when chosen, so snapshots of pictures without one stay exactly as they were.
     ...(focus ? { focus } : {}),
+    ...(color ? { color } : {}),
   };
 }
 

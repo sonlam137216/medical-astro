@@ -1,5 +1,6 @@
 // Shared by the admin (upload, library) and the public build (image URLs). Safe to import anywhere:
 // no Worker or Node APIs.
+import { readColor } from './image-color.ts';
 import { toFocus, type FocusPoint } from './image-slots.ts';
 
 /** Widths the browser generates before upload. An image only gets the sizes up to its own width. */
@@ -77,6 +78,8 @@ export interface MediaImageInput {
   /** Part of the picture that must stay in view when it is cropped (percent from the top-left). */
   focal_x?: number | null;
   focal_y?: number | null;
+  /** Average colour ('#rrggbb'), painted behind the picture while it loads. */
+  dominant_color?: string | null;
 }
 
 export interface PublicImage {
@@ -88,6 +91,8 @@ export interface PublicImage {
   alt: string;
   /** Absent: the place that shows the picture uses its own default. */
   focus?: FocusPoint;
+  /** Absent for pictures with transparency. */
+  color?: string;
 }
 
 /** The fields of a snapshot image (src/lib/snapshot.ts) as `toPublicImage` takes them. */
@@ -99,6 +104,7 @@ export function snapshotImageInput(image: {
   decorative: boolean;
   widths: number[];
   focus?: FocusPoint;
+  color?: string;
 }): MediaImageInput {
   return {
     r2_key: image.key,
@@ -109,6 +115,7 @@ export function snapshotImageInput(image: {
     variant_widths: image.widths,
     focal_x: image.focus?.x ?? null,
     focal_y: image.focus?.y ?? null,
+    dominant_color: image.color ?? null,
   };
 }
 
@@ -121,6 +128,7 @@ export function toPublicImage(
   if (!parsed || !asset.width || !asset.height) return null;
   const widths = [...asset.variant_widths].sort((a, b) => a - b);
   const focus = toFocus(asset.focal_x, asset.focal_y);
+  const color = readColor(asset.dominant_color);
   const srcset = widths
     .map((w) => `${mediaUrl(variantKey(parsed.assetId, parsed.version, w), publicBase)} ${w}w`)
     .join(', ');
@@ -131,6 +139,7 @@ export function toPublicImage(
     height: asset.height,
     alt: asset.is_decorative ? '' : (asset.alt_text ?? ''),
     ...(focus ? { focus } : {}),
+    ...(color ? { color } : {}),
   };
 }
 

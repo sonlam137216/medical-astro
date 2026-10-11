@@ -261,7 +261,9 @@ export interface Tables {
   media_assets: {
     Row: {
       alt_text: string | null;
+      content_hash: string | null;
       created_at: string;
+      dominant_color: string | null;
       focal_x: number | null;
       focal_y: number | null;
       height: number | null;
@@ -279,7 +281,9 @@ export interface Tables {
     };
     Insert: {
       alt_text?: string | null;
+      content_hash?: string | null;
       created_at?: string;
+      dominant_color?: string | null;
       focal_x?: number | null;
       focal_y?: number | null;
       height?: number | null;

@@ -1463,3 +1463,20 @@ html.js .no-js-only {
   grid-template-columns: repeat(2, minmax(0, 160px));
   gap: 12px;
 }
+
+.admin-swatch {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  margin-right: 4px;
+  border: 1px solid var(--a-line-strong);
+  border-radius: 3px;
+  vertical-align: -2px;
+}
+
+.admin-media-modal__duplicate {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}

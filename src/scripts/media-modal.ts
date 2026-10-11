@@ -3,7 +3,7 @@
 // uploading an item hands it to `onSelect` and closes the window. The window is added to the page body, not to
 // the form being edited, so nothing in it is ever submitted with that form.
 import { fitReport, fitWarnings, IMAGE_SLOTS, slotHint, type SlotKey } from '../lib/image-slots';
-import { uploadImage, uploadVideo } from './media-client';
+import { isDuplicate, uploadImage, uploadVideo } from './media-client';
 
 export interface PickedMedia {
   id: string;
@@ -146,6 +146,22 @@ export function openMediaModal(options: Options) {
   const progress = el('progress', { value: '0', max: '100' });
   progress.hidden = true;
   const uploadStatus = el('p', { class: 'form__status', role: 'status', 'aria-live': 'polite' });
+  // Shown when the same picture is already in the library: use that one, or upload it again on purpose.
+  const duplicateBox = el('div', { class: 'admin-media-modal__duplicate' });
+  duplicateBox.hidden = true;
+  let duplicate: PickedMedia | null = null;
+  let allowDuplicate = false;
+  const useExisting = el(
+    'button',
+    { type: 'button', class: 'admin-btn' },
+    'Use the one in the library',
+  );
+  const uploadAnyway = el(
+    'button',
+    { type: 'button', class: 'admin-btn admin-btn--ghost' },
+    'Upload it anyway',
+  );
+  add(duplicateBox, useExisting, uploadAnyway);
   const go = el('button', { type: 'button', class: 'admin-btn' }, `Upload ${noun}`);
   const hint = el(
     'p',
@@ -155,7 +171,18 @@ export function openMediaModal(options: Options) {
       : 'The image is resized in your browser to a few web sizes and location data is removed. Do not upload photos of patients unless they have given written permission.',
   );
   if (slot) add(upload, el('p', { class: 'admin-hint' }, slotHint(slot)));
-  add(upload, drop, altLabel, decorativeLabel, posterLabel, go, progress, uploadStatus, hint);
+  add(
+    upload,
+    drop,
+    altLabel,
+    decorativeLabel,
+    posterLabel,
+    go,
+    progress,
+    uploadStatus,
+    duplicateBox,
+    hint,
+  );
 
   add(dialog, head, tabs, library, upload);
   // Inside the admin shell (it defines the colours) but not inside the form being edited.
@@ -268,6 +295,9 @@ export function openMediaModal(options: Options) {
     uploadStatus.dataset.kind = error ? 'error' : 'ok';
   };
   file.addEventListener('change', () => {
+    allowDuplicate = false;
+    duplicate = null;
+    duplicateBox.hidden = true;
     dropText.textContent = file.files?.[0]?.name ?? dropText.textContent;
   });
   for (const type of ['dragenter', 'dragover']) {
@@ -303,12 +333,27 @@ export function openMediaModal(options: Options) {
             },
             onStatus: (message) => showUpload(message),
           })
-        : await uploadImage(chosen, alt.value, decorative.checked, (message) =>
-            showUpload(message),
+        : await uploadImage(
+            chosen,
+            alt.value,
+            decorative.checked,
+            (message) => showUpload(message),
+            { allowDuplicate },
           );
     go.disabled = false;
     progress.hidden = true;
-    if (!result.ok) return showUpload(result.error, true);
+    if (!result.ok) {
+      if (isDuplicate(result)) {
+        duplicate = { ...result.existing, kind };
+        duplicateBox.hidden = false;
+        return showUpload(
+          `${result.error} It is in the library as “${result.existing.label}”.`,
+          true,
+        );
+      }
+      return showUpload(result.error, true);
+    }
+    duplicateBox.hidden = true;
     finish({
       id: result.item.id,
       kind,
@@ -317,6 +362,15 @@ export function openMediaModal(options: Options) {
       width: result.item.width,
       height: result.item.height,
     });
+  });
+
+  useExisting.addEventListener('click', () => {
+    if (duplicate) finish(duplicate);
+  });
+  uploadAnyway.addEventListener('click', () => {
+    allowDuplicate = true;
+    duplicateBox.hidden = true;
+    go.click();
   });
 
   dialog.showModal();

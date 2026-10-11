@@ -3,6 +3,8 @@
 // also drops EXIF data such as camera and location before anything leaves the computer). Videos are sent as
 // they are. The server re-checks every file; nothing here is trusted. Keep the limits in step with
 // src/lib/media.ts.
+import { averageColor } from '../lib/image-color';
+
 const IMAGE_WIDTHS = [480, 960, 1600];
 const MAX_IMAGE_BYTES = 25 * 1024 * 1024;
 const MAX_VIDEO_BYTES = 80 * 1024 * 1024;
@@ -53,12 +55,33 @@ const encode = (bitmap: ImageBitmap, width: number) =>
     canvas.toBlob(resolve, 'image/webp', 0.82);
   });
 
-export async function uploadImage(
-  file: File,
-  altText: string,
-  decorative: boolean,
-  onStatus: (message: string) => void = () => undefined,
-): Promise<UploadResult> {
+const hex = (buffer: ArrayBuffer) =>
+  [...new Uint8Array(buffer)].map((byte) => byte.toString(16).padStart(2, '0')).join('');
+
+/** SHA-256 of the original file; null where the browser has no Web Crypto (an insecure page). */
+const hashFile = async (file: File): Promise<string | null> => {
+  try {
+    return hex(await crypto.subtle.digest('SHA-256', await file.arrayBuffer()));
+  } catch {
+    return null;
+  }
+};
+
+/** Average colour of the picture (a 16 x 16 redraw is plenty), or null for a picture with transparency. */
+const colorOf = (bitmap: ImageBitmap): string | null => {
+  const canvas = document.createElement('canvas');
+  canvas.width = 16;
+  canvas.height = 16;
+  const context = canvas.getContext('2d', { willReadFrequently: true });
+  if (!context) return null;
+  context.drawImage(bitmap, 0, 0, 16, 16);
+  return averageColor(context.getImageData(0, 0, 16, 16).data);
+};
+
+type Prepared = { ok: true; body: FormData } | { ok: false; error: string };
+
+/** The WebP sizes of an image, its colour and its hash, ready to send. */
+async function prepareImage(file: File, onStatus: (message: string) => void): Promise<Prepared> {
   if (!IMAGE_TYPES.includes(file.type)) return fail('Use a JPEG, PNG or WebP image.');
   if (file.size > MAX_IMAGE_BYTES) return fail('This image is larger than 25 MB.');
 
@@ -77,8 +100,6 @@ export async function uploadImage(
       );
     }
     const body = new FormData();
-    body.set('alt_text', altText);
-    if (decorative) body.set('is_decorative', 'on');
     for (const width of widths) {
       const blob = await encode(bitmap, width);
       if (!blob || blob.type !== 'image/webp') {
@@ -86,15 +107,87 @@ export async function uploadImage(
       }
       body.set(`w${width}`, blob, `${width}.webp`);
     }
-    onStatus('Uploading…');
-    const response = await fetch('/admin/media/upload', { method: 'POST', body });
-    return toResult(response.status, (await response.json().catch(() => null)) as Reply | null);
+    const color = colorOf(bitmap);
+    if (color) body.set('color', color);
+    const hash = await hashFile(file);
+    if (hash) body.set('hash', hash);
+    return { ok: true, body };
   } finally {
     bitmap.close();
   }
 }
 
-const fail = (error: string): UploadResult => ({ ok: false, error });
+export interface DuplicateResult {
+  ok: false;
+  error: string;
+  existing: UploadedMedia;
+}
+export type ImageUploadResult = UploadResult | DuplicateResult;
+
+export const isDuplicate = (result: { ok: boolean }): result is DuplicateResult =>
+  !result.ok && 'existing' in result;
+
+interface DuplicateReply extends Reply {
+  duplicate?: {
+    id: string;
+    thumb: string;
+    label: string;
+    width: number | null;
+    height: number | null;
+  };
+}
+
+/**
+ * Uploads an image. When the same file is already in the library the answer carries `existing` (and nothing
+ * was uploaded): offer to use it, or call again with `allowDuplicate` to upload it anyway.
+ */
+export async function uploadImage(
+  file: File,
+  altText: string,
+  decorative: boolean,
+  onStatus: (message: string) => void = () => undefined,
+  options: { allowDuplicate?: boolean } = {},
+): Promise<ImageUploadResult> {
+  const prepared = await prepareImage(file, onStatus);
+  if (!prepared.ok) return prepared;
+  const { body } = prepared;
+  body.set('alt_text', altText);
+  if (decorative) body.set('is_decorative', 'on');
+  if (options.allowDuplicate) body.set('allow_duplicate', 'on');
+  onStatus('Uploading…');
+  const response = await fetch('/admin/media/upload', { method: 'POST', body });
+  const reply = (await response.json().catch(() => null)) as DuplicateReply | null;
+  if (response.status === 409 && reply?.duplicate) {
+    const { id, thumb, label, width, height } = reply.duplicate;
+    return {
+      ok: false,
+      error: reply.error ?? 'This picture is already in the library.',
+      existing: { id, thumb, label, width: width ?? undefined, height: height ?? undefined },
+    };
+  }
+  return toResult(response.status, reply);
+}
+
+/** Puts a new file in place of an image of the library (same description, same places). */
+export async function replaceImage(
+  id: string,
+  file: File,
+  onStatus: (message: string) => void = () => undefined,
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const prepared = await prepareImage(file, onStatus);
+  if (!prepared.ok) return prepared;
+  onStatus('Uploading…');
+  const response = await fetch(`/admin/media/${id}/replace`, {
+    method: 'POST',
+    body: prepared.body,
+  });
+  const reply = (await response.json().catch(() => null)) as Reply | null;
+  return response.ok && reply?.ok
+    ? { ok: true }
+    : { ok: false, error: reply?.error ?? 'Upload failed. Please try again.' };
+}
+
+const fail = (error: string) => ({ ok: false as const, error });
 
 const readVideoSize = (file: File) =>
   new Promise<{ width: number; height: number } | null>((resolve) => {

@@ -85,6 +85,11 @@ const sp = Astro.url.searchParams;
         This {noun} is still used, so it cannot be deleted. Remove it from where it is used first.
       </p>
     )}
+    {sp.has('replaced') && (
+      <p class="admin-notice" role="status">
+        The picture was replaced. Publish to show the new one on the website.
+      </p>
+    )}
     {sp.has('focus') && (
       <p class="admin-notice" role="status">
         Focus point saved. Publish to show the change on the website.
@@ -127,6 +132,15 @@ const sp = Astro.url.searchParams;
             <dt>Size</dt>
             <dd>
               {asset.width} × {asset.height} px
+            </dd>
+          </>
+        )}
+        {!isVideo && asset.dominant_color && (
+          <>
+            <dt>Loading colour</dt>
+            <dd>
+              <span class="admin-swatch" style={`background: ${asset.dominant_color}`} />{' '}
+              {asset.dominant_color}
             </dd>
           </>
         )}
@@ -184,6 +198,30 @@ const sp = Astro.url.searchParams;
         </button>
       </div>
     </form>
+
+    {!isVideo && (
+      <form class="admin-form admin-card" data-media-replace data-id={id}>
+        <h2 class="t-h3">Replace the picture</h2>
+        <p class="admin-hint">
+          Put a new file in place of this one. The description and every place that uses it stay as
+          they are, and the new picture appears after you publish. If its proportions are different,
+          the focus point below is cleared.
+        </p>
+        <label>
+          New file (JPEG, PNG or WebP)
+          <input type="file" name="file" accept="image/jpeg,image/png,image/webp" />
+        </label>
+        <div>
+          <button class="admin-btn" type="submit">
+            Replace picture
+          </button>
+        </div>
+        <p class="form__status" data-status role="status" aria-live="polite" />
+        <noscript>
+          <p class="admin-notice admin-notice--error">Replacing a picture needs JavaScript.</p>
+        </noscript>
+      </form>
+    )}
 
     {!isVideo && asset.width && asset.height && (
       <form class="admin-form admin-card" method="post" action={`/admin/media/${id}/focus`}>
@@ -269,6 +307,8 @@ const sp = Astro.url.searchParams;
 </AdminLayout>
 
 <script>
+  import '../../../scripts/media-replace';
+
   // Click the picture to fill in the two numbers; the form is saved with the button, as without JavaScript.
   const stage = document.querySelector<HTMLElement>('[data-focus-stage]');
   const marker = document.querySelector<HTMLElement>('[data-focus-marker]');
