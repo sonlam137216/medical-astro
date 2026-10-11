@@ -1,7 +1,7 @@
 import type { APIRoute } from 'astro';
 import { env } from 'cloudflare:workers';
 import { isSameOrigin } from '../../../lib/admin-auth';
-import { MAX_VIDEO_BYTES, videoKey } from '../../../lib/media';
+import { MAX_VIDEO_BYTES, mediaUrl, thumbnailKey, videoKey } from '../../../lib/media';
 import { readAlt } from '../../../lib/media-upload';
 import { checkMp4Head } from '../../../lib/mp4';
 
@@ -10,7 +10,10 @@ export const prerender = false;
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const HEAD_BYTES = 64 * 1024;
 
-const json = (status: number, body: { ok: boolean; id?: string; error?: string }) =>
+const json = (
+  status: number,
+  body: { ok: boolean; id?: string; error?: string; thumb?: string | null; label?: string },
+) =>
   new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } });
 
 const dimension = (raw: string | null) => {
@@ -38,15 +41,17 @@ export const POST: APIRoute = async ({ request, url, locals }) => {
   if (!alt.ok) return json(422, { ok: false, error: alt.error });
 
   const posterId = url.searchParams.get('poster') || null;
+  let posterThumb: string | null = null;
   if (posterId) {
     if (!UUID_RE.test(posterId)) return json(422, { ok: false, error: 'Invalid cover image.' });
     const { data: poster } = await locals.db
       .from('media_assets')
-      .select('id')
+      .select('id, r2_key, variant_widths')
       .eq('id', posterId)
       .eq('kind', 'image')
       .maybeSingle();
     if (!poster) return json(422, { ok: false, error: 'The chosen cover image does not exist.' });
+    posterThumb = mediaUrl(thumbnailKey(poster.r2_key, poster.variant_widths));
   }
 
   // Read the start of the file and check it before anything is stored.
@@ -134,5 +139,10 @@ export const POST: APIRoute = async ({ request, url, locals }) => {
     return json(500, { ok: false, error: 'Could not save the video. Please try again.' });
   }
 
-  return json(200, { ok: true, id });
+  return json(200, {
+    ok: true,
+    id,
+    thumb: posterThumb,
+    label: alt.altText ?? 'No description yet',
+  });
 };

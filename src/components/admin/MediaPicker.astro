@@ -1,0 +1,49 @@
+---
+import type { PickerImage } from '../../lib/media-picker';
+
+// A photo field: the chosen picture with Choose / Replace / Remove, and the "Select or upload media" window
+// (src/scripts/media-fields.ts). The radio list below is what the form really submits: with JavaScript it is
+// hidden and kept in step by the script, without JavaScript it is the picker.
+interface Props {
+  name: string;
+  label: string;
+  /** Id of the chosen image, '' for none. */
+  value: string;
+  images: PickerImage[];
+  error?: string;
+  /** Words for "nothing chosen" in the radio list ("No image", "No photo"). */
+  none?: string;
+}
+
+const { name, label, value, images, error, none = 'No image' } = Astro.props;
+---
+
+<fieldset class="admin-picker-wrap" data-media-field data-kind="image">
+  <legend>{label}</legend>
+  <div class="admin-media-chosen" data-media-chosen hidden></div>
+  <div class="admin-picker" data-media-fallback>
+    <label>
+      <input type="radio" {name} value="" checked={value === ''} />
+      {none}
+    </label>
+    {images.map((img) => (
+      <label>
+        <input type="radio" {name} value={img.id} checked={value === img.id} />
+        <img src={img.thumb} alt="" loading="lazy" />
+        <span>{img.label}</span>
+      </label>
+    ))}
+  </div>
+  <span class="admin-hint js-only">
+    Choose from the library or upload a new one. Only use pictures you have the right to publish.
+  </span>
+  <span class="admin-hint no-js-only">
+    Upload pictures in <a href="/admin/media">Media</a> first. Only use pictures you have the right
+    to publish.
+  </span>
+  {error && <span class="admin-field-error">{error}</span>}
+</fieldset>
+
+<script>
+  import '../../scripts/media-fields';
+</script>

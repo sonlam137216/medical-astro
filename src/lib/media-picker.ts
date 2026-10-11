@@ -1,5 +1,6 @@
 import type { AdminDb } from './admin-auth';
 import { mediaUrl, thumbnailKey } from './media';
+import { MEDIA_PAGE_SIZE, pageMedia, searchMedia, type MediaItem } from './media-list';
 
 export interface PickerImage {
   id: string;
@@ -21,4 +22,63 @@ export async function listPickerImages(db: AdminDb): Promise<PickerImage[]> {
     thumb: mediaUrl(thumbnailKey(a.r2_key, a.variant_widths)),
     label: a.is_decorative ? 'Decorative' : (a.alt_text ?? 'No description yet'),
   }));
+}
+
+/** Newest first; the library is small enough to read once and filter here (there is no LIKE in the query layer). */
+const LIBRARY_LIMIT = 500;
+
+/**
+ * One page of the library for the pickers (`kind` images or videos), optionally searched; or, with `ids`, exactly
+ * those items (used to draw pictures already placed in an article). Only active files.
+ */
+export async function listMedia(
+  db: AdminDb,
+  options: { kind: 'image' | 'video'; query?: string; page?: number; ids?: string[] },
+): Promise<{ items: MediaItem[]; more: boolean }> {
+  let query = db
+    .from('media_assets')
+    .select(
+      'id, kind, r2_key, alt_text, is_decorative, variant_widths, size_bytes, poster_asset_id',
+    )
+    .eq('kind', options.kind)
+    .eq('status', 'active')
+    .order('created_at', { ascending: false });
+  if (options.ids) query = query.in('id', options.ids.slice(0, 80));
+  else query = query.limit(LIBRARY_LIMIT);
+  const { data } = await query;
+  const rows = data ?? [];
+
+  // A video's picture is its cover image: look those up in one go.
+  const posterIds = [
+    ...new Set(rows.flatMap((r) => (r.poster_asset_id ? [r.poster_asset_id] : []))),
+  ];
+  const posters = new Map<string, string>();
+  if (posterIds.length > 0) {
+    const { data: found } = await db
+      .from('media_assets')
+      .select('id, r2_key, variant_widths')
+      .in('id', posterIds.slice(0, 80));
+    for (const p of found ?? [])
+      posters.set(p.id, mediaUrl(thumbnailKey(p.r2_key, p.variant_widths)));
+  }
+
+  const all: MediaItem[] = rows.map((r) =>
+    r.kind === 'video'
+      ? {
+          id: r.id,
+          kind: 'video',
+          thumb: r.poster_asset_id ? (posters.get(r.poster_asset_id) ?? null) : null,
+          label: r.alt_text ?? 'No description yet',
+          detail: `${(r.size_bytes / 1024 / 1024).toFixed(1)} MB`,
+        }
+      : {
+          id: r.id,
+          kind: 'image',
+          thumb: mediaUrl(thumbnailKey(r.r2_key, r.variant_widths)),
+          label: r.is_decorative ? 'Decorative' : (r.alt_text ?? 'No description yet'),
+          detail: null,
+        },
+  );
+  if (options.ids) return { items: all, more: false };
+  return pageMedia(searchMedia(all, options.query ?? ''), options.page ?? 1, MEDIA_PAGE_SIZE);
 }

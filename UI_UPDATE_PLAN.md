@@ -163,6 +163,8 @@ Trạng thái dùng cho từng phần: `Chưa bắt đầu` → `Đang đối ch
 
 **Tiến độ 11/10/2026 (nâng cấp bài viết kiểu WordPress, U1–U4):** xong ở mức code, chưa commit, chưa deploy; theo chủ dự án **không đưa Dental Knowledge lên Home**. U1 danh sách admin (tab trạng thái có số lượng, lọc loại/chuyên mục, tìm, phân trang 20; chuyên mục có số bài). U2 trình soạn (thanh công cụ, chọn ảnh từ Media, tab Preview), ảnh trong thân bài `![chú thích](media:<id>)`, xem trước bản nháp ở `/admin/preview/articles/<id>`, đổi slug tạo redirect. U3 route công khai gộp ở `src/pages/[kind]/`: phân trang `page/<n>` (9 bài/trang), trang chuyên mục `category/<slug>` (có `description`, migration `0007`), chip thành link, `search.json` mỗi loại, `rel=prev/next`; slug `page`/`category`/`search` bị cấm. U4 bài liên quan chéo hai loại, link 'Dental Knowledge' ở footer mẫu, khối `LatestArticles` ở `/services` và `/services/dental-implants` (ẩn khi chưa có bài). Chi tiết kỹ thuật và kết quả thử ở `CLAUDE.md`. **Chưa làm:** hẹn giờ đăng, tag, nhiều chuyên mục, WYSIWYG, tìm trong toàn bộ nội dung bài.
 
+**Tiến độ 11/10/2026 (chọn/tải media trong form):** xong ở mức code, chưa commit, chưa deploy. Mọi trường ảnh, trường video Home và hộp 'Picture' của bài viết mở cửa sổ 'Select or upload media' (Library có tìm + 'Load more', Upload ảnh/video có mô tả bắt buộc); upload xong tự chọn; không có JS vẫn dùng được danh sách cũ. Chi tiết ở `CLAUDE.md`. **Chưa làm:** upload nhiều file, sửa mô tả trong cửa sổ, ảnh bìa tự tạo từ video.
+
 **Đạt khi:** đủ ba mẫu trang, UI khớp Figma, tìm kiếm/lọc/mục lục/liên kết bài hoạt động và SEO có trong HTML dựng sẵn.
 
 ### P9 — Liên kết, video và tương tác còn thiếu

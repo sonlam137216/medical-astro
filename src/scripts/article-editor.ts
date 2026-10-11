@@ -1,20 +1,20 @@
 // Writing tools of the article text box in the admin: a toolbar that types the markers for you, a picture picker
 // that reads from the Media library, and a preview that shows the text the way the parser will read it. The
 // text stays plain text in an ordinary <textarea>, so the form works the same without this script.
-import { parseArticleBody, type Block, type Inline } from '../lib/cms/articles';
+import { bodyImageIds, parseArticleBody, type Block, type Inline } from '../lib/cms/articles';
+import { openMediaModal } from './media-modal';
 
 const root = document.querySelector<HTMLElement>('[data-article-editor]');
 const area = root?.querySelector<HTMLTextAreaElement>('[data-rte-text]');
 const bar = root?.querySelector<HTMLElement>('[data-rte-tools]');
 const preview = root?.querySelector<HTMLElement>('[data-rte-preview]');
-const dialog = root?.querySelector<HTMLDialogElement>('[data-rte-pictures]');
 
-if (root && area && bar && preview && dialog) {
+if (root && area && bar && preview) {
   bar.hidden = false;
-  const thumbs = new Map<string, string>();
-  for (const b of dialog.querySelectorAll<HTMLElement>('[data-picture]')) {
-    thumbs.set(b.dataset.picture ?? '', b.dataset.thumb ?? '');
-  }
+  // id -> small picture, for the preview: the first images of the library come with the page, others are asked for.
+  const thumbs = new Map<string, string>(
+    Object.entries(JSON.parse(root.dataset.thumbs ?? '{}') as Record<string, string>),
+  );
 
   // ---- editing helpers -----------------------------------------------------------------------------------
   const replace = (
@@ -71,10 +71,8 @@ if (root && area && bar && preview && dialog) {
     replace(s, e, text, urlFrom, urlFrom + 'https://'.length);
   };
 
-  // Where the cursor was when the Picture button was pressed (the dialog takes the focus away).
-  let pictureAt = 0;
-  const insertPicture = (id: string) => {
-    const at = Math.min(pictureAt, area.value.length);
+  const insertPicture = (id: string, at: number) => {
+    at = Math.min(at, area.value.length);
     const before = area.value.slice(0, at);
     const lead =
       before === '' || before.endsWith('\n\n') ? '' : before.endsWith('\n') ? '\n' : '\n\n';
@@ -93,22 +91,21 @@ if (root && area && bar && preview && dialog) {
     bold: () => wrap('**', '**', 'bold text'),
     link: insertLink,
     image: () => {
-      pictureAt = area.selectionEnd;
-      dialog.showModal();
+      // The window takes the focus away, so remember where the cursor was.
+      const at = area.selectionEnd;
+      openMediaModal({
+        kind: 'image',
+        onSelect: (item) => {
+          if (item.thumb) thumbs.set(item.id, item.thumb);
+          insertPicture(item.id, at);
+        },
+      });
     },
   };
 
   bar.addEventListener('click', (event) => {
     const button = (event.target as HTMLElement).closest<HTMLButtonElement>('[data-tool]');
     if (button) tools[button.dataset.tool ?? '']?.();
-  });
-
-  dialog.addEventListener('click', (event) => {
-    if ((event.target as HTMLElement).closest('[data-rte-cancel]')) return dialog.close();
-    const pick = (event.target as HTMLElement).closest<HTMLButtonElement>('[data-picture]');
-    if (!pick) return;
-    dialog.close();
-    insertPicture(pick.dataset.picture ?? '');
   });
 
   // ---- preview -------------------------------------------------------------------------------------------
@@ -157,10 +154,26 @@ if (root && area && bar && preview && dialog) {
     return node;
   };
 
-  const show = (view: 'write' | 'preview') => {
+  /** Asks the library for pictures used in the text that the page did not bring along. */
+  const learnThumbs = async (ids: string[]) => {
+    const missing = ids.filter((id) => !thumbs.has(id));
+    if (missing.length === 0) return;
+    try {
+      const response = await fetch(
+        `/admin/media/list?kind=image&ids=${encodeURIComponent(missing.join(','))}`,
+      );
+      const data = (await response.json()) as { items: { id: string; thumb: string | null }[] };
+      for (const item of data.items) if (item.thumb) thumbs.set(item.id, item.thumb);
+    } catch {
+      // The preview then shows "not in Media" for those pictures; the saved text is not affected.
+    }
+  };
+
+  const show = async (view: 'write' | 'preview') => {
     const previewing = view === 'preview';
     if (previewing) {
       const blocks = parseArticleBody(area.value);
+      await learnThumbs(bodyImageIds(blocks));
       preview.replaceChildren(
         ...(blocks.length > 0 ? blocks.map(block) : [el('p', 'Nothing to preview yet.')]),
       );

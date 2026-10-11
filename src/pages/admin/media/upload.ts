@@ -1,12 +1,16 @@
 import type { APIRoute } from 'astro';
 import { env } from 'cloudflare:workers';
 import { isSameOrigin } from '../../../lib/admin-auth';
-import { variantKey } from '../../../lib/media';
+import { mediaUrl, thumbnailKey, variantKey } from '../../../lib/media';
 import { parseUpload } from '../../../lib/media-upload';
 
 export const prerender = false;
 
-const json = (status: number, body: { ok: boolean; id?: string; error?: string }) =>
+// `thumb` and `label` let a picker window show the new image without reloading the page.
+const json = (
+  status: number,
+  body: { ok: boolean; id?: string; error?: string; thumb?: string; label?: string },
+) =>
   new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } });
 
 export const POST: APIRoute = async ({ request, locals }) => {
@@ -58,5 +62,11 @@ export const POST: APIRoute = async ({ request, locals }) => {
     return json(500, { ok: false, error: 'Could not save the image. Please try again.' });
   }
 
-  return json(200, { ok: true, id });
+  const widths = variants.map((v) => v.width);
+  return json(200, {
+    ok: true,
+    id,
+    thumb: mediaUrl(thumbnailKey(keys[keys.length - 1], widths)),
+    label: isDecorative ? 'Decorative' : (altText ?? 'No description yet'),
+  });
 };

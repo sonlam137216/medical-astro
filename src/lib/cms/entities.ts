@@ -573,7 +573,7 @@ export const SITE_FIELDS: Field[] = [
     table: 'media_assets',
     labelColumn: 'alt_text',
     where: { kind: 'video', status: 'active' },
-    help: 'Shows the “Watch video” button and a player on the Home page. Upload an MP4 in Media first (add a cover image there so people see a picture before pressing play). Choose “None” to show no video.',
+    help: 'Shows the “Watch video” button and a player on the Home page. Use “Choose or upload a video…” to pick one from Media or upload an MP4 here (give it a cover image so people see a picture before pressing play). Choose “None” to show no video.',
   },
   ...SOCIAL_PLATFORMS.map((p): Field => ({
     group: 'Social profiles',

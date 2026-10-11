@@ -1,6 +1,7 @@
 ---
 import { itemInput, type Field, type FieldErrors, type FormValues } from '../../lib/cms/fields';
 import type { FormOptions } from '../../lib/cms/admin';
+import MediaPicker from './MediaPicker.astro';
 
 // One input of a content form, drawn from its field definition.
 interface Props {
@@ -31,27 +32,13 @@ const slotsFor = (f: Extract<Field, { type: 'items' }>) => {
 )}
 
 {f.type === 'image' && (
-  <fieldset class="admin-picker-wrap">
-    <legend>{f.label}</legend>
-    <div class="admin-picker">
-      <label>
-        <input type="radio" name={f.name} value="" checked={text(f.name) === ''} />
-        No image
-      </label>
-      {options.images.map((img) => (
-        <label>
-          <input type="radio" name={f.name} value={img.id} checked={text(f.name) === img.id} />
-          <img src={img.thumb} alt="" loading="lazy" />
-          <span>{img.label}</span>
-        </label>
-      ))}
-    </div>
-    <span class="admin-hint">
-      Upload images in <a href="/admin/media">Media</a> first. Only use images you have the right to
-      publish.
-    </span>
-    {error && <span class="admin-field-error">{error}</span>}
-  </fieldset>
+  <MediaPicker
+    name={f.name}
+    label={f.label}
+    value={text(f.name)}
+    images={options.images}
+    error={error}
+  />
 )}
 
 {f.type === 'items' && (
@@ -117,7 +104,13 @@ const slotsFor = (f: Extract<Field, { type: 'items' }>) => {
 )}
 
 {f.type === 'textarea' && f.editor === 'article' && (
-  <div class="admin-rte" data-article-editor>
+  <div
+    class="admin-rte"
+    data-article-editor
+    data-thumbs={JSON.stringify(
+      Object.fromEntries(options.images.map((img) => [img.id, img.thumb])),
+    )}
+  >
     <label class="admin-rte__label" for={`field-${f.name}`}>
       {f.label}
     </label>
@@ -164,30 +157,6 @@ const slotsFor = (f: Extract<Field, { type: 'items' }>) => {
       data-rte-text
     >{text(f.name)}</textarea>
     <div class="admin-rte__preview article-preview" data-rte-preview hidden></div>
-    <dialog class="admin-rte__pictures" data-rte-pictures aria-label="Choose a picture">
-      <!-- A div, not a form: this sits inside the article form, and forms cannot be nested. -->
-      <div class="admin-rte__pictures-body">
-        <p>
-          <strong>Choose a picture</strong>
-        </p>
-        {options.images.length === 0 && (
-          <p class="admin-hint">
-            No pictures yet. Upload them in <a href="/admin/media">Media</a> first.
-          </p>
-        )}
-        <div class="admin-picker">
-          {options.images.map((img) => (
-            <button type="button" data-picture={img.id} data-thumb={img.thumb}>
-              <img src={img.thumb} alt="" loading="lazy" />
-              <span>{img.label}</span>
-            </button>
-          ))}
-        </div>
-        <button class="admin-btn admin-btn--ghost" type="button" data-rte-cancel>
-          Cancel
-        </button>
-      </div>
-    </dialog>
     {f.help && <span class="admin-hint">{f.help}</span>}
     {error && <span class="admin-field-error">{error}</span>}
   </div>
@@ -260,7 +229,11 @@ const slotsFor = (f: Extract<Field, { type: 'items' }>) => {
         </select>
       )}
       {f.type === 'ref' && (
-        <select name={f.name} aria-invalid={invalid(f.name)}>
+        <select
+          name={f.name}
+          aria-invalid={invalid(f.name)}
+          data-media-video={f.where?.kind === 'video' ? '' : undefined}
+        >
           <option value="" selected={text(f.name) === ''}>
             None
           </option>
@@ -279,4 +252,5 @@ const slotsFor = (f: Extract<Field, { type: 'items' }>) => {
 <script>
   // The article writing tools are loaded only on pages that have them.
   if (document.querySelector('[data-article-editor]')) void import('../../scripts/article-editor');
+  if (document.querySelector('select[data-media-video]')) void import('../../scripts/media-fields');
 </script>
