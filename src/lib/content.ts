@@ -54,6 +54,7 @@ export function getPublicBase(): string | null {
 }
 
 let cached: Promise<Snapshot | null> | undefined;
+let cachedAt = 0;
 
 /**
  * The published content for this build:
@@ -64,6 +65,10 @@ let cached: Promise<Snapshot | null> | undefined;
  * A read error fails the build on purpose: silently shipping stale sample content would be worse.
  */
 export function loadSnapshot(): Promise<Snapshot | null> {
+  // `astro dev` keeps this module alive, so re-read now and then to show a revision published meanwhile.
+  // A build never does: it is one process and must see one revision throughout.
+  if (import.meta.env?.DEV && Date.now() - cachedAt > 3000) cached = undefined;
+  if (!cached) cachedAt = Date.now();
   return (cached ??= read());
 }
 

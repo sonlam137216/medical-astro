@@ -9,7 +9,10 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
+    "dev:local": "node --experimental-sqlite --no-warnings scripts/dev-local.mjs dev",
+    "build:local": "node --experimental-sqlite --no-warnings scripts/dev-local.mjs build",
     "preview": "astro build && wrangler dev",
+    "preview:local": "npm run build:local && wrangler dev",
     "astro": "astro",
     "typegen": "wrangler types --env-file .dev.vars.example",
     "db:migrate": "wrangler d1 migrations apply DB --local",
