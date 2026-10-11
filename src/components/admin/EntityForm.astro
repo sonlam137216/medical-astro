@@ -1,9 +1,11 @@
 ---
 import type { EntityDef } from '../../lib/cms/entities';
-import { itemInput, type Field, type FieldErrors, type FormValues } from '../../lib/cms/fields';
+import type { Field as FieldDef, FieldErrors, FormValues } from '../../lib/cms/fields';
 import type { FormOptions } from '../../lib/cms/admin';
+import Field from './Field.astro';
 
-// Renders the form of any registered content type from its field list.
+// Renders the form of any registered content type from its field list: the text on the left, the settings
+// (visibility, order, photo, dates, price...) in a column on the right, and a save bar along the bottom.
 interface Props {
   def: Pick<EntityDef, 'fields'>;
   values: FormValues;
@@ -14,216 +16,59 @@ interface Props {
 }
 
 const { def, values, errors = {}, formError, options, submitLabel } = Astro.props;
-const text = (name: string) => String(values[name] ?? '');
-const invalid = (name: string) => (errors[name] ? 'true' : undefined);
-// Slots of an `items` field to show: the filled ones plus two empty ones (at most the field's maximum).
-const slotsFor = (f: Extract<Field, { type: 'items' }>) => {
-  let last = -1;
-  for (let i = 0; i < f.maxItems; i++)
-    if (f.columns.some((c) => text(itemInput(f.name, i, c.name)) !== '')) last = i;
-  return Math.min(f.maxItems, last + 3);
-};
+
+const SIDE_TYPES = new Set(['bool', 'int', 'select', 'ref', 'date', 'image', 'money', 'slug']);
+const main = def.fields.filter((f) => !SIDE_TYPES.has(f.type));
+const side = def.fields.filter((f) => SIDE_TYPES.has(f.type));
+const photos = side.filter((f) => f.type === 'image');
+const settings = side.filter((f) => f.type !== 'image');
+
+// A heading is drawn when a field starts a new group.
+const rows = main.map((f: FieldDef, i) => ({
+  f,
+  heading: f.group && f.group !== main[i - 1]?.group ? f.group : null,
+}));
 ---
 
-<form class="admin-form admin-card" method="post">
+<form class:list={['admin-editor', { 'admin-editor--single': side.length === 0 }]} method="post">
   {formError && (
-    <p class="admin-notice admin-notice--error" role="alert">
+    <p class="admin-notice admin-notice--error admin-editor__wide" role="alert">
       {formError}
     </p>
   )}
 
-  {def.fields.map((f) => {
-    const error = errors[f.name];
-    return (
-      <>
-        {f.type === 'bool' && (
-          <label class="admin-check">
-            <input type="checkbox" name={f.name} checked={Boolean(values[f.name])} />
-            {f.label}
-          </label>
-        )}
+  {main.length > 0 && (
+    <div class="admin-editor__main admin-card admin-form">
+      {rows.map(({ f, heading }) => (
+        <>
+          {heading && <h2 class="admin-form__group">{heading}</h2>}
+          <div class:list={['admin-field', { 'is-half': f.half }]}>
+            <Field {f} {values} {errors} {options} />
+          </div>
+        </>
+      ))}
+    </div>
+  )}
 
-        {f.type === 'image' && (
-          <fieldset class="admin-picker-wrap">
-            <legend>{f.label}</legend>
-            <div class="admin-picker">
-              <label>
-                <input type="radio" name={f.name} value="" checked={text(f.name) === ''} />
-                No image
-              </label>
-              {options.images.map((img) => (
-                <label>
-                  <input
-                    type="radio"
-                    name={f.name}
-                    value={img.id}
-                    checked={text(f.name) === img.id}
-                  />
-                  <img src={img.thumb} alt="" loading="lazy" />
-                  <span>{img.label}</span>
-                </label>
-              ))}
-            </div>
-            <span class="admin-hint">
-              Upload images in <a href="/admin/media">Media</a> first. Only use images you have the
-              right to publish.
-            </span>
-            {error && <span class="admin-field-error">{error}</span>}
-          </fieldset>
-        )}
+  {side.length > 0 && (
+    <aside class="admin-editor__side">
+      {settings.length > 0 && (
+        <section class="admin-card admin-form">
+          <h2 class="admin-panel__title">Settings</h2>
+          {settings.map((f) => (
+            <Field {f} {values} {errors} {options} />
+          ))}
+        </section>
+      )}
+      {photos.map((f) => (
+        <section class="admin-card admin-form">
+          <Field {f} {values} {errors} {options} />
+        </section>
+      ))}
+    </aside>
+  )}
 
-        {f.type === 'items' && (
-          <fieldset class="admin-items">
-            <legend>{f.label}</legend>
-            {f.help && <span class="admin-hint">{f.help}</span>}
-            {Array.from({ length: slotsFor(f) }, (_, i) => (
-              <div class="admin-item">
-                <p class="admin-item__title">
-                  {f.itemLabel} {i + 1}
-                </p>
-                {f.columns.map((c) => (
-                  <label>
-                    {c.label}
-                    {c.kind === 'text' ? (
-                      <input
-                        name={itemInput(f.name, i, c.name)}
-                        value={text(itemInput(f.name, i, c.name))}
-                        maxlength={c.max}
-                      />
-                    ) : (
-                      <textarea
-                        name={itemInput(f.name, i, c.name)}
-                        rows={c.kind === 'lines' ? 4 : 3}
-                        maxlength={c.kind === 'textarea' ? c.max : undefined}
-                      >{text(itemInput(f.name, i, c.name))}</textarea>
-                    )}
-                    {c.help && <span class="admin-hint">{c.help}</span>}
-                  </label>
-                ))}
-              </div>
-            ))}
-            <span class="admin-hint">
-              Leave a card empty to leave it out. To add more than are shown, save and come back:
-              two empty cards are offered each time (up to {f.maxItems}).
-            </span>
-            {error && <span class="admin-field-error">{error}</span>}
-          </fieldset>
-        )}
-
-        {f.type === 'money' && (
-          <label>
-            {f.label}
-            <span class="admin-money">
-              <input
-                name={f.name}
-                value={text(f.name)}
-                inputmode="decimal"
-                placeholder="Leave empty if there is no price"
-                aria-invalid={invalid(f.name)}
-              />
-              <input
-                name={f.currencyName}
-                value={text(f.currencyName)}
-                maxlength="3"
-                aria-label="Currency"
-                placeholder="USD"
-              />
-            </span>
-            {f.help && <span class="admin-hint">{f.help}</span>}
-            {error && <span class="admin-field-error">{error}</span>}
-          </label>
-        )}
-
-        {f.type !== 'bool' && f.type !== 'image' && f.type !== 'money' && f.type !== 'items' && (
-          <label>
-            {f.label}
-            {(f.type === 'text' ||
-              f.type === 'url' ||
-              f.type === 'path' ||
-              f.type === 'email' ||
-              f.type === 'weburl') && (
-              <input
-                name={f.name}
-                value={text(f.name)}
-                maxlength={'max' in f ? f.max : 200}
-                placeholder={'placeholder' in f ? f.placeholder : undefined}
-                required={f.required}
-                readonly={f.readonly}
-                type={f.type === 'email' ? 'email' : 'text'}
-                aria-invalid={invalid(f.name)}
-              />
-            )}
-            {f.type === 'slug' && (
-              <input
-                name={f.name}
-                value={text(f.name)}
-                maxlength="100"
-                placeholder={
-                  f.from ? 'Leave empty to create it from the name' : 'lowercase-with-hyphens'
-                }
-                required={f.required}
-                aria-invalid={invalid(f.name)}
-              />
-            )}
-            {f.type === 'textarea' && <textarea
-              name={f.name}
-              rows={f.rows ?? 5}
-              maxlength={f.max}
-              aria-invalid={invalid(f.name)}
-            >{text(f.name)}</textarea>}
-            {f.type === 'lines' && <textarea
-              name={f.name}
-              rows="5"
-              aria-invalid={invalid(f.name)}
-            >{text(f.name)}</textarea>}
-            {f.type === 'int' && (
-              <input
-                name={f.name}
-                type="number"
-                min={f.min}
-                max={f.max}
-                value={text(f.name)}
-                aria-invalid={invalid(f.name)}
-              />
-            )}
-            {f.type === 'date' && (
-              <input
-                name={f.name}
-                type="date"
-                value={text(f.name)}
-                aria-invalid={invalid(f.name)}
-              />
-            )}
-            {f.type === 'select' && (
-              <select name={f.name} aria-invalid={invalid(f.name)}>
-                {f.options.map(([value, label]) => (
-                  <option value={value} selected={text(f.name) === value}>
-                    {label}
-                  </option>
-                ))}
-              </select>
-            )}
-            {f.type === 'ref' && (
-              <select name={f.name} aria-invalid={invalid(f.name)}>
-                <option value="" selected={text(f.name) === ''}>
-                  None
-                </option>
-                {(options.refs[f.name] ?? []).map((o) => (
-                  <option value={o.value} selected={text(f.name) === o.value}>
-                    {o.label}
-                  </option>
-                ))}
-              </select>
-            )}
-            {f.help && <span class="admin-hint">{f.help}</span>}
-            {error && <span class="admin-field-error">{error}</span>}
-          </label>
-        )}
-      </>
-    );
-  })}
-
-  <div class="admin-form__bar">
+  <div class="admin-form__bar admin-editor__wide">
     <button class="admin-btn" type="submit">
       {submitLabel}
     </button>

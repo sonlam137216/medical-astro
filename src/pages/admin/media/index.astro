@@ -34,79 +34,81 @@ const deleted = Astro.url.searchParams.has('deleted');
       </p>
     )}
 
-    <form class="admin-form admin-card" data-media-upload>
-      <h2 class="t-h3">Upload an image</h2>
-      <label>
-        Image (JPEG, PNG or WebP, at least 480px wide)
-        <input type="file" name="file" accept="image/jpeg,image/png,image/webp" required />
-      </label>
-      <label>
-        Description for people who cannot see the image
-        <input
-          name="alt_text"
-          maxlength={MAX_ALT_LENGTH}
-          placeholder="For example: Dentist examining a patient's teeth"
-        />
-      </label>
-      <label class="admin-check">
-        <input type="checkbox" name="is_decorative" />
-        Decorative image (no description needed)
-      </label>
-      <div>
-        <button class="admin-btn" type="submit">
-          Upload
-        </button>
-      </div>
-      <p class="form__status" data-status role="status" aria-live="polite"></p>
-      <p class="admin-hint">
-        The image is resized in your browser to a few web sizes and location data is removed. Do not
-        upload photos of patients unless they have given written permission.
-      </p>
-      <noscript>
-        <p class="admin-notice admin-notice--error">Uploading needs JavaScript.</p>
-      </noscript>
-    </form>
+    <div class="admin-split">
+      <form class="admin-form admin-card" data-media-upload>
+        <h2 class="t-h3">Upload an image</h2>
+        <label>
+          Image (JPEG, PNG or WebP, at least 480px wide)
+          <input type="file" name="file" accept="image/jpeg,image/png,image/webp" required />
+        </label>
+        <label>
+          Description for people who cannot see the image
+          <input
+            name="alt_text"
+            maxlength={MAX_ALT_LENGTH}
+            placeholder="For example: Dentist examining a patient's teeth"
+          />
+        </label>
+        <label class="admin-check">
+          <input type="checkbox" name="is_decorative" />
+          Decorative image (no description needed)
+        </label>
+        <div>
+          <button class="admin-btn" type="submit">
+            Upload
+          </button>
+        </div>
+        <p class="form__status" data-status role="status" aria-live="polite"></p>
+        <p class="admin-hint">
+          The image is resized in your browser to a few web sizes and location data is removed. Do
+          not upload photos of patients unless they have given written permission.
+        </p>
+        <noscript>
+          <p class="admin-notice admin-notice--error">Uploading needs JavaScript.</p>
+        </noscript>
+      </form>
 
-    <form class="admin-form admin-card" data-video-upload>
-      <h2 class="t-h3">Upload a video</h2>
-      <label>
-        Video (MP4, up to {MAX_VIDEO_BYTES / 1024 / 1024} MB)
-        <input type="file" name="file" accept="video/mp4" required />
-      </label>
-      <label>
-        What the video shows
-        <input name="alt_text" maxlength={MAX_ALT_LENGTH} required />
-      </label>
-      <label>
-        Cover image (shown before the video plays)
-        <select name="poster">
-          <option value="">None: the browser shows the first frame</option>
-          {posters.map((p) => (
-            <option value={p.id}>{p.label}</option>
-          ))}
-        </select>
-      </label>
-      <div>
-        <button class="admin-btn" type="submit">
-          Upload video
-        </button>
-      </div>
-      <progress data-progress value="0" max="100" hidden></progress>
-      <p class="form__status" data-status role="status" aria-live="polite"></p>
-      <p class="admin-hint">
-        The video is stored as it is: it is not converted. Prepare it once before uploading, for
-        example{' '}
-        <code>
-          ffmpeg -i in.mov -c:v libx264 -crf 26 -preset slow -vf scale=-2:720 -c:a aac -b:a 96k
-          -movflags +faststart out.mp4
-        </code>
-        . "faststart" lets it start playing before it has fully downloaded. Do not upload recordings
-        of patients unless they have given written permission.
-      </p>
-      <noscript>
-        <p class="admin-notice admin-notice--error">Uploading needs JavaScript.</p>
-      </noscript>
-    </form>
+      <form class="admin-form admin-card" data-video-upload>
+        <h2 class="t-h3">Upload a video</h2>
+        <label>
+          Video (MP4, up to {MAX_VIDEO_BYTES / 1024 / 1024} MB)
+          <input type="file" name="file" accept="video/mp4" required />
+        </label>
+        <label>
+          What the video shows
+          <input name="alt_text" maxlength={MAX_ALT_LENGTH} required />
+        </label>
+        <label>
+          Cover image (shown before the video plays)
+          <select name="poster">
+            <option value="">None: the browser shows the first frame</option>
+            {posters.map((p) => (
+              <option value={p.id}>{p.label}</option>
+            ))}
+          </select>
+        </label>
+        <div>
+          <button class="admin-btn" type="submit">
+            Upload video
+          </button>
+        </div>
+        <progress data-progress value="0" max="100" hidden></progress>
+        <p class="form__status" data-status role="status" aria-live="polite"></p>
+        <p class="admin-hint">
+          The video is stored as it is: it is not converted. Prepare it once before uploading, for
+          example{' '}
+          <code>
+            ffmpeg -i in.mov -c:v libx264 -crf 26 -preset slow -vf scale=-2:720 -c:a aac -b:a 96k
+            -movflags +faststart out.mp4
+          </code>
+          . "faststart" lets it start playing before it has fully downloaded. Do not upload
+          recordings of patients unless they have given written permission.
+        </p>
+        <noscript>
+          <p class="admin-notice admin-notice--error">Uploading needs JavaScript.</p>
+        </noscript>
+      </form>
+    </div>
 
     {videos && videos.length > 0 && (
       <>

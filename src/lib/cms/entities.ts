@@ -508,11 +508,20 @@ export const SOCIAL_PLATFORMS = ['facebook', 'instagram', 'youtube', 'linkedin']
 
 /** The single row of site-wide details, edited at /admin/site (not part of the generic list). */
 export const SITE_FIELDS: Field[] = [
-  { type: 'text', name: 'site_name', label: 'Clinic name', max: 120, required: true },
+  {
+    type: 'text',
+    name: 'site_name',
+    group: 'Clinic',
+    label: 'Clinic name',
+    max: 120,
+    required: true,
+  },
   { type: 'textarea', name: 'tagline', label: 'Tagline (footer)', max: 300, rows: 3 },
   {
     type: 'text',
     name: 'phone_display',
+    group: 'Contact',
+    half: true,
     label: 'Phone (as shown)',
     max: 40,
     placeholder: '(+84) 000 000 000',
@@ -520,6 +529,7 @@ export const SITE_FIELDS: Field[] = [
   {
     type: 'text',
     name: 'phone_intl',
+    half: true,
     label: 'Phone (international format)',
     max: 40,
     placeholder: '+84 000 000 000',
@@ -540,7 +550,7 @@ export const SITE_FIELDS: Field[] = [
     max: 200,
     placeholder: 'Monday–Sunday · 8:00–20:00',
   },
-  { type: 'text', name: 'copyright_text', label: 'Copyright line', max: 200 },
+  { type: 'text', name: 'copyright_text', group: 'Footer', label: 'Copyright line', max: 200 },
   {
     type: 'ref',
     name: 'intro_video_id',
@@ -551,6 +561,8 @@ export const SITE_FIELDS: Field[] = [
     help: 'Shows the “Watch video” button and a player on the Home page. Upload an MP4 in Media first (add a cover image there so people see a picture before pressing play). Choose “None” to show no video.',
   },
   ...SOCIAL_PLATFORMS.map((p): Field => ({
+    group: 'Social profiles',
+    half: true,
     type: 'weburl',
     name: `social_${p}`,
     label: `${p[0].toUpperCase()}${p.slice(1)} page`,

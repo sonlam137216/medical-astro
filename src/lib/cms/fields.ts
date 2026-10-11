@@ -9,6 +9,10 @@ export interface FieldBase {
   required?: boolean;
   /** Shown but never changed by the form (the saved value is kept). */
   readonly?: boolean;
+  /** Admin form only: a heading drawn above the first field of each group. */
+  group?: string;
+  /** Admin form only: the field takes half the width, so two in a row sit side by side. */
+  half?: boolean;
 }
 
 /** One column of an `items` field. `lines` values are stored as an array of text. */

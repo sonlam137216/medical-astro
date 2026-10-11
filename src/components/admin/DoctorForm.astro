@@ -15,120 +15,143 @@ interface Props {
 const { values, errors = {}, formError, submitLabel, images } = Astro.props;
 ---
 
-<form class="admin-form admin-card" method="post">
+<form class="admin-editor" method="post">
   {formError && (
-    <p class="admin-notice admin-notice--error" role="alert">
+    <p class="admin-notice admin-notice--error admin-editor__wide" role="alert">
       {formError}
     </p>
   )}
 
-  <label>
-    Full name
-    <input
-      name="full_name"
-      value={values.full_name}
-      maxlength={LIMITS.name}
-      required
-      aria-invalid={errors.full_name ? 'true' : undefined}
-    />
-    {errors.full_name && <span class="admin-field-error">{errors.full_name}</span>}
-  </label>
-
-  <label>
-    Page address (slug)
-    <input
-      name="slug"
-      value={values.slug}
-      maxlength={LIMITS.slug}
-      placeholder="Leave empty to create it from the name"
-      aria-invalid={errors.slug ? 'true' : undefined}
-    />
-    {errors.slug && <span class="admin-field-error">{errors.slug}</span>}
-  </label>
-
-  <label>
-    Title / specialty
-    <input
-      name="role_title"
-      value={values.role_title}
-      maxlength={LIMITS.role}
-      placeholder="For example Implantologist"
-      aria-invalid={errors.role_title ? 'true' : undefined}
-    />
-    {errors.role_title && <span class="admin-field-error">{errors.role_title}</span>}
-  </label>
-
-  <label>
-    Biography
-    <textarea
-      name="bio"
-      maxlength={LIMITS.bio}
-      aria-invalid={errors.bio ? 'true' : undefined}
-    >{values.bio}</textarea>
-    {errors.bio && <span class="admin-field-error">{errors.bio}</span>}
-  </label>
-
-  <label>
-    Qualifications (one per line)
-    <textarea
-      name="credentials"
-      aria-invalid={errors.credentials ? 'true' : undefined}
-    >{values.credentials}</textarea>
-    <span class="admin-hint">Only publish what the doctor and the clinic have confirmed.</span>
-    {errors.credentials && <span class="admin-field-error">{errors.credentials}</span>}
-  </label>
-
-  <label>
-    Languages (comma separated)
-    <input
-      name="languages"
-      value={values.languages}
-      aria-invalid={errors.languages ? 'true' : undefined}
-    />
-    {errors.languages && <span class="admin-field-error">{errors.languages}</span>}
-  </label>
-
-  <label>
-    Display order (lowest first)
-    <input
-      name="sort_order"
-      type="number"
-      min="0"
-      max={LIMITS.sortOrder}
-      value={values.sort_order}
-      aria-invalid={errors.sort_order ? 'true' : undefined}
-    />
-    {errors.sort_order && <span class="admin-field-error">{errors.sort_order}</span>}
-  </label>
-
-  <fieldset class="admin-picker-wrap">
-    <legend>Photo</legend>
-    <div class="admin-picker">
+  <div class="admin-editor__main admin-card admin-form">
+    <h2 class="admin-form__group">Profile</h2>
+    <div class="admin-field is-half">
       <label>
-        <input type="radio" name="image_id" value="" checked={values.image_id === ''} />
-        No photo
+        Full name
+        <input
+          name="full_name"
+          value={values.full_name}
+          maxlength={LIMITS.name}
+          required
+          aria-invalid={errors.full_name ? 'true' : undefined}
+        />
+        {errors.full_name && <span class="admin-field-error">{errors.full_name}</span>}
       </label>
-      {images.map((img) => (
-        <label>
-          <input type="radio" name="image_id" value={img.id} checked={values.image_id === img.id} />
-          <img src={img.thumb} alt="" loading="lazy" />
-          <span>{img.label}</span>
-        </label>
-      ))}
     </div>
-    <span class="admin-hint">
-      Upload photos in <a href="/admin/media">Media</a> first. Only use photos you have the right to
-      publish.
-    </span>
-    {errors.image_id && <span class="admin-field-error">{errors.image_id}</span>}
-  </fieldset>
+    <div class="admin-field is-half">
+      <label>
+        Title / specialty
+        <input
+          name="role_title"
+          value={values.role_title}
+          maxlength={LIMITS.role}
+          placeholder="For example Implantologist"
+          aria-invalid={errors.role_title ? 'true' : undefined}
+        />
+        {errors.role_title && <span class="admin-field-error">{errors.role_title}</span>}
+      </label>
+    </div>
+    <div class="admin-field">
+      <label>
+        Biography
+        <textarea
+          name="bio"
+          rows="8"
+          maxlength={LIMITS.bio}
+          aria-invalid={errors.bio ? 'true' : undefined}
+        >{values.bio}</textarea>
+        {errors.bio && <span class="admin-field-error">{errors.bio}</span>}
+      </label>
+    </div>
 
-  <label class="admin-check">
-    <input type="checkbox" name="is_visible" checked={values.is_visible} />
-    Show on the website
-  </label>
+    <h2 class="admin-form__group">Qualifications and languages</h2>
+    <div class="admin-field">
+      <label>
+        Qualifications (one per line)
+        <textarea
+          name="credentials"
+          rows="6"
+          aria-invalid={errors.credentials ? 'true' : undefined}
+        >{values.credentials}</textarea>
+        <span class="admin-hint">Only publish what the doctor and the clinic have confirmed.</span>
+        {errors.credentials && <span class="admin-field-error">{errors.credentials}</span>}
+      </label>
+    </div>
+    <div class="admin-field">
+      <label>
+        Languages (comma separated)
+        <input
+          name="languages"
+          value={values.languages}
+          aria-invalid={errors.languages ? 'true' : undefined}
+        />
+        {errors.languages && <span class="admin-field-error">{errors.languages}</span>}
+      </label>
+    </div>
+  </div>
 
-  <div class="admin-form__bar">
+  <aside class="admin-editor__side">
+    <section class="admin-card admin-form">
+      <h2 class="admin-panel__title">Settings</h2>
+      <label class="admin-check">
+        <input type="checkbox" name="is_visible" checked={values.is_visible} />
+        Show on the website
+      </label>
+      <label>
+        Page address (slug)
+        <input
+          name="slug"
+          value={values.slug}
+          maxlength={LIMITS.slug}
+          placeholder="Leave empty to create it from the name"
+          aria-invalid={errors.slug ? 'true' : undefined}
+        />
+        {errors.slug && <span class="admin-field-error">{errors.slug}</span>}
+      </label>
+      <label>
+        Display order (lowest first)
+        <input
+          name="sort_order"
+          type="number"
+          min="0"
+          max={LIMITS.sortOrder}
+          value={values.sort_order}
+          aria-invalid={errors.sort_order ? 'true' : undefined}
+        />
+        {errors.sort_order && <span class="admin-field-error">{errors.sort_order}</span>}
+      </label>
+    </section>
+
+    <section class="admin-card admin-form">
+      <fieldset class="admin-picker-wrap">
+        <legend>Photo</legend>
+        <div class="admin-picker">
+          <label>
+            <input type="radio" name="image_id" value="" checked={values.image_id === ''} />
+            No photo
+          </label>
+          {images.map((img) => (
+            <label>
+              <input
+                type="radio"
+                name="image_id"
+                value={img.id}
+                checked={values.image_id === img.id}
+              />
+              <img src={img.thumb} alt="" loading="lazy" />
+              <span>{img.label}</span>
+            </label>
+          ))}
+        </div>
+        <span class="admin-hint">
+          Upload photos in <a href="/admin/media">Media</a> first. Only use photos you have the
+          right to publish.
+        </span>
+        {errors.image_id && <span class="admin-field-error">{errors.image_id}</span>}
+      </fieldset>
+    </section>
+  </aside>
+
+  <div class="admin-form__bar admin-editor__wide">
     <button class="admin-btn" type="submit">
       {submitLabel}
     </button>

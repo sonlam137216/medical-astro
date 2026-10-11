@@ -74,7 +74,7 @@ const icons = {
 <BaseLayout title={`${title} · Melatec admin`} noindex>
   {nav ? (
     <div class="admin-shell">
-      <aside class="admin-side" data-admin-side>
+      <aside class="admin-side">
         <div class="admin-side__top">
           <a class="admin-side__brand" href="/admin">
             <span class="admin-side__logo" aria-hidden="true">
@@ -85,15 +85,6 @@ const icons = {
               <small>Admin</small>
             </span>
           </a>
-          <button
-            class="admin-side__toggle"
-            type="button"
-            aria-expanded="false"
-            aria-controls="admin-nav"
-            data-admin-toggle
-          >
-            Menu
-          </button>
         </div>
 
         <nav class="admin-nav" id="admin-nav" aria-label="Admin">
@@ -160,13 +151,3 @@ const icons = {
     </div>
   )}
 </BaseLayout>
-
-<script>
-  // On narrow screens the menu folds away behind a button. Without JavaScript it stays open.
-  const side = document.querySelector<HTMLElement>('[data-admin-side]');
-  const toggle = document.querySelector<HTMLButtonElement>('[data-admin-toggle]');
-  toggle?.addEventListener('click', () => {
-    const open = side?.classList.toggle('is-open') ?? false;
-    toggle.setAttribute('aria-expanded', String(open));
-  });
-</script>
