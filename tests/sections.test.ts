@@ -140,7 +140,7 @@ test('the snapshot holds the page text rows, with hidden ones and photos resolve
       summary: 'S',
       detailsTitle: 'D',
       details: ['x'],
-      image: '11111111-1111-4111-8111-111111111111',
+      before: '11111111-1111-4111-8111-111111111111',
     }),
   );
   insert.run('p1', 'home_costs', 0, '{}');
@@ -155,8 +155,8 @@ test('the snapshot holds the page text rows, with hidden ones and photos resolve
     ],
   );
   const smile = snapshot.sections?.find((s) => s.key === 'home_smile');
-  assert.equal(smile?.images?.image.alt, 'A smile');
-  assert.equal('image' in (smile?.data ?? {}), false);
+  assert.equal(smile?.images?.before.alt, 'A smile');
+  assert.equal('before' in (smile?.data ?? {}), false);
   assert.equal(isSnapshot(JSON.parse(JSON.stringify(snapshot))), true);
   assert.deepEqual(snapshotProblems(snapshot), []);
   // a hidden required section counts as decided; the others are still missing for production

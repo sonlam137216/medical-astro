@@ -62,7 +62,11 @@ const MARKERS = [
   ],
   ['hotel-room.', 'Hotel room photo standing in for the clinic rooms', 'Photos of the clinic'],
   ['panoramic-xray.', 'Sample X-ray image', 'Licensed image or a consented case'],
-  ['before-after.', 'Photo of a real patient (before/after)', 'Written consent and usage rights'],
+  [
+    'mock-smile-',
+    'Drawn placeholder pictures in the before/after slider',
+    'A real before/after pair with the patient’s written consent (admin: Page text)',
+  ],
 ];
 
 if (!existsSync(root)) {

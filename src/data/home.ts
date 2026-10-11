@@ -13,7 +13,8 @@ import dentalImplant from '../assets/images/photos/dental-implant.webp';
 import digitalScan from '../assets/images/photos/dentist-digital-scan.webp';
 import hotelRoom from '../assets/images/photos/hotel-room.webp';
 import xray from '../assets/images/photos/panoramic-xray.webp';
-import beforeAfter from '../assets/images/photos/before-after.webp';
+import smileBefore from '../assets/images/photos/mock-smile-before.webp';
+import smileAfter from '../assets/images/photos/mock-smile-after.webp';
 import doctorPortrait from '../assets/images/doctors/doctor-portrait.webp';
 import lakeAndTrees from '../assets/images/photos/lake-and-trees.webp';
 import homeHero from '../assets/images/photos/home-hero.webp';
@@ -199,8 +200,9 @@ export const howItWorks = {
   helpBody: 'A dedicated team will support you at every step of your journey.',
 };
 
-// The Figma image has a "BEFORE / AFTER" slider and handle baked in, and shows a real person:
-// confirm the patient's written consent and usage rights before this goes public.
+// PLACEHOLDER: the two pictures are drawn illustrations (not a real patient) standing in until the clinic chooses
+// a before/after pair in the admin (Page text > Home: smile transformation). Real patient photos need the
+// patient's written consent and usage rights before they go public.
 export const smileStories = {
   label: 'Smile transformations',
   title: 'Real Stories. Real Smiles.',
@@ -208,9 +210,13 @@ export const smileStories = {
     'The patient had multiple spaces between the teeth, including several areas with more noticeable gaps. The teeth were also discolored, with uneven coloration that affected the overall harmony of the smile',
   detailsTitle: 'Treatment Details',
   details: ['Smile design planning with digital preview', '20 DIDIBIO porcelain restorations'],
-  image: {
-    src: beforeAfter,
-    alt: 'Before and after comparison of a patient’s smile',
+  before: {
+    src: smileBefore,
+    alt: 'Illustration of uneven, discoloured teeth before treatment (placeholder)',
+  } satisfies Img,
+  after: {
+    src: smileAfter,
+    alt: 'Illustration of even, white teeth after treatment (placeholder)',
   } satisfies Img,
 };
 

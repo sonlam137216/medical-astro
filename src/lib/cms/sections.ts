@@ -77,7 +77,12 @@ const titleLines = area('title', 'Title', 200, {
   rows: 3,
   help: 'A new line starts a new line of the title.',
 });
-const image = (help: string): Field => ({ type: 'image', name: 'image', label: 'Photo', help });
+const image = (help: string, name = 'image', fieldLabel = 'Photo'): Field => ({
+  type: 'image',
+  name,
+  label: fieldLabel,
+  help,
+});
 
 const COUNTRY_ORDER = 'Vietnam, United States, Australia, United Kingdom, Canada, New Zealand';
 const costRows = (name: string, label: string) =>
@@ -227,7 +232,7 @@ export const SECTIONS: SectionDef[] = [
     page: '/',
     label: 'Home: smile transformation',
     where:
-      'The before/after story. It shows a real patient: only publish it with their written consent.',
+      'The before/after story with a slider the visitor drags to compare the two photos. It shows a real patient: only publish it with their written consent.',
     fields: [
       label,
       title,
@@ -235,7 +240,14 @@ export const SECTIONS: SectionDef[] = [
       text('detailsTitle', 'Details heading', 80),
       lines('details', 'Treatment details', 6, 160, 'One item per line.'),
       image(
-        'The before/after photo. Without a photo the story is shown without a picture. Only use a photo the patient agreed in writing to share.',
+        'The “before” picture, the one shown on the left of the slider. Both pictures need to be chosen for the slider to appear; use two photos of the same patient taken from the same angle, and only photos the patient agreed in writing to share.',
+        'before',
+        'Before photo',
+      ),
+      image(
+        'The “after” picture, shown on the right of the slider. Same angle and framing as the before photo.',
+        'after',
+        'After photo',
       ),
     ],
   },

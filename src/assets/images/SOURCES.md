@@ -15,8 +15,8 @@ Cần kiểm tra lại ảnh, cách crop và logo khi cập nhật UI theo thi�
 
 Review with the owner before launch:
 
-- `photos/before-after.webp`: shows a real patient, and the "BEFORE / AFTER" labels and slider handle are baked
-  into the picture. Confirm written consent and usage rights, then rebuild it as a real comparison component.
+- `photos/mock-smile-before.webp`, `photos/mock-smile-after.webp`: drawn placeholder illustrations (no real person) for the Home before/after slider, made 2026-10-11. Replace them by choosing a real, consented pair in the admin (Page text > Home: smile transformation).
+- `photos/before-after.webp`: no longer used. It shows a real patient with the "BEFORE / AFTER" labels and slider baked in; keep it out of the site unless written consent and usage rights are confirmed.
 - `photos/dentist-digital-scan.webp`: replaced on 2026-10-10 by `image 1` from the new Figma file (no baked-in text this time). Confirm it is a licensed or consented photo.
 - `photos/home-hero.webp`: Home hero background (`image 19` of the new Figma file, 2000 px wide). Stock-looking photo, confirm the licence.
 - `photos/hanoi-tower-wide.webp`: wide Hanoi Turtle Tower photo (`image 34` of the new Figma file, 2000 px wide) used for the navy page heroes (Services, Our Doctors, Packages). Confirm the licence.

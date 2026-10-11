@@ -1,15 +1,18 @@
 ---
-import ProfileImage from '../ProfileImage.astro';
+import BeforeAfter from '../BeforeAfter.astro';
 import Section from '../Section.astro';
 import SectionIntro from '../SectionIntro.astro';
 
 import { getSection } from '../../lib/content';
 
-// Built-in text: the sample photo. Once the section is edited the photo is the one chosen for it, and without one
-// the story is shown without a picture (the sample photo shows a real patient).
+// Built-in text: the two sample (drawn) pictures. Once the section is edited the pair is the one chosen for it,
+// and without both pictures the story is shown without a comparison (the slider needs the two of them).
 const smileStories = await getSection('home_smile');
-const picture =
-  smileStories && (smileStories.edited ? smileStories.chosenPhotos.image : smileStories.image);
+const pair =
+  smileStories &&
+  (smileStories.edited
+    ? { before: smileStories.chosenPhotos.before, after: smileStories.chosenPhotos.after }
+    : { before: smileStories.before, after: smileStories.after });
 ---
 
 {smileStories && (
@@ -34,10 +37,11 @@ const picture =
           )}
         </div>
       </div>
-      {picture && (
-        <ProfileImage
+      {pair?.before && pair.after && (
+        <BeforeAfter
           class="story__img"
-          image={picture}
+          before={pair.before}
+          after={pair.after}
           width={560}
           height={440}
           sizes="(max-width: 960px) 100vw, 560px"
@@ -77,10 +81,6 @@ const picture =
 
   .story__img {
     width: 100%;
-    height: auto;
-    aspect-ratio: 560 / 440;
-    object-fit: cover;
-    border-radius: var(--radius-image);
   }
 
   @media (max-width: 960px) {

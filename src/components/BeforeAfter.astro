@@ -1,0 +1,192 @@
+---
+import type { Img } from '../data/types';
+import type { PublicImage } from '../lib/media';
+import ProfileImage from './ProfileImage.astro';
+
+// Before/after comparison: both pictures are stacked and the visitor drags the divider (mouse, touch or arrow
+// keys) to reveal more of one or the other. The real control is a transparent <input type="range"> laid over
+// the pictures, so keyboard and screen readers work; the script only copies its value into --pos. Without
+// JavaScript the pictures are shown split in the middle and the control stays hidden.
+interface Props {
+  before: Img | PublicImage;
+  after: Img | PublicImage;
+  width: number;
+  height: number;
+  sizes: string;
+  class?: string;
+}
+
+const { before, after, width, height, sizes, class: className } = Astro.props;
+---
+
+<div
+  class:list={['ba', className]}
+  data-before-after
+  style={`--pos: 50%; aspect-ratio: ${width} / ${height}`}
+>
+  <ProfileImage class="ba__img" image={after} width={width} height={height} sizes={sizes} />
+  <ProfileImage
+    class="ba__img ba__img--before"
+    image={before}
+    width={width}
+    height={height}
+    sizes={sizes}
+  />
+
+  <span class="ba__tag ba__tag--before" aria-hidden="true">
+    Before
+  </span>
+  <span class="ba__tag ba__tag--after" aria-hidden="true">
+    After
+  </span>
+
+  <span class="ba__divider" aria-hidden="true">
+    <span class="ba__knob">
+      <svg
+        viewBox="0 0 24 24"
+        width="22"
+        height="22"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2.2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path d="M9 7l-5 5 5 5M15 7l5 5-5 5"></path>
+      </svg>
+    </span>
+  </span>
+
+  <input
+    class="ba__range"
+    type="range"
+    min="0"
+    max="100"
+    step="1"
+    value="50"
+    hidden
+    aria-label="Drag to compare the before and after pictures"
+    data-before-after-range
+  />
+</div>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-before-after]').forEach((root) => {
+    const range = root.querySelector<HTMLInputElement>('[data-before-after-range]');
+    if (!range) return;
+    range.hidden = false;
+    const update = () => {
+      root.style.setProperty('--pos', `${range.value}%`);
+      range.setAttribute(
+        'aria-valuetext',
+        `${range.value}% before, ${100 - Number(range.value)}% after`,
+      );
+    };
+    range.addEventListener('input', update);
+    update();
+  });
+</script>
+
+<style>
+  .ba {
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--radius-image);
+    background: var(--color-card);
+    user-select: none;
+  }
+
+  .ba__img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    pointer-events: none;
+  }
+
+  /* The before picture covers the left part, up to the divider. */
+  .ba__img--before {
+    clip-path: inset(0 calc(100% - var(--pos)) 0 0);
+  }
+
+  .ba__tag {
+    position: absolute;
+    top: 16px;
+    padding: 4px 12px;
+    border-radius: 999px;
+    background: rgb(2 15 50 / 0.72);
+    color: #fff;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    pointer-events: none;
+  }
+
+  .ba__tag--before {
+    left: 16px;
+  }
+
+  .ba__tag--after {
+    right: 16px;
+  }
+
+  .ba__divider {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: var(--pos);
+    width: 3px;
+    margin-left: -1.5px;
+    background: #fff;
+    box-shadow: 0 0 0 1px rgb(2 15 50 / 0.18);
+    pointer-events: none;
+  }
+
+  .ba__knob {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    display: grid;
+    place-items: center;
+    width: 48px;
+    height: 48px;
+    margin: -24px 0 0 -24px;
+    border-radius: 50%;
+    background: #fff;
+    color: var(--color-blue);
+    box-shadow: 0 4px 14px rgb(2 15 50 / 0.28);
+  }
+
+  .ba__range {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    opacity: 0;
+    cursor: ew-resize;
+    appearance: none;
+    background: transparent;
+    /* Horizontal drags move the divider, vertical drags still scroll the page. */
+    touch-action: pan-y;
+  }
+
+  .ba__range::-webkit-slider-thumb {
+    appearance: none;
+    width: 4px;
+    height: 100%;
+  }
+
+  .ba__range::-moz-range-thumb {
+    width: 4px;
+    height: 100%;
+    border: 0;
+  }
+
+  .ba:has(.ba__range:focus-visible) .ba__knob {
+    outline: 3px solid var(--color-blue);
+    outline-offset: 3px;
+  }
+</style>
