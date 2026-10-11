@@ -1,4 +1,5 @@
 import type { AdminDb } from './admin-auth';
+import { toFocus, type FocusPoint } from './image-slots';
 import { mediaUrl, thumbnailKey } from './media';
 import { MEDIA_PAGE_SIZE, pageMedia, searchMedia, type MediaItem } from './media-list';
 
@@ -6,13 +7,16 @@ export interface PickerImage {
   id: string;
   thumb: string;
   label: string;
+  width: number | null;
+  height: number | null;
+  focus: FocusPoint | null;
 }
 
 /** Images offered in the photo picker of a form (newest first). */
 export async function listPickerImages(db: AdminDb): Promise<PickerImage[]> {
   const { data } = await db
     .from('media_assets')
-    .select('id, r2_key, alt_text, is_decorative, variant_widths')
+    .select('id, r2_key, alt_text, is_decorative, variant_widths, width, height, focal_x, focal_y')
     .eq('kind', 'image')
     .eq('status', 'active')
     .order('created_at', { ascending: false })
@@ -21,6 +25,9 @@ export async function listPickerImages(db: AdminDb): Promise<PickerImage[]> {
     id: a.id,
     thumb: mediaUrl(thumbnailKey(a.r2_key, a.variant_widths)),
     label: a.is_decorative ? 'Decorative' : (a.alt_text ?? 'No description yet'),
+    width: a.width,
+    height: a.height,
+    focus: toFocus(a.focal_x, a.focal_y),
   }));
 }
 
@@ -38,7 +45,7 @@ export async function listMedia(
   let query = db
     .from('media_assets')
     .select(
-      'id, kind, r2_key, alt_text, is_decorative, variant_widths, size_bytes, poster_asset_id',
+      'id, kind, r2_key, alt_text, is_decorative, variant_widths, size_bytes, poster_asset_id, width, height, focal_x, focal_y',
     )
     .eq('kind', options.kind)
     .eq('status', 'active')
@@ -70,13 +77,19 @@ export async function listMedia(
           thumb: r.poster_asset_id ? (posters.get(r.poster_asset_id) ?? null) : null,
           label: r.alt_text ?? 'No description yet',
           detail: `${(r.size_bytes / 1024 / 1024).toFixed(1)} MB`,
+          width: null,
+          height: null,
+          focus: null,
         }
       : {
           id: r.id,
           kind: 'image',
           thumb: mediaUrl(thumbnailKey(r.r2_key, r.variant_widths)),
           label: r.is_decorative ? 'Decorative' : (r.alt_text ?? 'No description yet'),
-          detail: null,
+          detail: r.width && r.height ? `${r.width} × ${r.height} px` : null,
+          width: r.width,
+          height: r.height,
+          focus: toFocus(r.focal_x, r.focal_y),
         },
   );
   if (options.ids) return { items: all, more: false };

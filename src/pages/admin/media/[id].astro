@@ -85,7 +85,17 @@ const sp = Astro.url.searchParams;
         This {noun} is still used, so it cannot be deleted. Remove it from where it is used first.
       </p>
     )}
-    {sp.has('error') && sp.get('error') !== 'inuse' && (
+    {sp.has('focus') && (
+      <p class="admin-notice" role="status">
+        Focus point saved. Publish to show the change on the website.
+      </p>
+    )}
+    {sp.get('error') === 'focus' && (
+      <p class="admin-notice admin-notice--error" role="alert">
+        Could not save the focus point. Use numbers from 0 to 100.
+      </p>
+    )}
+    {sp.has('error') && sp.get('error') !== 'inuse' && sp.get('error') !== 'focus' && (
       <p class="admin-notice admin-notice--error" role="alert">
         Could not delete. Please try again.
       </p>
@@ -175,6 +185,75 @@ const sp = Astro.url.searchParams;
       </div>
     </form>
 
+    {!isVideo && asset.width && asset.height && (
+      <form class="admin-form admin-card" method="post" action={`/admin/media/${id}/focus`}>
+        <h2 class="t-h3">Focus point</h2>
+        <p class="admin-hint">
+          The website crops this picture to fit each place that shows it. Mark the most important
+          part (a face, a tooth) and it stays in view. Applies wherever the picture is used, after
+          you publish.
+        </p>
+        <button
+          type="button"
+          class="admin-focus"
+          data-focus-stage
+          aria-label="Click the most important part of the picture"
+        >
+          <img src={mediaUrl(thumbnailKey(asset.r2_key, asset.variant_widths))} alt="" />
+          <span
+            class="admin-focus__marker"
+            data-focus-marker
+            hidden={asset.focal_x === null || asset.focal_y === null}
+            style={
+              asset.focal_x !== null && asset.focal_y !== null
+                ? `left: ${asset.focal_x}%; top: ${asset.focal_y}%`
+                : undefined
+            }
+          />
+        </button>
+        <div class="admin-focus-numbers">
+          <label>
+            From the left (%)
+            <input
+              type="number"
+              name="x"
+              min="0"
+              max="100"
+              step="1"
+              value={asset.focal_x ?? ''}
+              data-focus-x
+            />
+          </label>
+          <label>
+            From the top (%)
+            <input
+              type="number"
+              name="y"
+              min="0"
+              max="100"
+              step="1"
+              value={asset.focal_y ?? ''}
+              data-focus-y
+            />
+          </label>
+        </div>
+        <div class="admin-actions">
+          <button class="admin-btn" type="submit">
+            Save focus point
+          </button>
+          <button
+            class="admin-btn admin-btn--ghost"
+            type="submit"
+            name="clear"
+            value="1"
+            formnovalidate
+          >
+            Use the default position
+          </button>
+        </div>
+      </form>
+    )}
+
     <form class="admin-form admin-card" method="post" action={`/admin/media/${id}/delete`}>
       <h2 class="t-h3">Delete</h2>
       <p class="admin-hint">
@@ -188,3 +267,31 @@ const sp = Astro.url.searchParams;
     </form>
   </main>
 </AdminLayout>
+
+<script>
+  // Click the picture to fill in the two numbers; the form is saved with the button, as without JavaScript.
+  const stage = document.querySelector<HTMLElement>('[data-focus-stage]');
+  const marker = document.querySelector<HTMLElement>('[data-focus-marker]');
+  const x = document.querySelector<HTMLInputElement>('[data-focus-x]');
+  const y = document.querySelector<HTMLInputElement>('[data-focus-y]');
+  const picture = stage?.querySelector('img');
+  const show = () => {
+    if (!marker || !x || !y) return;
+    const ok = x.value !== '' && y.value !== '';
+    marker.hidden = !ok;
+    if (ok) {
+      marker.style.left = `${x.value}%`;
+      marker.style.top = `${y.value}%`;
+    }
+  };
+  stage?.addEventListener('click', (event) => {
+    if (!picture || !x || !y) return;
+    const rect = picture.getBoundingClientRect();
+    const clamp = (n: number) => String(Math.min(100, Math.max(0, Math.round(n))));
+    x.value = clamp(((event.clientX - rect.left) / rect.width) * 100);
+    y.value = clamp(((event.clientY - rect.top) / rect.height) * 100);
+    show();
+  });
+  x?.addEventListener('input', show);
+  y?.addEventListener('input', show);
+</script>

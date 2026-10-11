@@ -73,8 +73,7 @@ const description = article.seoDescription || article.excerpt || undefined;
           <ProfileImage
             class="cover"
             image={article.cover}
-            width={800}
-            height={450}
+            slot="article-cover"
             sizes="(max-width: 960px) 100vw, 680px"
             priority
           />
@@ -116,6 +115,7 @@ const description = article.seoDescription || article.excerpt || undefined;
                       <ProfileImage
                         class="related__img"
                         image={r.cover}
+                        slot="article-cover"
                         width={240}
                         height={160}
                         sizes="(max-width: 600px) 45vw, 160px"
@@ -219,8 +219,6 @@ const description = article.seoDescription || article.excerpt || undefined;
   .main :global(.cover) {
     width: 100%;
     height: auto;
-    aspect-ratio: 16 / 9;
-    object-fit: cover;
     border-radius: var(--radius-card);
   }
 
@@ -324,8 +322,6 @@ const description = article.seoDescription || article.excerpt || undefined;
     display: block;
     width: 100%;
     height: auto;
-    aspect-ratio: 3 / 2;
-    object-fit: cover;
     border-radius: 12px;
   }
 

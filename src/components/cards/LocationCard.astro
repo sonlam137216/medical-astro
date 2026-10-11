@@ -2,6 +2,7 @@
 import type { Img } from '../../data/home';
 import type { PublicImage } from '../../lib/media';
 import ProfileImage from '../ProfileImage.astro';
+import { frameAspect, IMAGE_SLOTS } from '../../lib/image-slots';
 
 interface Props {
   name: string;
@@ -33,12 +34,15 @@ const external = /^https?:\/\//i.test(href);
     <ProfileImage
       class="card__media location__img"
       image={image}
-      width={384}
-      height={216}
+      slot="location-card"
       sizes="(max-width: 768px) 100vw, 384px"
     />
   ) : (
-    <div class="card__media location__img location__img--empty" aria-hidden="true"></div>
+    <div
+      class="card__media location__img location__img--empty"
+      style={`aspect-ratio: ${frameAspect(IMAGE_SLOTS['location-card'])}`}
+      aria-hidden="true"
+    ></div>
   )}
   <div class="card__body">
     {action === 'button' ? (
@@ -69,11 +73,6 @@ const external = /^https?:\/\//i.test(href);
 </article>
 
 <style>
-  .location__img {
-    aspect-ratio: 384 / 216;
-    object-fit: cover;
-  }
-
   .location__img--empty {
     background: var(--color-card);
   }

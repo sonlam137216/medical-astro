@@ -1,5 +1,6 @@
 ---
 import ProfileImage from '../components/ProfileImage.astro';
+import { frameAspect, IMAGE_SLOTS } from '../lib/image-slots';
 import SiteLayout from '../layouts/SiteLayout.astro';
 import { getPageSeo } from '../lib/site-content';
 import PageHero from '../components/PageHero.astro';
@@ -42,12 +43,15 @@ const seo = await getPageSeo('/our-doctors', {
             <ProfileImage
               class="profile__img"
               image={d.image}
-              width={282}
-              height={422}
+              slot="doctor"
               sizes="(max-width: 700px) 60vw, 240px"
             />
           ) : (
-            <div class="profile__img profile__initials" aria-hidden="true">
+            <div
+              class="profile__img profile__initials"
+              style={`aspect-ratio: ${frameAspect(IMAGE_SLOTS.doctor)}`}
+              aria-hidden="true"
+            >
               {d.name
                 .replace(/^(dr|prof|assoc\. prof)\.?\s+/i, '')
                 .split(/\s+/)
@@ -106,9 +110,6 @@ const seo = await getPageSeo('/our-doctors', {
   .profile__img {
     width: 100%;
     height: auto;
-    aspect-ratio: 282 / 422;
-    object-fit: contain;
-    object-position: center bottom;
   }
 
   .profile__initials {

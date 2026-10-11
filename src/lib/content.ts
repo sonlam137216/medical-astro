@@ -12,8 +12,8 @@ import { formatPrice, servicePath } from './services';
 import { mergeSection } from './cms/sections';
 import { SECTION_SAMPLES, type SectionKey } from '../data/sections';
 import { directionsUrl } from './maps';
-import { toPublicImage, type PublicImage } from './media';
-import { SNAPSHOT_SCHEMA_VERSION, isSnapshot, type Snapshot } from './snapshot';
+import { snapshotImageInput, toPublicImage, type PublicImage } from './media';
+import { SNAPSHOT_SCHEMA_VERSION, isSnapshot, type Snapshot, type SnapshotImage } from './snapshot';
 import { articlePath, type ArticleKind } from './cms/articles';
 
 // BUILD-TIME ONLY. Public pages are prerendered, so this runs while `astro build` runs and never per
@@ -132,20 +132,7 @@ export async function getDoctors(): Promise<PublicDoctor[]> {
       bio: d.bio,
       credentials: d.credentials,
       languages: d.languages,
-      image:
-        (d.image &&
-          toPublicImage(
-            {
-              r2_key: d.image.key,
-              width: d.image.width,
-              height: d.image.height,
-              alt_text: d.image.alt,
-              is_decorative: d.image.decorative,
-              variant_widths: d.image.widths,
-            },
-            publicBase,
-          )) ||
-        undefined,
+      image: (d.image && toPublicImage(snapshotImageInput(d.image), publicBase)) || undefined,
     }));
   }
   return doctorProfiles.map((d) => ({ ...d, languages: ['English'] }));
@@ -178,20 +165,7 @@ export async function getServices(): Promise<PublicService[]> {
       inclusions: s.inclusions,
       priceText: s.priceText,
       ...servicePath(s.slug),
-      image:
-        (s.image &&
-          toPublicImage(
-            {
-              r2_key: s.image.key,
-              width: s.image.width,
-              height: s.image.height,
-              alt_text: s.image.alt,
-              is_decorative: s.image.decorative,
-              variant_widths: s.image.widths,
-            },
-            publicBase,
-          )) ||
-        undefined,
+      image: (s.image && toPublicImage(snapshotImageInput(s.image), publicBase)) || undefined,
     }));
   }
   return sampleServices.map((s, i) => ({
@@ -219,32 +193,8 @@ export interface PublicPackage {
   image?: Img | PublicImage;
 }
 
-const toPublicImageOrUndefined = (
-  image:
-    | {
-        key: string;
-        width: number;
-        height: number;
-        alt: string | null;
-        decorative: boolean;
-        widths: number[];
-      }
-    | null
-    | undefined,
-) =>
-  (image &&
-    toPublicImage(
-      {
-        r2_key: image.key,
-        width: image.width,
-        height: image.height,
-        alt_text: image.alt,
-        is_decorative: image.decorative,
-        variant_widths: image.widths,
-      },
-      setting('R2_PUBLIC_BASE_URL'),
-    )) ||
-  undefined;
+const toPublicImageOrUndefined = (image: SnapshotImage | null | undefined) =>
+  (image && toPublicImage(snapshotImageInput(image), setting('R2_PUBLIC_BASE_URL'))) || undefined;
 
 /**
  * Package cards of one page: the published ones, or the sample cards before the first publish. Published but
@@ -323,20 +273,7 @@ export async function getLocations(): Promise<PublicLocation[]> {
         name: l.name,
         address,
         href: l.directionsUrl || directionsUrl(address) || '/locations',
-        image:
-          (l.image &&
-            toPublicImage(
-              {
-                r2_key: l.image.key,
-                width: l.image.width,
-                height: l.image.height,
-                alt_text: l.image.alt,
-                is_decorative: l.image.decorative,
-                variant_widths: l.image.widths,
-              },
-              publicBase,
-            )) ||
-          undefined,
+        image: (l.image && toPublicImage(snapshotImageInput(l.image), publicBase)) || undefined,
       };
     });
   }
@@ -423,20 +360,7 @@ export async function getArticles(kind: ArticleKind): Promise<PublicArticle[]> {
       title: a.title,
       excerpt: a.excerpt,
       body: a.body,
-      cover:
-        (a.coverImage &&
-          toPublicImage(
-            {
-              r2_key: a.coverImage.key,
-              width: a.coverImage.width,
-              height: a.coverImage.height,
-              alt_text: a.coverImage.alt,
-              is_decorative: a.coverImage.decorative,
-              variant_widths: a.coverImage.widths,
-            },
-            publicBase,
-          )) ||
-        null,
+      cover: (a.coverImage && toPublicImage(snapshotImageInput(a.coverImage), publicBase)) || null,
       bodyImages: Object.fromEntries(
         Object.entries(a.bodyImages ?? {}).flatMap(([id, image]) => {
           const photo = toPublicImageOrUndefined(image);

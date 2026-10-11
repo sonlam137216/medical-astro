@@ -2,6 +2,7 @@
 // editor: a Library tab (search, pages) and an Upload tab (drag and drop, description, progress). Choosing or
 // uploading an item hands it to `onSelect` and closes the window. The window is added to the page body, not to
 // the form being edited, so nothing in it is ever submitted with that form.
+import { fitReport, fitWarnings, IMAGE_SLOTS, slotHint, type SlotKey } from '../lib/image-slots';
 import { uploadImage, uploadVideo } from './media-client';
 
 export interface PickedMedia {
@@ -9,6 +10,10 @@ export interface PickedMedia {
   kind: 'image' | 'video';
   thumb: string | null;
   label: string;
+  /** Pixel size and chosen focus point of a picture, when known. */
+  width?: number | null;
+  height?: number | null;
+  focus?: { x: number; y: number } | null;
 }
 interface ListedItem extends PickedMedia {
   detail: string | null;
@@ -17,6 +22,8 @@ interface Options {
   kind: 'image' | 'video';
   /** Marked as the current choice in the library. */
   selectedId?: string;
+  /** The place the picture is for: pictures that would be cropped a lot or look small there are marked. */
+  slot?: SlotKey;
   onSelect: (item: PickedMedia) => void;
 }
 
@@ -91,6 +98,8 @@ export function openMediaModal(options: Options) {
   const grid = el('ul', { class: 'admin-media-modal__grid' });
   const more = el('button', { type: 'button', class: 'admin-btn admin-btn--ghost' }, 'Load more');
   more.hidden = true;
+  const slot = options.slot ? IMAGE_SLOTS[options.slot] : null;
+  if (slot) add(library, el('p', { class: 'admin-hint' }, slotHint(slot)));
   add(library, search, status, grid, more);
 
   // ---- upload panel --------------------------------------------------------------------------------------
@@ -145,6 +154,7 @@ export function openMediaModal(options: Options) {
       ? 'The video is stored as it is: it is not converted, and it must be prepared for web playback (see the Media page). Do not upload recordings of patients unless they have given written permission.'
       : 'The image is resized in your browser to a few web sizes and location data is removed. Do not upload photos of patients unless they have given written permission.',
   );
+  if (slot) add(upload, el('p', { class: 'admin-hint' }, slotHint(slot)));
   add(upload, drop, altLabel, decorativeLabel, posterLabel, go, progress, uploadStatus, hint);
 
   add(dialog, head, tabs, library, upload);
@@ -187,6 +197,19 @@ export function openMediaModal(options: Options) {
     else add(button, el('span', { class: 'admin-media-modal__novideo' }, 'Video'));
     add(button, el('span', {}, item.label));
     if (item.detail) add(button, el('small', {}, item.detail));
+    // Advice only: a picture that fits poorly can still be chosen (its focus point can be set afterwards).
+    if (slot && item.width && item.height) {
+      const warnings = fitWarnings(slot, { width: item.width, height: item.height });
+      if (warnings.length > 0) {
+        const report = fitReport(slot, { width: item.width, height: item.height });
+        button.classList.add('is-poor-fit');
+        button.title = `${item.label}\n${warnings.join('\n')}`;
+        const parts = [];
+        if (report.cropPercent >= 15) parts.push(`${report.cropPercent}% cropped`);
+        if (report.small) parts.push('small');
+        add(button, el('small', { class: 'admin-media-modal__warn' }, parts.join(' · ')));
+      }
+    }
     button.addEventListener('click', () => finish(item));
     add(li, button);
     return li;
@@ -286,7 +309,14 @@ export function openMediaModal(options: Options) {
     go.disabled = false;
     progress.hidden = true;
     if (!result.ok) return showUpload(result.error, true);
-    finish({ id: result.item.id, kind, thumb: result.item.thumb, label: result.item.label });
+    finish({
+      id: result.item.id,
+      kind,
+      thumb: result.item.thumb,
+      label: result.item.label,
+      width: result.item.width,
+      height: result.item.height,
+    });
   });
 
   dialog.showModal();

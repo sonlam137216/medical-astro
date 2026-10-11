@@ -2,6 +2,8 @@
 // Pure code (no Worker or Node APIs, no relative imports) so it can be unit-tested with `node --test`.
 // Limits mirror the CHECK constraints in the database; the database remains the last line of defence.
 
+import type { SlotKey } from '../image-slots.ts';
+
 export interface FieldBase {
   name: string;
   label: string;
@@ -48,7 +50,8 @@ export type Field =
       options: ReadonlyArray<readonly [string, string]>;
       default?: string;
     })
-  | (FieldBase & { type: 'image' })
+  /** `slot`: the place on the website that shows the picture (src/lib/image-slots.ts): sizes and crop hints. */
+  | (FieldBase & { type: 'image'; slot?: SlotKey })
   /** One row of another table, chosen from a list. */
   | (FieldBase & {
       type: 'ref';

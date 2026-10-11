@@ -105,7 +105,7 @@ const reviewed = formatArticleDate(row.reviewed_on);
     </p>
     {row.excerpt && <p class="lead">{row.excerpt}</p>}
     {cover && (
-      <ProfileImage image={cover} width={800} height={450} sizes="760px" class="cover" priority />
+      <ProfileImage image={cover} slot="article-cover" sizes="760px" class="cover" priority />
     )}
     {toc.length > 1 && (
       <nav class="toc" aria-label="Table of contents">
@@ -200,8 +200,6 @@ const reviewed = formatArticleDate(row.reviewed_on);
   .page :global(.cover) {
     width: 100%;
     height: auto;
-    aspect-ratio: 16 / 9;
-    object-fit: cover;
     border-radius: var(--radius-card);
   }
 

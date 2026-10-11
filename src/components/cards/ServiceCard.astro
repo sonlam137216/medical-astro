@@ -2,6 +2,7 @@
 import type { Img } from '../../data/home';
 import type { PublicImage } from '../../lib/media';
 import ProfileImage from '../ProfileImage.astro';
+import { frameAspect, IMAGE_SLOTS } from '../../lib/image-slots';
 
 interface Props {
   title: string;
@@ -24,12 +25,15 @@ const { title, body, total, href, image, linkLabel = 'Learn more', detail = fals
     <ProfileImage
       class="card__media service__img"
       image={image}
-      width={384}
-      height={190}
+      slot="service-card"
       sizes="(max-width: 768px) 100vw, 384px"
     />
   ) : (
-    <div class="card__media service__img service__img--empty" aria-hidden="true"></div>
+    <div
+      class="card__media service__img service__img--empty"
+      style={`aspect-ratio: ${frameAspect(IMAGE_SLOTS['service-card'])}`}
+      aria-hidden="true"
+    ></div>
   )}
   <div class:list={['card__body', { 'card__body--detail': detail }]}>
     <h3 class="t-h3">{title}</h3>
@@ -50,12 +54,6 @@ const { title, body, total, href, image, linkLabel = 'Learn more', detail = fals
 <style>
   .service__img--empty {
     background: var(--color-card);
-  }
-
-  .service__img {
-    aspect-ratio: 384 / 190;
-    object-fit: cover;
-    object-position: center top;
   }
 
   .card__body--detail {

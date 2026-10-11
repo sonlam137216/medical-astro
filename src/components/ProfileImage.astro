@@ -2,14 +2,24 @@
 import { Image } from 'astro:assets';
 import type { Img } from '../data/types';
 import type { PublicImage } from '../lib/media';
+import { frameStyle, IMAGE_SLOTS, type SlotKey } from '../lib/image-slots';
 
 // One image component for both kinds of source: a sample photo bundled with the site (optimised at build)
 // or an image from the media library (already resized into WebP files in R2).
 interface Props {
   image: Img | PublicImage;
-  width: number;
-  height: number;
+  /** Size of the sample photo to generate; defaults to the frame of `slot`. */
+  width?: number;
+  height?: number;
   sizes: string;
+  /**
+   * The place the picture is shown (src/lib/image-slots.ts). The picture is cropped to that frame and, for a
+   * photo from the media library, the focus point chosen in the admin stays in view. Without it the caller's
+   * CSS sets the shape.
+   */
+  slot?: SlotKey;
+  /** Which frame of the slot (0 is the main one). */
+  frame?: number;
   /** The image is the first thing people see: load it right away instead of lazily. */
   priority?: boolean;
   class?: string;
@@ -17,13 +27,30 @@ interface Props {
   [attr: `data-${string}`]: unknown;
 }
 
-const { image, width, height, sizes, priority = false, class: className, ...rest } = Astro.props;
+const {
+  image,
+  slot,
+  frame = 0,
+  width: givenWidth,
+  height: givenHeight,
+  sizes,
+  priority = false,
+  class: className,
+  ...rest
+} = Astro.props;
+const frameSize = slot ? (IMAGE_SLOTS[slot].frames[frame] ?? IMAGE_SLOTS[slot].frames[0]) : null;
+const width = givenWidth ?? frameSize?.width ?? 800;
+const height = givenHeight ?? frameSize?.height ?? 450;
+const style = slot
+  ? frameStyle(IMAGE_SLOTS[slot], 'focus' in image ? image.focus : null, frame)
+  : undefined;
 ---
 
 {'srcset' in image ? (
   <img
     {...rest}
     class={className}
+    style={style}
     src={image.url}
     srcset={image.srcset}
     sizes={sizes}
@@ -38,6 +65,7 @@ const { image, width, height, sizes, priority = false, class: className, ...rest
   <Image
     {...rest}
     class={className}
+    style={style}
     src={image.src}
     alt={image.alt}
     width={width}

@@ -1,3 +1,4 @@
+import type { SlotKey } from '../image-slots';
 import type { Field, ItemColumn } from './fields';
 
 // The text of the page sections that the admin can edit ("Page text"). Each section is one row of `page_sections`
@@ -77,11 +78,12 @@ const titleLines = area('title', 'Title', 200, {
   rows: 3,
   help: 'A new line starts a new line of the title.',
 });
-const image = (help: string, name = 'image', fieldLabel = 'Photo'): Field => ({
+const image = (help: string, slot: SlotKey, name = 'image', fieldLabel = 'Photo'): Field => ({
   type: 'image',
   name,
   label: fieldLabel,
   help,
+  slot,
 });
 
 const COUNTRY_ORDER = 'Vietnam, United States, Australia, United Kingdom, Canada, New Zealand';
@@ -174,6 +176,7 @@ export const SECTIONS: SectionDef[] = [
       area('body', 'Text', 600),
       image(
         'Shown when no video is chosen in Site details. Leave empty to keep the built-in picture.',
+        'home-conversations',
       ),
     ],
   },
@@ -241,11 +244,13 @@ export const SECTIONS: SectionDef[] = [
       lines('details', 'Treatment details', 6, 160, 'One item per line.'),
       image(
         'The “before” picture, the one shown on the left of the slider. Both pictures need to be chosen for the slider to appear; use two photos of the same patient taken from the same angle, and only photos the patient agreed in writing to share.',
+        'home-smile',
         'before',
         'Before photo',
       ),
       image(
         'The “after” picture, shown on the right of the slider. Same angle and framing as the before photo.',
+        'home-smile',
         'after',
         'After photo',
       ),

@@ -4,6 +4,7 @@ import inclusionDot from '../../assets/images/icons/inclusion-dot.png';
 import type { Img } from '../../data/types';
 import type { PublicImage } from '../../lib/media';
 import ProfileImage from '../ProfileImage.astro';
+import { frameAspect, IMAGE_SLOTS } from '../../lib/image-slots';
 
 interface Props {
   title: string;
@@ -26,12 +27,15 @@ const { title, inclusions, total, note, href, image, linkLabel = 'Learn more' } 
     <ProfileImage
       class="card__media package__img"
       image={image}
-      width={384}
-      height={190}
+      slot="package-card"
       sizes="(max-width: 768px) 100vw, 384px"
     />
   ) : (
-    <div class="card__media package__img package__img--empty" aria-hidden="true"></div>
+    <div
+      class="card__media package__img package__img--empty"
+      style={`aspect-ratio: ${frameAspect(IMAGE_SLOTS['package-card'])}`}
+      aria-hidden="true"
+    ></div>
   )}
   <div class="card__body">
     <h3 class="t-h3">{title}</h3>
@@ -61,12 +65,6 @@ const { title, inclusions, total, note, href, image, linkLabel = 'Learn more' } 
 </article>
 
 <style>
-  .package__img {
-    aspect-ratio: 384 / 190;
-    object-fit: cover;
-    object-position: center top;
-  }
-
   .package__img--empty {
     background: var(--color-card);
   }

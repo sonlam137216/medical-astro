@@ -9,7 +9,15 @@ export const prerender = false;
 // `thumb` and `label` let a picker window show the new image without reloading the page.
 const json = (
   status: number,
-  body: { ok: boolean; id?: string; error?: string; thumb?: string; label?: string },
+  body: {
+    ok: boolean;
+    id?: string;
+    error?: string;
+    thumb?: string;
+    label?: string;
+    width?: number;
+    height?: number;
+  },
 ) =>
   new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } });
 
@@ -68,5 +76,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
     id,
     thumb: mediaUrl(thumbnailKey(keys[keys.length - 1], widths)),
     label: isDecorative ? 'Decorative' : (altText ?? 'No description yet'),
+    width: largest.width,
+    height: largest.height,
   });
 };

@@ -8,7 +8,7 @@ import {
   type NavLink,
 } from '../data/site';
 import { loadSnapshot, getPublicBase, getServices } from './content';
-import { toPublicVideo, type PublicVideo } from './media';
+import { snapshotImageInput, toPublicVideo, type PublicVideo } from './media';
 
 // BUILD-TIME ONLY (see content.ts). Site-wide details and menus for the header, footer and contact blocks.
 //
@@ -59,14 +59,7 @@ export async function getSiteContent(): Promise<SiteContent> {
           width: v.width,
           height: v.height,
           alt_text: v.title,
-          poster: v.poster && {
-            r2_key: v.poster.key,
-            width: v.poster.width,
-            height: v.poster.height,
-            alt_text: v.poster.alt,
-            is_decorative: v.poster.decorative,
-            variant_widths: v.poster.widths,
-          },
+          poster: v.poster && snapshotImageInput(v.poster),
         },
         getPublicBase(),
       )

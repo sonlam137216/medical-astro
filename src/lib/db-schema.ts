@@ -262,6 +262,8 @@ export interface Tables {
     Row: {
       alt_text: string | null;
       created_at: string;
+      focal_x: number | null;
+      focal_y: number | null;
       height: number | null;
       id: string;
       is_decorative: boolean;
@@ -278,6 +280,8 @@ export interface Tables {
     Insert: {
       alt_text?: string | null;
       created_at?: string;
+      focal_x?: number | null;
+      focal_y?: number | null;
       height?: number | null;
       id?: string;
       is_decorative?: boolean;

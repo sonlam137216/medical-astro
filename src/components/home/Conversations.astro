@@ -29,8 +29,7 @@ const picture = conversations.chosenPhotos.image ?? conversations.image;
       <ProfileImage
         class="split__img"
         image={picture}
-        width={520}
-        height={440}
+        slot="home-conversations"
         sizes="(max-width: 960px) 100vw, 520px"
       />
     )}
@@ -48,8 +47,6 @@ const picture = conversations.chosenPhotos.image ?? conversations.image;
   .split__img {
     width: 100%;
     height: auto;
-    aspect-ratio: 520 / 440;
-    object-fit: cover;
     border-radius: var(--radius-image);
     overflow: hidden;
   }

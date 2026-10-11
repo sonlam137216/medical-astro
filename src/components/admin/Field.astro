@@ -37,6 +37,7 @@ const slotsFor = (f: Extract<Field, { type: 'items' }>) => {
     label={f.label}
     value={text(f.name)}
     images={options.images}
+    slot={f.slot}
     error={error}
   />
 )}

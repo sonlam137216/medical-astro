@@ -10,6 +10,11 @@ export interface MediaItem {
   label: string;
   /** Extra line: the size of a video. */
   detail: string | null;
+  /** Pixel size of a picture (what the slot hints compare with); null for a video. */
+  width: number | null;
+  height: number | null;
+  /** The chosen focus point of a picture, if any. */
+  focus: { x: number; y: number } | null;
 }
 
 export const MEDIA_PAGE_SIZE = 24;

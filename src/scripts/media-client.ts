@@ -13,6 +13,9 @@ export interface UploadedMedia {
   /** Small picture for the new item (a video without a cover image has none). */
   thumb: string | null;
   label: string;
+  /** Pixel size of an uploaded picture (the largest stored file). */
+  width?: number;
+  height?: number;
 }
 export type UploadResult = { ok: true; item: UploadedMedia } | { ok: false; error: string };
 
@@ -22,6 +25,8 @@ interface Reply {
   error?: string;
   thumb?: string | null;
   label?: string;
+  width?: number;
+  height?: number;
 }
 const toResult = (status: number, reply: Reply | null): UploadResult =>
   status === 200 && reply?.ok && reply.id
@@ -31,6 +36,8 @@ const toResult = (status: number, reply: Reply | null): UploadResult =>
           id: reply.id,
           thumb: reply.thumb ?? null,
           label: reply.label ?? 'No description yet',
+          width: reply.width,
+          height: reply.height,
         },
       }
     : { ok: false, error: reply?.error ?? 'Upload failed. Please try again.' };

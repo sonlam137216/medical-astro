@@ -1,5 +1,6 @@
 // Shared by the admin (upload, library) and the public build (image URLs). Safe to import anywhere:
 // no Worker or Node APIs.
+import { toFocus, type FocusPoint } from './image-slots.ts';
 
 /** Widths the browser generates before upload. An image only gets the sizes up to its own width. */
 export const VARIANT_WIDTHS = [480, 960, 1600] as const;
@@ -73,6 +74,9 @@ export interface MediaImageInput {
   alt_text: string | null;
   is_decorative: boolean;
   variant_widths: number[];
+  /** Part of the picture that must stay in view when it is cropped (percent from the top-left). */
+  focal_x?: number | null;
+  focal_y?: number | null;
 }
 
 export interface PublicImage {
@@ -82,6 +86,30 @@ export interface PublicImage {
   height: number;
   /** Empty for decorative images. */
   alt: string;
+  /** Absent: the place that shows the picture uses its own default. */
+  focus?: FocusPoint;
+}
+
+/** The fields of a snapshot image (src/lib/snapshot.ts) as `toPublicImage` takes them. */
+export function snapshotImageInput(image: {
+  key: string;
+  width: number;
+  height: number;
+  alt: string | null;
+  decorative: boolean;
+  widths: number[];
+  focus?: FocusPoint;
+}): MediaImageInput {
+  return {
+    r2_key: image.key,
+    width: image.width,
+    height: image.height,
+    alt_text: image.alt,
+    is_decorative: image.decorative,
+    variant_widths: image.widths,
+    focal_x: image.focus?.x ?? null,
+    focal_y: image.focus?.y ?? null,
+  };
 }
 
 /** A ready-to-render image (largest file as the fallback `src`, every width in `srcset`). */
@@ -92,6 +120,7 @@ export function toPublicImage(
   const parsed = parseKey(asset.r2_key);
   if (!parsed || !asset.width || !asset.height) return null;
   const widths = [...asset.variant_widths].sort((a, b) => a - b);
+  const focus = toFocus(asset.focal_x, asset.focal_y);
   const srcset = widths
     .map((w) => `${mediaUrl(variantKey(parsed.assetId, parsed.version, w), publicBase)} ${w}w`)
     .join(', ');
@@ -101,6 +130,7 @@ export function toPublicImage(
     width: asset.width,
     height: asset.height,
     alt: asset.is_decorative ? '' : (asset.alt_text ?? ''),
+    ...(focus ? { focus } : {}),
   };
 }
 

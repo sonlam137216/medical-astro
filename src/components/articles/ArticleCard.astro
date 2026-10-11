@@ -15,8 +15,7 @@ const { article } = Astro.props;
     <ProfileImage
       class="card__media article__img"
       image={article.cover}
-      width={384}
-      height={256}
+      slot="article-cover"
       sizes="(max-width: 640px) 100vw, 330px"
     />
   )}
@@ -35,11 +34,6 @@ const { article } = Astro.props;
 <style>
   .article {
     height: 100%;
-  }
-
-  .article__img {
-    aspect-ratio: 3 / 2;
-    object-fit: cover;
   }
 
   .card__body {

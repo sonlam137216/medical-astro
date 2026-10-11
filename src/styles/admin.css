@@ -1115,9 +1115,7 @@ html.js .no-js-only {
 }
 
 .admin-media-chosen {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
+  display: grid;
   gap: 12px;
   padding: 10px;
   border: 1px solid var(--a-line);
@@ -1131,7 +1129,14 @@ html.js .no-js-only {
   display: none !important;
 }
 
-.admin-media-chosen img {
+.admin-media-chosen__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.admin-media-chosen__head > img {
   width: 72px;
   height: 54px;
   object-fit: cover;
@@ -1342,4 +1347,119 @@ html.js .no-js-only {
 .admin-media-modal__drop:focus-within {
   border-color: var(--color-blue);
   background: var(--a-info-bg);
+}
+
+/* ---- Picture slots: the crop preview, size advice and focus point ------------------------------------------ */
+.admin-hint--slot {
+  display: block;
+  margin-top: 6px;
+}
+
+.admin-slot {
+  display: grid;
+  gap: 10px;
+}
+
+.admin-slot__frames {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.admin-slot__frame {
+  flex: 1 1 130px;
+  max-width: 280px;
+  margin: 0;
+}
+
+.admin-slot__frame figcaption {
+  margin-top: 4px;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--a-muted);
+}
+
+.admin-slot__crop {
+  overflow: hidden;
+  border: 1px solid var(--a-line-strong);
+  border-radius: 8px;
+  background: var(--a-bg);
+}
+
+.admin-slot__crop img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.admin-field-warning {
+  margin: 0;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: var(--a-warn-bg);
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.45;
+}
+
+.admin-slot__focus {
+  font-size: 13px;
+  font-weight: 400;
+}
+
+.admin-slot__focus summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--color-blue);
+}
+
+.admin-slot__focus > * + * {
+  margin-top: 8px;
+}
+
+.admin-focus {
+  position: relative;
+  display: block;
+  max-width: 360px;
+  padding: 0;
+  border: 1px solid var(--a-line-strong);
+  border-radius: 8px;
+  background: var(--a-bg);
+  line-height: 0;
+  cursor: crosshair;
+  overflow: hidden;
+}
+
+.admin-focus img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.admin-focus__marker {
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  margin: -11px 0 0 -11px;
+  border: 3px solid #fff;
+  border-radius: 50%;
+  background: rgb(0 86 229 / 35%);
+  box-shadow: 0 0 0 2px var(--color-blue);
+  pointer-events: none;
+}
+
+.admin-media-modal__grid button.is-poor-fit img {
+  opacity: 0.55;
+}
+
+.admin-media-modal__warn {
+  color: #9a5b00;
+  font-weight: 600;
+}
+
+.admin-focus-numbers {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 160px));
+  gap: 12px;
 }

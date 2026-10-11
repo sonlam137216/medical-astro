@@ -2,6 +2,7 @@
 import type { Img } from '../data/types';
 import type { PublicImage } from '../lib/media';
 import ProfileImage from './ProfileImage.astro';
+import { frameAspect, IMAGE_SLOTS, type SlotKey } from '../lib/image-slots';
 
 // Before/after comparison: both pictures are stacked and the visitor drags the divider (mouse, touch or arrow
 // keys) to reveal more of one or the other. The real control is a transparent <input type="range"> laid over
@@ -10,28 +11,22 @@ import ProfileImage from './ProfileImage.astro';
 interface Props {
   before: Img | PublicImage;
   after: Img | PublicImage;
-  width: number;
-  height: number;
+  /** The place the pair is shown: sets the shape of the comparison and keeps each photo's focus point in view. */
+  slot: SlotKey;
   sizes: string;
   class?: string;
 }
 
-const { before, after, width, height, sizes, class: className } = Astro.props;
+const { before, after, slot, sizes, class: className } = Astro.props;
 ---
 
 <div
   class:list={['ba', className]}
   data-before-after
-  style={`--pos: 50%; aspect-ratio: ${width} / ${height}`}
+  style={`--pos: 50%; aspect-ratio: ${frameAspect(IMAGE_SLOTS[slot])}`}
 >
-  <ProfileImage class="ba__img" image={after} width={width} height={height} sizes={sizes} />
-  <ProfileImage
-    class="ba__img ba__img--before"
-    image={before}
-    width={width}
-    height={height}
-    sizes={sizes}
-  />
+  <ProfileImage class="ba__img" image={after} slot={slot} sizes={sizes} />
+  <ProfileImage class="ba__img ba__img--before" image={before} slot={slot} sizes={sizes} />
 
   <span class="ba__tag ba__tag--before" aria-hidden="true">
     Before

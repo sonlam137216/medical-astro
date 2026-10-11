@@ -2,6 +2,7 @@
 import type { Img } from '../../data/types';
 import type { PublicImage } from '../../lib/media';
 import ProfileImage from '../ProfileImage.astro';
+import { frameAspect, IMAGE_SLOTS } from '../../lib/image-slots';
 
 interface Props {
   name: string;
@@ -28,12 +29,16 @@ const initials = name
     <ProfileImage
       class="card__media doctor__img"
       image={image}
-      width={282}
-      height={280}
+      slot="doctor"
+      frame={1}
       sizes="(max-width: 600px) 100vw, 282px"
     />
   ) : (
-    <div class="card__media doctor__img doctor__initials" aria-hidden="true">
+    <div
+      class="card__media doctor__img doctor__initials"
+      style={`aspect-ratio: ${frameAspect(IMAGE_SLOTS.doctor, 1)}`}
+      aria-hidden="true"
+    >
       {initials}
     </div>
   )}
@@ -55,9 +60,6 @@ const initials = name
   }
 
   .doctor__img {
-    aspect-ratio: 282 / 280;
-    object-fit: contain;
-    object-position: center bottom;
     background: var(--color-white);
   }
 
