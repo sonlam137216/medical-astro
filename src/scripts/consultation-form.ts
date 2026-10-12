@@ -1,6 +1,35 @@
 // Progressive enhancement for every consultation form: submit in place and show the result
 // without leaving the page. Without JS the form still POSTs and the endpoint answers with a page.
+// A module (not a plain script), so the global declaration below is allowed.
+export {};
+
 type ApiReply = { ok: boolean; message: string; errors?: Record<string, string> };
+
+// Cloudflare Turnstile (optional spam check, see src/lib/turnstile.ts). The widget script is third-party, so it
+// is loaded only when someone starts filling in a form, never with the page.
+interface TurnstileApi {
+  render(container: HTMLElement, options: Record<string, unknown>): string;
+  reset(widgetId?: string): void;
+}
+declare global {
+  interface Window {
+    turnstile?: TurnstileApi;
+  }
+}
+let turnstileScript: Promise<TurnstileApi> | undefined;
+function loadTurnstile(): Promise<TurnstileApi> {
+  return (turnstileScript ??= new Promise((resolve, reject) => {
+    const script = document.createElement('script');
+    script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+    script.async = true;
+    script.onload = () => (window.turnstile ? resolve(window.turnstile) : reject());
+    script.onerror = () => {
+      turnstileScript = undefined; // allow a retry on the next focus
+      reject();
+    };
+    document.head.appendChild(script);
+  }));
+}
 
 document.querySelectorAll<HTMLFormElement>('form[data-form="consultation"]').forEach((form) => {
   const status = form.querySelector<HTMLElement>('[data-status]');
@@ -18,9 +47,40 @@ document.querySelectorAll<HTMLFormElement>('form[data-form="consultation"]').for
     status.dataset.kind = kind;
   };
 
+  // The spam check: created on first focus, answered in the background; a token can be used once, so the
+  // widget is reset after every attempt.
+  const spamBox = form.querySelector<HTMLElement>('[data-turnstile-sitekey]');
+  let widgetId: string | undefined;
+  const startSpamCheck = () => {
+    if (!spamBox || widgetId !== undefined) return;
+    widgetId = ''; // rendering has started
+    loadTurnstile().then(
+      (api) => {
+        widgetId = api.render(spamBox, {
+          sitekey: spamBox.dataset.turnstileSitekey,
+          appearance: 'interaction-only',
+        });
+      },
+      () => (widgetId = undefined),
+    );
+  };
+  form.addEventListener('focusin', startSpamCheck, { once: true });
+  const resetSpamCheck = () => {
+    if (widgetId) window.turnstile?.reset(widgetId);
+  };
+
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
     form.querySelectorAll('[aria-invalid]').forEach((el) => el.removeAttribute('aria-invalid'));
+
+    if (
+      spamBox &&
+      !(form.elements.namedItem('cf-turnstile-response') as HTMLInputElement | null)?.value
+    ) {
+      startSpamCheck();
+      show('One moment, we are running a quick spam check. Please press Send again.', 'error');
+      return;
+    }
 
     button.disabled = true;
     show('Sending…', 'ok');
@@ -48,6 +108,7 @@ document.querySelectorAll<HTMLFormElement>('form[data-form="consultation"]').for
       show('Network problem. Please check your connection and try again.', 'error');
     } finally {
       button.disabled = false;
+      resetSpamCheck();
     }
   });
 });

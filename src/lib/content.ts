@@ -48,6 +48,11 @@ export function getMediaOrigin(): string | null {
   }
 }
 
+/** Turnstile site key (public, written into the forms) when the spam check is switched on. Build time only. */
+export function getTurnstileSiteKey(): string | null {
+  return setting('TURNSTILE_SITE_KEY') ?? null;
+}
+
 /** Public base URL of the media bucket (custom domain), if one is configured. Build time only. */
 export function getPublicBase(): string | null {
   return setting('R2_PUBLIC_BASE_URL') ?? null;

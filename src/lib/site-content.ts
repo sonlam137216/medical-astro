@@ -7,7 +7,8 @@ import {
   utilityLink as sampleUtility,
   type NavLink,
 } from '../data/site';
-import { loadSnapshot, getPublicBase, getServices } from './content';
+import { loadSnapshot, getPublicBase, getServices, getLocations } from './content';
+import { DEFAULT_SHARE_IMAGE, absoluteUrl, organizationJsonLd } from './seo';
 import { snapshotImageInput, toPublicVideo, type PublicVideo } from './media';
 
 // BUILD-TIME ONLY (see content.ts). Site-wide details and menus for the header, footer and contact blocks.
@@ -113,4 +114,27 @@ export async function getServiceLinks(): Promise<NavLink[]> {
     return (await getServices()).map((s) => ({ label: s.title, href: s.href }));
   }
   return (await getSiteContent()).footerTreatments;
+}
+
+/**
+ * schema.org data for the clinic (Home page): the site's name, contact details, social profiles and clinics.
+ * `site` is the website's origin (`Astro.site`); without it there is nothing to point the URLs at.
+ */
+export async function getOrganizationJsonLd(
+  site: URL | undefined,
+  extra: { description?: string; logoPath?: string } = {},
+): Promise<Record<string, unknown> | null> {
+  if (!site) return null;
+  const [content, locations] = await Promise.all([getSiteContent(), getLocations()]);
+  return organizationJsonLd({
+    name: content.name,
+    url: new URL('/', site).href,
+    logo: extra.logoPath ? absoluteUrl(site, extra.logoPath) : undefined,
+    image: absoluteUrl(site, DEFAULT_SHARE_IMAGE),
+    description: extra.description,
+    phone: content.phoneIntl,
+    email: content.email,
+    sameAs: content.social.map((s) => s.href),
+    locations: locations.map((l) => ({ name: l.name, address: l.address })),
+  });
 }

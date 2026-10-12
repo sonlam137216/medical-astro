@@ -32,7 +32,9 @@
     "deploy:staging": "CLOUDFLARE_ENV=staging astro build && wrangler deploy",
     "deploy:production": "astro build && wrangler deploy",
     "check:responsive": "node scripts/check-responsive.mjs",
-    "check:motion": "node scripts/check-motion.mjs"
+    "check:motion": "node scripts/check-motion.mjs",
+    "check:csp": "node scripts/check-csp.mjs",
+    "check:seo": "node scripts/check-seo.mjs"
   },
   "dependencies": {
     "@astrojs/cloudflare": "^14.3.3",

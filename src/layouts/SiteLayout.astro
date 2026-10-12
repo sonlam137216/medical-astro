@@ -5,6 +5,7 @@ import Footer from '../components/Footer.astro';
 import ConsultationSection from '../components/ConsultationSection.astro';
 import SocialBar from '../components/SocialBar.astro';
 import { getMediaOrigin } from '../lib/content';
+import { SITE_INDEXABLE } from '../lib/seo';
 
 interface Props {
   title: string;
@@ -20,6 +21,11 @@ interface Props {
   social?: boolean;
   /** `sans` = Home look (Montserrat headings); default `serif` = inner pages (Cormorant headings). */
   theme?: 'serif' | 'sans';
+  /** Link preview picture (path or address); absent: the default share picture. */
+  image?: string;
+  ogType?: 'website' | 'article';
+  /** schema.org data for the page (src/lib/seo.ts). */
+  jsonLd?: Record<string, unknown>[];
   /** Pathname used to highlight the active nav link (defaults to the request path). */
   current?: string;
   /** Header variations seen in Figma: the Dental Implants landing page swaps the utility text and CTA. */
@@ -38,11 +44,22 @@ const {
   current,
   header,
   theme = 'serif',
+  image,
+  ogType,
+  jsonLd,
 } = Astro.props;
 ---
 
-<!-- noindex stays on until launch (Phase 7 replaces this with per-environment robots handling) -->
-<BaseLayout title={title} description={description} noindex mediaOrigin={getMediaOrigin()}>
+<!-- Pages are indexable only on a build made with SITE_INDEXABLE=true and a SITE_URL (integrations/build-env.mjs). -->
+<BaseLayout
+  title={title}
+  description={description}
+  noindex={!SITE_INDEXABLE}
+  mediaOrigin={getMediaOrigin()}
+  {image}
+  {ogType}
+  {jsonLd}
+>
   <slot name="head" slot="head" />
   <a class="skip-link visually-hidden" href="#main">
     Skip to content

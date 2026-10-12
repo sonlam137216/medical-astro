@@ -1,6 +1,7 @@
 ---
 import SiteLayout from '../layouts/SiteLayout.astro';
-import { getPageSeo } from '../lib/site-content';
+import { getOrganizationJsonLd, getPageSeo } from '../lib/site-content';
+import logo from '../assets/images/brand/logo.png';
 import Hero from '../components/Hero.astro';
 import PatientSupport from '../components/home/PatientSupport.astro';
 import Services from '../components/home/Services.astro';
@@ -22,9 +23,18 @@ const seo = await getPageSeo('/', {
   description:
     'Melatec Dental Clinic in Vietnam: dental implants, porcelain crowns, veneers and complete smile makeovers for international patients, with English-speaking specialists.',
 });
+const organization = await getOrganizationJsonLd(Astro.site, {
+  description: seo.description,
+  logoPath: logo.src,
+});
 ---
 
-<SiteLayout title={seo.title} description={seo.description} theme="sans">
+<SiteLayout
+  title={seo.title}
+  description={seo.description}
+  theme="sans"
+  jsonLd={organization ? [organization] : []}
+>
   <Hero />
   <PatientSupport />
   <Services />

@@ -19,8 +19,13 @@ CLOUDFLARE_API_URL=
 # Setup and checks: MEDIA_CDN.md.
 R2_PUBLIC_BASE_URL=
 
-# Cloudflare Turnstile for the consultation form (Phase 4)
+# Cloudflare Turnstile spam check for the consultation forms. Optional; leave both empty until spam shows up.
+# Turn it on by setting BOTH: the secret on the Worker (`wrangler secret put TURNSTILE_SECRET_KEY`, the server then
+# requires a valid token) and the site key at BUILD time (GitHub Environment variable TURNSTILE_SITE_KEY, written
+# into the forms and allowed in the Content-Security-Policy). With only one of them the forms stop accepting
+# requests (secret only) or show a check nobody verifies (site key only). Browsers without JavaScript cannot pass it.
 TURNSTILE_SECRET_KEY=
+TURNSTILE_SITE_KEY=
 
 # Publish pipeline (Phase 6). The admin's Publish button starts the "Publish" GitHub Actions workflow.
 # GITHUB_DISPATCH_TOKEN: fine-grained token with "Actions: read and write" on the repository. Backend secret only.

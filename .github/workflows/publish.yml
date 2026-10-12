@@ -63,6 +63,12 @@ jobs:
         env:
           REVISION_ID: ${{ inputs.revision_id }}
           R2_PUBLIC_BASE_URL: ${{ vars.R2_PUBLIC_BASE_URL }}
+          # Public address of the website, whether search engines may index this build, and the Turnstile site key.
+          # All optional GitHub Environment variables. Only a production build can be indexable.
+          SITE_URL: ${{ vars.SITE_URL }}
+          SITE_INDEXABLE: ${{ vars.SITE_INDEXABLE }}
+          TURNSTILE_SITE_KEY: ${{ vars.TURNSTILE_SITE_KEY }}
+          TARGET: ${{ inputs.target }}
         run: |
           {
             echo "CLOUDFLARE_ACCOUNT_ID=$CLOUDFLARE_ACCOUNT_ID"
@@ -70,6 +76,9 @@ jobs:
             echo "D1_DATABASE_ID=$D1_DATABASE_ID"
             echo "CONTENT_REVISION_ID=$REVISION_ID"
             echo "R2_PUBLIC_BASE_URL=$R2_PUBLIC_BASE_URL"
+            echo "SITE_URL=$SITE_URL"
+            echo "TURNSTILE_SITE_KEY=$TURNSTILE_SITE_KEY"
+            if [ "$TARGET" = "production" ]; then echo "SITE_INDEXABLE=$SITE_INDEXABLE"; fi
           } > .dev.vars
 
       - name: Build and deploy

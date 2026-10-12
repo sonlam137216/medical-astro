@@ -35,3 +35,8 @@ test('an invalid country code is rejected, not stored', () => {
   assert.match(String(phoneOf({ phone_country: '84; drop', phone: '989402211' })), /country code/);
   assert.match(String(phoneOf({ phone_country: '+84', phone: '' })), /enter your phone/);
 });
+
+test('a country code the form does not offer is rejected', () => {
+  assert.match(String(phoneOf({ phone_country: '+999', phone: '989402211' })), /country code/);
+  assert.equal(phoneOf({ phone_country: '+1', phone: '415 555 0100' }), '+1 415 555 0100');
+});

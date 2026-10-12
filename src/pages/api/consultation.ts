@@ -8,6 +8,7 @@ import {
   validateConsultation,
 } from '../../lib/consultation';
 import { createDb } from '../../lib/db';
+import { TURNSTILE_FIELD, verifyTurnstile } from '../../lib/turnstile';
 
 // On-demand route (runs in the Worker). Handles personal data: never cache, never log field values.
 export const prerender = false;
@@ -20,6 +21,7 @@ const MESSAGES = {
   rateLimited: 'Too many requests. Please wait a minute and try again.',
   unavailable: 'We could not send your request right now. Please try again in a moment.',
   rejected: 'This request was not accepted.',
+  spamCheck: 'The spam check did not pass. Please wait a moment and press Send again.',
 } as const;
 
 function wantsJson(request: Request) {
@@ -97,6 +99,20 @@ export const POST: APIRoute = async ({ request }) => {
   }
   // Bots that fill the hidden field get the same answer as people, and nothing is stored.
   if (result.honeypot) return reply(request, 200, { ok: true, message: MESSAGES.sent });
+
+  // Spam check, only when it is switched on (secret key set). Placed after the cheap checks above so bots that
+  // fail them never cost a request to Cloudflare.
+  if (env.TURNSTILE_SECRET_KEY) {
+    const check = await verifyTurnstile(
+      raw[TURNSTILE_FIELD],
+      env.TURNSTILE_SECRET_KEY,
+      request.headers.get('cf-connecting-ip'),
+    );
+    if (check === 'failed') return reply(request, 403, { ok: false, message: MESSAGES.spamCheck });
+    if (check === 'unavailable') {
+      return reply(request, 503, { ok: false, message: MESSAGES.unavailable });
+    }
+  }
 
   if (!env.DB) {
     console.error('consultation: the DB binding is not configured');

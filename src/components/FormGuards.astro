@@ -4,7 +4,11 @@
 interface Props {
   part: 'fields' | 'status';
 }
+import { getTurnstileSiteKey } from '../lib/content';
+
 const { part } = Astro.props;
+// Spam check (Cloudflare Turnstile), only when switched on: the widget is created on first use by the script.
+const turnstileKey = getTurnstileSiteKey();
 ---
 
 {part === 'fields' ? (
@@ -17,6 +21,7 @@ const { part } = Astro.props;
         <input type="text" name="website" tabindex="-1" autocomplete="off" />
       </label>
     </div>
+    {turnstileKey && <div class="form__turnstile" data-turnstile-sitekey={turnstileKey} />}
   </>
 ) : (
   <p class="form__status" role="status" aria-live="polite" data-status />

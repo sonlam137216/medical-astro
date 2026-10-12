@@ -12,6 +12,7 @@ import PlanVisit from '../../components/PlanVisit.astro';
 import LatestArticles from '../../components/articles/LatestArticles.astro';
 import { getPageSeo } from '../../lib/site-content';
 import { getFaqs, getSection } from '../../lib/content';
+import { faqJsonLd } from '../../lib/seo';
 
 import { heroImage } from '../../data/implants';
 
@@ -30,6 +31,7 @@ const seo = await getPageSeo('/services/dental-implants', {
   description:
     'Single-tooth implants and All-on-4 and All-on-6 restorations, with a personalised treatment plan and estimate before you travel to Vietnam.',
 });
+const faqData = faqJsonLd(faqs);
 // The Figma row has one filled card (30,000+) and three empty ones: only the filled one is shown.
 const [stat] = statsSection?.items ?? [];
 ---
@@ -41,6 +43,7 @@ const [stat] = statsSection?.items ?? [];
   consultation={false}
   consultationAnchor
   social={false}
+  jsonLd={faqData ? [faqData] : []}
 >
   <PageHero
     variant="banner"

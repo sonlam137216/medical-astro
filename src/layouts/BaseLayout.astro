@@ -6,6 +6,8 @@ import '@fontsource/roboto/latin-700.css';
 import '@fontsource/cormorant-garamond/latin-700.css';
 import '@fontsource/cormorant-garamond/vietnamese-700.css';
 import '../styles/global.css';
+import { DEFAULT_SHARE_IMAGE, absoluteUrl, jsonLdString } from '../lib/seo';
+import { JS_FLAG_SCRIPT } from '../../integrations/inline-scripts.mjs';
 
 interface Props {
   title: string;
@@ -14,9 +16,30 @@ interface Props {
   noindex?: boolean;
   /** Origin of the media CDN, when pictures come from one: the browser connects to it early. */
   mediaOrigin?: string | null;
+  /** Picture for link previews: a path or address. Absent: the default share picture. */
+  image?: string;
+  /** Open Graph type: `article` for articles, `website` otherwise. */
+  ogType?: 'website' | 'article';
+  /** schema.org data for the page (see src/lib/seo.ts); written only on indexable builds. */
+  jsonLd?: Record<string, unknown>[];
 }
 
-const { title, description, noindex = false, mediaOrigin = null } = Astro.props;
+const {
+  title,
+  description,
+  noindex = false,
+  mediaOrigin = null,
+  image,
+  ogType = 'website',
+  jsonLd = [],
+} = Astro.props;
+
+// Canonical address, link previews and structured data are written only when the page may be indexed and the
+// site's address is known (SITE_URL). Staging and local builds therefore never point search engines or
+// social networks at the production address.
+const seo = !noindex && Astro.site !== undefined;
+const canonical = seo ? new URL(Astro.url.pathname, Astro.site).href : undefined;
+const shareImage = seo ? absoluteUrl(Astro.site, image ?? DEFAULT_SHARE_IMAGE) : undefined;
 ---
 
 <!doctype html>
@@ -25,15 +48,28 @@ const { title, description, noindex = false, mediaOrigin = null } = Astro.props;
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="generator" content={Astro.generator} />
-    <script is:inline>
-      document.documentElement.classList.add('js');
-    </script>
+    <script is:inline set:html={JS_FLAG_SCRIPT}></script>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon" href="/favicon.ico" />
     {mediaOrigin && <link rel="preconnect" href={mediaOrigin} />}
     <title>{title}</title>
     {description && <meta name="description" content={description} />}
     {noindex && <meta name="robots" content="noindex, nofollow" />}
+    {canonical && <link rel="canonical" href={canonical} />}
+    {canonical && (
+      <>
+        <meta property="og:site_name" content="Melatec Dental Clinic" />
+        <meta property="og:type" content={ogType} />
+        <meta property="og:title" content={title} />
+        {description && <meta property="og:description" content={description} />}
+        <meta property="og:url" content={canonical} />
+        {shareImage && <meta property="og:image" content={shareImage} />}
+        <meta name="twitter:card" content="summary_large_image" />
+      </>
+    )}
+    {seo && jsonLd.length > 0 && (
+      <script type="application/ld+json" set:html={jsonLdString(jsonLd)} />
+    )}
     <slot name="head" />
   </head>
   <body>

@@ -1,6 +1,8 @@
 // Server-side validation for the consultation form. Pure functions (no Worker APIs) so they can be
 // unit-tested. Limits mirror the CHECK constraints on `public.consultation_requests`.
 
+import { phoneCodes } from '../data/phone-codes.ts';
+
 export const MAX_BODY_BYTES = 8 * 1024;
 
 export const FIELD_LIMITS = {
@@ -30,6 +32,7 @@ const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
 // Same shape as the database CHECK on `email`.
 const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 const COUNTRY_CODE_RE = /^\+[0-9]{1,4}$/;
+const KNOWN_COUNTRY_CODES: ReadonlySet<string> = new Set(phoneCodes.map((c) => c.code));
 const PHONE_RE = /^\+?[0-9 ()\-.]+$/;
 // Same shape as the `url_path` domain.
 const URL_PATH_RE = /^\/([a-z0-9]+(-[a-z0-9]+)*(\/[a-z0-9]+(-[a-z0-9]+)*)*)?$/;
@@ -75,7 +78,11 @@ export function validateConsultation(
   // visitor already typed a full international number. A national leading zero is dropped.
   const phoneCountry = clean(raw.phone_country);
   let phone = clean(raw.phone);
-  if (phoneCountry && !COUNTRY_CODE_RE.test(phoneCountry)) {
+  // Only the codes the form offers: a made-up request cannot store a code that does not exist.
+  if (
+    phoneCountry &&
+    !(COUNTRY_CODE_RE.test(phoneCountry) && KNOWN_COUNTRY_CODES.has(phoneCountry))
+  ) {
     errors.phone = 'Please choose a valid country code.';
   } else if (phoneCountry && phone && !phone.startsWith('+')) {
     phone = `${phoneCountry} ${phone.replace(/^0+/, '')}`;

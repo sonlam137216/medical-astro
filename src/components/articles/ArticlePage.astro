@@ -12,7 +12,9 @@ import {
   tableOfContents,
 } from '../../lib/cms/articles';
 import type { PublicArticle } from '../../lib/content';
-import { getServiceLinks } from '../../lib/site-content';
+import { getServiceLinks, getSiteContent } from '../../lib/site-content';
+import { absoluteUrl, articleJsonLd, breadcrumbJsonLd, pageUrl } from '../../lib/seo';
+import logo from '../../assets/images/brand/logo.png';
 
 // One article (Figma "Single Post"): breadcrumb, title, update line, table of contents, body, reviewer card,
 // related articles, and a sidebar with the services and a consultation form.
@@ -32,9 +34,53 @@ const reviewed = formatArticleDate(article.reviewedOn);
 
 const title = article.seoTitle || `${article.title} · Melatec Dental Clinic`;
 const description = article.seoDescription || article.excerpt || undefined;
+
+// Structured data (only written on an indexable build, see BaseLayout): the article and its breadcrumb trail.
+const site = Astro.site;
+const siteContent = await getSiteContent();
+const at = (path: string) => pageUrl(site, path);
+const coverUrl = article.cover ? absoluteUrl(site, article.cover.url) : undefined;
+const jsonLd = site
+  ? [
+      articleJsonLd({
+        url: at(article.path)!,
+        title: article.title,
+        description,
+        image: coverUrl,
+        author: article.author,
+        publishedOn: article.publishedOn,
+        updatedOn: article.updatedOn,
+        reviewedBy: article.reviewedBy,
+        reviewedOn: article.reviewedOn,
+        publisher: { name: siteContent.name, url: at('/')!, logo: absoluteUrl(site, logo.src) },
+      }),
+      breadcrumbJsonLd([
+        { name: 'Home', url: at('/') },
+        { name: listLabel, url: at(ARTICLE_BASE_PATH[article.kind]) },
+        ...(article.category
+          ? [
+              {
+                name: article.category.name,
+                url: at(categoryBasePath(article.kind, article.category.slug)),
+              },
+            ]
+          : []),
+        { name: article.title },
+      ]),
+    ]
+  : [];
 ---
 
-<SiteLayout {title} {description} consultation={false} consultationAnchor social={false}>
+<SiteLayout
+  {title}
+  {description}
+  {jsonLd}
+  image={article.cover?.url}
+  ogType="article"
+  consultation={false}
+  consultationAnchor
+  social={false}
+>
   <Section labelledby="article-title">
     <div class="layout">
       <article class="main">
