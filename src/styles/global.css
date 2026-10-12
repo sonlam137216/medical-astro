@@ -1,4 +1,5 @@
 @import './tokens.css';
+@import './motion.css';
 
 *,
 *::before,
@@ -243,6 +244,13 @@ p {
 .link-arrow:hover > span[aria-hidden] {
   background: var(--color-title);
   color: var(--color-white);
+}
+
+/* Touch targets: at least 44 px high on phones (not in Figma: added) */
+@media (max-width: 768px) {
+  .link-arrow {
+    min-height: 44px;
+  }
 }
 
 /* Consultation forms (see FormGuards.astro). Shared by every form that posts to /api/consultation. */

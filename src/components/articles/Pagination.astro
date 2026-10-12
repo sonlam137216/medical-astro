@@ -112,6 +112,14 @@ for (let n = 1; n <= totalPages; n++) {
     visibility: hidden;
   }
 
+  @media (max-width: 768px) {
+    .pagination__step:not(.is-off) {
+      display: inline-flex;
+      align-items: center;
+      min-height: 44px;
+    }
+  }
+
   @media (max-width: 600px) {
     .pagination__step.is-off {
       display: none;

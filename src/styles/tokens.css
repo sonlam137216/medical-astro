@@ -90,7 +90,9 @@
   --radius-panel: 24px; /* consultation card */
 }
 
-/* (added) fluid fallbacks below the desktop design; Figma only has desktop frames */
+/* (added) fluid fallbacks below the desktop design; Figma only has desktop frames.
+   Reference breakpoints: 1200 (gutter), 1024 (tablet: menu, 2 columns), 768 (phone: type scale, 44 px touch targets),
+   520 (small phone). Check with `npm run check:responsive`. */
 @media (max-width: 1200px) {
   :root {
     --gutter: 48px;

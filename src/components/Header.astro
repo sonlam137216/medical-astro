@@ -95,7 +95,16 @@ const isActive = (href: string) => (href === '/' ? current === '/' : current.sta
 
   toggle?.addEventListener('click', () => setOpen(!menu?.classList.contains('is-open')));
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') setOpen(false);
+    if (e.key === 'Escape' && menu?.classList.contains('is-open')) {
+      setOpen(false);
+      toggle?.focus();
+    }
+  });
+  // Close on a tap outside the menu or on any link in it (a #anchor link keeps the page open).
+  document.addEventListener('click', (e) => {
+    const target = e.target as Node;
+    if (!menu?.classList.contains('is-open')) return;
+    if (!menu.contains(target) || (target as Element).closest?.('.menu__link')) setOpen(false);
   });
 </script>
 
@@ -237,7 +246,11 @@ const isActive = (href: string) => (href === '/' ? current === '/' : current.sta
     }
 
     .menu__toggle {
-      display: block;
+      display: grid;
+      place-items: center;
+      width: 44px;
+      height: 44px;
+      padding: 0;
     }
 
     .menu__panel {
@@ -271,20 +284,44 @@ const isActive = (href: string) => (href === '/' ? current === '/' : current.sta
       display: block;
     }
 
+    @media (prefers-reduced-motion: no-preference) {
+      :global(.js) .menu.is-open .menu__panel {
+        animation: menu-in var(--dur-base) var(--ease-out);
+      }
+    }
+
     :global(html:not(.js)) .menu__toggle {
       display: none;
     }
   }
 
-  @media (max-width: 600px) {
+  @media (max-width: 768px) {
     .topbar__contact {
-      font-size: 12px;
+      font-size: 13px;
+    }
+
+    .topbar__contact a {
+      display: flex;
+      align-items: center;
+      min-height: 40px;
     }
 
     .topbar__btn {
-      min-height: 32px;
-      padding: 4px 12px;
-      font-size: 12px;
+      min-height: 40px;
+      padding: 4px 14px;
+      font-size: 13px;
+    }
+  }
+
+  @keyframes menu-in {
+    from {
+      opacity: 0;
+      transform: translateY(-8px);
+    }
+
+    to {
+      opacity: 1;
+      transform: none;
     }
   }
 </style>

@@ -210,6 +210,13 @@ const [stat] = statsSection?.items ?? [];
     color: var(--color-title);
   }
 
+  @media (max-width: 768px) {
+    .faq summary {
+      align-items: center;
+      min-height: 44px;
+    }
+  }
+
   .faq summary::-webkit-details-marker {
     display: none;
   }

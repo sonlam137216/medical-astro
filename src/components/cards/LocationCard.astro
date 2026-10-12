@@ -101,6 +101,14 @@ const external = /^https?:\/\//i.test(href);
     color: var(--color-white);
   }
 
+  @media (max-width: 768px) {
+    .location__btn {
+      display: inline-flex;
+      align-items: center;
+      min-height: 44px;
+    }
+  }
+
   .location__btn:hover {
     background: var(--color-blue-deep);
   }

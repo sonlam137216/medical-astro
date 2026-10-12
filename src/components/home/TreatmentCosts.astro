@@ -128,6 +128,16 @@ const methodParagraphs = (data?.methodology ?? '')
       table.querySelectorAll<HTMLElement>('[data-country]').forEach((cell) => {
         cell.classList.toggle('is-selected', cell.dataset.country === select.value);
       });
+      // On a phone the chosen column can sit off screen: bring it into view inside the table only.
+      const head = table.querySelector<HTMLElement>(`thead [data-country="${select.value}"]`);
+      const scroller = head?.closest<HTMLElement>('.scroller');
+      if (head && scroller && scroller.scrollWidth > scroller.clientWidth) {
+        const first = table.querySelector<HTMLElement>('thead th')?.offsetWidth ?? 0;
+        scroller.scrollTo({
+          left: Math.max(0, head.offsetLeft - first - 8),
+          behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+        });
+      }
     });
   });
 </script>
@@ -154,6 +164,14 @@ const methodParagraphs = (data?.methodology ?? '')
     background: var(--color-white);
     border: 1px solid var(--color-title);
     border-radius: 10px;
+  }
+
+  /* iOS zooms the page when a field under 16 px gets focus */
+  @media (max-width: 768px) {
+    .compare__select {
+      height: 44px;
+      font-size: 16px;
+    }
   }
 
   .scroller {
@@ -225,6 +243,25 @@ const methodParagraphs = (data?.methodology ?? '')
   .table .is-selected {
     background: var(--color-border);
     color: var(--color-blue-deep);
+  }
+
+  /* Phones: keep the treatment names in view while the country columns scroll under them */
+  @media (max-width: 768px) {
+    .table {
+      min-width: 720px;
+    }
+
+    thead th:first-child,
+    tbody th {
+      position: sticky;
+      left: 0;
+      z-index: 1;
+      width: 140px;
+      padding-left: 12px;
+      padding-right: 8px;
+      background: var(--color-white);
+      box-shadow: 1px 0 0 var(--color-border);
+    }
   }
 
   .method summary {

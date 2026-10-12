@@ -55,9 +55,10 @@ const doctors = (await getSection('home_doctors'))!;
     }
   }
 
+  /* Two per row on phones: one portrait per row makes the list very long */
   @media (max-width: 520px) {
     .grid {
-      grid-template-columns: 1fr;
+      gap: 12px;
     }
   }
 </style>

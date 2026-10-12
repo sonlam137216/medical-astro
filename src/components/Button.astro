@@ -41,7 +41,12 @@ const attrs = href ? { href } : { type };
     transition:
       background-color 0.15s,
       border-color 0.15s,
-      color 0.15s;
+      color 0.15s,
+      transform 0.15s;
+  }
+
+  .btn:active {
+    transform: scale(0.98);
   }
 
   .btn--primary {

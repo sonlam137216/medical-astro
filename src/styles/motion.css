@@ -1,0 +1,185 @@
+/*
+ * Motion (not in Figma: added). Rules for keeping it cheap:
+ *  - CSS only, no JavaScript and no library: nothing is added to the page's script budget;
+ *  - only `transform` and `opacity` move (the compositor handles them, so no layout work and no CLS);
+ *  - scroll reveals use scroll-driven animations (`animation-timeline: view()`): browsers without
+ *    support simply show the content, so nothing can stay hidden;
+ *  - everything sits behind `prefers-reduced-motion: no-preference`; with "reduce" nothing moves;
+ *  - nothing animates the hero or the first screen on load, so LCP is untouched.
+ */
+:root {
+  --ease-out: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --dur-fast: 150ms;
+  --dur-base: 260ms;
+}
+
+/* Safety net for any animation added elsewhere */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Hover: lift linked cards and zoom their photo a little. Only where hovering exists (not touch). */
+  @media (hover: hover) {
+    .card:has(a) {
+      transition:
+        transform var(--dur-base) var(--ease-out),
+        box-shadow var(--dur-base) var(--ease-out);
+    }
+
+    .card:has(a):hover {
+      transform: translateY(-4px);
+      box-shadow: 0 14px 30px rgb(0 19 169 / 10%);
+    }
+
+    .card:has(a) .card__media {
+      transition: transform 500ms var(--ease-out);
+    }
+
+    .card:has(a):hover .card__media {
+      transform: scale(1.04);
+    }
+  }
+
+  .link-arrow > span[aria-hidden] {
+    transition:
+      transform var(--dur-fast) var(--ease-out),
+      background-color var(--dur-fast),
+      color var(--dur-fast);
+  }
+
+  .link-arrow:hover > span[aria-hidden] {
+    transform: translateX(3px);
+  }
+
+  /* Hero: the text block rises into place on load. `translate` only (no fade), so the first paint is never delayed. */
+  .hero__content > * {
+    animation: rise 700ms var(--ease-out) both;
+  }
+
+  .hero__content > :nth-child(2) {
+    animation-delay: 80ms;
+  }
+
+  .hero__content > :nth-child(3) {
+    animation-delay: 160ms;
+  }
+
+  .hero__content > :nth-child(n + 4) {
+    animation-delay: 240ms;
+  }
+
+  /* Reveal on scroll: fade + rise as a block enters the screen, over the first ~260 px of its entry
+     (a fixed length, so a tall block does not fade in slowly). Items of a card grid or list start a
+     little apart (--i = position in the row/list, capped at 3), so they arrive one after another. */
+  @supports (animation-timeline: view()) {
+    :is(
+      .intro,
+      .card,
+      .info,
+      .stats__card,
+      .stat__card,
+      .support__card,
+      .guide__item,
+      .guide__featured,
+      .profile,
+      .faq details,
+      .why__intro,
+      .why__item,
+      .split__text,
+      .split__img,
+      .story__text,
+      .story__img,
+      .compare,
+      .scroller,
+      .method,
+      .gallery,
+      .help
+    ) {
+      animation: reveal linear both;
+      animation-timeline: view();
+      animation-range: entry calc(var(--i, 0) * 30px) entry calc(260px + var(--i, 0) * 30px);
+    }
+
+    /* The item is either the list element itself or the card inside a <li> wrapper */
+    :is(
+      .card,
+      .info,
+      .stats__card,
+      .stat__card,
+      .support__card,
+      .guide__item,
+      .profile,
+      .why__item,
+      .faq details
+    ) {
+      &:nth-child(2),
+      li:nth-child(2) > & {
+        --i: 1;
+      }
+
+      &:nth-child(3),
+      li:nth-child(3) > & {
+        --i: 2;
+      }
+
+      &:nth-child(n + 4),
+      li:nth-child(n + 4) > & {
+        --i: 3;
+      }
+    }
+  }
+
+  /* Accordions (FAQ, "How these figures are worked out"): open and close smoothly where supported. */
+  @supports selector(details::details-content) {
+    :root {
+      interpolate-size: allow-keywords;
+    }
+
+    details::details-content {
+      block-size: 0;
+      overflow: clip;
+      transition:
+        block-size var(--dur-base) var(--ease-out),
+        content-visibility var(--dur-base) allow-discrete;
+    }
+
+    details[open]::details-content {
+      block-size: auto;
+    }
+  }
+}
+
+@keyframes reveal {
+  /* `translate`, not `transform`: a card's hover lift uses `transform` and the two must not fight */
+  from {
+    opacity: 0;
+    translate: 0 28px;
+  }
+
+  to {
+    opacity: 1;
+    translate: none;
+  }
+}
+
+@keyframes rise {
+  from {
+    translate: 0 22px;
+  }
+
+  to {
+    translate: none;
+  }
+}

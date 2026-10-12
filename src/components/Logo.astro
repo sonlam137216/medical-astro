@@ -29,4 +29,11 @@ const height = Math.round((185 * src.height) / src.width);
     display: inline-block;
     line-height: 0;
   }
+
+  /* Bigger touch area on phones without changing the look */
+  @media (max-width: 768px) {
+    .logo {
+      padding-block: 6px;
+    }
+  }
 </style>
