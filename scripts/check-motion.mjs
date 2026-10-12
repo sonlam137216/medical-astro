@@ -86,11 +86,13 @@ for (const width of widths) {
         }
       });
       await page.waitForTimeout(300);
-      const stuck = await page.evaluate((sel) => {
+      // A scroll-driven animation catches up with a jump on the next frames: wait for them before reading.
+      const stuck = await page.evaluate(async (sel) => {
         const out = [];
         for (const el of document.querySelectorAll(sel)) {
           // Put the block in the middle of the screen, as if the reader had stopped on it.
           el.scrollIntoView({ block: 'center', behavior: 'instant' });
+          await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(() => r())));
           const s = getComputedStyle(el);
           const r = el.getBoundingClientRect();
           if (r.height > innerHeight * 0.9) continue; // taller than the screen can never be fully "in"
@@ -103,17 +105,19 @@ for (const width of widths) {
         return out;
       }, SELECTOR);
       await page.waitForTimeout(700);
-      const stuck2 = await page.evaluate(
-        (sel) =>
-          [...document.querySelectorAll(sel)].filter((el) => {
-            el.scrollIntoView({ block: 'center', behavior: 'instant' });
-            return (
-              Number(getComputedStyle(el).opacity) < 0.99 &&
-              el.getBoundingClientRect().height < innerHeight * 0.9
-            );
-          }).length,
-        SELECTOR,
-      );
+      const stuck2 = await page.evaluate(async (sel) => {
+        let count = 0;
+        for (const el of document.querySelectorAll(sel)) {
+          el.scrollIntoView({ block: 'center', behavior: 'instant' });
+          await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(() => r())));
+          if (
+            Number(getComputedStyle(el).opacity) < 0.99 &&
+            el.getBoundingClientRect().height < innerHeight * 0.9
+          )
+            count++;
+        }
+        return count;
+      }, SELECTOR);
       const cls = await page.evaluate(() => window.__cls);
       // "reduce" must leave the reveal off entirely.
       const bad = stuck2 > 0 || cls > 0.1 || (motion === 'reduce' && animated !== 'none');

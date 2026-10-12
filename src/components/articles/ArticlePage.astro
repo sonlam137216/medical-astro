@@ -3,21 +3,25 @@ import SiteLayout from '../../layouts/SiteLayout.astro';
 import Section from '../Section.astro';
 import ProfileImage from '../ProfileImage.astro';
 import ArticleBody from './ArticleBody.astro';
+import ArticleCard from './ArticleCard.astro';
+import ArticleToc from './ArticleToc.astro';
 import SidebarConsultation from '../SidebarConsultation.astro';
 import {
   ARTICLE_BASE_PATH,
   categoryBasePath,
   formatArticleDate,
   parseArticleBody,
-  tableOfContents,
+  readingMinutes,
+  tocOutline,
 } from '../../lib/cms/articles';
 import type { PublicArticle } from '../../lib/content';
 import { getServiceLinks, getSiteContent } from '../../lib/site-content';
 import { absoluteUrl, articleJsonLd, breadcrumbJsonLd, pageUrl } from '../../lib/seo';
 import logo from '../../assets/images/brand/logo.png';
 
-// One article (Figma "Single Post"): breadcrumb, title, update line, table of contents, body, reviewer card,
-// related articles, and a sidebar with the services and a consultation form.
+// One article (Figma "Single Post", laid out like a WordPress post): breadcrumb, category, title, summary
+// (always there: a published article must have one), author and date line, cover (only when one was chosen),
+// table of contents, body, reviewer card, related articles, and a sidebar with the services and a consultation form.
 interface Props {
   article: PublicArticle;
   /** Chosen by the route (relatedArticles): same category first, then the same kind, then the other kind. */
@@ -27,7 +31,8 @@ interface Props {
 const { article, related } = Astro.props;
 const serviceLinks = await getServiceLinks();
 const blocks = parseArticleBody(article.body);
-const toc = tableOfContents(blocks);
+const toc = tocOutline(blocks);
+const minutes = readingMinutes(blocks);
 const listLabel = article.kind === 'travel_guide' ? 'Dental Travel Guide' : 'Dental Knowledge';
 const updated = formatArticleDate(article.updatedOn ?? article.publishedOn);
 const reviewed = formatArticleDate(article.reviewedOn);
@@ -81,6 +86,7 @@ const jsonLd = site
   consultationAnchor
   social={false}
 >
+  <div class="progress" aria-hidden="true"></div>
   <Section labelledby="article-title">
     <div class="layout">
       <article class="main">
@@ -104,73 +110,82 @@ const jsonLd = site
         </nav>
 
         <header class="head">
+          {article.category && (
+            <a class="eyebrow" href={categoryBasePath(article.kind, article.category.slug)}>
+              {article.category.name}
+            </a>
+          )}
           <h1 class="title" id="article-title">
             {article.title}
           </h1>
+          {article.excerpt && <p class="lead">{article.excerpt}</p>}
           <p class="meta">
-            {updated && <span>Updated: {updated}</span>}
-            {article.author && <span>Written by: {article.author}</span>}
+            {article.author && (
+              <span class="meta__author">
+                <span class="meta__avatar" aria-hidden="true">
+                  {article.author.trim().charAt(0).toUpperCase()}
+                </span>
+                <span>
+                  <span class="meta__label">Written by</span>
+                  {article.author}
+                </span>
+              </span>
+            )}
+            {updated && (
+              <span>
+                <span class="meta__label">Updated</span>
+                {updated}
+              </span>
+            )}
+            <span>
+              <span class="meta__label">Reading time</span>
+              {minutes} min
+            </span>
           </p>
         </header>
 
-        {article.excerpt && <p class="lead">{article.excerpt}</p>}
-
         {article.cover && (
-          <ProfileImage
-            class="cover"
-            image={article.cover}
-            slot="article-cover"
-            sizes="(max-width: 960px) 100vw, 680px"
-            priority
-          />
+          <figure class="cover-wrap">
+            <ProfileImage
+              class="cover"
+              image={article.cover}
+              slot="article-cover"
+              sizes="(max-width: 960px) 100vw, 692px"
+              priority
+            />
+          </figure>
         )}
 
-        {toc.length > 1 && (
-          <details class="toc">
-            <summary>Table of contents</summary>
-            <ol>
-              {toc.map((t) => (
-                <li>
-                  <a href={`#${t.id}`}>{t.text}</a>
-                </li>
-              ))}
-            </ol>
-          </details>
-        )}
+        {toc.length > 1 && <ArticleToc items={toc} />}
 
         <ArticleBody blocks={blocks} images={article.bodyImages} />
 
         {article.reviewedBy && (
-          <div class="review">
-            <p class="review__by">Clinically reviewed by: {article.reviewedBy}</p>
-            {reviewed && <p class="review__date">Reviewed on {reviewed}</p>}
-            <a class="link-arrow" href="/our-doctors">
-              View all doctors <span aria-hidden="true">→</span>
-            </a>
-          </div>
+          <aside class="review">
+            <span class="review__icon" aria-hidden="true">
+              ✓
+            </span>
+            <div class="review__text">
+              <p class="review__by">Clinically reviewed by {article.reviewedBy}</p>
+              {reviewed && <p class="review__date">Reviewed on {reviewed}</p>}
+              <a class="link-arrow" href="/our-doctors">
+                Meet our doctors <span aria-hidden="true">→</span>
+              </a>
+            </div>
+          </aside>
         )}
+
+        <a class="back" href={ARTICLE_BASE_PATH[article.kind]}>
+          <span aria-hidden="true">←</span> All articles in {listLabel}
+        </a>
 
         {related.length > 0 && (
           <section class="related" aria-labelledby="related-title">
-            <h2 id="related-title">Related articles</h2>
+            <h2 id="related-title">Keep reading</h2>
             <ul>
               {related.map((r) => (
                 <li>
-                  <a href={r.path}>
-                    {r.cover ? (
-                      <ProfileImage
-                        class="related__img"
-                        image={r.cover}
-                        slot="article-cover"
-                        width={240}
-                        height={160}
-                        sizes="(max-width: 600px) 45vw, 160px"
-                      />
-                    ) : (
-                      <span class="related__img related__img--empty" aria-hidden="true" />
-                    )}
-                    <span class="related__title">{r.title}</span>
-                  </a>
+                  <ArticleCard article={r} compact />
                 </li>
               ))}
             </ul>
@@ -201,14 +216,14 @@ const jsonLd = site
   .layout {
     display: grid;
     grid-template-columns: minmax(0, 1fr) 300px;
-    gap: 48px;
+    gap: 56px;
     align-items: start;
   }
 
   .main {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
-    gap: 24px;
+    gap: 28px;
     min-width: 0;
   }
 
@@ -219,8 +234,8 @@ const jsonLd = site
     margin: 0;
     padding: 0;
     list-style: none;
-    font-size: var(--text-small);
-    line-height: var(--text-small-lh);
+    font-size: 13px;
+    line-height: 20px;
     color: var(--color-muted);
   }
 
@@ -230,106 +245,135 @@ const jsonLd = site
   }
 
   .crumbs a {
-    color: var(--color-title);
+    color: var(--color-muted);
+  }
+
+  .crumbs a:hover {
+    color: var(--color-blue);
   }
 
   .crumbs li[aria-current] {
-    overflow-wrap: anywhere;
+    /* The page title is right below: keep the trail short. */
+    max-width: 240px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .head {
     display: grid;
-    gap: 10px;
+    gap: 16px;
+  }
+
+  .eyebrow {
+    justify-self: start;
+    padding: 4px 12px;
+    border-radius: 999px;
+    background: var(--color-soft);
+    font: 700 12px / 18px var(--font-display);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-blue);
+  }
+
+  .eyebrow:hover {
+    background: var(--color-blue);
+    color: var(--color-white);
   }
 
   .title {
-    font: 700 var(--text-h2) / var(--text-h2-lh) var(--font-serif);
+    font: 700 var(--text-h2) / 1.1 var(--font-serif);
     color: var(--color-heading);
+    text-wrap: balance;
     overflow-wrap: anywhere;
+  }
+
+  .lead {
+    font: 400 19px / 30px var(--font-sans);
+    color: var(--color-muted);
   }
 
   .meta {
     display: flex;
     flex-wrap: wrap;
-    gap: 4px 16px;
-    font-size: var(--text-small);
-    line-height: var(--text-small-lh);
-    color: var(--color-muted);
-  }
-
-  .lead {
-    font-size: 18px;
-    line-height: 28px;
+    align-items: center;
+    gap: 12px 28px;
+    padding: 16px 0;
+    border-block: 1px solid var(--color-border);
+    font: 500 14px / 20px var(--font-display);
     color: var(--color-navy);
   }
 
+  .meta > span {
+    display: grid;
+  }
+
+  .meta__author {
+    grid-auto-flow: column;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .meta__avatar {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--color-blue);
+    font: 700 16px / 1 var(--font-display);
+    color: var(--color-white);
+  }
+
+  .meta__label {
+    display: block;
+    font: 500 12px / 16px var(--font-display);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-muted);
+  }
+
+  .cover-wrap {
+    margin: 0;
+  }
+
   .main :global(.cover) {
+    display: block;
     width: 100%;
     height: auto;
-    border-radius: var(--radius-card);
-  }
-
-  .toc {
-    justify-self: start;
-    max-width: 100%;
-    background: var(--color-white);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-button);
-  }
-
-  .toc summary {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    padding: 10px 20px;
-    cursor: pointer;
-    list-style: none;
-    font: 700 13px / 20px var(--font-display);
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--color-title);
-  }
-
-  .toc summary::-webkit-details-marker {
-    display: none;
-  }
-
-  .toc summary::after {
-    content: '+';
-    font-size: 18px;
-    color: var(--color-blue);
-  }
-
-  .toc[open] summary::after {
-    content: '–';
-  }
-
-  .toc ol {
-    display: grid;
-    gap: 8px;
-    margin: 0;
-    padding: 4px 20px 16px 40px;
-    font-size: var(--text-small);
-    line-height: var(--text-small-lh);
-  }
-
-  .toc a {
-    color: var(--color-blue);
+    border-radius: var(--radius-image);
+    box-shadow: 0 18px 40px rgb(0 19 169 / 10%);
   }
 
   .review {
-    display: grid;
-    gap: 4px;
-    padding: 16px 20px;
+    display: flex;
+    gap: 16px;
+    padding: 20px 24px;
     border: 1px solid var(--color-border);
+    border-left: 4px solid var(--color-blue);
     border-radius: var(--radius-card);
     background: var(--color-card);
   }
 
+  .review__icon {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--color-blue);
+    font-size: 16px;
+    color: var(--color-white);
+  }
+
+  .review__text {
+    display: grid;
+    gap: 2px;
+  }
+
   .review__by {
-    font: 700 13px / 20px var(--font-display);
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
+    font: 700 15px / 24px var(--font-display);
     color: var(--color-title);
   }
 
@@ -342,48 +386,48 @@ const jsonLd = site
     margin-top: 6px;
   }
 
+  .back {
+    justify-self: start;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    font: 600 var(--text-small) / var(--text-small-lh) var(--font-display);
+    color: var(--color-blue);
+  }
+
+  .back:hover {
+    color: var(--color-blue-deep);
+  }
+
+  .related {
+    display: grid;
+    gap: 20px;
+    margin-top: 16px;
+    padding-top: 40px;
+    border-top: 1px solid var(--color-border);
+  }
+
   .related h2 {
-    margin-bottom: 14px;
-    font: 700 13px / 20px var(--font-display);
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--color-title);
+    font: 700 30px / 36px var(--font-serif);
+    color: var(--color-heading);
   }
 
   .related ul {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 20px;
     margin: 0;
     padding: 0;
     list-style: none;
   }
 
-  .related a {
-    display: grid;
-    gap: 8px;
+  .related li {
+    display: flex;
   }
 
-  .related :global(.related__img),
-  .related__img {
-    display: block;
-    width: 100%;
-    height: auto;
-    border-radius: 12px;
-  }
-
-  .related__img--empty {
-    background: var(--color-soft);
-    border: 1px solid var(--color-border);
-  }
-
-  .related__title {
-    font: 600 var(--text-small) / var(--text-small-lh) var(--font-display);
-    color: var(--color-title);
-  }
-
-  .related a:hover .related__title {
-    color: var(--color-blue);
+  .related li > :global(*) {
+    flex: 1;
   }
 
   .side {
@@ -412,13 +456,66 @@ const jsonLd = site
     list-style: none;
   }
 
+  /* Reading progress: a thin bar under the top of the window, driven by the page scroll. Only where the browser
+     supports scroll-driven animations and motion is welcome; elsewhere it is simply not there. */
+  .progress {
+    display: none;
+  }
+
+  @supports (animation-timeline: scroll()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .progress {
+        display: block;
+        position: fixed;
+        inset: 0 0 auto;
+        z-index: 60;
+        height: 3px;
+        background: var(--color-blue);
+        transform-origin: left;
+        animation: progress linear both;
+        animation-timeline: scroll(root block);
+      }
+
+      @keyframes progress {
+        from {
+          transform: scaleX(0);
+        }
+
+        to {
+          transform: scaleX(1);
+        }
+      }
+    }
+  }
+
   @media (max-width: 960px) {
     .layout {
       grid-template-columns: minmax(0, 1fr);
+      gap: 40px;
     }
 
     .side {
       position: static;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      min-height: 44px;
+      padding-inline: 16px;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .related ul {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .lead {
+      font-size: 17px;
+      line-height: 28px;
     }
   }
 </style>

@@ -226,6 +226,17 @@ export const tableOfContents = (blocks: Block[]) =>
     b.type === 'heading' && b.level === 2 ? [{ id: b.id, text: b.text }] : [],
   );
 
+/** The table of contents with its second level: each section heading and the smaller headings under it. */
+export function tocOutline(blocks: Block[]) {
+  const out: { id: string; text: string; children: { id: string; text: string }[] }[] = [];
+  for (const b of blocks) {
+    if (b.type !== 'heading') continue;
+    if (b.level === 2) out.push({ id: b.id, text: b.text, children: [] });
+    else out.at(-1)?.children.push({ id: b.id, text: b.text }); // a small heading before any section has no parent
+  }
+  return out;
+}
+
 /** Ids of the pictures used in a body, each once. */
 export const bodyImageIds = (blocks: Block[]) => [
   ...new Set(blocks.flatMap((b) => (b.type === 'image' ? [b.id] : []))),
@@ -243,6 +254,12 @@ export function bodyPlainText(blocks: Block[]): string {
     })
     .filter((text) => text !== '')
     .join(' ');
+}
+
+/** Minutes to read an article (about 200 words a minute, never less than 1), for the "4 min read" labels. */
+export function readingMinutes(blocks: Block[]): number {
+  const words = bodyPlainText(blocks).split(/\s+/).filter(Boolean).length;
+  return Math.max(1, Math.round(words / 200));
 }
 
 /** How much of an article's text goes into the search index (characters); the rest is still on the page. */
@@ -305,6 +322,14 @@ export function articleProblems(i: ArticleCheckInput): Record<string, string> {
       'Dental knowledge articles must say who reviewed them clinically, for example “Melatec Dental Team”.';
   }
   return errors;
+}
+
+/** '2026-06-29' -> 'Jun 29, 2026': the short form for cards. */
+export function formatArticleDateShort(iso: string | null | undefined): string | null {
+  if (!iso || !/^\d{4}-\d{2}-\d{2}$/.test(iso)) return null;
+  const date = new Date(`${iso}T00:00:00Z`);
+  if (Number.isNaN(date.getTime())) return null;
+  return new Intl.DateTimeFormat('en-US', { dateStyle: 'medium', timeZone: 'UTC' }).format(date);
 }
 
 /** '2026-06-29' -> 'June 29, 2026' (fixed to UTC so the build machine's time zone cannot shift the day). */

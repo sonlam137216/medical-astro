@@ -407,7 +407,7 @@ export const ENTITIES: EntityDef[] = [
         label: 'Short summary',
         max: 500,
         rows: 3,
-        help: 'Shown on the article cards and in search results.',
+        help: 'Required to publish. Shown on the article cards, in search results and as the opening lines of the article. One or two sentences.',
       },
       {
         type: 'textarea',
@@ -418,7 +418,13 @@ export const ENTITIES: EntityDef[] = [
         editor: 'article',
         help: 'Use the buttons above the text, or type: “## Heading” starts a section (listed in the table of contents), “### Heading” a smaller one, “- item” a bullet, “1. item” a numbered point, “> text” a quote, “**bold**” bold text and “[words](https://…)” a link. A blank line starts a new paragraph. Pictures come from Media: use the Picture button.',
       },
-      { type: 'image', name: 'cover_image_id', label: 'Cover image', slot: 'article-cover' },
+      {
+        type: 'image',
+        name: 'cover_image_id',
+        label: 'Cover image',
+        slot: 'article-cover',
+        help: 'Optional but recommended: the picture of the cards and the top of the article. Without one, the cards show a plain tile.',
+      },
       {
         type: 'ref',
         name: 'category_id',

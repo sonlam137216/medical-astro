@@ -11,12 +11,15 @@ import {
   paginate,
   relatedArticles,
   formatArticleDate,
+  formatArticleDateShort,
+  readingMinutes,
   articleProblems,
   bodyPlainText,
   parseArticleBody,
   parseInline,
   searchText,
   tableOfContents,
+  tocOutline,
 } from '../src/lib/cms/articles.ts';
 import { createDb } from '../src/lib/db.ts';
 import { buildSnapshot, isSnapshot, snapshotProblems } from '../src/lib/snapshot.ts';
@@ -107,6 +110,29 @@ test('article dates are formatted in English and tolerate bad input', () => {
   assert.equal(formatArticleDate('2026-01-01'), 'January 1, 2026');
   for (const v of [null, undefined, '', 'yesterday', '2026-13-40', '29/06/2026'])
     assert.equal(formatArticleDate(v), null, String(v));
+});
+
+test('the outline nests small headings under their section', () => {
+  const blocks = parseArticleBody('### Orphan\n\n## A\n\n### A1\n\n### A2\n\n## B');
+  assert.deepEqual(tocOutline(blocks), [
+    {
+      id: 'a',
+      text: 'A',
+      children: [
+        { id: 'a1', text: 'A1' },
+        { id: 'a2', text: 'A2' },
+      ],
+    },
+    { id: 'b', text: 'B', children: [] },
+  ]);
+});
+
+test('short dates and reading time for the cards', () => {
+  assert.equal(formatArticleDateShort('2026-06-29'), 'Jun 29, 2026');
+  assert.equal(formatArticleDateShort('nope'), null);
+  assert.equal(readingMinutes(parseArticleBody('')), 1);
+  assert.equal(readingMinutes(parseArticleBody('A few words.')), 1);
+  assert.equal(readingMinutes(parseArticleBody('word '.repeat(900))), 5);
 });
 
 // ---- rules -----------------------------------------------------------------------------------------------

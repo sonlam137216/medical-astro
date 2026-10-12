@@ -1,49 +1,94 @@
 ---
 import type { PublicArticle } from '../../lib/content';
 import ProfileImage from '../ProfileImage.astro';
+import { formatArticleDateShort, parseArticleBody, readingMinutes } from '../../lib/cms/articles';
 
-// Card of the article lists (Figma: picture, serif blue title, summary, "Explore more").
+// Card of the article lists (like a WordPress archive card: cover, category, title, date and reading time,
+// summary). The whole card is one link (the title link is stretched over it), so the picture is clickable
+// without a second link for keyboard and screen-reader users. An article without a cover gets a plain tile of
+// the same shape, so the grid stays even.
 interface Props {
   article: PublicArticle;
+  /** The big card at the top of the first page: picture beside the text. */
+  featured?: boolean;
+  /** No summary (the "Related articles" strip). */
+  compact?: boolean;
 }
 
-const { article } = Astro.props;
+const { article, featured = false, compact = false } = Astro.props;
+const date = formatArticleDateShort(article.publishedOn);
+const minutes = readingMinutes(parseArticleBody(article.body));
+const kindLabel = article.kind === 'travel_guide' ? 'Travel guide' : 'Dental knowledge';
 ---
 
-<article class="card article">
-  {article.cover && (
+<article class:list={['card', 'article', { 'article--featured': featured }]}>
+  {article.cover ? (
     <ProfileImage
       class="card__media article__img"
       image={article.cover}
       slot="article-cover"
-      sizes="(max-width: 640px) 100vw, 330px"
+      sizes={featured ? '(max-width: 768px) 100vw, 600px' : '(max-width: 640px) 100vw, 340px'}
+      priority={featured}
     />
+  ) : (
+    <div class="card__media article__img article__img--empty" aria-hidden="true">
+      <span>{kindLabel}</span>
+    </div>
   )}
   <div class="card__body">
-    {article.category && <p class="article__category">{article.category.name}</p>}
+    <p class="article__meta">
+      {article.category && <span class="article__category">{article.category.name}</span>}
+      {date && <time datetime={article.publishedOn ?? undefined}>{date}</time>}
+      {!compact && <span>{minutes} min read</span>}
+    </p>
     <h3 class="article__title">
       <a href={article.path}>{article.title}</a>
     </h3>
-    {article.excerpt && <p class="article__excerpt">{article.excerpt}</p>}
-    <a class="link-arrow" href={article.path} aria-label={`Explore more: ${article.title}`}>
-      Explore more <span aria-hidden="true">→</span>
-    </a>
+    {!compact && article.excerpt && <p class="article__excerpt">{article.excerpt}</p>}
+    <span class="article__more" aria-hidden="true">
+      Read article <span class="article__arrow">→</span>
+    </span>
   </div>
 </article>
 
 <style>
   .article {
+    position: relative;
     height: 100%;
+    background: var(--color-white);
   }
 
   .card__body {
     flex: 1;
     align-content: start;
     gap: 10px;
+    padding: 22px 24px 24px;
+  }
+
+  .article__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 2px 10px;
+    font: 500 12px / 18px var(--font-display);
+    letter-spacing: 0.02em;
+    color: var(--color-muted);
+  }
+
+  .article__meta > :not(:first-child)::before {
+    content: '';
+    display: inline-block;
+    width: 3px;
+    height: 3px;
+    margin-right: 10px;
+    vertical-align: middle;
+    border-radius: 50%;
+    background: currentcolor;
+    opacity: 0.6;
   }
 
   .article__category {
-    font: 700 12px / 18px var(--font-display);
+    font-weight: 700;
     letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--color-blue);
@@ -51,20 +96,121 @@ const { article } = Astro.props;
 
   .article__title {
     font: 700 24px / 30px var(--font-serif);
-    color: var(--color-title);
+    color: var(--color-heading);
+    text-wrap: balance;
   }
 
-  .article__title a:hover {
+  /* The link covers the whole card. */
+  .article__title a::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+  }
+
+  .article__title a:focus-visible {
+    outline: none;
+  }
+
+  .article:has(.article__title a:focus-visible) {
+    outline: 2px solid var(--color-blue);
+    outline-offset: 3px;
+  }
+
+  .article:hover .article__title {
     color: var(--color-blue);
   }
 
   .article__excerpt {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    overflow: hidden;
     font-size: var(--text-small);
     line-height: var(--text-small-lh);
     color: var(--color-navy);
   }
 
-  .link-arrow {
+  .article__more {
     align-self: end;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 4px;
+    font: 500 var(--text-small) / var(--text-small-lh) var(--font-display);
+    color: var(--color-title);
+  }
+
+  .article__arrow {
+    display: inline-grid;
+    place-items: center;
+    width: 26px;
+    height: 26px;
+    border: 1px solid currentcolor;
+    border-radius: 50%;
+    font-size: 13px;
+    line-height: 1;
+    transition:
+      background-color 0.15s,
+      color 0.15s;
+  }
+
+  .article:hover .article__arrow {
+    background: var(--color-title);
+    color: var(--color-white);
+  }
+
+  .article__img--empty {
+    display: grid;
+    place-items: center;
+    aspect-ratio: 3 / 2;
+    background:
+      radial-gradient(circle at 20% 15%, rgb(255 255 255 / 70%), transparent 55%),
+      linear-gradient(135deg, #dce9fc, #bcd3f7);
+  }
+
+  .article__img--empty span {
+    font: 700 12px / 18px var(--font-display);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-title);
+    opacity: 0.55;
+  }
+
+  /* Featured: picture on the left, a larger title (first page of the unfiltered list only). */
+  @media (min-width: 769px) {
+    .article--featured {
+      display: grid;
+      grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+    }
+
+    .article--featured .article__img {
+      height: 100%;
+      min-height: 100%;
+    }
+
+    .article--featured .card__body {
+      align-content: center;
+      gap: 14px;
+      padding: 40px 40px 40px 36px;
+    }
+
+    .article--featured .article__title {
+      font-size: 34px;
+      line-height: 40px;
+    }
+
+    .article--featured .article__excerpt {
+      -webkit-line-clamp: 4;
+      line-clamp: 4;
+      font-size: var(--text-body);
+      line-height: var(--text-body-lh);
+    }
+
+    .article--featured .article__more {
+      align-self: start;
+      margin-top: 8px;
+    }
   }
 </style>

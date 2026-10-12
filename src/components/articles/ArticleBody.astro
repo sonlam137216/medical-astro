@@ -94,23 +94,24 @@ const external = (href: string) => /^https?:\/\//i.test(href);
   .body {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
-    gap: 16px;
+    gap: 20px;
     font-family: var(--font-sans);
-    font-size: var(--text-body);
-    line-height: var(--text-body-lh);
+    font-size: 17px;
+    line-height: 30px;
     color: var(--color-navy);
     overflow-wrap: anywhere;
   }
 
   .body :global(h2) {
-    margin-top: 16px;
-    font: 700 28px / 34px var(--font-serif);
+    margin-top: 28px;
+    font: 700 32px / 38px var(--font-serif);
     color: var(--color-heading);
+    text-wrap: balance;
     scroll-margin-top: 24px;
   }
 
   .body :global(h3) {
-    margin-top: 8px;
+    margin-top: 12px;
     font: 600 20px / 28px var(--font-display);
     color: var(--color-title);
     scroll-margin-top: 24px;
@@ -119,22 +120,30 @@ const external = (href: string) => /^https?:\/\//i.test(href);
   .body :global(ul),
   .body :global(ol) {
     display: grid;
-    gap: 8px;
+    gap: 10px;
     margin: 0;
-    padding-left: 24px;
+    padding-left: 26px;
+  }
+
+  .body :global(li::marker) {
+    font-weight: 700;
+    color: var(--color-blue);
   }
 
   .body :global(blockquote) {
-    margin: 0;
-    padding: 4px 0 4px 20px;
-    border-left: 3px solid var(--color-border);
-    color: var(--color-muted);
+    margin: 8px 0;
+    padding: 20px 26px;
+    border-left: 4px solid var(--color-blue);
+    border-radius: 0 var(--radius-card) var(--radius-card) 0;
+    background: var(--color-card);
+    font: 700 22px / 32px var(--font-serif);
+    color: var(--color-heading);
   }
 
   .body :global(figure) {
     display: grid;
-    gap: 8px;
-    margin: 8px 0;
+    gap: 10px;
+    margin: 12px 0;
   }
 
   .body :global(figure img) {
@@ -145,14 +154,40 @@ const external = (href: string) => /^https?:\/\//i.test(href);
   }
 
   .body :global(figcaption) {
-    font-size: var(--text-small);
-    line-height: var(--text-small-lh);
+    font-size: 13px;
+    line-height: 20px;
+    text-align: center;
     color: var(--color-muted);
   }
 
   .body :global(a) {
     color: var(--color-blue);
     text-decoration: underline;
-    text-underline-offset: 3px;
+    text-decoration-color: rgb(0 86 229 / 35%);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 4px;
+    transition: text-decoration-color 0.15s;
+  }
+
+  .body :global(a:hover) {
+    text-decoration-color: currentcolor;
+  }
+
+  @media (max-width: 768px) {
+    .body {
+      font-size: 16px;
+      line-height: 28px;
+    }
+
+    .body :global(h2) {
+      font-size: 28px;
+      line-height: 34px;
+    }
+
+    .body :global(blockquote) {
+      padding: 16px 20px;
+      font-size: 19px;
+      line-height: 28px;
+    }
   }
 </style>

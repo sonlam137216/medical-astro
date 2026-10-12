@@ -54,6 +54,11 @@ const {
   searchUrl,
   current,
 } = Astro.props;
+
+// Like a WordPress blog's newest post: on the first page of the whole list the first article is shown big,
+// when there are enough of them for the rest to still fill a grid.
+const featured = page === 1 && activeCategory === null && articles.length >= 4 ? articles[0] : null;
+const rest = featured ? articles.slice(1) : articles;
 ---
 
 <SiteLayout {title} {description} {current} consultation={false} social={false}>
@@ -117,15 +122,18 @@ const {
           </nav>
         )}
 
-        {articles.length > 0 ? (
+        {featured && <ArticleCard article={featured} featured />}
+
+        {rest.length > 0 ? (
           <ul class="grid">
-            {articles.map((a) => (
+            {rest.map((a) => (
               <li>
                 <ArticleCard article={a} />
               </li>
             ))}
           </ul>
         ) : (
+          articles.length === 0 &&
           kindTotal === 0 && (
             <div class="empty">
               <h3 class="t-h2">Articles are on their way</h3>
@@ -188,11 +196,11 @@ const {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 12px;
+    gap: 10px;
   }
 
   .chip {
-    padding: 10px 24px;
+    padding: 8px 22px;
     border: 1px solid var(--color-border);
     border-radius: var(--radius-button);
     background: var(--color-white);
@@ -217,7 +225,7 @@ const {
   .grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 24px;
+    gap: 28px;
     margin: 0;
     padding: 0;
     list-style: none;

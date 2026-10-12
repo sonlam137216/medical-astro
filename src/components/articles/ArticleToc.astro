@@ -1,0 +1,137 @@
+---
+// "Table of contents" box of an article: the sections, with the smaller headings nested under them. It is open
+// when the page loads (so it works without JavaScript) and the script folds it on phones, where it would push
+// the text down.
+interface Props {
+  items: { id: string; text: string; children: { id: string; text: string }[] }[];
+}
+
+const { items } = Astro.props;
+---
+
+<details class="toc" open data-toc>
+  <summary>
+    <span>In this article</span>
+    <span class="toc__count">{items.length} sections</span>
+  </summary>
+  <ol>
+    {items.map((t) => (
+      <li>
+        <a href={`#${t.id}`}>{t.text}</a>
+        {t.children.length > 0 && (
+          <ul>
+            {t.children.map((c) => (
+              <li>
+                <a href={`#${c.id}`}>{c.text}</a>
+              </li>
+            ))}
+          </ul>
+        )}
+      </li>
+    ))}
+  </ol>
+</details>
+
+<script>
+  const toc = document.querySelector<HTMLDetailsElement>('[data-toc]');
+  if (toc && matchMedia('(max-width: 768px)').matches) toc.open = false;
+</script>
+
+<style>
+  .toc {
+    max-width: 100%;
+    background: var(--color-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card);
+  }
+
+  .toc summary {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 52px;
+    padding: 12px 22px;
+    cursor: pointer;
+    list-style: none;
+    font: 700 13px / 20px var(--font-display);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-title);
+  }
+
+  .toc summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .toc summary::after {
+    content: '–';
+    margin-left: auto;
+    font-size: 20px;
+    color: var(--color-blue);
+  }
+
+  .toc:not([open]) summary::after {
+    content: '+';
+  }
+
+  .toc__count {
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    text-transform: none;
+    color: var(--color-muted);
+  }
+
+  .toc ol {
+    display: grid;
+    gap: 10px;
+    margin: 0;
+    padding: 2px 22px 20px 44px;
+    font-size: var(--text-small);
+    line-height: var(--text-small-lh);
+  }
+
+  .toc ul {
+    display: grid;
+    gap: 6px;
+    margin: 6px 0 0;
+    padding-left: 18px;
+    list-style: '–  ';
+    font-size: 13px;
+    line-height: 20px;
+  }
+
+  .toc li::marker {
+    font-weight: 700;
+    color: var(--color-blue);
+  }
+
+  .toc ul li::marker {
+    font-weight: 400;
+    color: var(--color-muted);
+  }
+
+  .toc a {
+    color: var(--color-navy);
+  }
+
+  .toc ul a {
+    color: var(--color-muted);
+  }
+
+  .toc a:hover {
+    color: var(--color-blue);
+  }
+
+  @media (max-width: 768px) {
+    .toc ol,
+    .toc ul {
+      gap: 0;
+    }
+
+    .toc a {
+      display: flex;
+      align-items: center;
+      min-height: 40px;
+    }
+  }
+</style>
