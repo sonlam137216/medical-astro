@@ -5,6 +5,7 @@ import type { Img } from '../../data/types';
 import type { PublicImage } from '../../lib/media';
 import ProfileImage from '../ProfileImage.astro';
 import { frameAspect, IMAGE_SLOTS } from '../../lib/image-slots';
+import { tidyPrice } from '../../lib/price';
 
 interface Props {
   title: string;
@@ -56,7 +57,7 @@ const { title, inclusions, total, note, href, image, linkLabel = 'Learn more' } 
         ))}
       </ul>
     )}
-    {total && <p class="package__total">{total}</p>}
+    {total && <p class="package__total">{tidyPrice(total)}</p>}
     {total && note && <p class="package__note">{note}</p>}
     <a class="link-arrow" href={href}>
       {linkLabel} <span aria-hidden="true">→</span>

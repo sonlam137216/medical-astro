@@ -27,6 +27,8 @@ const cellLines = (row: Row, i: number): string[] => {
   return value ? value.split(/\s*\|\s*/) : ['—'];
 };
 const saving = (row: Row) => (data?.edited ? row.saving || '—' : c.saving);
+// No row has a saving figure: leave the column out instead of a column of dashes.
+const showSaving = (data?.rows ?? []).some((row) => saving(row) !== '—');
 const methodParagraphs = (data?.methodology ?? '')
   .split(/\n{2,}|\n/)
   .filter((p) => p.trim() !== '');
@@ -50,13 +52,14 @@ const methodParagraphs = (data?.methodology ?? '')
             {country}
           </option>
         ))}
+        <option value="all">All countries</option>
       </select>
     </div>
 
     <div class="scroller" tabindex="0" role="region" aria-label="Treatment cost comparison">
       <table class="table" data-compare-table>
         <caption class="visually-hidden">
-          Treatment prices in{home}compared with the selected country
+          {`Treatment prices in ${home} compared with the selected country`}
         </caption>
         <thead>
           <tr>
@@ -64,16 +67,13 @@ const methodParagraphs = (data?.methodology ?? '')
             {c.countries.map((country, i) => (
               <th
                 scope="col"
-                data-country={country}
-                class:list={{
-                  'is-home': i === 0,
-                  'is-selected': country === defaultCountry,
-                }}
+                data-country={i === 0 ? undefined : country}
+                class:list={{ 'is-home': i === 0 }}
               >
                 {country}
               </th>
             ))}
-            <th scope="col">Saving</th>
+            {showSaving && <th scope="col">Saving</th>}
           </tr>
         </thead>
         <tbody>
@@ -85,11 +85,8 @@ const methodParagraphs = (data?.methodology ?? '')
               </th>
               {c.countries.map((country, i) => (
                 <td
-                  data-country={country}
-                  class:list={{
-                    'is-home': i === 0,
-                    'is-selected': country === defaultCountry,
-                  }}
+                  data-country={i === 0 ? undefined : country}
+                  class:list={{ 'is-home': i === 0 }}
                 >
                   {cellLines(row, i).map((line, n) => (
                     <>
@@ -99,7 +96,9 @@ const methodParagraphs = (data?.methodology ?? '')
                   ))}
                 </td>
               ))}
-              <td>{saving(row)}</td>
+              {showSaving && (
+                <td>{saving(row) === '—' ? '—' : <span class="saving">{saving(row)}</span>}</td>
+              )}
             </tr>
           ))}
         </tbody>
@@ -118,27 +117,22 @@ const methodParagraphs = (data?.methodology ?? '')
 )}
 
 <script>
-  // Highlights the column of the chosen country. The table already renders every country, so
-  // without JavaScript the default country stays highlighted and nothing is lost.
+  // UI update: with JavaScript the table shows Vietnam next to the chosen country only (plus the saving), so it
+  // fits a phone without sideways scrolling; "All countries" brings back every column. Without JavaScript
+  // the full table is shown, as before.
   document.querySelectorAll<HTMLElement>('[data-compare]').forEach((box) => {
     const select = box.querySelector('select');
     const table = box.parentElement?.querySelector<HTMLTableElement>('[data-compare-table]');
     if (!select || !table) return;
-    select.addEventListener('change', () => {
+    const show = () => {
+      const all = select.value === 'all';
+      table.classList.toggle('is-compact', !all);
       table.querySelectorAll<HTMLElement>('[data-country]').forEach((cell) => {
-        cell.classList.toggle('is-selected', cell.dataset.country === select.value);
+        cell.hidden = !all && cell.dataset.country !== select.value;
       });
-      // On a phone the chosen column can sit off screen: bring it into view inside the table only.
-      const head = table.querySelector<HTMLElement>(`thead [data-country="${select.value}"]`);
-      const scroller = head?.closest<HTMLElement>('.scroller');
-      if (head && scroller && scroller.scrollWidth > scroller.clientWidth) {
-        const first = table.querySelector<HTMLElement>('thead th')?.offsetWidth ?? 0;
-        scroller.scrollTo({
-          left: Math.max(0, head.offsetLeft - first - 8),
-          behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
-        });
-      }
-    });
+    };
+    select.addEventListener('change', show);
+    show();
   });
 </script>
 
@@ -229,25 +223,46 @@ const methodParagraphs = (data?.methodology ?? '')
     margin-top: 4px;
   }
 
-  /* Vietnam column: solid blue band running through header and rows. */
-  .table .is-home {
+  /* Vietnam column: solid blue heading, a light blue band through the rows (UI update: was solid blue all the
+     way down, which outweighed the figures beside it). */
+  thead .is-home {
     background: var(--color-blue);
     color: var(--color-white);
   }
 
   tbody td.is-home {
-    font-weight: 600;
+    background: var(--color-soft);
+    font-weight: 700;
+    color: var(--color-blue-deep);
   }
 
-  /* Chosen comparison country: light blue column. */
-  .table .is-selected {
-    background: var(--color-border);
-    color: var(--color-blue-deep);
+  /* Vietnam beside one country: the table fits the box, no sideways scrolling. */
+  .table.is-compact {
+    min-width: 0;
+  }
+
+  .table.is-compact thead th:first-child,
+  .table.is-compact tbody th {
+    width: 40%;
+  }
+
+  .table.is-compact tbody td:not(.is-home) {
+    color: var(--color-title);
+  }
+
+  .saving {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 999px;
+    background: var(--color-soft);
+    color: var(--color-blue);
+    font-weight: 600;
+    white-space: nowrap;
   }
 
   /* Phones: keep the treatment names in view while the country columns scroll under them */
   @media (max-width: 768px) {
-    .table {
+    .table:not(.is-compact) {
       min-width: 720px;
     }
 

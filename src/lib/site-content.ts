@@ -7,7 +7,7 @@ import {
   utilityLink as sampleUtility,
   type NavLink,
 } from '../data/site';
-import { loadSnapshot, getPublicBase, getServices, getLocations } from './content';
+import { loadSnapshot, getPublicBase, getSection, getServices, getLocations } from './content';
 import { DEFAULT_SHARE_IMAGE, absoluteUrl, organizationJsonLd } from './seo';
 import { snapshotImageInput, toPublicImage, toPublicVideo, type PublicVideo } from './media';
 
@@ -90,6 +90,15 @@ export async function getSiteContent(): Promise<SiteContent> {
     footerExplore: nav ? at('footer_explore') : sampleExplore,
     footerLegal: nav ? at('footer_legal') : sampleLegal,
   };
+}
+
+/**
+ * The rating claim ("4.9/5 on Google Reviews"), written once in "Home: top banner" and shown there and in the
+ * "Visit us" block of every page. Null when it is left empty or the banner is switched off.
+ */
+export async function getRatingLine(): Promise<string | null> {
+  const hero = await getSection('home_hero');
+  return hero?.rating?.trim() || null;
 }
 
 /** Page title and description: the published SEO text for the page, or the built-in text. */

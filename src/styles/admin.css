@@ -1078,7 +1078,7 @@ a.admin-stat:hover {
 }
 
 .article-preview h2 {
-  font: 700 24px / 1.3 var(--font-serif);
+  font: 600 20px / 1.3 var(--font-display);
 }
 
 .article-preview h3 {

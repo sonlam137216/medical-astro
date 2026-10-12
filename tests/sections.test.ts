@@ -66,6 +66,24 @@ test('a section row replaces the words and keeps what the admin cannot edit', ()
   );
 });
 
+test('a field added after a row was saved counts as empty, not as the built-in words', () => {
+  const fields = sectionByKey('home_hero')!.fields;
+  const merged = mergeSection(
+    { title: 'Built-in', paragraphs: ['a'], rating: '4.9/5 built-in', trust: 'built-in' },
+    { title: 'Mine', paragraphs: ['mine'], trust: 'mine' }, // saved before "rating" existed
+    fields,
+  );
+  assert.equal(merged.title, 'Mine');
+  assert.equal(merged.rating, '');
+
+  const steps = mergeSection(
+    { steps: [{ number: '01', title: 'Built-in', body: 'b', tag: 'Online' }] },
+    { steps: [{ title: 'Mine', body: 'mine' }] }, // saved before the "tag" column existed
+    sectionByKey('home_how')!.fields,
+  );
+  assert.deepEqual(steps.steps[0], { number: '01', title: 'Mine', body: 'mine', tag: '' });
+});
+
 test('an emptied list stays empty instead of falling back to the built-in cards', () => {
   const merged = mergeSection({ items: [{ title: 'a' }] }, { items: [] });
   assert.deepEqual(merged.items, []);

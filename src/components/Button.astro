@@ -2,9 +2,9 @@
 interface Props {
   /**
    * `light` and `outline-light` are for dark bands (Figma "Take the first step").
-   * `whatsapp` is the green button next to the hero copy.
+   * `whatsapp` is the green button; `whatsapp-outline` its quieter form beside a primary button (Home hero).
    */
-  variant?: 'primary' | 'outline' | 'light' | 'outline-light' | 'whatsapp';
+  variant?: 'primary' | 'outline' | 'light' | 'outline-light' | 'whatsapp' | 'whatsapp-outline';
   href?: string;
   type?: 'button' | 'submit';
   class?: string;
@@ -100,5 +100,19 @@ const attrs = href ? { href } : { type };
 
   .btn--whatsapp:hover {
     filter: brightness(0.92);
+  }
+
+  .btn--whatsapp-outline {
+    background: var(--color-white);
+    border: 1.5px solid var(--color-green);
+    color: var(--color-title);
+  }
+
+  .btn--whatsapp-outline:hover {
+    background: var(--color-soft);
+  }
+
+  .btn--whatsapp-outline :global(svg) {
+    color: var(--color-green);
   }
 </style>

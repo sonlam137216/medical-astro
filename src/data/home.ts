@@ -12,7 +12,6 @@ import hanoiTower from '../assets/images/photos/hanoi-turtle-tower.webp';
 import dentalImplant from '../assets/images/photos/dental-implant.webp';
 import digitalScan from '../assets/images/photos/dentist-digital-scan.webp';
 import hotelRoom from '../assets/images/photos/hotel-room.webp';
-import xray from '../assets/images/photos/panoramic-xray.webp';
 import smileBefore from '../assets/images/photos/mock-smile-before.webp';
 import smileAfter from '../assets/images/photos/mock-smile-after.webp';
 import doctorPortrait from '../assets/images/doctors/doctor-portrait.webp';
@@ -29,11 +28,12 @@ export const heroImage: Img = {
 export const hero = {
   label: 'Melatec Dental Clinic. Viet Nam',
   title: 'Every Perfect Journey Begins with a Radiant Smile',
+  // UI update: the three design paragraphs are cut to one sentence, so the buttons sit higher on the first screen.
   paragraphs: [
-    'Premium dentistry, thoughtfully tailored to you.',
-    'From dental implants and porcelain crowns to veneers and complete smile makeovers, every treatment is guided by clinical precision and refined care.',
-    'English-speaking specialists, advanced technology and a truly personalized experience all in Vietnam.',
+    'Dental implants, porcelain crowns, veneers and complete smile makeovers by English-speaking specialists, with your treatment plan ready before you travel.',
   ],
+  // PLACEHOLDER: the design's rating claim (it was in the "Visit us" block); the owner must confirm it.
+  rating: '4.9/5 on Google Reviews',
   // PLACEHOLDER: a claim of the design ("20+ countries"); the owner must confirm it.
   trust: 'Trusted by patients from 20+ countries\nAustralia · USA · UK · France · Japan · Korea',
 };
@@ -41,10 +41,10 @@ export const hero = {
 export const servicesHeading = { label: 'Our services', title: 'Treatments for every smile' };
 
 export const patientSupport = [
-  { number: '01', title: 'Affordable Care\nInternational Standards' },
-  { number: '02', title: 'Experienced & Dedicated\nDental Specialists' },
-  { number: '03', title: 'Dedicated Support\nfor International Patients' },
-  { number: '04', title: 'Dental Care Meets\nthe Vietnam Experience' },
+  { number: '01', title: 'Affordable Care\nInternational Standards', body: '' },
+  { number: '02', title: 'Experienced & Dedicated\nDental Specialists', body: '' },
+  { number: '03', title: 'Dedicated Support\nfor International Patients', body: '' },
+  { number: '04', title: 'Dental Care Meets\nthe Vietnam Experience', body: '' },
 ];
 
 // PLACEHOLDER: five identical cards and "600$" are dummy values from the design; the four bullet lines are
@@ -179,23 +179,27 @@ export const howItWorks = {
       number: '01',
       title: 'Send Us a Photo',
       body: 'Share photos of your teeth and any X-rays you have.',
+      tag: 'Online',
     },
     {
       number: '02',
       title: 'Get Your Options',
       body: 'Receive treatment options, pricing and timelines from selected clinics.',
+      tag: 'Online',
     },
     {
       number: '03',
       title: 'Compare & Choose',
       body: 'Compare your options and choose the clinic that suits you.',
+      tag: 'Online',
     },
     {
       number: '04',
       title: 'Travel & Get Treated',
       body: 'Plan your visit, meet your dentist and begin treatment in Vietnam.',
+      tag: 'In Vietnam',
     },
-  ].map((s) => ({ ...s, image: { src: xray, alt: '' } satisfies Img })), // PLACEHOLDER: same X-ray on every card
+  ], // UI update: the step cards no longer repeat one X-ray picture; the number carries the step.
   helpTitle: 'Need help or have questions?',
   helpBody: 'A dedicated team will support you at every step of your journey.',
 };

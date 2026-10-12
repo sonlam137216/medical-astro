@@ -9,15 +9,13 @@ interface Props {
   imageHeight: number;
   /** Rounded 24px image (landing and packages pages) or square corners (About, Services, Doctors). */
   rounded?: boolean;
-  /** Content pages set the h1 in capitals. */
-  upper?: boolean;
   headingId?: string;
   /**
    * `split`: text left, picture right (current pages).
    * `banner`: full-width picture with the copy on top, as in the new Figma hero.
    */
   variant?: 'split' | 'banner';
-  /** Banner only: navy overlay with white serif title (Services, Doctors, Packages) instead of the light Home/About look. */
+  /** Banner only: navy overlay with a white title (Services, Packages, articles) instead of the light Home/About look. */
   dark?: boolean;
   /** Banner only: CSS object-position of the picture, to keep the subject clear of the copy. */
   position?: string;
@@ -28,7 +26,6 @@ const {
   image,
   imageHeight,
   rounded = false,
-  upper = false,
   headingId = 'page-title',
   variant = 'split',
   dark = false,
@@ -52,10 +49,7 @@ const banner = variant === 'banner';
     <div class="container banner__inner" style={`min-height: ${imageHeight}px;`}>
       <div class="hero__text">
         <p class:list={['t-label', 'is-lined', 'is-lead', 'hero__label']}>{label}</p>
-        <h1
-          class:list={['t-hero', { 't-hero--serif': dark, 'is-upper': upper || dark }]}
-          id={headingId}
-        >
+        <h1 class:list={['t-hero', { 't-hero--light': dark }]} id={headingId}>
           <slot name="title" />
         </h1>
         <div class="hero__body">
@@ -75,7 +69,7 @@ const banner = variant === 'banner';
     <div class="container hero">
       <div class="hero__text">
         <p class="t-label">{label}</p>
-        <h1 class:list={['t-hero', { 'is-upper': upper }]} id={headingId}>
+        <h1 class="t-hero" id={headingId}>
           <slot name="title" />
         </h1>
         <div class="hero__body">
@@ -149,10 +143,6 @@ const banner = variant === 'banner';
     display: grid;
     gap: 16px;
     color: var(--color-heading);
-  }
-
-  .is-upper {
-    text-transform: uppercase;
   }
 
   .hero__img {
@@ -234,7 +224,6 @@ const banner = variant === 'banner';
   .banner--dark .hero__extra :global(.hero-chip) {
     background: var(--color-white);
     color: var(--color-heading);
-    font: 700 var(--text-body) / var(--text-body-lh) var(--font-serif);
   }
 
   .banner--dark .hero__extra:has(.hero-chip) {

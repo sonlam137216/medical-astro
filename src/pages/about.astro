@@ -37,13 +37,12 @@ const seo = await getPageSeo('/about', {
 });
 ---
 
-<SiteLayout title={seo.title} description={seo.description} theme="sans">
+<SiteLayout title={seo.title} description={seo.description}>
   <PageHero
     variant="banner"
     label={aboutHero.label}
     image={heroImage}
     imageHeight={480}
-    upper
     position="75% center"
   >
     <Fragment slot="title">{aboutHero.title}</Fragment>

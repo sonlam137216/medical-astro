@@ -155,7 +155,7 @@
       .info,
       .stats__card,
       .stat__card,
-      .support__card,
+      .support__item,
       .guide__item,
       .guide__featured,
       .profile,
@@ -170,7 +170,8 @@
       .scroller,
       .method,
       .gallery,
-      .help
+      .help,
+      .step
     ) {
       animation: reveal linear both;
       animation-timeline: view();
@@ -183,10 +184,11 @@
       .info,
       .stats__card,
       .stat__card,
-      .support__card,
+      .support__item,
       .guide__item,
       .profile,
       .why__item,
+      .step,
       .faq details
     ) {
       &:nth-child(2),
@@ -229,7 +231,7 @@
     }
 
     /* Numbered circles ("Why Melatec", "Dental journey") pop in after their card starts to appear. */
-    :is(.why__no, .journey__no) {
+    :is(.why__no, .step__no) {
       animation: pop linear both;
       animation-timeline: view();
       animation-range: entry calc(60px + var(--i, 0) * 30px) entry calc(280px + var(--i, 0) * 30px);

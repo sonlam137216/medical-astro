@@ -3,6 +3,7 @@ import type { Img } from '../../data/home';
 import type { PublicImage } from '../../lib/media';
 import ProfileImage from '../ProfileImage.astro';
 import { frameAspect, IMAGE_SLOTS } from '../../lib/image-slots';
+import { tidyPrice } from '../../lib/price';
 
 interface Props {
   title: string;
@@ -13,7 +14,7 @@ interface Props {
   href?: string | null;
   image?: Img | PublicImage;
   linkLabel?: string;
-  /** Services page (Figma): centred serif title, short copy, outline pill button. */
+  /** Services page (Figma): centred title, short copy, outline pill button. */
   detail?: boolean;
 }
 
@@ -38,7 +39,7 @@ const { title, body, total, href, image, linkLabel = 'Learn more', detail = fals
   <div class:list={['card__body', { 'card__body--detail': detail }]}>
     <h3 class="t-h3">{title}</h3>
     {body && <p class:list={detail ? [] : ['t-small', 'muted']}>{body}</p>}
-    {total && <p class="price-total">{total}</p>}
+    {total && <p class="price-total">{tidyPrice(total)}</p>}
     {!href ? null : detail ? (
       <a class="service__pill" href={href}>
         {linkLabel} <span aria-hidden="true">→</span>
@@ -66,11 +67,8 @@ const { title, body, total, href, image, linkLabel = 'Learn more', detail = fals
   }
 
   .card__body--detail .t-h3 {
-    font-family: var(--font-serif);
-    font-weight: 700;
-    font-size: 26px;
-    line-height: 32px;
-    color: var(--color-title);
+    font-size: 21px;
+    line-height: 28px;
   }
 
   .card__body--detail p {

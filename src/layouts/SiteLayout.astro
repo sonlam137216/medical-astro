@@ -4,6 +4,7 @@ import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import ConsultationSection from '../components/ConsultationSection.astro';
 import SocialBar from '../components/SocialBar.astro';
+import MobileActionBar from '../components/MobileActionBar.astro';
 import { getMediaOrigin } from '../lib/content';
 import { SITE_INDEXABLE } from '../lib/seo';
 import { getPageMeta } from '../lib/site-content';
@@ -20,11 +21,6 @@ interface Props {
   consultationAnchor?: boolean;
   /** Show the "Stay Connected" social row above the footer. */
   social?: boolean;
-  /**
-   * `sans` = Home and About look (Montserrat headings, bright blue consultation block and footer); default `serif` =
-   * the other inner pages (Cormorant headings, navy bands), as in Figma.
-   */
-  theme?: 'serif' | 'sans';
   /** Link preview picture (path or address); absent: the default share picture. */
   image?: string;
   ogType?: 'website' | 'article';
@@ -47,7 +43,6 @@ const {
   social = true,
   current,
   header,
-  theme = 'serif',
   image,
   ogType,
   jsonLd,
@@ -77,11 +72,14 @@ const meta = await getPageMeta(Astro.url.pathname);
     cta={header?.cta}
     consultationHere={consultationAnchor}
   />
-  <main id="main" class:list={{ 'theme-sans': theme === 'sans' }}>
+  <!-- UI update (2026-10-12): one look on every page (the Figma file has a Montserrat Home/About and Cormorant
+       inner pages); the old `theme` prop is gone. -->
+  <main id="main">
     <slot />
   </main>
-  {consultation && <ConsultationSection bright={theme === 'sans'} />}
+  {consultation && <ConsultationSection />}
   <slot name="after-consultation" />
-  {social && <SocialBar sans={theme === 'sans'} />}
-  <Footer consultationHere={consultationAnchor} bright={theme === 'sans'} />
+  {social && <SocialBar />}
+  <Footer consultationHere={consultationAnchor} />
+  <MobileActionBar consultationHere={consultationAnchor} />
 </BaseLayout>

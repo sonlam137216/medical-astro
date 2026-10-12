@@ -8,15 +8,14 @@
  * Scale: the Figma pages are 1042 px wide with ~880 px of content. This site renders the same
  * layout in a 1040 px container (see --container), i.e. ~1.18× the Figma content width, so
  * measured type sizes are multiplied by ~1.18 and rounded for legibility. Example: hero title
- * Figma 37 → 44, Home section title 35 → 40, Cormorant section title 40 → 46.
+ * Figma 37 → 44, Home section title 35 → 40.
  * The owner does not require pixel-exact matching: text/buttons that look misaligned in Figma
  * are corrected, and layouts may be adjusted (see docs/design/figma-2026-10-10/COMPARISON.md).
  *
- * Fonts (all confirmed in Figma):
- *  - Montserrat: Home headings (Bold/SemiBold), nav, buttons, card text, hero.
- *  - Cormorant Garamond Bold: section titles on inner pages, stats, hero on navy pages.
- *  - Inter Regular: body copy on inner pages, "Learn more" links, TOTAL price.
- *  - Roboto (Bold/Regular): footer, consultation form, CTA band button text.
+ * Fonts: the Figma file mixes four families (Montserrat on Home/About, Cormorant on the other pages,
+ * Inter, Roboto). The UI update of 2026-10-12 (branch ui-improvements, direction "A") keeps two:
+ *  - Montserrat: every heading, nav, buttons, card titles, hero.
+ *  - Inter: running text, links, prices, forms, footer.
  *
  * Admin note: styles/admin.css reuses --color-white/border/heading/error/soft/blue/navy/muted,
  * --radius-control and --font-*; keep those names and meanings stable.
@@ -26,7 +25,7 @@
   --color-blue: #0056e5; /* primary: top bar, eyebrow, price, filled buttons */
   --color-blue-deep: #0441cf; /* button labels on white, hover state */
   --color-title: #0013a9; /* Home headings, nav, hero title */
-  --color-heading: #183c78; /* serif section titles on inner pages */
+  --color-heading: #183c78; /* section titles on inner pages */
   --color-navy: #020f32; /* body text colour (and admin chrome) */
   --color-muted: #57595b; /* secondary text (Figma 57595B) */
   --color-white: #ffffff;
@@ -47,19 +46,15 @@
 
   /* font families */
   --font-display: 'Montserrat Variable', 'Montserrat', system-ui, sans-serif;
-  --font-serif: 'Cormorant Garamond', 'Times New Roman', serif;
   --font-sans: 'Inter Variable', system-ui, sans-serif;
-  --font-roboto: 'Roboto', system-ui, sans-serif; /* footer, consultation form */
+  /* UI update: one look on every page. Cormorant (inner-page titles) and Roboto (footer, form) are gone:
+     headings are Montserrat, running text Inter. */
 
   /* type scale: size / line-height (Figma value × ~1.18, see header) */
   --text-hero: 44px; /* Figma Montserrat Bold 37 */
   --text-hero-lh: 54px;
-  --text-hero-serif: 52px; /* Figma Cormorant Bold 45 (hero on navy pages) */
-  --text-hero-serif-lh: 58px;
-  --text-h2: 46px; /* Figma Cormorant Bold 40 (inner-page section title) */
-  --text-h2-lh: 52px;
-  --text-h2-sans: 40px; /* Figma Montserrat SemiBold 35 (Home section title) */
-  --text-h2-sans-lh: 48px;
+  --text-h2: 40px; /* Figma Montserrat SemiBold 35 (section title) */
+  --text-h2-lh: 48px;
   --text-h3: 22px; /* Figma Montserrat Medium 17–20 (card titles) */
   --text-h3-lh: 30px;
   --text-body: 16px; /* Figma 14–17 */
@@ -79,8 +74,7 @@
   --container: 1040px; /* content width; Figma frames are 1042 wide with ~880 of content */
   --gutter: 120px;
   --section-pad-y: 80px;
-  --utility-bar-h: 38px;
-  --nav-h: 88px;
+  --header-h: 76px; /* sticky one-row header (UI update; was a 38 px top bar + 88 px nav) */
 
   /* shape */
   --radius-control: 8px; /* form inputs (and admin controls) */
@@ -103,13 +97,10 @@
   :root {
     --gutter: 20px;
     --section-pad-y: 56px;
+    --header-h: 64px;
     --text-hero: 34px;
     --text-hero-lh: 42px;
-    --text-hero-serif: 38px;
-    --text-hero-serif-lh: 46px;
-    --text-h2: 34px;
-    --text-h2-lh: 40px;
-    --text-h2-sans: 30px;
-    --text-h2-sans-lh: 38px;
+    --text-h2: 30px;
+    --text-h2-lh: 38px;
   }
 }

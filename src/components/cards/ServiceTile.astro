@@ -1,0 +1,152 @@
+---
+import type { Img } from '../../data/types';
+import type { PublicImage } from '../../lib/media';
+import ProfileImage from '../ProfileImage.astro';
+import { frameAspect, IMAGE_SLOTS } from '../../lib/image-slots';
+import { tidyPrice } from '../../lib/price';
+
+// Home service card (UI update, replaces the Figma card with four bullet lines): picture, name, one or two
+// lines of description and the price. The list of what is included stays on the Services page.
+interface Props {
+  title: string;
+  summary?: string | null;
+  price?: string | null;
+  /** Absent: the card has no link. */
+  href?: string | null;
+  image?: Img | PublicImage;
+}
+
+const { title, summary, price, href, image } = Astro.props;
+---
+
+<article class="card tile">
+  {image ? (
+    <ProfileImage
+      class="card__media tile__img"
+      image={image}
+      slot="service-card"
+      sizes="(max-width: 600px) 100vw, (max-width: 1024px) 50vw, 260px"
+    />
+  ) : (
+    <div
+      class="card__media tile__img tile__img--empty"
+      style={`aspect-ratio: ${frameAspect(IMAGE_SLOTS['service-card'])}`}
+      aria-hidden="true"
+    ></div>
+  )}
+  <div class="tile__body">
+    <h3 class="tile__title">
+      {href ? (
+        <a class="tile__link" href={href}>
+          {title}
+        </a>
+      ) : (
+        title
+      )}
+    </h3>
+    {summary && <p class="tile__summary">{summary}</p>}
+    {(price || href) && (
+      <div class="tile__foot">
+        {price ? <p class="tile__price">{tidyPrice(price)}</p> : <span></span>}
+        {href && (
+          <span class="tile__arrow" aria-hidden="true">
+            →
+          </span>
+        )}
+      </div>
+    )}
+  </div>
+</article>
+
+<style>
+  .tile {
+    position: relative;
+    background: var(--color-white);
+  }
+
+  .tile__img--empty {
+    background: var(--color-soft);
+  }
+
+  .tile__body {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 8px;
+    padding: 18px 18px 20px;
+  }
+
+  .tile__title {
+    font: 600 18px / 26px var(--font-display);
+    color: var(--color-title);
+  }
+
+  /* The whole card is the link target; the title carries the accessible name. */
+  .tile__link::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+  }
+
+  .tile__link:focus-visible {
+    outline: none;
+  }
+
+  .tile:has(.tile__link:focus-visible) {
+    outline: 2px solid var(--color-blue);
+    outline-offset: 2px;
+  }
+
+  .tile__summary {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    font-size: var(--text-small);
+    line-height: 21px;
+    color: var(--color-muted);
+  }
+
+  .tile__foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: auto;
+    padding-top: 12px;
+    border-top: 1px solid var(--color-border);
+  }
+
+  .tile__price {
+    font: 700 17px / 24px var(--font-display);
+    color: var(--color-title);
+  }
+
+  .tile__arrow {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    border: 1.5px solid var(--color-border);
+    border-radius: 50%;
+    font-size: 15px;
+    color: var(--color-blue);
+    transition:
+      background-color 0.15s,
+      border-color 0.15s,
+      color 0.15s;
+  }
+
+  .tile:hover .tile__arrow {
+    background: var(--color-blue);
+    border-color: var(--color-blue);
+    color: var(--color-white);
+  }
+
+  .tile:hover .tile__title {
+    color: var(--color-blue);
+  }
+</style>

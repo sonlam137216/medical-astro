@@ -24,7 +24,6 @@ const seo = await getPageSeo('/our-doctors', {
 <SiteLayout title={seo.title} description={seo.description} current="/about">
   <PageHero
     variant="banner"
-    upper
     label={hero.label}
     image={heroImage}
     imageHeight={400}
@@ -122,7 +121,7 @@ const seo = await getPageSeo('/our-doctors', {
   .profile__initials {
     display: grid;
     place-items: center;
-    font: 700 72px / 1 var(--font-serif);
+    font: 600 56px / 1 var(--font-display);
     color: var(--color-heading);
     background: var(--color-soft);
     border-radius: 12px;
@@ -135,9 +134,9 @@ const seo = await getPageSeo('/our-doctors', {
     color: var(--color-navy);
   }
 
-  /* Figma: role in serif blue above a bold navy name. */
+  /* Figma: role in blue above a bold navy name. */
   .profile__role {
-    font: 700 22px / 28px var(--font-serif);
+    font: 600 17px / 24px var(--font-display);
     color: var(--color-blue);
   }
 

@@ -32,7 +32,6 @@ const organization = await getOrganizationJsonLd(Astro.site, {
 <SiteLayout
   title={seo.title}
   description={seo.description}
-  theme="sans"
   jsonLd={organization ? [organization] : []}
 >
   <Hero />

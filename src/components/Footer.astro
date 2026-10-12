@@ -6,16 +6,15 @@ import { pageLink } from '../lib/links';
 interface Props {
   /** The page has its own `#consultation` block (see SiteLayout). */
   consultationHere?: boolean;
-  /** Bright blue band (Home and About in Figma) instead of the navy one. */
-  bright?: boolean;
 }
 
-const { consultationHere = true, bright = false } = Astro.props;
+const { consultationHere = true } = Astro.props;
 const site = await getSiteContent();
 const link = (href: string) => pageLink(href, consultationHere);
 ---
 
-<footer class:list={['footer', { 'footer--bright': bright }]}>
+<!-- Navy on every page (UI update): the bright variant of Home/About ran into the blue "Visit us" band above it. -->
+<footer class="footer">
   <div class="container">
     <div class="footer__grid">
       <div class="footer__brand">
@@ -55,6 +54,12 @@ const link = (href: string) => pageLink(href, consultationHere);
               <a href={`tel:${site.phoneIntl.replace(/\s/g, '')}`}>{site.phoneIntl}</a>
             </p>
           )}
+          {/* Was in the top bar, which the UI update removed. */}
+          {site.email && (
+            <p>
+              <a href={`mailto:${site.email}`}>{site.email}</a>
+            </p>
+          )}
           {site.hours && <p>{site.hours}</p>}
         </address>
       </div>
@@ -74,16 +79,11 @@ const link = (href: string) => pageLink(href, consultationHere);
 </footer>
 
 <style>
-  /* Figma Shared / Footer: dark blue gradient, Roboto, logo + 3 link columns, rule, legal row. */
+  /* Figma Shared / Footer: dark blue gradient, logo + 3 link columns, rule, legal row. */
   .footer {
     background: var(--gradient-band);
     color: var(--color-white);
     padding-block: 64px 32px;
-    font-family: var(--font-roboto);
-  }
-
-  .footer--bright {
-    background: var(--gradient-blue);
   }
 
   .footer__grid {
@@ -100,7 +100,6 @@ const link = (href: string) => pageLink(href, consultationHere);
   }
 
   .footer__name {
-    font-family: var(--font-roboto);
     font-weight: 700;
     color: var(--color-white);
     margin-top: 8px;
@@ -112,17 +111,20 @@ const link = (href: string) => pageLink(href, consultationHere);
   }
 
   .footer__col {
-    font-size: var(--text-body);
+    font-size: 15px;
     line-height: 24px;
+    color: rgb(255 255 255 / 88%);
   }
 
   .footer__title {
     margin: 0 0 20px;
-    font-family: var(--font-roboto);
-    font-weight: 700;
-    font-size: 20px;
-    line-height: 28px;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 13px;
+    line-height: 20px;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
+    color: rgb(255 255 255 / 70%);
   }
 
   .footer__col ul {

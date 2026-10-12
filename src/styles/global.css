@@ -9,6 +9,8 @@
 
 html {
   -webkit-text-size-adjust: 100%;
+  /* Anchor jumps (#consultation…) stop below the sticky header. */
+  scroll-padding-top: calc(var(--header-h) + 8px);
 }
 
 body {
@@ -60,31 +62,32 @@ p {
   font-weight: 700;
   font-size: var(--text-hero);
   line-height: var(--text-hero-lh);
+  letter-spacing: -0.015em;
   color: var(--color-title);
+  text-wrap: balance;
 }
 
 /* Hero title on the dark navy page banners (Services, Doctors, Packages …) */
-.t-hero--serif {
-  font-family: var(--font-serif);
-  font-weight: 700;
-  font-size: var(--text-hero-serif);
-  line-height: var(--text-hero-serif-lh);
+.t-hero--light {
   color: var(--color-white);
 }
 
 .t-h2 {
-  font-family: var(--font-serif);
-  font-weight: 700;
+  font-family: var(--font-display);
+  font-weight: 600;
   font-size: var(--text-h2);
   line-height: var(--text-h2-lh);
-  color: var(--color-heading);
+  letter-spacing: -0.01em;
+  color: var(--color-title); /* the Home/About look (Figma 0013A9), now on every page */
+  text-wrap: balance;
 }
 
 .t-h3 {
+  font-family: var(--font-display);
   font-weight: 600;
   font-size: var(--text-h3);
   line-height: var(--text-h3-lh);
-  color: var(--color-heading);
+  color: var(--color-title);
 }
 
 .t-small {
@@ -130,29 +133,6 @@ p {
 
 .t-label.is-lined.is-lead::after {
   display: none;
-}
-
-/*
- * Home uses a different heading face from the inner pages in Figma: Montserrat (SemiBold, dark blue)
- * instead of Cormorant. Wrap a page in `.theme-sans` (SiteLayout theme="sans") to get that look;
- * body copy switches to Montserrat as well.
- */
-.theme-sans {
-  font-family: var(--font-display);
-}
-
-.theme-sans .t-h2 {
-  font-family: var(--font-display);
-  font-weight: 600;
-  font-size: var(--text-h2-sans);
-  line-height: var(--text-h2-sans-lh);
-  color: var(--color-title);
-}
-
-.theme-sans .t-h3 {
-  font-family: var(--font-display);
-  font-weight: 500;
-  color: var(--color-title);
 }
 
 .visually-hidden {

@@ -6,9 +6,9 @@ import { pageLink } from '../lib/links';
 interface Props {
   /** Pathname of the current page, used to highlight the active link. */
   current?: string;
-  /** Second top-bar button. Defaults to the "Dental Knowledge" link from the site menu. */
+  /** Extra menu link after the main ones. Defaults to the "Dental Knowledge" link from the site menu. */
   utility?: { label: string; href?: string };
-  /** First top-bar button. Defaults to "Booking Now" (jumps to the consultation form). */
+  /** The filled button at the right. Defaults to "Get a free plan" (jumps to the consultation form). */
   cta?: { label: string; href?: string };
   /** The page has its own `#consultation` block (see SiteLayout). */
   consultationHere?: boolean;
@@ -18,68 +18,66 @@ const site = await getSiteContent();
 const {
   current = Astro.url.pathname,
   utility = site.utility ?? undefined,
-  cta = { label: 'Booking Now', href: '#consultation' },
+  cta = { label: 'Get a free plan', href: '#consultation' },
   consultationHere = true,
 } = Astro.props;
 const link = (href: string) => pageLink(href, consultationHere);
 const isActive = (href: string) => (href === '/' ? current === '/' : current.startsWith(href));
+// UI update (2026-10-12): the blue top bar (phone, email and two outlined buttons) is gone. Phone and email are in
+// the footer and the "Visit us" block; the top-bar link joins the menu; the call to action is a filled button here.
+const links = [
+  ...site.main,
+  ...(utility?.href ? [{ label: utility.label, href: utility.href }] : []),
+];
 ---
 
 <header class="header">
-  <div class="topbar">
-    <div class="container topbar__inner">
-      <p class="topbar__contact">
-        {site.phoneDisplay && (
-          <a href={`tel:${site.phoneIntl?.replace(/\s/g, '') ?? ''}`}>{site.phoneDisplay}</a>
-        )}
-        {site.email && <a href={`mailto:${site.email}`}>{site.email}</a>}
-      </p>
-      <div class="topbar__actions">
-        <a class="topbar__btn" href={link(cta.href ?? '#consultation')}>
-          {cta.label}
-        </a>
-        {utility && utility.href && (
-          <a class="topbar__btn" href={link(utility.href)}>
-            {utility.label}
-          </a>
-        )}
-        {utility && !utility.href && <span class="topbar__btn">{utility.label}</span>}
-      </div>
+  <div class="header__inner">
+    <Logo />
+
+    <!-- Small-screen menu is an addition: Figma only has the desktop header -->
+    <div class="menu" data-menu>
+      <button
+        class="menu__toggle"
+        type="button"
+        aria-expanded="false"
+        aria-controls="site-menu"
+        data-menu-toggle
+      >
+        <span class="visually-hidden">Menu</span>
+        <span class="menu__bars" aria-hidden="true"></span>
+      </button>
+      <nav id="site-menu" class="menu__panel" aria-label="Main">
+        <ul class="menu__list">
+          {links.map((l) => (
+            <li>
+              <a
+                class:list={['menu__link', { 'is-active': isActive(l.href) }]}
+                href={link(l.href)}
+                aria-current={isActive(l.href) ? 'page' : undefined}
+              >
+                {l.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
     </div>
-  </div>
 
-  <div class="nav">
-    <div class="container nav__inner">
-      <Logo />
-
-      <!-- Small-screen menu is an addition: Figma only has the desktop header -->
-      <div class="menu" data-menu>
-        <button
-          class="menu__toggle"
-          type="button"
-          aria-expanded="false"
-          aria-controls="site-menu"
-          data-menu-toggle
-        >
-          <span class="visually-hidden">Menu</span>
-          <span class="menu__bars" aria-hidden="true"></span>
-        </button>
-        <nav id="site-menu" class="menu__panel" aria-label="Main">
-          <ul class="menu__list">
-            {site.main.map((link) => (
-              <li>
-                <a
-                  class:list={['menu__link', { 'is-active': isActive(link.href) }]}
-                  href={pageLink(link.href, consultationHere)}
-                  aria-current={isActive(link.href) ? 'page' : undefined}
-                >
-                  {link.label}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </nav>
-      </div>
+    <div class="header__actions">
+      {site.whatsappUrl && (
+        <a class="header__wa" href={site.whatsappUrl} aria-label="Chat on WhatsApp">
+          <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+            <path
+              fill="currentColor"
+              d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 18.2c-1.6 0-3.1-.4-4.4-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.2-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.4.1-.7.3-.2.3-.9.9-.9 2.2s.9 2.5 1 2.7c.1.2 1.8 2.8 4.4 3.9 1.6.7 2.3.8 3.1.6.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.2-1.2-.1-.1-.3-.2-.5-.3Z"
+            ></path>
+          </svg>
+        </a>
+      )}
+      <a class="header__cta" href={link(cta.href ?? '#consultation')}>
+        {cta.label}
+      </a>
     </div>
   </div>
 </header>
@@ -109,70 +107,52 @@ const isActive = (href: string) => (href === '/' ? current === '/' : current.sta
 </script>
 
 <style>
-  /* Top bar: Figma #0056E5, contact on the left, two outlined pill buttons on the right. */
-  .topbar {
-    background: var(--color-blue);
-    color: var(--color-white);
-    font-family: var(--font-display);
-    font-size: var(--text-small);
-    line-height: var(--text-small-lh);
-  }
-
-  .topbar__inner {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px 24px;
-    flex-wrap: wrap;
-    min-height: var(--utility-bar-h);
-    padding-block: 12px;
-  }
-
-  .topbar__contact {
-    display: grid;
-    margin: 0;
-  }
-
-  .topbar__contact a:hover {
-    text-decoration: underline;
-  }
-
-  .topbar__actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-  }
-
-  .topbar__btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 36px;
-    padding: 6px 18px;
-    color: var(--color-white);
-    border: 1px solid var(--color-border);
-    border-radius: 12px;
-    box-shadow: 0 2px 6px rgb(0 19 169 / 25%);
-    text-align: center;
-    white-space: nowrap;
-    transition: background-color 0.15s;
-  }
-
-  a.topbar__btn:hover {
-    background: rgb(255 255 255 / 16%);
-  }
-
-  .nav {
+  /* One row that stays at the top while the page scrolls (added: Figma's header scrolls away). */
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
     background: var(--color-white);
+    border-bottom: 1px solid rgb(0 19 169 / 8%);
   }
 
-  .nav__inner {
+  /* A soft shadow once the page has scrolled (CSS only; browsers without scroll timelines keep the hairline). */
+  @supports (animation-timeline: scroll()) {
+    .header {
+      animation: header-lift linear both;
+      animation-timeline: scroll();
+      animation-range: 0 80px;
+    }
+  }
+
+  @keyframes header-lift {
+    to {
+      box-shadow: 0 6px 24px rgb(0 19 169 / 8%);
+      border-bottom-color: transparent;
+    }
+  }
+
+  /* Wider than the page container: seven menu links and two buttons need the room. */
+  .header__inner {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 24px;
-    min-height: var(--nav-h);
-    padding-block: 16px;
+    gap: 28px;
+    max-width: 1264px;
+    min-height: var(--header-h);
+    margin-inline: auto;
+    padding-inline: 32px;
+  }
+
+  /* At least 44 px of tap area round the logo link, whatever its picture's height. */
+  .header__inner :global(.logo) {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+  }
+
+  .header__inner :global(.logo img) {
+    width: 168px;
+    height: auto;
   }
 
   .menu {
@@ -219,17 +199,18 @@ const isActive = (href: string) => (href === '/' ? current === '/' : current.sta
 
   .menu__list {
     display: flex;
-    gap: 32px;
+    gap: 24px;
     margin: 0;
     padding: 0;
     list-style: none;
   }
 
   .menu__link {
+    position: relative;
     font-family: var(--font-display);
     font-weight: 500;
-    font-size: var(--text-body);
-    line-height: var(--text-body-lh);
+    font-size: 15px;
+    line-height: 24px;
     color: var(--color-title);
     white-space: nowrap;
   }
@@ -239,10 +220,55 @@ const isActive = (href: string) => (href === '/' ? current === '/' : current.sta
     color: var(--color-blue);
   }
 
-  @media (max-width: 1024px) {
+  .header__actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .header__wa {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: var(--color-soft);
+    color: var(--color-green);
+    transition: background-color 0.15s;
+  }
+
+  .header__wa:hover {
+    box-shadow: inset 0 0 0 1px var(--color-border);
+  }
+
+  .header__cta {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 10px 20px;
+    border-radius: 12px;
+    background: var(--color-blue);
+    color: var(--color-white);
+    font: 600 15px / 24px var(--font-display);
+    white-space: nowrap;
+    transition: background-color 0.15s;
+  }
+
+  .header__cta:hover {
+    background: var(--color-blue-deep);
+  }
+
+  /* Below this width the links do not fit on one row: they move into the menu panel. */
+  @media (max-width: 1220px) {
+    /* Logo, then the buttons, then the menu toggle at the far right. */
     .menu {
-      flex: 0;
       position: relative;
+      flex: 0;
+      order: 1;
+    }
+
+    .header__actions {
+      margin-left: auto;
     }
 
     .menu__toggle {
@@ -256,12 +282,13 @@ const isActive = (href: string) => (href === '/' ? current === '/' : current.sta
     .menu__panel {
       position: absolute;
       right: 0;
-      top: 100%;
+      top: calc(100% + 12px);
       width: min(320px, 90vw);
       padding: 16px;
       background: var(--color-white);
       border: 1px solid var(--color-border);
       border-radius: var(--radius-control);
+      box-shadow: 0 12px 32px rgb(0 19 169 / 12%);
       z-index: 10;
     }
 
@@ -273,6 +300,7 @@ const isActive = (href: string) => (href === '/' ? current === '/' : current.sta
     .menu__link {
       display: block;
       padding: 10px 4px;
+      font-size: var(--text-body);
     }
 
     /* With JS the panel is collapsed until toggled; without JS it stays visible */
@@ -295,21 +323,23 @@ const isActive = (href: string) => (href === '/' ? current === '/' : current.sta
     }
   }
 
+  /* Phones: the WhatsApp and consultation buttons live in the bar at the bottom of the screen (MobileActionBar). */
   @media (max-width: 768px) {
-    .topbar__contact {
-      font-size: 13px;
+    .header__inner {
+      gap: 12px;
+      padding-inline: var(--gutter);
     }
 
-    .topbar__contact a {
-      display: flex;
-      align-items: center;
-      min-height: 40px;
+    .header__inner :global(.logo img) {
+      width: 150px;
     }
 
-    .topbar__btn {
-      min-height: 40px;
-      padding: 4px 14px;
-      font-size: 13px;
+    .header__actions {
+      display: none;
+    }
+
+    .menu {
+      margin-left: auto;
     }
   }
 

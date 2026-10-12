@@ -2,27 +2,18 @@
 import Button from './Button.astro';
 import FormGuards from './FormGuards.astro';
 import PhoneField from './PhoneField.astro';
-import { getServiceLinks, getSiteContent } from '../lib/site-content';
-
-interface Props {
-  /** Bright blue band with Montserrat titles (Home and About in Figma) instead of navy with Cormorant. */
-  bright?: boolean;
-}
-
-const { bright = false } = Astro.props;
+import { getRatingLine, getServiceLinks, getSiteContent } from '../lib/site-content';
 
 const site = await getSiteContent();
 
-// Copy is from Figma "Shared / Consultation". The rating line is a claim made by the design;
+// Copy is from Figma "Shared / Consultation". The rating line comes from "Home: top banner" (see getRatingLine);
 // the owner must confirm it is current and verifiable before launch.
 const services = (await getServiceLinks()).map((t) => t.label);
+const rating = await getRatingLine();
 ---
 
-<section
-  class:list={['consult', { 'consult--bright': bright }]}
-  id="consultation"
-  aria-labelledby="consult-title"
->
+<!-- One bright blue band on every page (UI update: the navy variant ran into the navy footer). -->
+<section class="consult" id="consultation" aria-labelledby="consult-title">
   <div class="container consult__inner">
     <p class="t-label is-lined consult__eyebrow">Visit us</p>
     <h2 class="t-h2 consult__title" id="consult-title">
@@ -32,10 +23,12 @@ const services = (await getServiceLinks()).map((t) => t.label);
     <div class="consult__grid">
       <div class="consult__panel consult__info">
         <p class="consult__name">{site.name}</p>
-        <p class="consult__rating">
-          <span aria-hidden="true">★★★★★</span>
-          <span class="visually-hidden">Rated</span> 4.9/5 on Google Reviews
-        </p>
+        {rating && (
+          <p class="consult__rating">
+            <span aria-hidden="true">★★★★★</span>
+            {rating}
+          </p>
+        )}
         {site.addressLine && (
           <p class="consult__line">
             <span class="consult__key">Headquarters</span>
@@ -115,13 +108,12 @@ const services = (await getServiceLinks()).map((t) => t.label);
 </section>
 
 <style>
-  /* Figma: dark blue band, centred eyebrow + serif title, an info card and a form card side by side,
-     both translucent with a light outline. Roboto for the small text. */
+  /* Figma: blue band, centred eyebrow + title, an info card and a form card side by side,
+     both translucent with a light outline. */
   .consult {
     padding-block: var(--section-pad-y);
-    background: var(--gradient-band);
+    background: var(--gradient-blue);
     color: var(--color-white);
-    font-family: var(--font-roboto);
     /* Brighter error colour so the invalid-field outline stays visible on the dark band. */
     --color-error: #ff8a80;
   }
@@ -135,29 +127,6 @@ const services = (await getServiceLinks()).map((t) => t.label);
   .consult__eyebrow,
   .consult__title {
     color: var(--color-white);
-  }
-
-  /* Home and About: bright blue band, Montserrat titles. */
-  .consult--bright {
-    background: var(--gradient-blue);
-  }
-
-  .consult--bright .consult__title,
-  .consult--bright .consult__name,
-  .consult--bright .consult__formtitle {
-    font-family: var(--font-display);
-    font-weight: 700;
-  }
-
-  .consult--bright .consult__title {
-    font-size: var(--text-h2-sans);
-    line-height: var(--text-h2-sans-lh);
-  }
-
-  .consult--bright .consult__name,
-  .consult--bright .consult__formtitle {
-    font-size: 26px;
-    line-height: 34px;
   }
 
   .consult__grid {
@@ -184,10 +153,10 @@ const services = (await getServiceLinks()).map((t) => t.label);
   .consult__name,
   .consult__formtitle {
     margin: 0;
-    font-family: var(--font-serif);
+    font-family: var(--font-display);
     font-weight: 700;
-    font-size: 32px;
-    line-height: 40px;
+    font-size: 26px;
+    line-height: 34px;
     color: var(--color-white);
   }
 
@@ -227,8 +196,8 @@ const services = (await getServiceLinks()).map((t) => t.label);
     gap: 20px;
     /* Colours picked up by the inputs here and by PhoneField. */
     --field-label: var(--color-white);
-    --field-label-font: 700 14px / 20px var(--font-roboto);
-    --field-label-transform: uppercase;
+    --field-label-font: 600 14px / 20px var(--font-sans);
+    --field-label-transform: none;
     --field-color: var(--color-white);
     --field-bg: rgb(255 255 255 / 8%);
     --field-border: rgb(255 255 255 / 55%);
@@ -283,9 +252,7 @@ const services = (await getServiceLinks()).map((t) => t.label);
   }
 
   .consult :global(.consult__submit) {
-    font-family: var(--font-roboto);
-    font-weight: 700;
-    text-transform: uppercase;
+    font-weight: 600;
   }
 
   .form__note {

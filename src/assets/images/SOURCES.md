@@ -21,7 +21,7 @@ Review with the owner before launch:
 - `photos/home-hero.webp`: Home hero background (`image 19` of the new Figma file, 2000 px wide). Stock-looking photo, confirm the licence.
 - `photos/hanoi-tower-wide.webp`: wide Hanoi Turtle Tower photo (`image 34` of the new Figma file, 2000 px wide) used for the navy page heroes (Services, Our Doctors, Packages). Confirm the licence.
 - `photos/implant-hero.webp`: 3D illustration of an implant beside natural teeth (`image 35` of the new Figma file, 2000 px wide), hero of the Dental Implants page. Confirm the licence.
-- `photos/panoramic-xray.webp`: a panoramic X-ray. Confirm it is a licensed stock image or a consented case.
+- `photos/panoramic-xray.webp`: a panoramic X-ray. Not used since the UI update of 2026-10-12 (the How it works steps lost their picture). Confirm it is a licensed stock image or a consented case before using it again.
 - `doctors/doctor-portrait.webp`: one portrait is reused for every doctor in the design.
 - `photos/hotel-room.webp`: reused for all five "Inside Melatec" tiles in the design.
 - `photos/vietnam-*.webp`, `da-nang.webp`: travel photography; confirm the license.

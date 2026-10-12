@@ -132,7 +132,16 @@ export const SECTIONS: SectionDef[] = [
     fields: [
       label,
       text('title', 'Title', 160, { required: true }),
-      lines('paragraphs', 'Paragraphs', 4, 400, 'One paragraph per line.'),
+      lines(
+        'paragraphs',
+        'Paragraphs',
+        4,
+        400,
+        'One paragraph per line. One or two short sentences read best on a phone.',
+      ),
+      text('rating', 'Rating line', 80, {
+        help: 'Shown with five stars under the buttons and in the “Visit us” block of every page, for example “4.9/5 on Google Reviews”. Only a rating the clinic can show. Leave empty to show no rating.',
+      }),
       area('trust', 'Line under the buttons', 200, {
         rows: 2,
         help: 'For example the countries your patients come from. Only claims the clinic can back up. Leave empty to show nothing.',
@@ -143,11 +152,19 @@ export const SECTIONS: SectionDef[] = [
     key: 'home_support',
     page: '/',
     label: 'Home: four reasons strip',
-    where: 'The four cards under the top banner.',
+    where: 'The row of reasons under the top banner.',
     fields: [
-      items('items', 'Cards', 'Card', 6, [col('title', 'Text', 'textarea', 120, true)], {
-        required: true,
-      }),
+      items(
+        'items',
+        'Cards',
+        'Card',
+        6,
+        [
+          col('title', 'Text', 'textarea', 120, true),
+          col('body', 'Short description', 'textarea', 160, false, 'Optional, one line.'),
+        ],
+        { required: true },
+      ),
     ],
   },
   {
@@ -218,13 +235,21 @@ export const SECTIONS: SectionDef[] = [
     key: 'home_how',
     page: '/',
     label: 'Home: how it works',
-    where: 'The four steps on the blue band.',
+    where: 'The numbered steps on the blue band.',
     fields: [
       label,
       title,
       items('steps', 'Steps', 'Step', 6, [
         col('title', 'Title', 'text', 80, true),
         col('body', 'Text', 'textarea', 200),
+        col(
+          'tag',
+          'Where it happens',
+          'text',
+          30,
+          false,
+          'A short tag above the step, for example “Online” or “In Vietnam”. Leave empty for none.',
+        ),
       ]),
       text('helpTitle', 'Help line (bold)', 120),
       text('helpBody', 'Help line', 200),
@@ -495,12 +520,39 @@ const isObj = (v: unknown): v is Obj => typeof v === 'object' && v !== null && !
 
 const pad = (n: number) => String(n).padStart(2, '0');
 
+const emptyValue = (kind: 'text' | 'textarea' | 'lines' | 'items') =>
+  kind === 'lines' || kind === 'items' ? [] : '';
+
+/**
+ * A row saved before a field (or a card column) was added has no value for it. Without this, the built-in words
+ * of that field would show next to the admin's own words; with it, the missing field counts as left empty.
+ */
+function fillMissingWords(fields: Field[], data: Obj): Obj {
+  const out: Obj = { ...data };
+  for (const f of fields) {
+    if (f.type !== 'text' && f.type !== 'textarea' && f.type !== 'lines' && f.type !== 'items')
+      continue;
+    if (!(f.name in out)) out[f.name] = emptyValue(f.type);
+    if (f.type === 'items' && Array.isArray(out[f.name])) {
+      out[f.name] = (out[f.name] as unknown[]).map((item) => {
+        if (!isObj(item)) return item;
+        const filled: Obj = { ...item };
+        for (const c of f.columns) if (!(c.name in filled)) filled[c.name] = emptyValue(c.kind);
+        return filled;
+      });
+    }
+  }
+  return out;
+}
+
 /**
  * The words of a row replace the built-in words; anything the admin cannot edit (photos, links, fixed lists)
  * stays as built. Cards in a list keep the non-text parts of the built-in card at the same position (for
- * example its picture), and a "01", "02"... numbering follows the new order.
+ * example its picture), and a "01", "02"... numbering follows the new order. With `fields`, a field the row has
+ * no value for (it was added after the row was saved) is treated as empty rather than as the built-in words.
  */
-export function mergeSection<T extends Obj>(sample: T, data: Obj): T {
+export function mergeSection<T extends Obj>(sample: T, saved: Obj, fields?: Field[]): T {
+  const data = fields ? fillMissingWords(fields, saved) : saved;
   const out: Obj = { ...sample };
   for (const [key, value] of Object.entries(data)) {
     const base = sample[key];
