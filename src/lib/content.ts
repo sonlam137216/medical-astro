@@ -326,6 +326,19 @@ export async function getFaqs(group: string, sampleQuestions: string[]): Promise
   return sampleQuestions.map((question) => ({ question, answer: null }));
 }
 
+export interface PublicLegalPage {
+  slug: string;
+  title: string;
+  /** Source text in the format of src/lib/cms/articles.ts; render it with parseArticleBody. */
+  body: string;
+  seoDescription: string | null;
+}
+
+/** The published legal pages. Empty before any is published: there is no sample legal text, so no such pages. */
+export async function getLegalPages(): Promise<PublicLegalPage[]> {
+  return (await loadSnapshot())?.legalPages ?? [];
+}
+
 export interface PublicArticle {
   slug: string;
   kind: ArticleKind;

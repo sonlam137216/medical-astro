@@ -9,7 +9,7 @@ import {
 } from '../data/site';
 import { loadSnapshot, getPublicBase, getServices, getLocations } from './content';
 import { DEFAULT_SHARE_IMAGE, absoluteUrl, organizationJsonLd } from './seo';
-import { snapshotImageInput, toPublicVideo, type PublicVideo } from './media';
+import { snapshotImageInput, toPublicImage, toPublicVideo, type PublicVideo } from './media';
 
 // BUILD-TIME ONLY (see content.ts). Site-wide details and menus for the header, footer and contact blocks.
 //
@@ -102,6 +102,20 @@ export async function getPageSeo(
     title: page?.seoTitle || fallback.title,
     description: page?.seoDescription || fallback.description,
   };
+}
+
+/**
+ * Search and share settings of one page from Pages (SEO): whether to keep it out of search engines, and the
+ * picture for link previews. `path` is the page's address with or without a trailing slash.
+ */
+export async function getPageMeta(
+  path: string,
+): Promise<{ noindex: boolean; shareImage: string | null }> {
+  const wanted = path.length > 1 ? path.replace(/\/$/, '') : path;
+  const page = (await loadSnapshot())?.pages?.find((p) => p.path === wanted);
+  const shareImage =
+    page?.shareImage && toPublicImage(snapshotImageInput(page.shareImage), getPublicBase());
+  return { noindex: page?.noindex ?? false, shareImage: shareImage ? shareImage.url : null };
 }
 
 /**

@@ -6,6 +6,7 @@ import ConsultationSection from '../components/ConsultationSection.astro';
 import SocialBar from '../components/SocialBar.astro';
 import { getMediaOrigin } from '../lib/content';
 import { SITE_INDEXABLE } from '../lib/seo';
+import { getPageMeta } from '../lib/site-content';
 
 interface Props {
   title: string;
@@ -48,15 +49,18 @@ const {
   ogType,
   jsonLd,
 } = Astro.props;
+
+// Per-page settings from Pages (SEO): hidden from search engines, and the picture for link previews.
+const meta = await getPageMeta(Astro.url.pathname);
 ---
 
 <!-- Pages are indexable only on a build made with SITE_INDEXABLE=true and a SITE_URL (integrations/build-env.mjs). -->
 <BaseLayout
   title={title}
   description={description}
-  noindex={!SITE_INDEXABLE}
+  noindex={!SITE_INDEXABLE || meta.noindex}
   mediaOrigin={getMediaOrigin()}
-  {image}
+  image={image ?? meta.shareImage ?? undefined}
   {ogType}
   {jsonLd}
 >

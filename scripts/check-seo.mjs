@@ -64,7 +64,14 @@ for (const path of pages) {
     continue;
   }
 
-  if (noindex) fail(path, 'is noindex on an indexable build');
+  // A page can be hidden on purpose (Pages (SEO) in the admin): then it must also be out of the sitemap.
+  // The Home page can never be hidden: that is always a mistake.
+  if (noindex) {
+    if (path === '/') fail(path, 'the Home page is noindex on an indexable build');
+    if (sitemap?.includes(`<loc>${origin}${path}</loc>`))
+      fail(path, 'is noindex but is in sitemap.xml');
+    continue;
+  }
   if (canonical !== `${origin}${path}`)
     fail(path, `canonical is ${canonical ?? 'missing'}, expected ${origin}${path}`);
   if (!tag(html, /<title>([^<]+)<\/title>/)) fail(path, 'has no title');

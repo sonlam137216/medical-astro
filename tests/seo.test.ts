@@ -9,7 +9,7 @@ import {
   pageUrl,
   organizationJsonLd,
 } from '../src/lib/seo.ts';
-import { isSitemapPath, renderSitemap } from '../integrations/sitemap-file.mjs';
+import { isNoindexPage, isSitemapPath, renderSitemap } from '../integrations/sitemap-file.mjs';
 
 test('absoluteUrl resolves against the site and leaves full addresses alone', () => {
   assert.equal(
@@ -113,4 +113,12 @@ test('page addresses carry the trailing slash the build serves, files do not', (
     'https://melatec.example/og-default.jpg',
   );
   assert.equal(pageUrl(undefined, '/about'), undefined);
+});
+
+test('pages that ask for noindex are recognised', () => {
+  assert.equal(
+    isNoindexPage('<head><meta name="robots" content="noindex, nofollow"></head>'),
+    true,
+  );
+  assert.equal(isNoindexPage('<head><title>x</title></head>'), false);
 });

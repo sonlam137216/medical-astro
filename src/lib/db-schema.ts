@@ -232,6 +232,28 @@ export interface Tables {
       updated_at?: string;
     };
   };
+  legal_pages: {
+    Row: {
+      body: string | null;
+      created_at: string;
+      id: string;
+      is_visible: boolean;
+      seo_description: string | null;
+      slug: string;
+      title: string;
+      updated_at: string;
+    };
+    Insert: {
+      body?: string | null;
+      created_at?: string;
+      id?: string;
+      is_visible?: boolean;
+      seo_description?: string | null;
+      slug: string;
+      title: string;
+      updated_at?: string;
+    };
+  };
   locations: {
     Row: {
       address_line: string | null;
@@ -611,6 +633,12 @@ export const TABLES: Record<TableName, TableInfo> = {
     refs: { image_id: 'media_assets' },
   },
   faqs: { bool: ['is_visible'], uuid: true },
+  // The text can be tens of kilobytes: the audit log records the other columns only.
+  legal_pages: {
+    bool: ['is_visible'],
+    uuid: true,
+    audit: ['slug', 'title', 'seo_description', 'is_visible'],
+  },
   locations: { bool: ['is_visible'], uuid: true, refs: { image_id: 'media_assets' } },
   media_assets: { bool: ['is_decorative'], json: ['variant_widths'], uuid: true },
   navigation_items: { bool: ['is_visible'], uuid: true },
@@ -622,7 +650,7 @@ export const TABLES: Record<TableName, TableInfo> = {
     refs: { image_id: 'media_assets', service_id: 'services' },
   },
   page_sections: { bool: ['is_visible'], json: ['data'], uuid: true, refs: { page_id: 'pages' } },
-  pages: { bool: ['noindex', 'is_enabled'], uuid: true },
+  pages: { bool: ['noindex', 'is_enabled'], uuid: true, refs: { og_image_id: 'media_assets' } },
   publish_jobs: { uuid: true, refs: { revision_id: 'content_revisions' } },
   redirects: { uuid: true },
   services: {

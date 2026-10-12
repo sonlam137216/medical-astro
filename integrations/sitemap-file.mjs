@@ -2,7 +2,7 @@
 // list pages are always included, and nothing is listed by hand). Only runs for an indexable build with a
 // known site origin; otherwise there is no sitemap (robots.txt then disallows everything).
 // Plain JavaScript, not type-checked.
-import { writeFile } from 'node:fs/promises';
+import { readFile, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 
 const escapeXml = (text) =>
@@ -12,6 +12,9 @@ const escapeXml = (text) =>
 export function isSitemapPath(pathname) {
   return !/^\/(admin|api|media)(\/|$)/.test(pathname) && !/\.[a-z0-9]+$/i.test(pathname);
 }
+
+/** Whether a page's HTML asks search engines to keep it out (a page hidden in Pages (SEO)). */
+export const isNoindexPage = (html) => /<meta name="robots" content="[^"]*noindex/.test(html);
 
 /** `pathnames` as the sitemap XML (sorted, no duplicates), each as an absolute URL under `origin`. */
 export function renderSitemap(origin, pathnames) {
@@ -37,10 +40,20 @@ export default function sitemapFile({ origin, indexable }) {
     hooks: {
       'astro:build:done': async ({ dir, pages, logger }) => {
         if (!indexable || !origin) return;
-        const xml = renderSitemap(
-          origin,
-          pages.map((p) => p.pathname),
-        );
+        // A page that is noindex must not be offered to search engines in the sitemap either.
+        const listed = [];
+        for (const { pathname } of pages) {
+          // Astro names the Home page '' and the others 'about/'.
+          const file = new URL(
+            pathname === '' || pathname.endsWith('/')
+              ? `${pathname}index.html`
+              : `${pathname}.html`,
+            dir,
+          );
+          const html = await readFile(fileURLToPath(file), 'utf8').catch(() => '');
+          if (!isNoindexPage(html)) listed.push(pathname);
+        }
+        const xml = renderSitemap(origin, listed);
         await writeFile(fileURLToPath(new URL('sitemap.xml', dir)), xml);
         logger.info(`sitemap.xml: ${xml.split('<url>').length - 1} pages`);
       },

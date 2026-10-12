@@ -11,12 +11,18 @@ const root = process.argv[2] ?? 'dist/client';
 
 /** Pages the owner has not provided content for yet (legal texts need the clinic's own wording). */
 const PENDING = new Map([
-  ['/privacy-policy', 'Privacy Policy text to be provided by the owner'],
+  [
+    '/privacy-policy',
+    'Privacy Policy: the clinic writes it in the admin (Legal pages), then Publish',
+  ],
   [
     '/cookie-settings',
     'Cookie settings: depends on whether the site will use cookies or analytics',
   ],
-  ['/legal-disclaimer', 'Legal Disclaimer text to be provided by the owner'],
+  [
+    '/legal-disclaimer',
+    'Legal Disclaimer: the clinic writes it in the admin (Legal pages), then Publish',
+  ],
 ]);
 
 if (!existsSync(root)) {

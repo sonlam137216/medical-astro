@@ -1,6 +1,6 @@
 // Search box of the article lists. The list itself is plain pages and links; only the search needs a script,
 // because a page holds just some of the articles. The first time someone types, the small index of the kind
-// (`search.json`: title, summary, category, section headings) is fetched; matches replace the list until the
+// (`search.json`: title, summary, category, section headings and the text) is fetched; matches replace the list until the
 // box is empty again. Without JavaScript the box stays hidden (see ArticleIndex) and the pages still work.
 interface Entry {
   title: string;
@@ -8,6 +8,8 @@ interface Entry {
   category: string;
   path: string;
   topics: string;
+  /** The article's text (the first part of it). */
+  text: string;
 }
 
 const root = document.querySelector<HTMLElement>('[data-article-index]');
@@ -19,7 +21,8 @@ if (root && form && input) {
   const results = root.querySelector<HTMLElement>('[data-search-results]');
   const status = root.querySelector<HTMLElement>('[data-search-status]');
   const list = root.querySelector<HTMLElement>('[data-search-list]');
-  let index: Promise<{ entry: Entry; text: string }[] | null> | undefined;
+  // `head` is what an article is about (title, summary, category, headings), `text` its body.
+  let index: Promise<{ entry: Entry; head: string; text: string }[] | null> | undefined;
 
   const load = () =>
     (index ??= fetch(form.dataset.searchUrl ?? '')
@@ -31,7 +34,8 @@ if (root && form && input) {
       .then((data) =>
         data.articles.map((entry) => ({
           entry,
-          text: [entry.title, entry.excerpt, entry.category, entry.topics].join(' ').toLowerCase(),
+          head: [entry.title, entry.excerpt, entry.category, entry.topics].join(' ').toLowerCase(),
+          text: (entry.text ?? '').toLowerCase(),
         })),
       )
       .catch(() => {
@@ -89,7 +93,18 @@ if (root && form && input) {
     const entries = await load();
     if (ticket !== latest) return; // a newer keystroke is already being handled
     if (!entries) return render([], true);
-    render(entries.filter((e) => words.every((w) => e.text.includes(w))).map((e) => e.entry));
+    // An article that mentions every word in its title, summary, category or headings comes before one that
+    // only has them somewhere in its text.
+    const found = entries
+      .map((e) => ({
+        entry: e.entry,
+        inHead: words.every((w) => e.head.includes(w)),
+        inText: words.every((w) => `${e.head} ${e.text}`.includes(w)),
+      }))
+      .filter((e) => e.inText);
+    render(
+      [...found.filter((e) => e.inHead), ...found.filter((e) => !e.inHead)].map((e) => e.entry),
+    );
   };
 
   input.addEventListener('input', run);

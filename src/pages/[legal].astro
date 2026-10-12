@@ -1,0 +1,49 @@
+---
+import SiteLayout from '../layouts/SiteLayout.astro';
+import Section from '../components/Section.astro';
+import ArticleBody from '../components/articles/ArticleBody.astro';
+import { parseArticleBody } from '../lib/cms/articles';
+import { getLegalPages, type PublicLegalPage } from '../lib/content';
+
+export const prerender = true;
+
+// /privacy-policy and /legal-disclaimer, from the text the clinic wrote in the admin (Legal pages). A page that
+// was not published does not exist (404): there is no sample legal text. Cookie settings is not here: the
+// public website sets no cookies.
+export async function getStaticPaths() {
+  return (await getLegalPages()).map((page) => ({ params: { legal: page.slug }, props: { page } }));
+}
+
+interface Props {
+  page: PublicLegalPage;
+}
+const { page } = Astro.props;
+const blocks = parseArticleBody(page.body);
+const title = `${page.title} · Melatec Dental Clinic`;
+const description = page.seoDescription ?? `${page.title} of Melatec Dental Clinic, Vietnam.`;
+---
+
+<SiteLayout {title} {description} consultation={false} consultationAnchor={false} social={false}>
+  <Section labelledby="legal-title">
+    <div class="legal">
+      <h1 id="legal-title">{page.title}</h1>
+      <ArticleBody {blocks} />
+    </div>
+  </Section>
+</SiteLayout>
+
+<style>
+  .legal {
+    display: grid;
+    gap: 24px;
+    max-width: 760px;
+    margin-inline: auto;
+    min-width: 0;
+  }
+
+  h1 {
+    font: 700 var(--text-h2) / var(--text-h2-lh) var(--font-serif);
+    color: var(--color-heading);
+    overflow-wrap: anywhere;
+  }
+</style>

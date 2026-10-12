@@ -245,6 +245,18 @@ export function bodyPlainText(blocks: Block[]): string {
     .join(' ');
 }
 
+/** How much of an article's text goes into the search index (characters); the rest is still on the page. */
+export const SEARCH_TEXT_LIMIT = 5000;
+
+/** The plain text of an article for the search index, cut at a word boundary at `limit` characters. */
+export function searchText(blocks: Block[], limit = SEARCH_TEXT_LIMIT): string {
+  const text = bodyPlainText(blocks).replace(/\s+/g, ' ').trim();
+  if (text.length <= limit) return text;
+  const cut = text.slice(0, limit);
+  const lastSpace = cut.lastIndexOf(' ');
+  return (lastSpace > limit * 0.8 ? cut.slice(0, lastSpace) : cut).trim();
+}
+
 // ---------------------------------------------------------------------------
 // Rules
 // ---------------------------------------------------------------------------

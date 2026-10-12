@@ -54,6 +54,12 @@ export const IMAGE_SLOTS = {
     frames: [{ label: 'Home page, beside the text', width: 520, height: 440 }],
     position: { x: 50, y: 50 },
   },
+  share: {
+    label: 'Share picture',
+    // Shown when the page is shared (chat apps, social networks): the usual 1.91:1 preview, cropped to the middle.
+    frames: [{ label: 'Link preview when the page is shared', width: 600, height: 315 }],
+    position: { x: 50, y: 50 },
+  },
   'home-smile': {
     label: 'Before / after photo',
     frames: [{ label: 'Home page slider', width: 560, height: 440 }],

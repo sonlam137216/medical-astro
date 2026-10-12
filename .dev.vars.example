@@ -19,6 +19,13 @@ CLOUDFLARE_API_URL=
 # Setup and checks: MEDIA_CDN.md.
 R2_PUBLIC_BASE_URL=
 
+# Public address of the website and whether search engines may index this build. Read by the BUILD only (the publish
+# workflow writes them from GitHub Environment variables). SITE_URL gives pages their canonical address, link-preview
+# tags and the sitemap; SITE_INDEXABLE=true (production builds only, and only with a SITE_URL) removes `noindex`.
+# Leave both empty for local and staging: every page stays noindex and robots.txt refuses all crawlers.
+SITE_URL=
+SITE_INDEXABLE=
+
 # Cloudflare Turnstile spam check for the consultation forms. Optional; leave both empty until spam shows up.
 # Turn it on by setting BOTH: the secret on the Worker (`wrangler secret put TURNSTILE_SECRET_KEY`, the server then
 # requires a valid token) and the site key at BUILD time (GitHub Environment variable TURNSTILE_SITE_KEY, written

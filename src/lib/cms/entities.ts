@@ -45,6 +45,12 @@ export const PACKAGE_KINDS = [
   ['travel_combo', 'Travel Combos'],
 ] as const;
 
+/** The legal pages the website has, by address (/privacy-policy, /legal-disclaimer): same list as the table's CHECK. */
+export const LEGAL_PAGES = [
+  ['privacy-policy', 'Privacy Policy'],
+  ['legal-disclaimer', 'Legal Disclaimer'],
+] as const;
+
 export const NAV_LOCATIONS = [
   ['utility', 'Top bar (utility link)'],
   ['header', 'Main menu'],
@@ -91,7 +97,7 @@ export const ENTITIES: EntityDef[] = [
     singular: 'page',
     plural: 'Pages (SEO)',
     intro:
-      'The title and description search engines show for each page. Leave them empty to keep the built-in text. Pages cannot be added or renamed here.',
+      'The title and description search engines show for each page, the picture shown when the page is shared, and whether the page is kept out of search engines. Leave the texts empty to keep the built-in text. Pages cannot be added or renamed here.',
     titleField: 'title',
     columns: [
       { field: 'title', label: 'Page' },
@@ -115,6 +121,19 @@ export const ENTITIES: EntityDef[] = [
         max: 400,
         rows: 3,
         help: 'Around 150 characters works well.',
+      },
+      {
+        type: 'image',
+        name: 'og_image_id',
+        label: 'Share picture',
+        slot: 'share',
+        help: 'Shown when the page is shared. Empty: the Melatec logo picture is used.',
+      },
+      {
+        type: 'bool',
+        name: 'noindex',
+        label: 'Hide this page from search engines',
+        default: false,
       },
     ],
     order: [{ column: 'path' }],
@@ -515,6 +534,51 @@ export const ENTITIES: EntityDef[] = [
       visible,
     ],
     order: [{ column: 'group_key' }, { column: 'sort_order' }],
+    deletable: true,
+  },
+  {
+    key: 'legal',
+    table: 'legal_pages',
+    singular: 'legal page',
+    plural: 'Legal pages',
+    intro:
+      'The Privacy Policy and the Legal Disclaimer. The text must come from the clinic (or its lawyer): nothing is written for you. A page appears on the website, at /privacy-policy or /legal-disclaimer, once it has text, is shown, and the website is published. Then add a link to it under Menu links → “Footer: legal links”.',
+    titleField: 'title',
+    columns: [
+      { field: 'title', label: 'Page' },
+      { field: 'slug', label: 'Address' },
+      { field: 'is_visible', label: 'Shown' },
+    ],
+    fields: [
+      {
+        type: 'select',
+        name: 'slug',
+        label: 'Which page',
+        options: LEGAL_PAGES,
+        default: 'privacy-policy',
+        help: 'Each page can be added once.',
+      },
+      { type: 'text', name: 'title', label: 'Title', max: 200, required: true },
+      {
+        type: 'textarea',
+        name: 'body',
+        label: 'Text',
+        max: MAX_ARTICLE_BODY,
+        rows: 24,
+        editor: 'text',
+        help: 'Use the buttons above the text, or type: “## Heading” starts a section, “- item” a bullet, “1. item” a numbered point, “**bold**” bold text and “[words](https://…)” a link. A blank line starts a new paragraph. Pictures are not used on legal pages.',
+      },
+      {
+        type: 'textarea',
+        name: 'seo_description',
+        label: 'Search description',
+        max: 400,
+        rows: 3,
+        help: 'Optional. Around 150 characters works well.',
+      },
+      visible,
+    ],
+    order: [{ column: 'slug' }],
     deletable: true,
   },
 ];

@@ -27,6 +27,7 @@ const included = [
   count(snapshot.faqs?.length, 'answered question', 'answered questions'),
   count(snapshot.articles?.length, 'published article', 'published articles'),
   count(snapshot.articleCategories?.length, 'article category', 'article categories'),
+  count(snapshot.legalPages?.length, 'legal page', 'legal pages'),
   count(snapshot.redirects?.length, 'redirect', 'redirects'),
 ].filter((x): x is string => x !== null);
 

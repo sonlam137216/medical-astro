@@ -20,7 +20,12 @@ const mode = process.argv[2] === 'build' ? 'build' : 'dev';
 const passThrough = process.argv.slice(3);
 const port = Number(process.env.LOCAL_D1_PORT || 8799);
 
-const stateDir = join(process.cwd(), '.wrangler/state/v3/d1/miniflare-D1DatabaseObject');
+// LOCAL_STATE_DIR: read another wrangler state folder (one made with `wrangler dev --persist-to <dir>`), e.g. a
+// throw-away copy used to try the admin without touching your own local data.
+const stateDir = join(
+  process.env.LOCAL_STATE_DIR ?? join(process.cwd(), '.wrangler/state'),
+  'v3/d1/miniflare-D1DatabaseObject',
+);
 
 /** The local D1 file (wrangler names it by a hash; metadata.sqlite is miniflare's own bookkeeping). */
 function databaseFile() {

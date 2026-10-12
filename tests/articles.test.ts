@@ -15,6 +15,7 @@ import {
   bodyPlainText,
   parseArticleBody,
   parseInline,
+  searchText,
   tableOfContents,
 } from '../src/lib/cms/articles.ts';
 import { createDb } from '../src/lib/db.ts';
@@ -538,4 +539,15 @@ test('the category description reaches the snapshot', async () => {
     ),
     /CHECK/,
   );
+});
+
+test('the search text is the plain text of the article, cut at a word', () => {
+  const blocks = parseArticleBody(
+    '## Implants\n\nA **titanium** post, then a crown.\n\n- Day one\n- Day two',
+  );
+  assert.equal(searchText(blocks), 'Implants A titanium post, then a crown. Day one Day two');
+  const long = parseArticleBody(`${'word '.repeat(50)}`.trim());
+  const cut = searchText(long, 42);
+  assert.ok(cut.length <= 42);
+  assert.ok(/^(word )*word$/.test(cut), `cut at a word boundary: "${cut}"`);
 });

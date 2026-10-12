@@ -51,6 +51,15 @@ export interface SnapshotFaq {
   answer: string;
 }
 
+/** A published legal page (Privacy Policy, Legal Disclaimer): only pages that are shown and have text. */
+export interface SnapshotLegalPage {
+  slug: string;
+  title: string;
+  /** Text in the format described in src/lib/cms/articles.ts; rendered as escaped data, never as HTML. */
+  body: string;
+  seoDescription: string | null;
+}
+
 export interface SnapshotRedirect {
   from: string;
   to: string;
@@ -88,6 +97,8 @@ export interface SnapshotPage {
   seoTitle: string | null;
   seoDescription: string | null;
   noindex: boolean;
+  /** Picture for link previews when the page is shared; absent: the default share picture. */
+  shareImage?: SnapshotImage;
 }
 
 export interface SnapshotService {
@@ -175,6 +186,7 @@ export interface Snapshot {
   doctors?: SnapshotDoctor[];
   faqs?: SnapshotFaq[];
   redirects?: SnapshotRedirect[];
+  legalPages?: SnapshotLegalPage[];
   locations?: SnapshotLocation[];
   services?: SnapshotService[];
   packages?: SnapshotPackage[];
@@ -297,17 +309,24 @@ export async function buildSnapshot(db: AdminDb): Promise<Snapshot> {
 
   const { data: pages, error: pagesError } = await db
     .from('pages')
-    .select('path, title, seo_title, seo_description, noindex')
+    .select(
+      `path, title, seo_title, seo_description, noindex, share_image:media_assets(${IMAGE_COLUMNS})`,
+    )
     .order('path');
   if (pagesError) throw fail('pages', pagesError);
   if (pages.length > 0) {
-    snapshot.pages = pages.map((p) => ({
-      path: p.path,
-      title: p.title,
-      seoTitle: p.seo_title,
-      seoDescription: p.seo_description,
-      noindex: p.noindex,
-    }));
+    snapshot.pages = pages.map((p) => {
+      const shareImage = toSnapshotImage(p.share_image);
+      return {
+        path: p.path,
+        title: p.title,
+        seoTitle: p.seo_title,
+        seoDescription: p.seo_description,
+        noindex: p.noindex,
+        // Only when chosen, so snapshots of earlier publishes keep their hash.
+        ...(shareImage ? { shareImage } : {}),
+      };
+    });
   }
 
   const { data: doctors, error: doctorsError } = await db
@@ -346,6 +365,23 @@ export async function buildSnapshot(db: AdminDb): Promise<Snapshot> {
       group: f.group_key,
       question: f.question,
       answer: f.answer as string,
+    }));
+  }
+
+  // A legal page without text is not published: the text has to come from the clinic.
+  const { data: legal, error: legalError } = await db
+    .from('legal_pages')
+    .select('slug, title, body, seo_description')
+    .eq('is_visible', true)
+    .order('slug');
+  if (legalError) throw fail('legal pages', legalError);
+  const written = legal.filter((l) => l.body && l.body.trim() !== '');
+  if (written.length > 0) {
+    snapshot.legalPages = written.map((l) => ({
+      slug: l.slug,
+      title: l.title,
+      body: l.body as string,
+      seoDescription: l.seo_description,
     }));
   }
 
@@ -692,6 +728,13 @@ export function snapshotProblems(snapshot: Snapshot, target: string = 'staging')
       );
     }
   }
+  for (const l of snapshot.legalPages ?? []) {
+    if (bodyImageIds(parseArticleBody(l.body)).length > 0) {
+      problems.push(
+        `Legal page “${l.title}”: pictures are not used on legal pages. Remove them from the text.`,
+      );
+    }
+  }
   for (const r of snapshot.redirects ?? []) {
     if (r.from === r.to) problems.push(`Redirect ${r.from} points to itself.`);
     if (!/^(\/|https?:\/\/)/.test(r.to)) {
@@ -730,6 +773,7 @@ export function isSnapshot(value: unknown): value is Snapshot {
       'doctors',
       'faqs',
       'redirects',
+      'legalPages',
       'locations',
       'services',
       'packages',

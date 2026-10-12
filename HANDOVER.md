@@ -70,14 +70,17 @@ Phần admin đã chặn Publish lên production khi còn dùng mẫu cho Site d
 5. Cấu hình secret/biến (xem `PUBLISHING.md`, `.dev.vars.example`): `GITHUB_DISPATCH_TOKEN`, `GITHUB_REPO`, token Cloudflare có quyền D1 trong GitHub Environment, `R2_PUBLIC_BASE_URL` khi có domain media.
 6. Thử trên staging: đăng nhập admin (PBKDF2 với giới hạn CPU của Workers), form tư vấn, upload ảnh/video, Publish → build → deploy, đo LCP/INP (cache hit và miss).
 7. Nhập nội dung thật (Site details, Menu, Bác sĩ, FAQ, bài viết, video), rồi chạy `npm run build` với `CONTENT_REVISION_ID` của bản sắp ra mắt và `npm run check:launch`, `npm run check:links`.
-8. Khi ra mắt: bỏ `noindex` (hiện cứng trong `BaseLayout`/`SiteLayout`, kế hoạch xử lý theo môi trường) và thêm `sitemap`/`robots.txt`.
+8. Khi ra mắt: đặt `SITE_URL` + `SITE_INDEXABLE=true` trong GitHub Environment `production` (xem mục 'Ra mắt' ở `PUBLISHING.md`); đã có sẵn `robots.txt`, `sitemap.xml`, canonical, thẻ chia sẻ, JSON-LD (cập nhật 2026-10-12).
+9. Nhập nội dung 'Legal pages' (Privacy Policy, Legal Disclaimer) ở admin rồi thêm link ở Menu links → 'Footer: legal links'.
 
 ## 7. Giới hạn và rủi ro đã biết
 
-- **Chưa có Content-Security-Policy** ở trang public: trang có script nội tuyến nhỏ nên cần băm (hash) trước. Các header khác đã có.
-- **`noindex` đang bật ở mọi trang** theo thiết kế (chưa ra mắt). Chưa có sitemap, `robots.txt`, JSON-LD, ảnh chia sẻ (`og:image`).
-- **Mã quốc gia của số điện thoại**: server chỉ kiểm định dạng (`+` và 1–4 chữ số), không kiểm có thuộc danh sách 12 mã của ô chọn; một request tự chế có thể lưu mã không có thật (vô hại, chỉ là dữ liệu).
-- **Ô tìm kiếm bài viết** chỉ lọc thẻ trên trang (tiêu đề, tóm tắt, chuyên mục), không có tìm toàn site.
+- **Content-Security-Policy** (2026-10-12): Astro ghi thẻ `<meta http-equiv="content-security-policy">` vào mọi trang tĩnh kèm hash của script; trang admin (render ở Worker) nhận cùng chính sách qua header. Script chỉ chạy nếu là file của site hoặc script nội tuyến có hash; style giữ `'unsafe-inline'` vì ảnh đặt `style="aspect-ratio…"`. `frame-ancestors` không đặt được trong thẻ meta nên chống nhúng vẫn dựa vào `X-Frame-Options: DENY` ở `_headers`. `npm run check:csp` mở từng trang bằng Chrome và báo vi phạm; đã thử riêng trên admin (đăng nhập, trình soạn bài, cửa sổ media). Thêm script nội tuyến mới vào layout thì phải thêm hash của nó vào `astro.config.mjs` (xem `integrations/inline-scripts.mjs`).
+- **`noindex` theo môi trường** (2026-10-12): mặc định mọi trang `noindex` và `robots.txt` chặn tất cả; chỉ bản build production có `SITE_URL` + `SITE_INDEXABLE=true` mới được index. Trang nào cũng có thể ẩn riêng ở 'Pages (SEO)' và bị loại khỏi sitemap. **Chưa làm:** gửi sitemap cho Search Console, đo thật Core Web Vitals.
+- **Mã quốc gia của số điện thoại**: server nay chỉ nhận mã nằm trong danh sách 12 mã của ô chọn (2026-10-12).
+- **Turnstile** (tuỳ chọn, mặc định tắt): xem `PUBLISHING.md`. Chưa thử với key thật trên Cloudflare, chỉ với key thử.
+- **Tìm kiếm bài viết** nay tìm cả trong nội dung bài (5000 ký tự đầu mỗi bài, `search.json` khoảng 22 KB cho 24 bài mẫu; tải ở lần gõ đầu). Vẫn chỉ trong từng loại bài, chưa có tìm toàn site.
+- **Trang pháp lý** (Privacy Policy, Legal Disclaimer): làm ở admin 'Legal pages' (migration `0010_legal_pages.sql`, cần `npm run db:migrate:staging`); trang không có nội dung thì không tồn tại. **'Cookie settings' chưa xử lý**: website public không đặt cookie nên có thể bỏ link này ở Menu links.
 - **Chưa thử trên Cloudflare thật**: PBKDF2 100.000 vòng với 10 ms CPU của gói Free, media qua custom domain, workflow GitHub sau khi đổi sang D1, phát video thật (mới thử bằng file MP4 giả).
 - **Responsive, hover/focus** là phần tự bổ sung (Figma chỉ có desktop).
 - axe không kết luận được độ tương phản chữ trên ảnh nền (hero): đã xem mắt, lớp phủ navy/trắng đủ đậm, nhưng khi thay ảnh hero cần xem lại.

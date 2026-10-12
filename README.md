@@ -112,7 +112,7 @@ Figma cũ đã đọc chỉ có bản desktop 1440px; chưa xác nhận các fra
 
 - **Nội dung trong code lấy nguyên từ Figma và nhiều chỗ là dữ liệu mẫu**: thẻ dịch vụ lặp lại, giá "600$" và "C$1,250", số liệu "30,000+ khách", "4.9/5 Google Reviews", thông tin bác sĩ. Cần chủ dự án xác nhận hoặc thay thế. Các chỗ này được đánh dấu `PLACEHOLDER` trong `src/data/*.ts`.
 - **Ảnh cần xác nhận quyền sử dụng**: ảnh trước/sau có người thật, ảnh X-quang, ảnh có chữ quảng cáo tiếng Việt in sẵn. Chi tiết ở `src/assets/images/SOURCES.md`.
-- Site đang `noindex` (xem `src/layouts/SiteLayout.astro`). Gỡ khi sẵn sàng cho công cụ tìm kiếm.
+- Site `noindex` cho tới khi build production được đặt `SITE_URL` + `SITE_INDEXABLE=true` (xem mục 'Ra mắt' ở `PUBLISHING.md`); khi đó mới có canonical, thẻ chia sẻ, JSON-LD, `robots.txt` và `sitemap.xml`.
 - Form tư vấn gửi POST tới `/api/consultation` và lưu vào D1; không gửi email, xem yêu cầu ở `/admin`.
 - Không commit `.dev.vars`, `.env*`, token Cloudflare, token GitHub hay mật khẩu admin. Các file này đã nằm trong `.gitignore`.
 

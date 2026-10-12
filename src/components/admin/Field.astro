@@ -104,7 +104,7 @@ const slotsFor = (f: Extract<Field, { type: 'items' }>) => {
   </label>
 )}
 
-{f.type === 'textarea' && f.editor === 'article' && (
+{f.type === 'textarea' && f.editor && (
   <div
     class="admin-rte"
     data-article-editor
@@ -137,9 +137,11 @@ const slotsFor = (f: Extract<Field, { type: 'items' }>) => {
       <button type="button" data-tool="link" title="Link">
         Link
       </button>
-      <button type="button" data-tool="image" title="Picture from Media">
-        Picture
-      </button>
+      {f.editor === 'article' && (
+        <button type="button" data-tool="image" title="Picture from Media">
+          Picture
+        </button>
+      )}
       <span class="admin-rte__tabs" role="tablist" aria-label="View">
         <button type="button" role="tab" data-view="write" aria-selected="true">
           Write

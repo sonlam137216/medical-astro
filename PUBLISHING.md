@@ -29,6 +29,7 @@ Làm theo thứ tự. Bước 1 và 5 cần chạy lệnh, các bước còn l�
    | `CLOUDFLARE_ACCOUNT_ID` | Account ID     |
 
    Biến (Variables, không phải secret): **`D1_DATABASE_ID`** (id database của môi trường này, lấy từ `wrangler d1 create`, bắt buộc: build và script `publish-job` đọc/ghi D1 qua API Cloudflare bằng id này). Tuỳ chọn: `R2_PUBLIC_BASE_URL` (URL công khai của bucket khi đã có custom domain; để trống thì ảnh đi qua Worker).
+   Biến tuỳ chọn cho **ra mắt** (đọc lúc build, ghi vào `.dev.vars` bởi workflow): `SITE_URL` (địa chỉ công khai, ví dụ `https://melatec.vn`: dùng cho canonical, thẻ chia sẻ, JSON-LD và `sitemap.xml`) và `SITE_INDEXABLE` (`true` để gỡ `noindex`; **chỉ có tác dụng ở environment `production` và khi đã có `SITE_URL`**). Để trống cả hai thì mọi trang vẫn `noindex` và `robots.txt` chặn tất cả. `TURNSTILE_SITE_KEY`: xem mục 'Chống spam form (Turnstile)' bên dưới.
    Khi làm production, tạo thêm environment `production` với bộ secret riêng và bật **Required reviewers** để có người duyệt trước khi deploy.
 
 4. **Token cho Worker khởi động workflow** (không phải token ở bước 2): GitHub → Settings → Developer settings → Fine-grained personal access tokens → Generate. Chọn **Only select repositories** = repo này, quyền **Actions: Read and write** (Metadata read tự có). Đặt hạn ngắn (ví dụ 90 ngày) và ghi lịch gia hạn. Token này chỉ khởi động được workflow, không đọc được code.
@@ -40,6 +41,28 @@ Làm theo thứ tự. Bước 1 và 5 cần chạy lệnh, các bước còn l�
    ```
 
    Với production: `--env` bỏ trống, và `PUBLISH_TARGET` của Worker production là `production` (khai báo trong `wrangler.jsonc`).
+
+## Ra mắt: cho công cụ tìm kiếm thấy website
+
+Chỉ làm khi nội dung thật đã có và `npm run check:launch` sạch.
+
+1. Đặt biến `SITE_URL` và `SITE_INDEXABLE=true` trong GitHub Environment `production` (xem bước 3).
+2. Publish lên production. Bản build sẽ: bỏ `noindex`, thêm canonical, thẻ `og:*`/`twitter:*`, JSON-LD (Home: `Dentist`, bài viết: `Article`, FAQ có đáp án: `FAQPage`), `robots.txt` (chặn `/admin/`, `/api/`, nêu sitemap) và `sitemap.xml` (mọi trang, trừ trang đã ẩn ở Pages (SEO)).
+3. Kiểm tra: mở `https://<tên miền>/robots.txt`, `/sitemap.xml`, xem mã nguồn Home có `<link rel="canonical">`. Gửi `sitemap.xml` cho Google Search Console.
+4. Từng trang có thể giữ ngoài công cụ tìm kiếm ở admin 'Pages (SEO)' (ô 'Hide this page from search engines'); ảnh chia sẻ riêng của trang cũng chọn ở đó. Trang không có ảnh riêng dùng `public/og-default.jpg` (1200×630).
+5. Staging không bao giờ có `SITE_INDEXABLE` (workflow chỉ ghi biến này khi target là `production`), nên staging luôn `noindex`.
+
+`npm run check:seo` (build thường) và `npm run check:seo -- --site=https://…` (build đã đặt `SITE_URL` + `SITE_INDEXABLE=true`) kiểm các điều trên; CI chạy cả hai.
+
+## Chống spam form (Turnstile)
+
+Tuỳ chọn, bật khi thấy spam ở hộp thư tư vấn. Cần **cả hai** cùng lúc:
+
+1. Cloudflare dashboard → Turnstile → Add site (tên miền của website) → lấy **Site key** và **Secret key**.
+2. Secret: `npx wrangler secret put TURNSTILE_SECRET_KEY` (thêm `--env staging` cho staging). Từ lúc này server yêu cầu token hợp lệ cho mọi yêu cầu tư vấn.
+3. Site key: đặt biến `TURNSTILE_SITE_KEY` trong GitHub Environment tương ứng rồi Publish (site key được ghi vào form lúc build và được thêm vào Content-Security-Policy).
+
+Chỉ đặt secret mà thiếu site key: form ngừng nhận yêu cầu (không có token). Chỉ đặt site key: hiện widget nhưng server không kiểm. Trình duyệt tắt JavaScript không qua được kiểm tra. Widget chỉ tải khi khách bắt đầu điền form (không làm chậm trang), ở chế độ 'interaction-only' (thường không hiện gì). Thử cục bộ bằng key thử của Cloudflare: site key `1x00000000000000000000AA`, secret `1x0000000000000000000000000000000AA` (luôn pass).
 
 ## Kiểm tra
 
