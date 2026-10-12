@@ -90,7 +90,10 @@ for (const path of pages) {
         if (item['@context'] !== 'https://schema.org' || !item['@type'])
           fail(path, 'JSON-LD without @context/@type');
         if (item.mainEntityOfPage && item.mainEntityOfPage !== canonical)
-          fail(path, `JSON-LD mainEntityOfPage ${item.mainEntityOfPage} differs from the canonical address`);
+          fail(
+            path,
+            `JSON-LD mainEntityOfPage ${item.mainEntityOfPage} differs from the canonical address`,
+          );
       }
     } catch {
       fail(path, 'JSON-LD is not valid JSON');
