@@ -5,7 +5,7 @@ import SiteLayout from '../layouts/SiteLayout.astro';
 import { getPageSeo } from '../lib/site-content';
 import PageHero from '../components/PageHero.astro';
 import Section from '../components/Section.astro';
-import { towerImage } from '../data/shared';
+import { heroImage } from '../data/home';
 import { getDoctors, getSection } from '../lib/content';
 
 export const prerender = true;
@@ -22,7 +22,14 @@ const seo = await getPageSeo('/our-doctors', {
 
 <!-- Figma highlights "About us" in the nav on this page -->
 <SiteLayout title={seo.title} description={seo.description} current="/about">
-  <PageHero variant="banner" dark label={hero.label} image={towerImage} imageHeight={400}>
+  <PageHero
+    variant="banner"
+    upper
+    label={hero.label}
+    image={heroImage}
+    imageHeight={400}
+    position="75% center"
+  >
     <Fragment slot="title">{hero.title}</Fragment>
     {hero.body && <p>{hero.body}</p>}
     <Fragment slot="extra">

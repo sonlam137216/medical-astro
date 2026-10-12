@@ -26,10 +26,10 @@ const insideClinic = await getSection('home_inside');
                 class="gallery__img"
                 src={tile.image.src}
                 alt={tile.image.alt}
-                width={240}
-                height={220}
+                width={360}
+                height={340}
                 densities={[1, 2]}
-                sizes="240px"
+                sizes="(max-width: 700px) 70vw, 340px"
                 loading="lazy"
               />
               <figcaption>{tile.caption}</figcaption>
@@ -48,10 +48,21 @@ const insideClinic = await getSection('home_inside');
   document.querySelectorAll<HTMLElement>('[data-gallery]').forEach((gallery) => {
     const track = gallery.querySelector<HTMLElement>('[data-gallery-track]');
     if (!track) return;
-    const step = () => Math.max(track.clientWidth * 0.8, 240);
+    // One tile (plus the gap) per click; the row snaps to tile edges.
+    const step = () => {
+      const tile = track.firstElementChild as HTMLElement | null;
+      const gap = parseFloat(getComputedStyle(track).columnGap) || 0;
+      return (tile?.offsetWidth ?? 240) + gap;
+    };
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const scroll = (dir: number) =>
-      track.scrollBy({ left: dir * step(), behavior: reduce ? 'auto' : 'smooth' });
+    const behavior = reduce ? 'auto' : 'smooth';
+    // At either end the arrow wraps round to the other end, so both arrows always do something.
+    const scroll = (dir: number) => {
+      const max = track.scrollWidth - track.clientWidth;
+      if (dir > 0 && track.scrollLeft >= max - 4) track.scrollTo({ left: 0, behavior });
+      else if (dir < 0 && track.scrollLeft <= 4) track.scrollTo({ left: max, behavior });
+      else track.scrollBy({ left: dir * step(), behavior });
+    };
     gallery.querySelector('[data-gallery-prev]')?.addEventListener('click', () => scroll(-1));
     gallery.querySelector('[data-gallery-next]')?.addEventListener('click', () => scroll(1));
   });
@@ -62,14 +73,14 @@ const insideClinic = await getSection('home_inside');
     display: grid;
     grid-template-columns: auto 1fr auto;
     align-items: center;
-    gap: 16px;
+    gap: 20px;
   }
 
   .gallery__track {
     display: flex;
-    gap: 20px;
+    gap: 24px;
     margin: 0;
-    padding: 4px;
+    padding: 6px 4px 14px; /* room for the lifted tile's shadow */
     overflow-x: auto;
     list-style: none;
     scroll-snap-type: x mandatory;
@@ -81,8 +92,8 @@ const insideClinic = await getSection('home_inside');
   }
 
   .gallery__tile {
-    flex: 0 0 calc((100% - 60px) / 4);
-    min-width: 200px;
+    flex: 0 0 calc((100% - 48px) / 3);
+    min-width: 240px;
     scroll-snap-align: start;
   }
 
@@ -91,9 +102,9 @@ const insideClinic = await getSection('home_inside');
     grid-template-rows: auto 1fr;
     align-content: start;
     height: 100%;
-    gap: 12px;
+    gap: 16px;
     margin: 0;
-    padding: 12px;
+    padding: 16px 16px 20px;
     background: var(--color-white);
     border-radius: var(--radius-card);
   }
@@ -101,27 +112,27 @@ const insideClinic = await getSection('home_inside');
   .gallery__img {
     width: 100%;
     height: auto;
-    aspect-ratio: 240 / 200;
+    aspect-ratio: 1 / 1;
     object-fit: cover;
-    border-radius: 10px;
+    border-radius: 12px;
   }
 
   figcaption {
     text-align: center;
-    font: 600 var(--text-small) / var(--text-small-lh) var(--font-display);
+    font: 600 20px / 28px var(--font-display);
     color: var(--color-blue-deep);
   }
 
   .gallery__arrow {
     display: grid;
     place-items: center;
-    width: 40px;
-    height: 40px;
+    width: 48px;
+    height: 48px;
     padding: 0;
     background: var(--color-white);
     border: 0;
     border-radius: 50%;
-    font-size: 18px;
+    font-size: 22px;
     line-height: 1;
     color: var(--color-blue);
     cursor: pointer;
@@ -146,7 +157,12 @@ const insideClinic = await getSection('home_inside');
     }
 
     .gallery__tile {
-      flex-basis: 70%;
+      flex-basis: 78%;
+    }
+
+    figcaption {
+      font-size: 18px;
+      line-height: 26px;
     }
   }
 </style>

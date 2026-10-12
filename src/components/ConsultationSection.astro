@@ -4,6 +4,13 @@ import FormGuards from './FormGuards.astro';
 import PhoneField from './PhoneField.astro';
 import { getServiceLinks, getSiteContent } from '../lib/site-content';
 
+interface Props {
+  /** Bright blue band with Montserrat titles (Home and About in Figma) instead of navy with Cormorant. */
+  bright?: boolean;
+}
+
+const { bright = false } = Astro.props;
+
 const site = await getSiteContent();
 
 // Copy is from Figma "Shared / Consultation". The rating line is a claim made by the design;
@@ -11,7 +18,11 @@ const site = await getSiteContent();
 const services = (await getServiceLinks()).map((t) => t.label);
 ---
 
-<section class="consult" id="consultation" aria-labelledby="consult-title">
+<section
+  class:list={['consult', { 'consult--bright': bright }]}
+  id="consultation"
+  aria-labelledby="consult-title"
+>
   <div class="container consult__inner">
     <p class="t-label is-lined consult__eyebrow">Visit us</p>
     <h2 class="t-h2 consult__title" id="consult-title">
@@ -68,6 +79,7 @@ const services = (await getServiceLinks()).map((t) => t.label);
               required
             />
           </div>
+          <PhoneField id="cf-phone" label="Phone" placeholder="Number" />
           <div class="field">
             <label for="cf-email">Email</label>
             <input
@@ -80,8 +92,7 @@ const services = (await getServiceLinks()).map((t) => t.label);
               required
             />
           </div>
-          <PhoneField id="cf-phone" label="Phone" class="form__wide" />
-          <div class="field form__wide">
+          <div class="field">
             <label for="cf-service">Services</label>
             <select id="cf-service" name="service">
               <option value="">Select a treatment</option>
@@ -126,9 +137,32 @@ const services = (await getServiceLinks()).map((t) => t.label);
     color: var(--color-white);
   }
 
+  /* Home and About: bright blue band, Montserrat titles. */
+  .consult--bright {
+    background: var(--gradient-blue);
+  }
+
+  .consult--bright .consult__title,
+  .consult--bright .consult__name,
+  .consult--bright .consult__formtitle {
+    font-family: var(--font-display);
+    font-weight: 700;
+  }
+
+  .consult--bright .consult__title {
+    font-size: var(--text-h2-sans);
+    line-height: var(--text-h2-sans-lh);
+  }
+
+  .consult--bright .consult__name,
+  .consult--bright .consult__formtitle {
+    font-size: 26px;
+    line-height: 34px;
+  }
+
   .consult__grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 1.1fr;
     gap: 24px;
     width: 100%;
     margin-top: 24px;
@@ -200,6 +234,9 @@ const services = (await getServiceLinks()).map((t) => t.label);
     --field-border: rgb(255 255 255 / 55%);
     --field-placeholder: rgb(255 255 255 / 65%);
     --field-radius: 10px;
+    /* The phone sits in a half-width cell: a narrower country-code selector keeps the number legible. */
+    --phone-code-width: 96px;
+    --phone-code-pad: 8px;
   }
 
   .field {

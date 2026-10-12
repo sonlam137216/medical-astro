@@ -57,6 +57,19 @@ const { eyebrow, title, body, upper = false, tone = 'light' } = Astro.props;
     line-height: 28px;
   }
 
+  /* Pages in the sans look (About): Montserrat titles in blue, as the Figma "Why choose" cards. */
+  :global(.theme-sans) .info__title {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 20px;
+    line-height: 26px;
+    color: var(--color-blue);
+  }
+
+  :global(.theme-sans) .info__body {
+    font-family: var(--font-display);
+  }
+
   .info--dark {
     background: rgb(255 255 255 / 6%);
     border: 1px solid rgb(179 201 243 / 60%);

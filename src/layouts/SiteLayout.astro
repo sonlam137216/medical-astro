@@ -20,7 +20,10 @@ interface Props {
   consultationAnchor?: boolean;
   /** Show the "Stay Connected" social row above the footer. */
   social?: boolean;
-  /** `sans` = Home look (Montserrat headings); default `serif` = inner pages (Cormorant headings). */
+  /**
+   * `sans` = Home and About look (Montserrat headings, bright blue consultation block and footer); default `serif` =
+   * the other inner pages (Cormorant headings, navy bands), as in Figma.
+   */
   theme?: 'serif' | 'sans';
   /** Link preview picture (path or address); absent: the default share picture. */
   image?: string;
@@ -77,8 +80,8 @@ const meta = await getPageMeta(Astro.url.pathname);
   <main id="main" class:list={{ 'theme-sans': theme === 'sans' }}>
     <slot />
   </main>
-  {consultation && <ConsultationSection />}
+  {consultation && <ConsultationSection bright={theme === 'sans'} />}
   <slot name="after-consultation" />
-  {social && <SocialBar />}
-  <Footer consultationHere={consultationAnchor} />
+  {social && <SocialBar sans={theme === 'sans'} />}
+  <Footer consultationHere={consultationAnchor} bright={theme === 'sans'} />
 </BaseLayout>

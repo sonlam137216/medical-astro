@@ -6,14 +6,16 @@ import { pageLink } from '../lib/links';
 interface Props {
   /** The page has its own `#consultation` block (see SiteLayout). */
   consultationHere?: boolean;
+  /** Bright blue band (Home and About in Figma) instead of the navy one. */
+  bright?: boolean;
 }
 
-const { consultationHere = true } = Astro.props;
+const { consultationHere = true, bright = false } = Astro.props;
 const site = await getSiteContent();
 const link = (href: string) => pageLink(href, consultationHere);
 ---
 
-<footer class="footer">
+<footer class:list={['footer', { 'footer--bright': bright }]}>
   <div class="container">
     <div class="footer__grid">
       <div class="footer__brand">
@@ -78,6 +80,10 @@ const link = (href: string) => pageLink(href, consultationHere);
     color: var(--color-white);
     padding-block: 64px 32px;
     font-family: var(--font-roboto);
+  }
+
+  .footer--bright {
+    background: var(--gradient-blue);
   }
 
   .footer__grid {

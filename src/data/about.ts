@@ -29,7 +29,7 @@ const reception: Img = { src: clinicReception, alt: 'Melatec Dental Clinic recep
 
 export const personalisedCare = {
   label: 'Your home away from home',
-  title: 'Personalised Care, International Standards',
+  title: 'Personalized Care, International Standards',
   rows: [
     {
       title: 'Advanced Implant Care, Built for Lasting Results',
@@ -44,14 +44,36 @@ export const personalisedCare = {
   ],
 };
 
-// PLACEHOLDER: six identical cards in the design.
+// Copy from the Figma "Why choose Melatec" cards (the sixth card repeats the first in the design).
 export const whyChoose = {
   label: 'Why choose Melatec',
   title: 'Premium Care, Beautiful Smiles in Vietnam',
-  items: Array.from({ length: 6 }, () => ({
-    title: 'Experienced team',
-    body: 'Dentists with international training and a team of nurses and coordinators who speak English.',
-  })),
+  items: [
+    {
+      title: 'Experienced team',
+      body: 'Dentists with international training and a team of nurses and coordinators who speak English.',
+    },
+    {
+      title: 'Personalized Plans',
+      body: 'Every treatment is tailored to your oral health, aesthetic goals and individual needs.',
+    },
+    {
+      title: 'Modern Technology',
+      body: 'Digital diagnostics, 3D imaging and modern CAD/CAM technology for precise treatment planning.',
+    },
+    {
+      title: 'Transparent, Fair Pricing',
+      body: 'Clear quotations, quality materials and carefully considered treatment options with no hidden costs.',
+    },
+    {
+      title: 'Complete Support',
+      body: 'From planning your visit to post-treatment follow-up, our team is here to support your journey.',
+    },
+    {
+      title: 'Experienced team',
+      body: 'Dentists with international training and a team of nurses and coordinators who speak English.',
+    },
+  ],
 };
 
 export const insideClinic = {

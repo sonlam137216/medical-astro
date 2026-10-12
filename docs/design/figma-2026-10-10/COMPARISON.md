@@ -136,3 +136,14 @@ Thẻ bài hiện chỉ là mẫu "Da Nang city" lặp; trang chi tiết chưa c
 3. **P3 Home** (nhiều section nhất, gồm dropdown bảng giá).
 4. **P4 → P6** các trang còn lại, **P5** nếu cần landing implant trước.
 5. **P7 → P8** bài viết và ba trang mới; **A1–A5** song song theo plan.
+
+## 11. Cập nhật 12/10/2026: Figma đã chỉnh sau mốc 10/10
+
+Rà lại file Figma ngày 12/10 (zoom 50%, so với ảnh `references/pages`). Ảnh tham chiếu ở thư mục này **chưa cập nhật** cho hai trang đổi:
+
+- **About:** cả trang theo kiểu Home (Montserrat, xanh dương sáng cho Why choose, CTA, Visit us, footer; thẻ Why choose nhạt; 'Meet Our Specialists'; 'View Our Doctors'; 'Personalized').
+- **Our Doctors:** hero ảnh sáng (cùng ảnh Home) + 2 pill xanh, tiêu đề sans in hoa.
+- Home luôn dùng Visit us/Social/footer xanh sáng + tiêu đề sans (trước đây site để navy + serif); form tư vấn xếp Name | Phone / Email | Services ở mọi trang.
+- Services, Dental Implants, Packages (2 trang), Travel Guide, Dental Knowledge: không đổi (serif + navy). Single Post chưa rà kỹ.
+
+Đã sửa trong code cùng ngày (xem CLAUDE.md). Chưa chụp lại ảnh tham chiếu mới.

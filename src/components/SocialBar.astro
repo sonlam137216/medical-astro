@@ -6,6 +6,12 @@ import youtube from '../assets/images/social/youtube.png';
 import linkedin from '../assets/images/social/linkedin.png';
 import { getSiteContent } from '../lib/site-content';
 
+interface Props {
+  /** Heading in Montserrat (Home and About) instead of Cormorant. */
+  sans?: boolean;
+}
+
+const { sans = false } = Astro.props;
 const icons = { facebook, instagram, youtube, linkedin } as const;
 // Profile links come from Site details. Before anything is published they are shown without a link (Figma
 // shows the four icons but no URLs); published, a platform without a link is simply not shown.
@@ -17,7 +23,7 @@ const links = (await getSiteContent()).social.flatMap((l) =>
 ---
 
 {links.length > 0 && (
-  <section class="social" aria-labelledby="social-title">
+  <section class:list={['social', { 'social--sans': sans }]} aria-labelledby="social-title">
     <div class="container social__inner">
       <p class="t-label is-lined">Social media</p>
       <h2 class="t-h2" id="social-title">
@@ -63,6 +69,14 @@ const links = (await getSiteContent()).social.flatMap((l) =>
   .social {
     padding-block: var(--section-pad-y);
     background: var(--color-soft);
+  }
+
+  .social--sans h2 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--text-h2-sans);
+    line-height: var(--text-h2-sans-lh);
+    color: var(--color-title);
   }
 
   .social__inner {

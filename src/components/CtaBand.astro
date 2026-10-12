@@ -11,16 +11,19 @@ interface Props {
   label?: string;
   title?: string;
   actions: Action[];
+  /** Bright blue band with a Montserrat title (About in Figma) instead of navy with Cormorant. */
+  bright?: boolean;
 }
 
 const {
   label = 'Take the first step',
   title = 'Begin Your Personalized Dental Journey',
   actions,
+  bright = false,
 } = Astro.props;
 ---
 
-<section class="band" aria-labelledby="cta-title">
+<section class:list={['band', { 'band--bright': bright }]} aria-labelledby="cta-title">
   <div class="container cta">
     <p class="t-label is-lined cta__label">{label}</p>
     <h2 class="t-h2 cta__title" id="cta-title">
@@ -41,6 +44,17 @@ const {
   .band {
     padding-block: calc(var(--section-pad-y) * 0.75);
     background: var(--gradient-band);
+  }
+
+  .band--bright {
+    background: var(--gradient-blue);
+  }
+
+  .band--bright .cta__title {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--text-h2-sans);
+    line-height: var(--text-h2-sans-lh);
   }
 
   .cta {

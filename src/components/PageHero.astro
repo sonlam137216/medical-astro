@@ -220,12 +220,18 @@ const banner = variant === 'banner';
     color: var(--color-white);
   }
 
-  /* Pills under the hero copy (Our Doctors: "15+ Years of Experience"). Pass <p class="hero-chip">. */
+  /* Pills under the hero copy (Our Doctors: "15+ Years of Experience"): blue on the light hero, white on the dark one. */
   .hero__extra :global(.hero-chip) {
     display: inline-flex;
     justify-self: start;
     padding: 8px 22px;
     border-radius: 999px;
+    background: var(--color-blue);
+    color: var(--color-white);
+    font: 500 var(--text-body) / var(--text-body-lh) var(--font-display);
+  }
+
+  .banner--dark .hero__extra :global(.hero-chip) {
     background: var(--color-white);
     color: var(--color-heading);
     font: 700 var(--text-body) / var(--text-body-lh) var(--font-serif);

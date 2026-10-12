@@ -75,6 +75,11 @@ const hero = (await getSection('home_hero'))!;
   .hero__content {
     display: grid;
     gap: 20px;
+    max-width: 720px; /* wide enough for the Figma two-line title; the copy below stays narrower */
+  }
+
+  .hero__body,
+  .hero__trust {
     max-width: 600px;
   }
 

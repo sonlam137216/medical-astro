@@ -37,7 +37,7 @@ const seo = await getPageSeo('/about', {
 });
 ---
 
-<SiteLayout title={seo.title} description={seo.description}>
+<SiteLayout title={seo.title} description={seo.description} theme="sans">
   <PageHero
     variant="banner"
     label={aboutHero.label}
@@ -96,14 +96,14 @@ const seo = await getPageSeo('/about', {
     </div>
   </Section>
 
-  <Section tone="navy" labelledby="why-title">
+  <Section tone="blue" labelledby="why-title">
     <SectionIntro label={whyChoose.label} headingId="why-title" align="center" lined inverse>
       <Fragment slot="title">{whyChoose.title}</Fragment>
     </SectionIntro>
     <ul class="cards">
       {whyChoose.items.map((i) => (
         <li>
-          <InfoCard {...i} tone="dark" />
+          <InfoCard {...i} />
         </li>
       ))}
     </ul>
@@ -136,6 +136,7 @@ const seo = await getPageSeo('/about', {
   </Section>
 
   <CtaBand
+    bright
     actions={[
       { label: 'Book a consultation', href: '#consultation' },
       { label: 'Explore our services', href: '/services' },
@@ -144,7 +145,7 @@ const seo = await getPageSeo('/about', {
 
   <Section tone="soft" labelledby="specialists-title">
     <SectionIntro label="Our doctors" headingId="specialists-title" align="center" lined>
-      <Fragment slot="title">Meet Melatec’s Specialists</Fragment>
+      <Fragment slot="title">Meet Our Specialists</Fragment>
     </SectionIntro>
     <ul class="doctors">
       {doctors.map((d) => (
@@ -155,7 +156,7 @@ const seo = await getPageSeo('/about', {
     </ul>
     <div class="more">
       <Button variant="outline" href="/our-doctors">
-        View all doctors
+        View Our Doctors
       </Button>
     </div>
   </Section>
@@ -179,6 +180,7 @@ const seo = await getPageSeo('/about', {
 
   .stats__card {
     display: grid;
+    min-width: 0;
     align-content: start;
     gap: 4px;
     padding: 24px 20px;
@@ -189,10 +191,10 @@ const seo = await getPageSeo('/about', {
   }
 
   .stats__value {
-    font-family: var(--font-serif);
-    font-weight: 700;
-    font-size: 48px;
-    line-height: 56px;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 40px;
+    line-height: 48px;
     color: var(--color-title);
   }
 
@@ -237,11 +239,11 @@ const seo = await getPageSeo('/about', {
   }
 
   .care__title {
-    font-family: var(--font-serif);
-    font-weight: 700;
-    font-size: 30px;
-    line-height: 36px;
-    color: var(--color-heading);
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 26px;
+    line-height: 34px;
+    color: var(--color-blue);
   }
 
   .cards {
@@ -343,8 +345,8 @@ const seo = await getPageSeo('/about', {
     }
 
     .stats__value {
-      font-size: 36px;
-      line-height: 44px;
+      font-size: 26px;
+      line-height: 34px;
     }
 
     .photos {

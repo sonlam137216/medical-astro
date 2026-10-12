@@ -52,6 +52,71 @@
     }
   }
 
+  /* Buttons rise a little on hover (`translate`, so the pressed `scale` in Button.astro still works). */
+  @media (hover: hover) {
+    .btn {
+      transition:
+        background-color 0.15s,
+        border-color 0.15s,
+        color 0.15s,
+        transform 0.15s,
+        translate var(--dur-fast) var(--ease-out),
+        box-shadow var(--dur-base) var(--ease-out);
+    }
+
+    .btn:hover {
+      translate: 0 -2px;
+      box-shadow: 0 8px 18px rgb(0 86 229 / 22%);
+    }
+
+    /* Clinic gallery (Home): tiles lift, arrows grow and the glyph leans the way they scroll. */
+    .gallery__tile figure {
+      transition:
+        translate var(--dur-base) var(--ease-out),
+        box-shadow var(--dur-base) var(--ease-out);
+    }
+
+    .gallery__tile:hover figure {
+      translate: 0 -4px;
+      box-shadow: 0 14px 28px rgb(0 19 90 / 28%);
+    }
+
+    .gallery__arrow {
+      transition:
+        scale var(--dur-fast) var(--ease-out),
+        background-color var(--dur-fast);
+    }
+
+    .gallery__arrow:hover {
+      scale: 1.1;
+    }
+
+    .gallery__arrow:active {
+      scale: 0.94;
+    }
+
+    .gallery__arrow > span {
+      display: inline-block;
+      transition: translate var(--dur-fast) var(--ease-out);
+    }
+
+    [data-gallery-prev]:hover > span {
+      translate: -2px 0;
+    }
+
+    [data-gallery-next]:hover > span {
+      translate: 2px 0;
+    }
+  }
+
+  /* Changing the country in the cost table fades the highlighted column instead of snapping. */
+  .table th,
+  .table td {
+    transition:
+      background-color var(--dur-base),
+      color var(--dur-base);
+  }
+
   .link-arrow > span[aria-hidden] {
     transition:
       transform var(--dur-fast) var(--ease-out),
@@ -139,6 +204,51 @@
         --i: 3;
       }
     }
+
+    /* Eyebrow rules grow out from the text while their block reveals (not the hero eyebrow, which is on the
+       first screen). Each block is a named timeline so the rules move in step with the block's fade. */
+    :is(.intro, .why__intro, .split__text, .story__text) {
+      view-timeline: --blk block;
+    }
+
+    :is(.intro, .why__intro, .split__text, .story__text) .t-label.is-lined {
+      &::before,
+      &::after {
+        animation: grow-x linear both;
+        animation-timeline: --blk;
+        animation-range: entry 0px entry 260px;
+      }
+
+      &::before {
+        transform-origin: right center;
+      }
+
+      &::after {
+        transform-origin: left center;
+      }
+    }
+
+    /* Numbered circles ("Why Melatec", "Dental journey") pop in after their card starts to appear. */
+    :is(.why__no, .journey__no) {
+      animation: pop linear both;
+      animation-timeline: view();
+      animation-range: entry calc(60px + var(--i, 0) * 30px) entry calc(280px + var(--i, 0) * 30px);
+    }
+
+    /* Before/after knob swells once as the photo passes mid-screen: a hint that it can be dragged. */
+    .ba__knob {
+      animation: nudge linear both;
+      animation-timeline: view();
+      animation-range: entry 45% cover 55%;
+    }
+
+    /* Clinic gallery: tiles shrink and dim as they approach either edge of the row, so the photos in the
+       middle stand out and the row feels like it continues. Driven by the row's own horizontal scroll. */
+    .gallery__tile {
+      animation: edge linear both;
+      animation-timeline: view(inline);
+      animation-range: cover;
+    }
   }
 
   /* Accordions (FAQ, "How these figures are worked out"): open and close smoothly where supported. */
@@ -181,5 +291,52 @@
 
   to {
     translate: none;
+  }
+}
+
+@keyframes grow-x {
+  from {
+    transform: scaleX(0);
+  }
+
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes pop {
+  from {
+    opacity: 0;
+    scale: 0.6;
+  }
+
+  to {
+    opacity: 1;
+    scale: 1;
+  }
+}
+
+@keyframes nudge {
+  0%,
+  100% {
+    scale: 1;
+  }
+
+  50% {
+    scale: 1.18;
+  }
+}
+
+@keyframes edge {
+  0%,
+  100% {
+    opacity: 0.5;
+    scale: 0.92;
+  }
+
+  20%,
+  80% {
+    opacity: 1;
+    scale: 1;
   }
 }

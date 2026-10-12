@@ -66,6 +66,10 @@ const { id, label = 'Phone', placeholder = 'Phone number', class: className } = 
     border-radius: var(--field-radius, var(--radius-control));
   }
 
+  .phone select {
+    padding-inline: var(--phone-code-pad, 14px);
+  }
+
   .phone select option {
     color: var(--color-navy);
     background: var(--color-white);
