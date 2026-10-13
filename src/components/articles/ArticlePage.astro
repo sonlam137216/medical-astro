@@ -5,23 +5,25 @@ import ProfileImage from '../ProfileImage.astro';
 import ArticleBody from './ArticleBody.astro';
 import ArticleCard from './ArticleCard.astro';
 import ArticleToc from './ArticleToc.astro';
-import SidebarConsultation from '../SidebarConsultation.astro';
+import Button from '../Button.astro';
 import {
   ARTICLE_BASE_PATH,
   categoryBasePath,
   formatArticleDate,
   parseArticleBody,
-  readingMinutes,
   tocOutline,
 } from '../../lib/cms/articles';
 import type { PublicArticle } from '../../lib/content';
-import { getServiceLinks, getSiteContent } from '../../lib/site-content';
+import { getSiteContent } from '../../lib/site-content';
 import { absoluteUrl, articleJsonLd, breadcrumbJsonLd, pageUrl } from '../../lib/seo';
 import logo from '../../assets/images/brand/logo.png';
 
 // One article (Figma "Single Post", laid out like a WordPress post): breadcrumb, category, title, summary
-// (always there: a published article must have one), author and date line, cover (only when one was chosen),
-// table of contents, body, reviewer card, related articles, and a sidebar with the services and a consultation form.
+// (always there: a published article must have one), author and date line with share links, cover (only when
+// one was chosen), body, reviewer card, related articles. UI update (2026-10-13, direction A, a deliberate change
+// from Figma's sidebar with the services and a form): on wide screens the side column holds the table of
+// contents (it stays in view and marks the section being read) and a short call to action; the consultation form
+// is the shared block after the article. Below 960px the table of contents sits in the text, as before.
 interface Props {
   article: PublicArticle;
   /** Chosen by the route (relatedArticles): same category first, then the same kind, then the other kind. */
@@ -29,10 +31,8 @@ interface Props {
 }
 
 const { article, related } = Astro.props;
-const serviceLinks = await getServiceLinks();
 const blocks = parseArticleBody(article.body);
 const toc = tocOutline(blocks);
-const minutes = readingMinutes(blocks);
 const listLabel = article.kind === 'travel_guide' ? 'Dental Travel Guide' : 'Dental Knowledge';
 const updated = formatArticleDate(article.updatedOn ?? article.publishedOn);
 const reviewed = formatArticleDate(article.reviewedOn);
@@ -45,6 +45,10 @@ const site = Astro.site;
 const siteContent = await getSiteContent();
 const at = (path: string) => pageUrl(site, path);
 const coverUrl = article.cover ? absoluteUrl(site, article.cover.url) : undefined;
+// Share on WhatsApp: a plain link (no third-party script). The script below swaps in the address of the page as
+// it is opened, so it also works on staging, where there is no public address at build time.
+const shareText = [article.title, at(article.path)].filter(Boolean).join(' ');
+const whatsappShare = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
 const jsonLd = site
   ? [
       articleJsonLd({
@@ -82,8 +86,6 @@ const jsonLd = site
   {jsonLd}
   image={article.cover?.url}
   ogType="article"
-  consultation={false}
-  consultationAnchor
   social={false}
 >
   <div class="progress" aria-hidden="true"></div>
@@ -119,29 +121,47 @@ const jsonLd = site
             {article.title}
           </h1>
           {article.excerpt && <p class="lead">{article.excerpt}</p>}
-          <p class="meta">
-            {article.author && (
-              <span class="meta__author">
+          <div class="meta">
+            <p class="meta__info">
+              {article.author && (
                 <span class="meta__avatar" aria-hidden="true">
                   {article.author.trim().charAt(0).toUpperCase()}
                 </span>
-                <span>
-                  <span class="meta__label">Written by</span>
-                  {article.author}
-                </span>
+              )}
+              <span class="meta__text">
+                {article.author && <span class="meta__author">{article.author}</span>}
+                {updated && <span class="meta__date">Updated {updated}</span>}
               </span>
-            )}
-            {updated && (
-              <span>
-                <span class="meta__label">Updated</span>
-                {updated}
-              </span>
-            )}
-            <span>
-              <span class="meta__label">Reading time</span>
-              {minutes} min
-            </span>
-          </p>
+            </p>
+            <div class="share" data-share>
+              <button type="button" class="share__btn" data-copy-link data-needs-js>
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"></path>
+                  <path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"></path>
+                </svg>
+                <span data-copy-label>Copy link</span>
+              </button>
+              <a
+                class="share__btn"
+                href={whatsappShare}
+                data-share-whatsapp
+                rel="noopener"
+                target="_blank"
+              >
+                Share on WhatsApp
+              </a>
+            </div>
+          </div>
         </header>
 
         {article.cover && (
@@ -156,7 +176,11 @@ const jsonLd = site
           </figure>
         )}
 
-        {toc.length > 1 && <ArticleToc items={toc} />}
+        {toc.length > 1 && (
+          <div class="toc-inline">
+            <ArticleToc items={toc} />
+          </div>
+        )}
 
         <ArticleBody blocks={blocks} images={article.bodyImages} />
 
@@ -178,44 +202,70 @@ const jsonLd = site
         <a class="back" href={ARTICLE_BASE_PATH[article.kind]}>
           <span aria-hidden="true">←</span> All articles in {listLabel}
         </a>
-
-        {related.length > 0 && (
-          <section class="related" aria-labelledby="related-title">
-            <h2 id="related-title">Keep reading</h2>
-            <ul>
-              {related.map((r) => (
-                <li>
-                  <ArticleCard article={r} compact />
-                </li>
-              ))}
-            </ul>
-          </section>
-        )}
       </article>
 
       <div class="side">
-        <section class="services card" aria-labelledby="services-title">
-          <h2 id="services-title">Our services</h2>
-          <ul>
-            {serviceLinks.slice(0, 4).map((s) => (
-              <li>
-                <a class="link-arrow" href={s.href}>
-                  {s.label} <span aria-hidden="true">→</span>
-                </a>
-              </li>
-            ))}
-          </ul>
-        </section>
-        <SidebarConsultation />
+        {toc.length > 1 && <ArticleToc items={toc} variant="rail" />}
+        <div class="cta">
+          <p class="cta__title">Planning treatment in Vietnam?</p>
+          <p class="cta__text">
+            Tell us what you need and our team will prepare a free treatment plan.
+          </p>
+          <Button href="#consultation">Get a free plan</Button>
+          {siteContent.whatsappUrl && (
+            <Button variant="whatsapp-outline" href={siteContent.whatsappUrl}>
+              WhatsApp us
+            </Button>
+          )}
+        </div>
       </div>
     </div>
+
+    {related.length > 0 && (
+      <section class="related" aria-labelledby="related-title">
+        <h2 id="related-title">Keep reading</h2>
+        <ul>
+          {related.map((r) => (
+            <li>
+              <ArticleCard article={r} compact />
+            </li>
+          ))}
+        </ul>
+      </section>
+    )}
   </Section>
 </SiteLayout>
+
+<script>
+  // Share links: the address of the page as it is opened (staging has no public address at build time).
+  const share = document.querySelector<HTMLElement>('[data-share]');
+  const whatsapp = share?.querySelector<HTMLAnchorElement>('[data-share-whatsapp]');
+  const copy = share?.querySelector<HTMLButtonElement>('[data-copy-link]');
+  const label = copy?.querySelector<HTMLElement>('[data-copy-label]');
+  const url = location.origin + location.pathname;
+  if (whatsapp) {
+    const title = document.querySelector('h1')?.textContent?.trim() ?? document.title;
+    whatsapp.href = `https://wa.me/?text=${encodeURIComponent(`${title} ${url}`)}`;
+  }
+  if (copy && label) {
+    let timer: number | undefined;
+    copy.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(url);
+        label.textContent = 'Link copied';
+      } catch {
+        label.textContent = 'Could not copy';
+      }
+      clearTimeout(timer);
+      timer = window.setTimeout(() => (label.textContent = 'Copy link'), 2000);
+    });
+  }
+</script>
 
 <style>
   .layout {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 300px;
+    grid-template-columns: minmax(0, 1fr) 280px;
     gap: 56px;
     align-items: start;
   }
@@ -298,19 +348,14 @@ const jsonLd = site
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 12px 28px;
-    padding: 16px 0;
+    justify-content: space-between;
+    gap: 12px 24px;
+    padding: 14px 0;
     border-block: 1px solid var(--color-border);
-    font: 500 14px / 20px var(--font-display);
-    color: var(--color-navy);
   }
 
-  .meta > span {
-    display: grid;
-  }
-
-  .meta__author {
-    grid-auto-flow: column;
+  .meta__info {
+    display: flex;
     align-items: center;
     gap: 12px;
   }
@@ -326,12 +371,44 @@ const jsonLd = site
     color: var(--color-white);
   }
 
-  .meta__label {
-    display: block;
-    font: 500 12px / 16px var(--font-display);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
+  .meta__text {
+    display: grid;
+    font-size: var(--text-small);
+    line-height: 20px;
     color: var(--color-muted);
+  }
+
+  .meta__author {
+    font: 600 15px / 22px var(--font-display);
+    color: var(--color-navy);
+  }
+
+  .share {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .share__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 40px;
+    padding: 0 16px;
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    background: var(--color-white);
+    font: 500 13px / 1 var(--font-display);
+    color: var(--color-title);
+    cursor: pointer;
+    transition:
+      border-color 0.15s,
+      color 0.15s;
+  }
+
+  .share__btn:hover {
+    border-color: var(--color-blue);
+    color: var(--color-blue);
   }
 
   .cover-wrap {
@@ -403,8 +480,8 @@ const jsonLd = site
 
   .related {
     display: grid;
-    gap: 20px;
-    margin-top: 16px;
+    gap: 24px;
+    margin-top: 64px;
     padding-top: 40px;
     border-top: 1px solid var(--color-border);
   }
@@ -416,45 +493,48 @@ const jsonLd = site
 
   .related ul {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 20px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 24px 32px;
     margin: 0;
     padding: 0;
     list-style: none;
   }
 
-  .related li {
-    display: flex;
-  }
-
-  .related li > :global(*) {
-    flex: 1;
-  }
-
+  /* Side column (wide screens): table of contents and a short call to action, in view while the article
+     scrolls. Its top clears the sticky header; a long table of contents scrolls inside the column. */
   .side {
     position: sticky;
-    top: 24px;
+    top: calc(var(--header-h) + 24px);
     display: grid;
-    gap: 24px;
+    gap: 28px;
+    max-height: calc(100vh - var(--header-h) - 48px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
   }
 
-  .services {
+  .cta {
+    display: grid;
     gap: 12px;
-    padding: 24px;
-    background: var(--color-white);
+    padding: 22px;
+    border-radius: var(--radius-card);
+    background: var(--color-soft);
   }
 
-  .services h2 {
-    font: 600 20px / 28px var(--font-display);
-    color: var(--color-heading);
+  .cta__title {
+    font: 700 18px / 26px var(--font-display);
+    color: var(--color-title);
+    text-wrap: balance;
   }
 
-  .services ul {
-    display: grid;
-    gap: 10px;
-    margin: 0;
-    padding: 0;
-    list-style: none;
+  .cta__text {
+    font-size: var(--text-small);
+    line-height: var(--text-small-lh);
+    color: var(--color-muted);
+  }
+
+  .cta :global(.btn) {
+    width: 100%;
   }
 
   /* Reading progress: a thin bar under the top of the window, driven by the page scroll. Only where the browser
@@ -489,14 +569,25 @@ const jsonLd = site
     }
   }
 
+  @media (min-width: 961px) {
+    .toc-inline {
+      display: none;
+    }
+  }
+
   @media (max-width: 960px) {
     .layout {
       grid-template-columns: minmax(0, 1fr);
-      gap: 40px;
     }
 
+    /* Narrower screens: the table of contents is in the text, the form is below the article and the phone
+       action bar is at the bottom of the screen, so the side column is not needed. */
     .side {
-      position: static;
+      display: none;
+    }
+
+    .related ul {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }
 

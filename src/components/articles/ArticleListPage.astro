@@ -25,6 +25,9 @@ const text = ARTICLE_LISTS[kind];
 const rootPath = ARTICLE_BASE_PATH[kind];
 
 const all = await getArticles(kind);
+// The other kind of article, linked from the hero when it has articles.
+const otherKind: ArticleKind = kind === 'travel_guide' ? 'dental_knowledge' : 'travel_guide';
+const otherTotal = (await getArticles(otherKind)).length;
 const categories = await usedCategories(kind, all);
 const active = category ? (categories.find((c) => c.slug === category) ?? null) : null;
 const shown = active ? all.filter((a) => a.category?.slug === active.slug) : all;
@@ -48,6 +51,7 @@ const description = active ? (active.description ?? seo.description) : seo.descr
     slug: c.slug,
     name: c.name,
     path: categoryBasePath(kind, c.slug),
+    count: all.filter((a) => a.category?.slug === c.slug).length,
   }))}
   activeCategory={active?.slug ?? null}
   {listPath}
@@ -55,6 +59,16 @@ const description = active ? (active.description ?? seo.description) : seo.descr
   page={paged.page}
   totalPages={paged.totalPages}
   kindTotal={all.length}
+  activeTotal={shown.length}
+  other={
+    otherTotal > 0
+      ? {
+          label: ARTICLE_LISTS[otherKind].label,
+          teaser: ARTICLE_LISTS[otherKind].teaser,
+          path: ARTICLE_BASE_PATH[otherKind],
+        }
+      : null
+  }
   searchUrl={`${rootPath}/search.json`}
   current={rootPath}
 />

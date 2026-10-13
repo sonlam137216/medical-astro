@@ -9,6 +9,8 @@ export interface ArticleListText {
   label: string;
   heading: string;
   intro: string;
+  /** One line under the link to this list from the other list's hero ("Also read"). */
+  teaser: string;
   seoTitle: string;
   seoDescription: string;
 }
@@ -21,6 +23,7 @@ export const ARTICLE_LISTS: Record<ArticleKind, ArticleListText> = {
     heading: 'Discover Beautiful Vietnam.',
     intro:
       'Practical tips and places to explore when you plan a trip around your dental treatment in Vietnam.',
+    teaser: 'Plan your trip around your treatment',
     seoTitle: 'Dental travel guide · Melatec Dental Clinic',
     seoDescription:
       'Practical tips and places to explore when you plan a trip around your dental treatment in Vietnam.',
@@ -32,6 +35,7 @@ export const ARTICLE_LISTS: Record<ArticleKind, ArticleListText> = {
     heading: 'Trusted Knowledge for a Healthier Smile',
     intro:
       'Clear answers about dental treatments, each reviewed by our dental team, to help you decide with confidence.',
+    teaser: 'Treatments explained by our dental team',
     seoTitle: 'Dental knowledge · Melatec Dental Clinic',
     seoDescription: 'Clear answers about dental treatments, reviewed by the Melatec dental team.',
   },
