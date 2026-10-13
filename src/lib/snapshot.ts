@@ -43,6 +43,8 @@ export interface SnapshotNavItem {
   location: string;
   label: string;
   href: string;
+  /** Main menu only: the drop-down the link is in. Only present when set (older snapshots keep their hash). */
+  group?: string;
 }
 
 export interface SnapshotFaq {
@@ -299,13 +301,16 @@ export async function buildSnapshot(db: AdminDb): Promise<Snapshot> {
 
   const { data: nav, error: navError } = await db
     .from('navigation_items')
-    .select('location, label, href')
+    .select('location, label, href, menu_group')
     .eq('is_visible', true)
     .order('location')
     .order('sort_order')
     .order('label');
   if (navError) throw fail('menu links', navError);
-  if (nav.length > 0) snapshot.navigation = nav;
+  if (nav.length > 0)
+    snapshot.navigation = nav.map(({ menu_group, ...link }) =>
+      menu_group ? { ...link, group: menu_group } : link,
+    );
 
   const { data: pages, error: pagesError } = await db
     .from('pages')

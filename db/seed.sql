@@ -24,27 +24,27 @@ insert or ignore into site_settings (
 );
 
 -- Routes marked PROVISIONAL in src/data/*.ts are not confirmed with the owner yet.
-insert into navigation_items (location, label, href, sort_order)
+insert into navigation_items (location, label, href, sort_order, menu_group)
 select * from (values
-  ('utility', 'Dental Knowledge', '/dental-knowledge', 1),
-  ('header', 'Home', '/', 1),
-  ('header', 'About us', '/about', 2),
-  ('header', 'Services', '/services', 3),
-  ('header', 'Dental Packages', '/dental-packages', 4),
-  ('header', 'Travel Guide', '/travel-guide', 5),
-  ('header', 'Contact', '#consultation', 6),
-  ('footer_treatment', 'Dental Implants', '/services/dental-implants', 1),
-  ('footer_treatment', 'Porcelain Veneers', '/services', 2),
-  ('footer_treatment', 'Dental Crowns', '/services', 3),
-  ('footer_treatment', 'Orthodontic Braces', '/services', 4),
-  ('footer_treatment', 'General Dentistry', '/services', 5),
-  ('footer_explore', 'About Us', '/about', 1),
-  ('footer_explore', 'Dental Packages', '/dental-packages', 2),
-  ('footer_explore', 'Dental Travel Guide', '/travel-guide', 3),
-  ('footer_explore', 'Contacts', '#consultation', 4),
-  ('footer_legal', 'Privacy Policy', '/privacy-policy', 1),
-  ('footer_legal', 'Cookie settings', '/cookie-settings', 2),
-  ('footer_legal', 'Legal Disclaimer', '/legal-disclaimer', 3)
+  ('header', 'Home', '/', 1, null),
+  ('header', 'About us', '/about', 2, null),
+  ('header', 'Services', '/services', 3, null),
+  ('header', 'Dental Packages', '/dental-packages', 4, null),
+  ('header', 'Dental Travel Guide', '/travel-guide', 5, 'Guides'),
+  ('header', 'Dental Knowledge', '/dental-knowledge', 6, 'Guides'),
+  ('header', 'Contact', '#consultation', 7, null),
+  ('footer_treatment', 'Dental Implants', '/services/dental-implants', 1, null),
+  ('footer_treatment', 'Porcelain Veneers', '/services', 2, null),
+  ('footer_treatment', 'Dental Crowns', '/services', 3, null),
+  ('footer_treatment', 'Orthodontic Braces', '/services', 4, null),
+  ('footer_treatment', 'General Dentistry', '/services', 5, null),
+  ('footer_explore', 'About Us', '/about', 1, null),
+  ('footer_explore', 'Dental Packages', '/dental-packages', 2, null),
+  ('footer_explore', 'Dental Travel Guide', '/travel-guide', 3, null),
+  ('footer_explore', 'Contacts', '#consultation', 4, null),
+  ('footer_legal', 'Privacy Policy', '/privacy-policy', 1, null),
+  ('footer_legal', 'Cookie settings', '/cookie-settings', 2, null),
+  ('footer_legal', 'Legal Disclaimer', '/legal-disclaimer', 3, null)
 ) where not exists (select 1 from navigation_items);
 
 insert or ignore into locations (slug, name, address_line, sort_order) values

@@ -1,5 +1,6 @@
 import type { Field } from './fields';
 import { ARTICLE_KINDS, MAX_ARTICLE_BODY } from './articles';
+import { MENU_GROUP_MAX } from '../menu';
 
 // Every kind of content the admin can edit with the generic list / add / edit pages, described as data.
 // Adding a module = adding an entry here (plus its part of the snapshot and its public pages).
@@ -71,6 +72,7 @@ export const ENTITIES: EntityDef[] = [
     columns: [
       { field: 'location', label: 'Where' },
       { field: 'label', label: 'Text' },
+      { field: 'menu_group', label: 'Drop-down' },
       { field: 'href', label: 'Link' },
       { field: 'sort_order', label: 'Order' },
       { field: 'is_visible', label: 'Shown' },
@@ -85,6 +87,14 @@ export const ENTITIES: EntityDef[] = [
       },
       { type: 'text', name: 'label', label: 'Text', max: 80, required: true },
       { type: 'url', name: 'href', label: 'Link', max: 500, required: true, placeholder: '/about' },
+      {
+        type: 'text',
+        name: 'menu_group',
+        label: 'Drop-down (main menu only)',
+        max: MENU_GROUP_MAX,
+        placeholder: 'Guides',
+        help: 'Links of the main menu with the same drop-down name are shown together under that name, at the place of the first of them. Leave empty for a plain link.',
+      },
       sortOrder,
       visible,
     ],
