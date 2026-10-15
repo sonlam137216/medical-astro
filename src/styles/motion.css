@@ -32,23 +32,72 @@
 
   /* Hover: lift linked cards and zoom their photo a little. Only where hovering exists (not touch). */
   @media (hover: hover) {
-    .card:has(a) {
+    .card:is(:has(a), .doctor, .journey) {
       transition:
         transform var(--dur-base) var(--ease-out),
         box-shadow var(--dur-base) var(--ease-out);
     }
 
-    .card:has(a):hover {
+    .card:is(:has(a), .doctor, .journey):hover {
       transform: translateY(-4px);
       box-shadow: 0 14px 30px rgb(0 19 169 / 10%);
     }
 
-    .card:has(a) .card__media {
+    .card:is(:has(a), .doctor, .journey) .card__media {
       transition: transform 500ms var(--ease-out);
     }
 
-    .card:has(a):hover .card__media {
+    .card:is(:has(a), .doctor, .journey):hover .card__media {
       transform: scale(1.04);
+    }
+  }
+
+  /* Home: the small benefit tiles, the "Why Melatec" list and the Travel Guide articles lift on hover too
+     (the doctor and journey cards above have no link of their own, so they are named in the card rule). */
+  @media (hover: hover) {
+    .support__card,
+    .why__item {
+      transition:
+        transform var(--dur-base) var(--ease-out),
+        box-shadow var(--dur-base) var(--ease-out),
+        border-color var(--dur-base);
+    }
+
+    .support__card:hover,
+    .why__item:hover {
+      transform: translateY(-4px);
+      border-color: var(--color-blue);
+      box-shadow: 0 12px 26px rgb(0 86 229 / 14%);
+    }
+
+    .why__no {
+      transition:
+        background-color var(--dur-base),
+        color var(--dur-base);
+    }
+
+    .why__item:hover .why__no {
+      background: var(--color-blue);
+      color: var(--color-white);
+    }
+
+    .guide__img,
+    .guide__thumb {
+      transition:
+        transform var(--dur-base) var(--ease-out),
+        box-shadow var(--dur-base) var(--ease-out);
+    }
+
+    .guide__featured:hover .guide__img,
+    .guide__item:hover .guide__thumb {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 26px rgb(0 19 90 / 18%);
+    }
+
+    .guide__featured:hover .guide__title,
+    .guide__item:hover .guide__title {
+      text-decoration: underline;
+      text-underline-offset: 4px;
     }
   }
 
