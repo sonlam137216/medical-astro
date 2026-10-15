@@ -1,5 +1,5 @@
 // The icons of the public site: Tabler Icons (MIT, https://tabler.io/icons), outline style drawn at stroke 1.75,
-// chosen by the owner on 2026-10-16 from docs/design/icon-preview. Figma has almost no icons, so where they appear
+// chosen by the owner on 2026-10-16 over Phosphor. Figma has almost no icons, so where they appear
 // is our own addition. Each SVG is read as text at build time and inlined by Icon.astro: no icon font, no script,
 // and only the icons listed here end up in the HTML. To add one, import it below and add it to ICONS.
 import arrowLeft from '@tabler/icons/outline/arrow-left.svg?raw';

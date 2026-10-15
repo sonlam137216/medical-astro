@@ -6,5 +6,3 @@ package-lock.json
 worker-configuration.d.ts
 WEBSITE_TECHSTACK.md
 src/types/database.ts
-# Generated single-file preview (fonts inlined), see docs/design/icon-preview
-docs/design/icon-preview/
