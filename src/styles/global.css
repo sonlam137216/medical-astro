@@ -223,6 +223,12 @@ html:not(.js) [data-needs-js] {
   color: var(--color-muted);
 }
 
+/* Inline icons (Icon.astro): never squeezed in a flex row, sit on the line of the text next to them. */
+.icon {
+  flex: none;
+  vertical-align: middle;
+}
+
 /* "Learn more ⟶" / "Directions" / "View profile": text plus a round arrow (Figma: Inter Regular, 0013A9) */
 .link-arrow {
   display: inline-flex;

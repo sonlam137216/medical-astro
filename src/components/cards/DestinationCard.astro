@@ -1,4 +1,5 @@
 ---
+import Icon from '../Icon.astro';
 import { Image } from 'astro:assets';
 import type { Img } from '../../data/types';
 
@@ -26,7 +27,10 @@ const { text, href, image, linkLabel = 'Directions' } = Astro.props;
   <div class="card__body">
     <p>{text}</p>
     <a class="link-arrow" href={href}>
-      {linkLabel} <span aria-hidden="true">→</span>
+      {linkLabel}{' '}
+      <span aria-hidden="true">
+        <Icon name="arrow-right" size={14} />
+      </span>
     </a>
   </div>
 </article>

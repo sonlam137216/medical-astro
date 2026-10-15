@@ -1,4 +1,5 @@
 ---
+import Icon from '../Icon.astro';
 import type { Img } from '../../data/home';
 import type { PublicImage } from '../../lib/media';
 import ProfileImage from '../ProfileImage.astro';
@@ -48,7 +49,10 @@ const external = /^https?:\/\//i.test(href);
     {action === 'button' ? (
       <>
         <p class="location__text">
-          <strong>{name}</strong>: {address}
+          <Icon name="map-pin" size={18} />
+          <span>
+            <strong>{name}</strong>: {address}
+          </span>
         </p>
         <a
           class="location__btn"
@@ -56,6 +60,7 @@ const external = /^https?:\/\//i.test(href);
           target={external ? '_blank' : undefined}
           rel={external ? 'noopener noreferrer' : undefined}
         >
+          <Icon name="directions" size={16} />
           {linkLabel}
           {external && <span class="visually-hidden"> (opens in a new tab)</span>}
         </a>
@@ -65,7 +70,10 @@ const external = /^https?:\/\//i.test(href);
         <h3 class="t-h3">{name}</h3>
         <p class:list={detail ? [] : ['t-small', 'muted']}>{address}</p>
         <a class="link-arrow" href={href}>
-          {linkLabel} <span aria-hidden="true">→</span>
+          {linkLabel}{' '}
+          <span aria-hidden="true">
+            <Icon name="arrow-right" size={14} />
+          </span>
         </a>
       </>
     )}
@@ -82,9 +90,16 @@ const external = /^https?:\/\//i.test(href);
   }
 
   .location__text {
+    display: flex;
+    gap: 8px;
     font-size: var(--text-small);
     line-height: var(--text-small-lh);
     color: var(--color-muted);
+  }
+
+  .location__text :global(.icon) {
+    margin-top: 2px;
+    color: var(--color-blue);
   }
 
   .location__text strong {
@@ -94,6 +109,9 @@ const external = /^https?:\/\//i.test(href);
 
   .location__btn {
     justify-self: start;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
     padding: 8px 22px;
     border-radius: var(--radius-button);
     background: var(--color-blue);

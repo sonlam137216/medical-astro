@@ -1,0 +1,49 @@
+---
+import { iconSvg, type IconName } from '../lib/icons';
+
+// One Tabler icon, inlined (see src/lib/icons.ts). It takes the colour of the text around it (`currentColor`).
+// Without `label` it is decorative and hidden from screen readers, which is right whenever text next to it says
+// the same thing.
+interface Props {
+  name: IconName;
+  /** Width and height in px. */
+  size?: number;
+  /** Accessible name, for an icon that stands alone. */
+  label?: string;
+  class?: string;
+}
+
+// `rest` carries the scope attribute Astro adds when a parent passes `class`, so the parent's styles reach the icon.
+const {
+  name,
+  size = 20,
+  label,
+  class: className,
+  ...rest
+} = Astro.props as Props & Record<string, unknown>;
+const { body, filled } = iconSvg(name);
+const paint = filled
+  ? { fill: 'currentColor' }
+  : {
+      fill: 'none',
+      stroke: 'currentColor',
+      'stroke-width': '1.75',
+      'stroke-linecap': 'round' as const,
+      'stroke-linejoin': 'round' as const,
+    };
+---
+
+<svg
+  class:list={['icon', className]}
+  xmlns="http://www.w3.org/2000/svg"
+  viewBox="0 0 24 24"
+  width={size}
+  height={size}
+  {...paint}
+  role={label ? 'img' : undefined}
+  aria-label={label}
+  aria-hidden={label ? undefined : 'true'}
+  focusable="false"
+  {...rest}
+  set:html={body}
+/>

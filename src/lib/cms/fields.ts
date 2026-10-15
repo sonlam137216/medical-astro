@@ -17,14 +17,19 @@ export interface FieldBase {
   half?: boolean;
 }
 
-/** One column of an `items` field. `lines` values are stored as an array of text. */
+/**
+ * One column of an `items` field. `lines` values are stored as an array of text; `choice` is one of `options`
+ * (stored as its value, empty for none).
+ */
 export interface ItemColumn {
   name: string;
   label: string;
-  kind: 'text' | 'textarea' | 'lines';
+  kind: 'text' | 'textarea' | 'lines' | 'choice';
   max: number;
   required?: boolean;
   help?: string;
+  /** `choice` only: the allowed values and their names in the admin. */
+  options?: readonly { value: string; label: string }[];
 }
 
 export type Field =
@@ -224,6 +229,14 @@ export function parseFields(fields: readonly Field[], form: URLSearchParams): Pa
               }
               if (lines.length > 0) filled = true;
               item[c.name] = lines;
+            } else if (c.kind === 'choice') {
+              const v = oneLine(raw);
+              if (v !== '' && !c.options?.some((o) => o.value === v)) {
+                errors[field.name] =
+                  `${field.itemLabel} ${i + 1}: choose “${c.label}” from the list.`;
+              }
+              // A choice alone does not make a card: an empty card keeps its list on "None".
+              item[c.name] = v;
             } else {
               const v = c.kind === 'textarea' ? multiLine(raw) : oneLine(raw);
               if (v.length > c.max) {

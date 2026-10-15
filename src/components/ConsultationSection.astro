@@ -1,4 +1,5 @@
 ---
+import Icon from './Icon.astro';
 import Button from './Button.astro';
 import FormGuards from './FormGuards.astro';
 import PhoneField from './PhoneField.astro';
@@ -33,29 +34,40 @@ const services = (await getServiceLinks()).map((t) => t.label);
       <div class="consult__panel consult__info">
         <p class="consult__name">{site.name}</p>
         <p class="consult__rating">
-          <span aria-hidden="true">★★★★★</span>
+          <span class="consult__stars" aria-hidden="true">
+            {[1, 2, 3, 4, 5].map(() => (
+              <Icon name="star-filled" size={16} />
+            ))}
+          </span>
           <span class="visually-hidden">Rated</span> 4.9/5 on Google Reviews
         </p>
         {site.addressLine && (
           <p class="consult__line">
+            <Icon name="map-pin" class="consult__icon" />
             <span class="consult__key">Headquarters</span>
-            {site.addressLine.replace(', Vietnam', '')}
+            <span>{site.addressLine.replace(', Vietnam', '')}</span>
           </p>
         )}
         {site.phoneIntl && (
           <p class="consult__line">
+            <Icon name="brand-whatsapp" class="consult__icon" />
             <span class="consult__key">Phone / WhatsApp</span>
-            {site.phoneIntl}
+            <span>{site.phoneIntl}</span>
           </p>
         )}
         {site.hours && (
           <p class="consult__line">
+            <Icon name="clock" class="consult__icon" />
             <span class="consult__key">Opening hours</span>
-            {site.hours}
+            <span>{site.hours}</span>
           </p>
         )}
         <p class="consult__line consult__note">
-          We provide consultation support in English and flexible scheduling for overseas patients.
+          <Icon name="language" class="consult__icon" />
+          <span>
+            We provide consultation support in English and flexible scheduling for overseas
+            patients.
+          </span>
         </p>
       </div>
 
@@ -104,10 +116,14 @@ const services = (await getServiceLinks()).map((t) => t.label);
           <div class="form__actions">
             <Button type="submit" variant="light" class="consult__submit">
               Request consultation
+              <Icon name="send" size={18} />
             </Button>
           </div>
           <FormGuards part="status" />
-          <p class="form__note">*Your information is kept strictly confidential.</p>
+          <p class="form__note">
+            <Icon name="lock" size={16} />
+            *Your information is kept strictly confidential.
+          </p>
         </form>
       </div>
     </div>
@@ -196,16 +212,31 @@ const services = (await getServiceLinks()).map((t) => t.label);
     font-size: var(--text-small);
   }
 
-  .consult__rating [aria-hidden] {
+  .consult__stars {
+    display: inline-flex;
+    gap: 2px;
     margin-right: 6px;
+    vertical-align: -2px;
     color: #ffc83d;
   }
 
+  /* Icons (added 2026-10-16, not in Figma) hang in a column to the left of each line. */
   .consult__line {
     display: grid;
-    gap: 2px;
+    grid-template-columns: 20px 1fr;
+    column-gap: 14px;
+    row-gap: 2px;
     padding-block: 16px;
     border-top: 1px solid rgb(255 255 255 / 55%);
+  }
+
+  .consult__line > :global(.consult__icon) {
+    grid-row: span 2;
+    margin-top: 2px;
+  }
+
+  .consult__line > :not(.consult__icon) {
+    grid-column: 2;
   }
 
   .consult__key {
@@ -289,6 +320,9 @@ const services = (await getServiceLinks()).map((t) => t.label);
   }
 
   .form__note {
+    display: flex;
+    align-items: center;
+    gap: 8px;
     font-size: var(--text-small);
     font-style: italic;
   }

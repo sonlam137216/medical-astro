@@ -1,10 +1,14 @@
 ---
+import Icon from './Icon.astro';
+import { isIconName } from '../lib/icons';
+
 // The numbered steps of "How it works" (from "Home: how it works" in the admin): numbers on a dashed line, an
 // optional tag ("Online", "In Vietnam") saying where the step happens. `blue` on the blue band of Home, `light`
 // under the "Your Seamless Dental Journey" banner of the inner pages (UI update 2026-10-13: that banner had a
-// heading and a photo but no steps).
+// heading and a photo but no steps). A step with an icon (chosen in the admin, 2026-10-16; Figma had emoji
+// placeholders) shows it in the circle with the number in a small badge; without one the circle shows the number.
 interface Props {
-  steps: { title: string; body?: string | null; tag?: string | null }[];
+  steps: { title: string; body?: string | null; tag?: string | null; icon?: string | null }[];
   tone?: 'blue' | 'light';
 }
 
@@ -15,7 +19,14 @@ const { steps, tone = 'blue' } = Astro.props;
   {steps.map((s, i) => (
     <li class="step">
       <span class="step__no" aria-hidden="true">
-        {String(i + 1).padStart(2, '0')}
+        {isIconName(s.icon) ? (
+          <>
+            <Icon name={s.icon} size={24} />
+            <span class="step__badge">{String(i + 1).padStart(2, '0')}</span>
+          </>
+        ) : (
+          String(i + 1).padStart(2, '0')
+        )}
       </span>
       {s.tag && <span class="step__tag">{s.tag}</span>}
       <h3 class="step__title">
@@ -46,6 +57,9 @@ const { steps, tone = 'blue' } = Astro.props;
     --step-tag-fg: var(--color-white);
     --step-title: var(--color-white);
     --step-body: rgb(255 255 255 / 85%);
+    --step-badge-bg: var(--color-title);
+    --step-badge-fg: var(--color-white);
+    --step-badge-border: var(--color-white);
   }
 
   .steps--light {
@@ -57,6 +71,9 @@ const { steps, tone = 'blue' } = Astro.props;
     --step-tag-fg: var(--color-blue);
     --step-title: var(--color-heading);
     --step-body: var(--color-muted);
+    --step-badge-bg: var(--color-white);
+    --step-badge-fg: var(--color-blue);
+    --step-badge-border: var(--color-blue);
   }
 
   /* A dashed line from each number to the next one. */
@@ -78,6 +95,7 @@ const { steps, tone = 'blue' } = Astro.props;
   }
 
   .step__no {
+    position: relative;
     display: grid;
     place-items: center;
     width: 48px;
@@ -88,6 +106,22 @@ const { steps, tone = 'blue' } = Astro.props;
     box-shadow: 0 0 0 6px var(--step-ring);
     font: 700 16px / 1 var(--font-display);
     color: var(--step-no-fg);
+  }
+
+  .step__badge {
+    position: absolute;
+    top: -6px;
+    right: -8px;
+    display: grid;
+    place-items: center;
+    min-width: 28px;
+    height: 24px;
+    padding: 0 5px;
+    border: 2px solid var(--step-badge-border);
+    border-radius: 999px;
+    background: var(--step-badge-bg);
+    font: 700 12px / 1 var(--font-display);
+    color: var(--step-badge-fg);
   }
 
   .step__tag {

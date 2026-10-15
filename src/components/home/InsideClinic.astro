@@ -1,4 +1,5 @@
 ---
+import Icon from '../Icon.astro';
 import { Image } from 'astro:assets';
 import Section from '../Section.astro';
 
@@ -16,7 +17,9 @@ const insideClinic = await getSection('home_inside');
     <!-- Figma: a blue band with a row of photo tiles and an arrow at each end. -->
     <div class="gallery" data-gallery>
       <button class="gallery__arrow" type="button" aria-label="Previous photos" data-gallery-prev>
-        <span aria-hidden="true">←</span>
+        <span aria-hidden="true">
+          <Icon name="arrow-left" size={22} />
+        </span>
       </button>
       <ul class="gallery__track" tabindex="0" aria-label="Clinic photos" data-gallery-track>
         {insideClinic.tiles.map((tile) => (
@@ -38,7 +41,9 @@ const insideClinic = await getSection('home_inside');
         ))}
       </ul>
       <button class="gallery__arrow" type="button" aria-label="Next photos" data-gallery-next>
-        <span aria-hidden="true">→</span>
+        <span aria-hidden="true">
+          <Icon name="arrow-right" size={22} />
+        </span>
       </button>
     </div>
   </Section>

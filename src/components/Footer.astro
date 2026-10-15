@@ -1,4 +1,5 @@
 ---
+import Icon from './Icon.astro';
 import Logo from './Logo.astro';
 import { getSiteContent } from '../lib/site-content';
 import { pageLink } from '../lib/links';
@@ -49,13 +50,24 @@ const link = (href: string) => pageLink(href, consultationHere);
       <div class="footer__col">
         <h2 class="footer__title">Contact Us</h2>
         <address>
-          {site.addressLine && <p>{site.addressLine}</p>}
+          {site.addressLine && (
+            <p>
+              <Icon name="map-pin" size={18} />
+              <span>{site.addressLine}</span>
+            </p>
+          )}
           {site.phoneIntl && (
             <p>
+              <Icon name="phone" size={18} />
               <a href={`tel:${site.phoneIntl.replace(/\s/g, '')}`}>{site.phoneIntl}</a>
             </p>
           )}
-          {site.hours && <p>{site.hours}</p>}
+          {site.hours && (
+            <p>
+              <Icon name="clock" size={18} />
+              <span>{site.hours}</span>
+            </p>
+          )}
         </address>
       </div>
     </div>
@@ -140,6 +152,19 @@ const link = (href: string) => pageLink(href, consultationHere);
     max-width: 280px;
   }
 
+  /* Icons (added 2026-10-16, not in Figma) hang to the left of their line. */
+  .footer__col address p {
+    display: grid;
+    grid-template-columns: 18px 1fr;
+    gap: 10px;
+    align-items: start;
+  }
+
+  .footer__col address :global(.icon) {
+    margin-top: 2px;
+    opacity: 0.9;
+  }
+
   .footer a:hover {
     text-decoration: underline;
   }
@@ -172,6 +197,16 @@ const link = (href: string) => pageLink(href, consultationHere);
     .footer__brand {
       grid-column: 1 / -1;
       padding-right: 0;
+    }
+  }
+
+  /* Phones: a 40 px tap area for the phone number without spreading the lines apart. */
+  @media (max-width: 768px) {
+    .footer__col address a {
+      display: inline-flex;
+      align-items: center;
+      min-height: 40px;
+      margin-block: -8px;
     }
   }
 

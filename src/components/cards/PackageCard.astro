@@ -1,6 +1,5 @@
 ---
-import { Image } from 'astro:assets';
-import inclusionDot from '../../assets/images/icons/inclusion-dot.png';
+import Icon from '../Icon.astro';
 import type { Img } from '../../data/types';
 import type { PublicImage } from '../../lib/media';
 import ProfileImage from '../ProfileImage.astro';
@@ -43,14 +42,9 @@ const { title, inclusions, total, note, href, image, linkLabel = 'Learn more' } 
       <ul class="package__list">
         {inclusions.map((item) => (
           <li>
-            <Image
-              src={inclusionDot}
-              alt=""
-              width={20}
-              height={20}
-              densities={[1, 2]}
-              loading="lazy"
-            />
+            <span class="tick" aria-hidden="true">
+              <Icon name="check" size={14} />
+            </span>
             <span>{item}</span>
           </li>
         ))}
@@ -59,7 +53,10 @@ const { title, inclusions, total, note, href, image, linkLabel = 'Learn more' } 
     {total && <p class="package__total">{total}</p>}
     {total && note && <p class="package__note">{note}</p>}
     <a class="link-arrow" href={href}>
-      {linkLabel} <span aria-hidden="true">→</span>
+      {linkLabel}{' '}
+      <span aria-hidden="true">
+        <Icon name="arrow-right" size={14} />
+      </span>
     </a>
   </div>
 </article>
@@ -87,8 +84,16 @@ const { title, inclusions, total, note, href, image, linkLabel = 'Learn more' } 
     gap: 12px;
   }
 
-  .package__list li :global(img) {
-    margin-top: 3px;
+  /* Was a plain blue dot (Figma); a tick in the dot since the icons came in (2026-10-16). */
+  .tick {
+    display: grid;
+    place-items: center;
+    width: 20px;
+    height: 20px;
+    margin-top: 1px;
+    border-radius: 50%;
+    background: var(--color-blue);
+    color: var(--color-white);
   }
 
   .package__note {

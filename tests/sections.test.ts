@@ -69,10 +69,16 @@ test('a section row replaces the words and keeps what the admin cannot edit', ()
 test('a field added after a row was saved counts as empty, not as the built-in words', () => {
   const steps = mergeSection(
     { steps: [{ number: '01', title: 'Built-in', body: 'b', tag: 'Online' }] },
-    { steps: [{ title: 'Mine', body: 'mine' }] }, // saved before the "tag" column existed
+    { steps: [{ title: 'Mine', body: 'mine' }] }, // saved before the "tag" and "icon" columns existed
     sectionByKey('home_how')!.fields,
   );
-  assert.deepEqual(steps.steps[0], { number: '01', title: 'Mine', body: 'mine', tag: '' });
+  assert.deepEqual(steps.steps[0], {
+    number: '01',
+    title: 'Mine',
+    body: 'mine',
+    tag: '',
+    icon: '',
+  });
 
   // Without the fields (older callers) the built-in words still fill the gap.
   const loose = mergeSection({ label: 'Built-in', title: 'T' }, { title: 'Mine' });
@@ -123,6 +129,68 @@ test('items fields: parsed per slot, empty slots are left out, form state round-
   // nothing filled in and not required: an empty list
   const none = parseFields([field], new URLSearchParams());
   assert.ok(none.ok && (none.value.steps as unknown[]).length === 0);
+});
+
+test('items fields: a choice column takes a listed value or none, and alone makes no card', () => {
+  const field: Field = {
+    type: 'items',
+    name: 'steps',
+    label: 'Steps',
+    itemLabel: 'Step',
+    maxItems: 3,
+    columns: [
+      { name: 'title', label: 'Title', kind: 'text', max: 20, required: true },
+      {
+        name: 'icon',
+        label: 'Icon',
+        kind: 'choice',
+        max: 40,
+        options: [{ value: 'camera', label: 'Camera' }],
+      },
+    ],
+  };
+  const parsed = parseFields(
+    [field],
+    new URLSearchParams({
+      [itemInput('steps', 0, 'title')]: 'Photo',
+      [itemInput('steps', 0, 'icon')]: 'camera',
+      [itemInput('steps', 1, 'title')]: 'No icon',
+      [itemInput('steps', 2, 'icon')]: 'camera', // no title: dropped, not an error
+    }),
+  );
+  assert.ok(parsed.ok);
+  assert.deepEqual(parsed.value.steps, [
+    { title: 'Photo', icon: 'camera' },
+    { title: 'No icon', icon: '' },
+  ]);
+  const values = valuesFromRow([field], { steps: parsed.value.steps });
+  assert.equal(values[itemInput('steps', 0, 'icon')], 'camera');
+
+  const unknown = parseFields(
+    [field],
+    new URLSearchParams({
+      [itemInput('steps', 0, 'title')]: 'Photo',
+      [itemInput('steps', 0, 'icon')]: 'rocket',
+    }),
+  );
+  assert.ok(!unknown.ok && unknown.errors.steps);
+});
+
+test('How it works: each step has an icon list, and a row saved before it was added has no icon', () => {
+  const how = sectionByKey('home_how')!;
+  const steps = how.fields.find((f) => f.name === 'steps');
+  assert.ok(steps && steps.type === 'items');
+  const icon = steps.columns.find((c) => c.name === 'icon');
+  assert.ok(icon?.kind === 'choice' && (icon.options?.length ?? 0) > 0);
+
+  // Not the built-in camera icon next to the admin's own words: the saved row counts as "None".
+  const sample = { steps: [{ title: 'Send Us a Photo', body: '', tag: '', icon: 'camera' }] };
+  const merged = mergeSection(
+    sample,
+    { steps: [{ title: 'Mine', body: '', tag: '' }] },
+    how.fields,
+  );
+  assert.equal(merged.steps[0].icon, '');
 });
 
 const setup = () => {

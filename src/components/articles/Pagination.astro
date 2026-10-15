@@ -1,4 +1,5 @@
 ---
+import Icon from '../Icon.astro';
 import { listPagePath } from '../../lib/cms/articles';
 
 // "← Newer · 1 2 3 · Older →" for the article lists. Plain links to pages built at build time, so it works
@@ -24,11 +25,11 @@ for (let n = 1; n <= totalPages; n++) {
   <nav class="pagination" aria-label="Pagination">
     {page > 1 ? (
       <a class="pagination__step" href={listPagePath(base, page - 1)} rel="prev">
-        <span aria-hidden="true">←</span> Newer
+        <Icon name="arrow-left" size={16} /> Newer
       </a>
     ) : (
       <span class="pagination__step is-off" aria-hidden="true">
-        <span>←</span> Newer
+        <Icon name="arrow-left" size={16} /> Newer
       </span>
     )}
     <ol class="pagination__pages">
@@ -51,11 +52,11 @@ for (let n = 1; n <= totalPages; n++) {
     </ol>
     {page < totalPages ? (
       <a class="pagination__step" href={listPagePath(base, page + 1)} rel="next">
-        Older <span aria-hidden="true">→</span>
+        Older <Icon name="arrow-right" size={16} />
       </a>
     ) : (
       <span class="pagination__step is-off" aria-hidden="true">
-        Older <span>→</span>
+        Older <Icon name="arrow-right" size={16} />
       </span>
     )}
   </nav>
@@ -104,6 +105,9 @@ for (let n = 1; n <= totalPages; n++) {
   }
 
   .pagination__step {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
     font: 600 var(--text-small) / var(--text-small-lh) var(--font-display);
     color: var(--color-blue);
   }

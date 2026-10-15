@@ -82,7 +82,23 @@ const seo = await getPageSeo('/our-doctors', {
               <ul class="profile__langs" aria-label="Languages spoken">
                 {d.languages.map((l) => (
                   <li>
-                    {l === 'English' && <span aria-hidden="true">🇬🇧 </span>}
+                    {/* A drawn flag: Windows shows the 🇬🇧 emoji of the design as the letters "GB". */}
+                    {l === 'English' && (
+                      <svg
+                        class="flag"
+                        viewBox="0 0 60 30"
+                        width="20"
+                        height="10"
+                        aria-hidden="true"
+                        focusable="false"
+                      >
+                        <rect width="60" height="30" fill="#012169" />
+                        <path d="M0 0l60 30M60 0L0 30" stroke="#fff" stroke-width="6" />
+                        <path d="M0 0l60 30M60 0L0 30" stroke="#c8102e" stroke-width="2" />
+                        <path d="M30 0v30M0 15h60" stroke="#fff" stroke-width="10" />
+                        <path d="M30 0v30M0 15h60" stroke="#c8102e" stroke-width="6" />
+                      </svg>
+                    )}
                     {l}
                   </li>
                 ))}
@@ -187,12 +203,20 @@ const seo = await getPageSeo('/our-doctors', {
   }
 
   .profile__langs li {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
     padding: 6px 18px;
     border: 1px solid var(--color-border);
     border-radius: 999px;
     background: var(--color-card);
     font: 700 var(--text-small) / 20px var(--font-sans);
     color: var(--color-title);
+  }
+
+  .flag {
+    flex: none;
+    border-radius: 2px;
   }
 
   @media (max-width: 700px) {

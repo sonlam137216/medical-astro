@@ -1,4 +1,5 @@
 ---
+import Icon from '../Icon.astro';
 import SiteLayout from '../../layouts/SiteLayout.astro';
 import PageHero from '../PageHero.astro';
 import Section from '../Section.astro';
@@ -100,7 +101,7 @@ const placeholder = active ? `Search in ${active.name}` : `Search ${activeTotal}
       <a slot="extra" class="other" href={other.path}>
         <span class="other__label">Also read</span>
         <span class="other__name">
-          {other.label} <span aria-hidden="true">→</span>
+          {other.label} <Icon name="arrow-right" size={18} />
         </span>
         <span class="other__teaser">{other.teaser}</span>
       </a>
@@ -153,20 +154,7 @@ const placeholder = active ? `Search in ${active.name}` : `Search ${activeTotal}
           <label class="visually-hidden" for="article-search">
             Search articles
           </label>
-          <svg
-            class="search__icon"
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            aria-hidden="true"
-          >
-            <circle cx="11" cy="11" r="7"></circle>
-            <path d="m20 20-3.5-3.5"></path>
-          </svg>
+          <Icon name="search" size={18} class="search__icon" />
           <input
             id="article-search"
             type="search"

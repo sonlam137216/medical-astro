@@ -1,4 +1,5 @@
 ---
+import Icon from './Icon.astro';
 import Button from './Button.astro';
 import { Image } from 'astro:assets';
 import { getSiteContent } from '../lib/site-content';
@@ -36,11 +37,17 @@ const hero = (await getSection('home_hero'))!;
       <div class="hero__actions">
         {site.whatsappUrl && (
           <Button variant="whatsapp" href={site.whatsappUrl}>
+            <Icon name="brand-whatsapp" />
             WhatsApp us
           </Button>
         )}
         {/* Only when a video is chosen in Site details: it scrolls to the player further down the page. */}
-        {(site.video || site.videoEmbed) && <Button href="#video">Watch video</Button>}
+        {(site.video || site.videoEmbed) && (
+          <Button href="#video">
+            <Icon name="player-play" />
+            Watch video
+          </Button>
+        )}
       </div>
       {hero.trust && <p class="hero__trust pre-line">{hero.trust}</p>}
     </div>

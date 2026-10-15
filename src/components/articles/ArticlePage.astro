@@ -1,4 +1,5 @@
 ---
+import Icon from '../Icon.astro';
 import SiteLayout from '../../layouts/SiteLayout.astro';
 import Section from '../Section.astro';
 import ProfileImage from '../ProfileImage.astro';
@@ -164,6 +165,7 @@ const jsonLd = site
                 rel="noopener"
                 target="_blank"
               >
+                <Icon name="brand-whatsapp" size={16} />
                 Share on WhatsApp
               </a>
             </div>
@@ -197,20 +199,23 @@ const jsonLd = site
           {article.reviewedBy && (
             <aside class="review">
               <span class="review__icon" aria-hidden="true">
-                ✓
+                <Icon name="shield-check" size={18} />
               </span>
               <div class="review__text">
                 <p class="review__by">Clinically reviewed by {article.reviewedBy}</p>
                 {reviewed && <p class="review__date">Reviewed on {reviewed}</p>}
                 <a class="link-arrow" href="/our-doctors">
-                  Meet our doctors <span aria-hidden="true">→</span>
+                  Meet our doctors{' '}
+                  <span aria-hidden="true">
+                    <Icon name="arrow-right" size={14} />
+                  </span>
                 </a>
               </div>
             </aside>
           )}
 
           <a class="back" href={ARTICLE_BASE_PATH[article.kind]}>
-            <span aria-hidden="true">←</span> All articles in {listLabel}
+            <Icon name="arrow-left" size={16} /> All articles in {listLabel}
           </a>
         </div>
 
@@ -224,6 +229,7 @@ const jsonLd = site
             <Button href="#consultation">Get a free plan</Button>
             {siteContent.whatsappUrl && (
               <Button variant="whatsapp-outline" href={siteContent.whatsappUrl}>
+                <Icon name="brand-whatsapp" />
                 WhatsApp us
               </Button>
             )}

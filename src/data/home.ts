@@ -7,6 +7,7 @@
  * reproduced as designed and marked PLACEHOLDER. Do not publish them as real facts.
  */
 import type { Img } from './types';
+import type { StepIcon } from '../lib/cms/sections';
 import { directionsUrl } from '../lib/maps';
 import hanoiTower from '../assets/images/photos/hanoi-turtle-tower.webp';
 import digitalScan from '../assets/images/photos/dentist-digital-scan.webp';
@@ -219,24 +220,28 @@ export const howItWorks = {
       title: 'Send Us a Photo',
       body: 'Share photos of your teeth and any X-rays you have.',
       tag: 'Online',
+      icon: 'camera' satisfies StepIcon,
     },
     {
       number: '02',
       title: 'Get Your Options',
       body: 'Receive treatment options, pricing and timelines from selected clinics.',
       tag: 'Online',
+      icon: 'message-dots' satisfies StepIcon,
     },
     {
       number: '03',
       title: 'Compare & Choose',
       body: 'Compare your options and choose the clinic that suits you.',
       tag: 'Online',
+      icon: 'list-check' satisfies StepIcon,
     },
     {
       number: '04',
       title: 'Travel & Get Treated',
       body: 'Plan your visit, meet your dentist and begin treatment in Vietnam.',
       tag: 'In Vietnam',
+      icon: 'plane-tilt' satisfies StepIcon,
     },
   ], // UI update (from ui-improvements): the steps no longer repeat one X-ray picture; the number carries the step.
   helpTitle: 'Need help or have questions?',

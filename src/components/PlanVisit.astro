@@ -1,4 +1,5 @@
 ---
+import Icon from './Icon.astro';
 import FormGuards from './FormGuards.astro';
 import Button from './Button.astro';
 import PhoneField from './PhoneField.astro';
@@ -30,6 +31,7 @@ const interests = (await getServiceLinks()).map((t) => t.label);
         {site.whatsappUrl && (
           <div>
             <Button variant="outline" href={site.whatsappUrl}>
+              <Icon name="brand-whatsapp" />
               Ask on WhatsApp
             </Button>
           </div>

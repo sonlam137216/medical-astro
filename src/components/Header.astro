@@ -1,4 +1,5 @@
 ---
+import Icon from './Icon.astro';
 import Logo from './Logo.astro';
 import { getSiteContent } from '../lib/site-content';
 import { pageLink } from '../lib/links';
@@ -33,12 +34,21 @@ const groupActive = (g: MenuGroup) => g.links.some((l) => isActive(l.href));
     <div class="container topbar__inner">
       <p class="topbar__contact">
         {site.phoneDisplay && (
-          <a href={`tel:${site.phoneIntl?.replace(/\s/g, '') ?? ''}`}>{site.phoneDisplay}</a>
+          <a href={`tel:${site.phoneIntl?.replace(/\s/g, '') ?? ''}`}>
+            <Icon name="phone" size={16} />
+            {site.phoneDisplay}
+          </a>
         )}
-        {site.email && <a href={`mailto:${site.email}`}>{site.email}</a>}
+        {site.email && (
+          <a href={`mailto:${site.email}`}>
+            <Icon name="mail" size={16} />
+            {site.email}
+          </a>
+        )}
       </p>
       <div class="topbar__actions">
         <a class="topbar__btn" href={link(cta.href ?? '#consultation')}>
+          <Icon name="calendar-check" size={16} />
           {cta.label}
         </a>
         {utility && utility.href && (
@@ -80,22 +90,7 @@ const groupActive = (g: MenuGroup) => g.links.some((l) => isActive(l.href));
                     data-dropdown-toggle
                   >
                     {item.label}
-                    <svg
-                      class="menu__chevron"
-                      width="12"
-                      height="12"
-                      viewBox="0 0 12 12"
-                      aria-hidden="true"
-                    >
-                      <path
-                        d="M2.5 4.5 6 8l3.5-3.5"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="1.6"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                      ></path>
-                    </svg>
+                    <Icon name="chevron-down" size={16} class="menu__chevron" />
                   </button>
                   <ul class="menu__sub" id={`menu-group-${i}`}>
                     {item.links.map((l) => (
@@ -208,6 +203,16 @@ const groupActive = (g: MenuGroup) => g.links.some((l) => isActive(l.href));
     margin: 0;
   }
 
+  .topbar__contact a {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .topbar__contact :global(.icon) {
+    opacity: 0.9;
+  }
+
   .topbar__contact a:hover {
     text-decoration: underline;
   }
@@ -222,6 +227,7 @@ const groupActive = (g: MenuGroup) => g.links.some((l) => isActive(l.href));
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    gap: 8px;
     min-height: 36px;
     padding: 6px 18px;
     color: var(--color-white);

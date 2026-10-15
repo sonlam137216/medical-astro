@@ -71,6 +71,32 @@ const col = (
   help?: string,
 ): ItemColumn => ({ name, label, kind, max, required, help });
 
+const choice = (
+  name: string,
+  label: string,
+  options: readonly { value: string; label: string }[],
+  help?: string,
+): ItemColumn => ({ name, label, kind: 'choice', max: 40, options, help });
+
+/** Icons the admin can put on a "How it works" step (names from src/lib/icons.ts, which checks they exist). */
+export const STEP_ICONS = [
+  { value: 'camera', label: 'Camera (photos)' },
+  { value: 'message-dots', label: 'Chat bubble (advice, questions)' },
+  { value: 'list-check', label: 'Checklist (compare, choose)' },
+  { value: 'calendar-check', label: 'Calendar (book a date)' },
+  { value: 'plane-tilt', label: 'Plane (travel)' },
+  { value: 'plane-arrival', label: 'Plane landing (arrival, pickup)' },
+  { value: 'hotel-service', label: 'Hotel bell (stay)' },
+  { value: 'car', label: 'Car (transfer)' },
+  { value: 'map-pin', label: 'Map pin (place, clinic)' },
+  { value: 'stethoscope', label: 'Stethoscope (check-up)' },
+  { value: 'dental', label: 'Tooth (treatment)' },
+  { value: 'clipboard-check', label: 'Clipboard (plan, report)' },
+  { value: 'certificate', label: 'Certificate (warranty)' },
+  { value: 'mood-smile', label: 'Smile (result)' },
+] as const;
+export type StepIcon = (typeof STEP_ICONS)[number]['value'];
+
 const label = text('label', 'Small heading above the title', 120, { required: true });
 const title = text('title', 'Title', 200, { required: true });
 const titleLines = area('title', 'Title', 200, {
@@ -233,6 +259,12 @@ export const SECTIONS: SectionDef[] = [
           30,
           false,
           'A short tag above the step, for example “Online” or “In Vietnam”. Leave empty for none.',
+        ),
+        choice(
+          'icon',
+          'Icon',
+          STEP_ICONS,
+          'Shown in the circle, with the step number in its corner. With “None” the circle shows the number.',
         ),
       ]),
       text('helpTitle', 'Help line (bold)', 120),
@@ -516,7 +548,7 @@ const isObj = (v: unknown): v is Obj => typeof v === 'object' && v !== null && !
 
 const pad = (n: number) => String(n).padStart(2, '0');
 
-const emptyValue = (kind: 'text' | 'textarea' | 'lines' | 'items') =>
+const emptyValue = (kind: 'text' | 'textarea' | 'lines' | 'choice' | 'items') =>
   kind === 'lines' || kind === 'items' ? [] : '';
 
 /**

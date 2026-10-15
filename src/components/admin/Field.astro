@@ -60,6 +60,15 @@ const slotsFor = (f: Extract<Field, { type: 'items' }>) => {
                 value={text(itemInput(f.name, i, c.name))}
                 maxlength={c.max}
               />
+            ) : c.kind === 'choice' ? (
+              <select name={itemInput(f.name, i, c.name)}>
+                <option value="">None</option>
+                {(c.options ?? []).map((o) => (
+                  <option value={o.value} selected={text(itemInput(f.name, i, c.name)) === o.value}>
+                    {o.label}
+                  </option>
+                ))}
+              </select>
             ) : (
               <textarea
                 name={itemInput(f.name, i, c.name)}

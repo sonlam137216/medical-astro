@@ -1,4 +1,5 @@
 ---
+import Icon from '../Icon.astro';
 import type { Img } from '../../data/home';
 import type { PublicImage } from '../../lib/media';
 import ProfileImage from '../ProfileImage.astro';
@@ -41,11 +42,17 @@ const { title, body, total, href, image, linkLabel = 'Learn more', detail = fals
     {total && <p class="price-total">{total}</p>}
     {!href ? null : detail ? (
       <a class="service__pill" href={href}>
-        {linkLabel} <span aria-hidden="true">→</span>
+        {linkLabel}{' '}
+        <span aria-hidden="true">
+          <Icon name="arrow-right" size={14} />
+        </span>
       </a>
     ) : (
       <a class="link-arrow" href={href}>
-        {linkLabel} <span aria-hidden="true">→</span>
+        {linkLabel}{' '}
+        <span aria-hidden="true">
+          <Icon name="arrow-right" size={14} />
+        </span>
       </a>
     )}
   </div>
