@@ -45,10 +45,12 @@ const articles = (await getArticles(kind)).slice(0, count);
 )}
 
 <style>
+  /* 3 per row; with fewer articles the row is centred instead of leaving an empty column. */
   .grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 24px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 40px 28px;
     margin: 0;
     padding: 0;
     list-style: none;
@@ -56,6 +58,8 @@ const articles = (await getArticles(kind)).slice(0, count);
 
   .grid li {
     display: flex;
+    flex: 0 0 calc((100% - 56px) / 3);
+    min-width: 0;
   }
 
   .grid li > :global(*) {
@@ -69,14 +73,18 @@ const articles = (await getArticles(kind)).slice(0, count);
   }
 
   @media (max-width: 960px) {
-    .grid {
-      grid-template-columns: repeat(2, 1fr);
+    .grid li {
+      flex-basis: calc((100% - 28px) / 2);
     }
   }
 
   @media (max-width: 600px) {
     .grid {
-      grid-template-columns: 1fr;
+      gap: 0;
+    }
+
+    .grid li {
+      flex-basis: 100%;
     }
   }
 </style>

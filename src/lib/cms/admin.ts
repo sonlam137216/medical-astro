@@ -3,6 +3,7 @@ import { isSameOrigin } from '../admin-auth';
 import { readBodyLimited } from '../consultation';
 import { listPickerImages, type PickerImage } from '../media-picker';
 import { articleProblems, movedArticleRedirect } from './articles';
+import { menuGroupError } from '../menu';
 import type { EntityDef } from './entities';
 import {
   emptyValues,
@@ -101,6 +102,11 @@ export async function processPost(
   if (def.key === 'articles') {
     const errors = await checkArticle(db, parsed.value);
     if (Object.keys(errors).length > 0) return { status: 422, values, errors };
+  }
+
+  if (def.key === 'navigation') {
+    const groupError = menuGroupError(parsed.value);
+    if (groupError) return { status: 422, values, errors: { menu_group: groupError } };
   }
 
   // `status_code` is the only numeric select; the column is an integer.

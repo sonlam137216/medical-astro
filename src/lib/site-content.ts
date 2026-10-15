@@ -11,6 +11,7 @@ import { loadSnapshot, getPublicBase, getServices, getLocations } from './conten
 import { DEFAULT_SHARE_IMAGE, absoluteUrl, organizationJsonLd } from './seo';
 import { snapshotImageInput, toPublicImage, toPublicVideo, type PublicVideo } from './media';
 import { parseVideoUrl, type VideoEmbed } from './video-embed';
+import { groupMenu, type MenuItem } from './menu';
 
 // BUILD-TIME ONLY (see content.ts). Site-wide details and menus for the header, footer and contact blocks.
 //
@@ -31,7 +32,8 @@ export interface SiteContent {
   /** `href` is null before anything is published: the platform is shown without a link rather than a dead one. */
   social: { platform: string; name: string; href: string | null }[];
   utility: NavLink | null;
-  main: NavLink[];
+  /** The main menu: links, and drop-downs of links. */
+  main: MenuItem[];
   footerTreatments: NavLink[];
   footerExplore: NavLink[];
   footerLegal: NavLink[];
@@ -89,7 +91,7 @@ export async function getSiteContent(): Promise<SiteContent> {
         }))
       : Object.entries(PLATFORM_NAMES).map(([platform, name]) => ({ platform, name, href: null })), // PLACEHOLDER
     utility: nav ? (at('utility')[0] ?? null) : sampleUtility,
-    main: nav ? at('header') : sampleMain,
+    main: nav ? groupMenu(nav.filter((n) => n.location === 'header')) : sampleMain,
     footerTreatments: nav ? at('footer_treatment') : sampleTreatments,
     footerExplore: nav ? at('footer_explore') : sampleExplore,
     footerLegal: nav ? at('footer_legal') : sampleLegal,

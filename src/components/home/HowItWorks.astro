@@ -1,7 +1,7 @@
 ---
 import Section from '../Section.astro';
 import SectionIntro from '../SectionIntro.astro';
-import JourneyCard from '../cards/JourneyCard.astro';
+import JourneySteps from '../JourneySteps.astro';
 
 import { getSection } from '../../lib/content';
 import { getSiteContent } from '../../lib/site-content';
@@ -16,13 +16,8 @@ const howItWorks = await getSection('home_how');
       <Fragment slot="title">{howItWorks.title}</Fragment>
     </SectionIntro>
 
-    <ol class="grid">
-      {howItWorks.steps.map((s) => (
-        <li>
-          <JourneyCard {...s} />
-        </li>
-      ))}
-    </ol>
+    <!-- UI update: numbered steps on a dashed line instead of four cards repeating one X-ray picture. -->
+    <JourneySteps steps={howItWorks.steps} />
 
     <div class="help">
       <p>
@@ -40,23 +35,6 @@ const howItWorks = await getSection('home_how');
 )}
 
 <style>
-  .grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 20px;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
-
-  .grid li {
-    display: flex;
-  }
-
-  .grid li > :global(*) {
-    flex: 1;
-  }
-
   .help {
     display: flex;
     flex-wrap: wrap;
@@ -81,17 +59,5 @@ const howItWorks = await getSection('home_how');
 
   .help__btn:hover {
     background: var(--color-soft);
-  }
-
-  @media (max-width: 1024px) {
-    .grid {
-      grid-template-columns: repeat(2, 1fr);
-    }
-  }
-
-  @media (max-width: 520px) {
-    .grid {
-      grid-template-columns: 1fr;
-    }
   }
 </style>

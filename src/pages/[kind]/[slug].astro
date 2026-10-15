@@ -14,7 +14,7 @@ export async function getStaticPaths() {
   return ARTICLE_SEGMENTS.flatMap(([segment], i) =>
     lists[i].map((article) => ({
       params: { kind: segment, slug: article.slug },
-      props: { article, related: relatedArticles(article, all) },
+      props: { article, related: relatedArticles(article, all, 3) },
     })),
   );
 }

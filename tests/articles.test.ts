@@ -12,7 +12,6 @@ import {
   relatedArticles,
   formatArticleDate,
   formatArticleDateShort,
-  readingMinutes,
   articleProblems,
   bodyPlainText,
   parseArticleBody,
@@ -127,12 +126,9 @@ test('the outline nests small headings under their section', () => {
   ]);
 });
 
-test('short dates and reading time for the cards', () => {
+test('short dates for the cards', () => {
   assert.equal(formatArticleDateShort('2026-06-29'), 'Jun 29, 2026');
   assert.equal(formatArticleDateShort('nope'), null);
-  assert.equal(readingMinutes(parseArticleBody('')), 1);
-  assert.equal(readingMinutes(parseArticleBody('A few words.')), 1);
-  assert.equal(readingMinutes(parseArticleBody('word '.repeat(900))), 5);
 });
 
 // ---- rules -----------------------------------------------------------------------------------------------

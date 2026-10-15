@@ -256,12 +256,6 @@ export function bodyPlainText(blocks: Block[]): string {
     .join(' ');
 }
 
-/** Minutes to read an article (about 200 words a minute, never less than 1), for the "4 min read" labels. */
-export function readingMinutes(blocks: Block[]): number {
-  const words = bodyPlainText(blocks).split(/\s+/).filter(Boolean).length;
-  return Math.max(1, Math.round(words / 200));
-}
-
 /** How much of an article's text goes into the search index (characters); the rest is still on the page. */
 export const SEARCH_TEXT_LIMIT = 5000;
 

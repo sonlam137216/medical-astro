@@ -66,6 +66,19 @@ test('a section row replaces the words and keeps what the admin cannot edit', ()
   );
 });
 
+test('a field added after a row was saved counts as empty, not as the built-in words', () => {
+  const steps = mergeSection(
+    { steps: [{ number: '01', title: 'Built-in', body: 'b', tag: 'Online' }] },
+    { steps: [{ title: 'Mine', body: 'mine' }] }, // saved before the "tag" column existed
+    sectionByKey('home_how')!.fields,
+  );
+  assert.deepEqual(steps.steps[0], { number: '01', title: 'Mine', body: 'mine', tag: '' });
+
+  // Without the fields (older callers) the built-in words still fill the gap.
+  const loose = mergeSection({ label: 'Built-in', title: 'T' }, { title: 'Mine' });
+  assert.equal(loose.label, 'Built-in');
+});
+
 test('an emptied list stays empty instead of falling back to the built-in cards', () => {
   const merged = mergeSection({ items: [{ title: 'a' }] }, { items: [] });
   assert.deepEqual(merged.items, []);

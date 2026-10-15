@@ -330,6 +330,7 @@ export interface Tables {
       is_visible: boolean;
       label: string;
       location: string;
+      menu_group: string | null;
       sort_order: number;
       updated_at: string;
     };
@@ -340,6 +341,7 @@ export interface Tables {
       is_visible?: boolean;
       label: string;
       location: string;
+      menu_group?: string | null;
       sort_order?: number;
       updated_at?: string;
     };

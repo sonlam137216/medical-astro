@@ -3,6 +3,7 @@ import SiteLayout from '../../layouts/SiteLayout.astro';
 import { getPageSeo } from '../../lib/site-content';
 import PageHero from '../../components/PageHero.astro';
 import Button from '../../components/Button.astro';
+import SeamlessJourney from '../../components/SeamlessJourney.astro';
 import PackageGrid from '../../components/PackageGrid.astro';
 import CtaBand from '../../components/CtaBand.astro';
 import TourismSupport from '../../components/TourismSupport.astro';
@@ -39,6 +40,9 @@ const seo = await getPageSeo('/dental-packages', {
   </PageHero>
 
   <PackageGrid kind="single_treatment" />
+
+  <!-- Not in Figma (as on ui-improvements): the steps of the visit next to the prices. -->
+  <SeamlessJourney />
 
   <CtaBand {...careCta} />
   <TourismSupport />

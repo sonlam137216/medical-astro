@@ -6,6 +6,8 @@
  * Routes marked PROVISIONAL are not in Figma. Confirm the final URL structure with the owner.
  */
 
+import type { MenuItem } from '../lib/menu';
+
 export interface NavLink {
   label: string;
   href: string;
@@ -25,14 +27,22 @@ export const site = {
   copyright: '© 2026 Melatec Dental Clinic. All Rights Reserved.',
 } as const;
 
-export const utilityLink: NavLink = { label: 'Dental Knowledge', href: '/dental-knowledge' }; // PROVISIONAL
+// UI update (2026-10-13): the two article lists share a "Guides" drop-down in the main menu (Figma has
+// "Travel Guide" in the menu and "Dental Knowledge" in the top bar), so there is no separate top-bar link.
+export const utilityLink: NavLink | null = null;
 
-export const mainNav: NavLink[] = [
+export const mainNav: MenuItem[] = [
   { label: 'Home', href: '/' },
   { label: 'About us', href: '/about' }, // PROVISIONAL
   { label: 'Services', href: '/services' }, // PROVISIONAL
   { label: 'Dental Packages', href: '/dental-packages' }, // PROVISIONAL
-  { label: 'Dental Travel Guide', href: '/travel-guide' }, // PROVISIONAL
+  {
+    label: 'Guides',
+    links: [
+      { label: 'Dental Travel Guide', href: '/travel-guide' }, // PROVISIONAL
+      { label: 'Dental Knowledge', href: '/dental-knowledge' }, // PROVISIONAL
+    ],
+  },
   { label: 'Contact', href: '#consultation' },
 ];
 

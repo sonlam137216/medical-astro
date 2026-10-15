@@ -7,6 +7,7 @@ import Section from '../../components/Section.astro';
 import SectionIntro from '../../components/SectionIntro.astro';
 import Button from '../../components/Button.astro';
 import LocationCard from '../../components/cards/LocationCard.astro';
+import SeamlessJourney from '../../components/SeamlessJourney.astro';
 import PackageGrid from '../../components/PackageGrid.astro';
 import CtaBand from '../../components/CtaBand.astro';
 import { careCta } from '../../data/shared';
@@ -93,6 +94,9 @@ const seo = await getPageSeo('/dental-packages/travel-combos', {
     kind="travel_combo"
     intro={{ label: 'Cost', title: 'Dental Tourism Package Prices' }}
   />
+
+  <!-- Not in Figma (as on ui-improvements): the steps of the visit next to the prices. -->
+  <SeamlessJourney />
 
   <Fragment slot="after-consultation">
     <Section tone="soft" labelledby="discover-title">

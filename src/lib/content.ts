@@ -9,7 +9,7 @@ import {
 } from '../data/shared';
 import { discover as sampleDiscover } from '../data/packages';
 import { formatPrice, servicePath } from './services';
-import { mergeSection } from './cms/sections';
+import { mergeSection, sectionByKey } from './cms/sections';
 import { SECTION_SAMPLES, type SectionKey } from '../data/sections';
 import { directionsUrl } from './maps';
 import { snapshotImageInput, toPublicImage, type PublicImage } from './media';
@@ -321,7 +321,7 @@ export async function getSection<K extends SectionKey>(key: K): Promise<Section<
     if (photo) photos[name] = photo;
   }
   return {
-    ...mergeSection(sample as Record<string, unknown>, row.data),
+    ...mergeSection(sample as Record<string, unknown>, row.data, sectionByKey(key)?.fields),
     chosenPhotos: photos,
     edited: true,
   } as Section<K>;

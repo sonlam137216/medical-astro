@@ -11,7 +11,6 @@ import { directionsUrl } from '../lib/maps';
 import hanoiTower from '../assets/images/photos/hanoi-turtle-tower.webp';
 import digitalScan from '../assets/images/photos/dentist-digital-scan.webp';
 import hotelRoom from '../assets/images/photos/hotel-room.webp';
-import xray from '../assets/images/photos/panoramic-xray.webp';
 import smileBefore from '../assets/images/photos/mock-smile-before.webp';
 import smileAfter from '../assets/images/photos/mock-smile-after.webp';
 import doctorPortrait from '../assets/images/doctors/doctor-portrait.webp';
@@ -219,23 +218,27 @@ export const howItWorks = {
       number: '01',
       title: 'Send Us a Photo',
       body: 'Share photos of your teeth and any X-rays you have.',
+      tag: 'Online',
     },
     {
       number: '02',
       title: 'Get Your Options',
       body: 'Receive treatment options, pricing and timelines from selected clinics.',
+      tag: 'Online',
     },
     {
       number: '03',
       title: 'Compare & Choose',
       body: 'Compare your options and choose the clinic that suits you.',
+      tag: 'Online',
     },
     {
       number: '04',
       title: 'Travel & Get Treated',
       body: 'Plan your visit, meet your dentist and begin treatment in Vietnam.',
+      tag: 'In Vietnam',
     },
-  ].map((s) => ({ ...s, image: { src: xray, alt: '' } satisfies Img })), // PLACEHOLDER: same X-ray on every card
+  ], // UI update (from ui-improvements): the steps no longer repeat one X-ray picture; the number carries the step.
   helpTitle: 'Need help or have questions?',
   helpBody: 'We’re here for you. A dedicated team will support you at every step of your journey.',
 };

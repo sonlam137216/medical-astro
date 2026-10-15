@@ -1,43 +1,154 @@
 ---
-// "Table of contents" box of an article: the sections, with the smaller headings nested under them. It is open
-// when the page loads (so it works without JavaScript) and the script folds it on phones, where it would push
-// the text down.
+// "Table of contents" of an article: the sections, with the smaller headings nested under them. Two looks:
+// - `box` (in the text, tablets and phones): open when the page loads (so it works without JavaScript); the
+//   script folds it on phones, where it would push the text down.
+// - `rail` (the side column on wide screens, UI update 2026-10-13): stays in view while the article scrolls and
+//   marks the section being read. Without JavaScript it is a plain list of links.
 interface Props {
   items: { id: string; text: string; children: { id: string; text: string }[] }[];
+  variant?: 'box' | 'rail';
 }
 
-const { items } = Astro.props;
+const { items, variant = 'box' } = Astro.props;
 ---
 
-<details class="toc" open data-toc>
-  <summary>
-    <span>In this article</span>
-    <span class="toc__count">{items.length} sections</span>
-  </summary>
-  <ol>
-    {items.map((t) => (
-      <li>
-        <a href={`#${t.id}`}>{t.text}</a>
-        {t.children.length > 0 && (
-          <ul>
-            {t.children.map((c) => (
-              <li>
-                <a href={`#${c.id}`}>{c.text}</a>
-              </li>
-            ))}
-          </ul>
-        )}
-      </li>
-    ))}
-  </ol>
-</details>
+{variant === 'rail' ? (
+  <nav class="rail" aria-labelledby="rail-title" data-toc-rail>
+    <p class="rail__title" id="rail-title">
+      On this page
+    </p>
+    <ol>
+      {items.map((t) => (
+        <li>
+          <a href={`#${t.id}`}>{t.text}</a>
+          {t.children.length > 0 && (
+            <ol>
+              {t.children.map((c) => (
+                <li>
+                  <a href={`#${c.id}`}>{c.text}</a>
+                </li>
+              ))}
+            </ol>
+          )}
+        </li>
+      ))}
+    </ol>
+  </nav>
+) : (
+  <details class="toc" open data-toc>
+    <summary>
+      <span>In this article</span>
+      <span class="toc__count">{items.length} sections</span>
+    </summary>
+    <ol>
+      {items.map((t) => (
+        <li>
+          <a href={`#${t.id}`}>{t.text}</a>
+          {t.children.length > 0 && (
+            <ul>
+              {t.children.map((c) => (
+                <li>
+                  <a href={`#${c.id}`}>{c.text}</a>
+                </li>
+              ))}
+            </ul>
+          )}
+        </li>
+      ))}
+    </ol>
+  </details>
+)}
 
 <script>
   const toc = document.querySelector<HTMLDetailsElement>('[data-toc]');
   if (toc && matchMedia('(max-width: 768px)').matches) toc.open = false;
+
+  // Rail: the current section is the last heading that has passed the top quarter of the window (under the
+  // header), so a section is marked as soon as people start reading it.
+  const rail = document.querySelector<HTMLElement>('[data-toc-rail]');
+  if (rail) {
+    const links = [...rail.querySelectorAll<HTMLAnchorElement>('a[href^="#"]')];
+    const targets = links
+      .map((link) => ({ link, heading: document.getElementById(link.hash.slice(1)) }))
+      .filter((t): t is { link: HTMLAnchorElement; heading: HTMLElement } => t.heading !== null);
+    let current: HTMLAnchorElement | null = null;
+    let queued = false;
+    const update = () => {
+      queued = false;
+      const line =
+        (Number.parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) || 0) +
+        innerHeight * 0.25;
+      let next: HTMLAnchorElement | null = null;
+      for (const t of targets) {
+        if (t.heading.getBoundingClientRect().top <= line) next = t.link;
+        else break;
+      }
+      if (next === current) return;
+      current?.removeAttribute('aria-current');
+      next?.setAttribute('aria-current', 'location');
+      current = next;
+    };
+    const queue = () => {
+      if (queued) return;
+      queued = true;
+      requestAnimationFrame(update);
+    };
+    addEventListener('scroll', queue, { passive: true });
+    addEventListener('resize', queue, { passive: true });
+    update();
+  }
 </script>
 
 <style>
+  .rail {
+    display: grid;
+    gap: 10px;
+  }
+
+  .rail__title {
+    font: 700 12px / 18px var(--font-display);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-muted);
+  }
+
+  .rail ol {
+    display: grid;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .rail a {
+    display: block;
+    padding: 7px 12px;
+    border-left: 2px solid var(--color-soft);
+    font-size: 14px;
+    line-height: 21px;
+    color: var(--color-muted);
+    transition:
+      color 0.15s,
+      border-color 0.15s,
+      background-color 0.15s;
+  }
+
+  .rail ol ol a {
+    padding-left: 26px;
+    font-size: 13px;
+    line-height: 19px;
+  }
+
+  .rail a:hover {
+    color: var(--color-blue);
+  }
+
+  .rail a[aria-current] {
+    border-left-color: var(--color-blue);
+    background: var(--color-soft);
+    font-weight: 600;
+    color: var(--color-blue);
+  }
+
   .toc {
     max-width: 100%;
     background: var(--color-card);

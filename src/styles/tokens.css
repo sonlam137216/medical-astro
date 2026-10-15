@@ -81,6 +81,9 @@
   --section-pad-y: 80px;
   --utility-bar-h: 38px;
   --nav-h: 88px;
+  /* Height of a sticky header. The header of this branch scrolls away, so sticky bars (article filters, the
+     article rail) sit at the top of the screen. */
+  --header-h: 0px;
 
   /* shape */
   --radius-control: 8px; /* form inputs (and admin controls) */

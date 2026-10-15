@@ -164,6 +164,11 @@ p {
   white-space: nowrap;
 }
 
+/* Controls that only work with JavaScript stay hidden until it runs (the flag is set by a script in the head). */
+html:not(.js) [data-needs-js] {
+  display: none;
+}
+
 :focus-visible {
   outline: 2px solid var(--color-blue);
   outline-offset: 2px;

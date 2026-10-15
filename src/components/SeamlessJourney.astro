@@ -1,10 +1,15 @@
 ---
 import { Image } from 'astro:assets';
 import Section from './Section.astro';
+import JourneySteps from './JourneySteps.astro';
 
 import { getSection } from '../lib/content';
 
 const j = (await getSection('shared_journey'))!;
+// The steps are the ones of "Home: how it works" (written once in the admin); switched off there, the banner
+// stands alone as before.
+const how = await getSection('home_how');
+const steps = how?.steps ?? [];
 ---
 
 <Section labelledby="journey-title">
@@ -25,9 +30,19 @@ const j = (await getSection('shared_journey'))!;
       </h2>
     </div>
   </div>
+  {steps.length > 0 && (
+    <div class="journey__steps">
+      <JourneySteps steps={steps} tone="light" />
+    </div>
+  )}
 </Section>
 
 <style>
+  .journey__steps {
+    margin-top: 40px;
+    padding-inline: 8px;
+  }
+
   .journey {
     position: relative;
     isolation: isolate;

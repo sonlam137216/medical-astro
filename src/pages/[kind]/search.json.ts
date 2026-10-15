@@ -24,6 +24,7 @@ export const GET: APIRoute = async ({ props }) => {
       title: a.title,
       excerpt: a.excerpt ?? '',
       category: a.category?.name ?? '',
+      categorySlug: a.category?.slug ?? '',
       path: a.path,
       topics: blocks.flatMap((b) => (b.type === 'heading' ? [b.text] : [])).join(' '),
       text: searchText(blocks),

@@ -5,14 +5,16 @@ import Section from '../Section.astro';
 import Button from '../Button.astro';
 import ArticleCard from './ArticleCard.astro';
 import Pagination from './Pagination.astro';
-import { heroImage } from '../../data/home';
 import { listPagePath } from '../../lib/cms/articles';
 import type { PublicArticle } from '../../lib/content';
+import { heroImage } from '../../data/home';
 
-// Shared by the Travel Guide and Dental Knowledge lists, their category pages and their later pages (Figma: navy
-// hero with a search box, category chips, a 3-column grid of cards). Everything but the search is plain links to
-// pages built at build time, so it works without JavaScript. The search loads a small index (`search.json`) the
-// first time someone types, because one page only holds some of the articles.
+// Shared by the Travel Guide and Dental Knowledge lists, their category pages and their later pages.
+// UI update (2026-10-13, direction A, a deliberate change from Figma's navy hero with the search box in it):
+// the light banner of the other inner pages (PageHero, with the breadcrumb on top), then one bar with the
+// category chips and the search box that stays under the header while the list scrolls (tablet and desktop).
+// Everything but the search is plain links to pages built at build time, so it works without JavaScript. The search loads a small index (`search.json`) the first time
+// someone types, because one page only holds some of the articles.
 interface Props {
   title: string;
   description?: string;
@@ -21,18 +23,22 @@ interface Props {
   intro: string;
   /** The articles of this page only. */
   articles: PublicArticle[];
-  /** Categories that have articles, as filters. */
-  categories: { slug: string; name: string; path: string }[];
+  /** Categories that have articles, as filters, with their number of articles. */
+  categories: { slug: string; name: string; path: string; count: number }[];
   /** Slug of the category page being shown; none: the whole list. */
   activeCategory?: string | null;
   /** Address of page 1 of this list (pagination links are built from it). */
   listPath: string;
-  /** Address of the whole list of this kind (the "All articles" chip). */
+  /** Address of the whole list of this kind (the "All" chip). */
   rootPath: string;
   page: number;
   totalPages: number;
   /** Number of articles of the kind: 0 shows the "on their way" message. */
   kindTotal: number;
+  /** Number of articles of the list shown (the kind, or the active category). */
+  activeTotal: number;
+  /** The other kind of article, linked from the hero; none when it has no articles. */
+  other: { label: string; teaser: string; path: string } | null;
   searchUrl: string;
   current?: string;
 }
@@ -51,14 +57,19 @@ const {
   page,
   totalPages,
   kindTotal,
+  activeTotal,
+  other,
   searchUrl,
   current,
 } = Astro.props;
+
+const active = categories.find((c) => c.slug === activeCategory) ?? null;
 
 // Like a WordPress blog's newest post: on the first page of the whole list the first article is shown big,
 // when there are enough of them for the rest to still fill a grid.
 const featured = page === 1 && activeCategory === null && articles.length >= 4 ? articles[0] : null;
 const rest = featured ? articles.slice(1) : articles;
+const placeholder = active ? `Search in ${active.name}` : `Search ${activeTotal} articles`;
 ---
 
 <SiteLayout {title} {description} {current} consultation={false} social={false}>
@@ -66,49 +77,52 @@ const rest = featured ? articles.slice(1) : articles;
   {page < totalPages && <link slot="head" rel="next" href={listPagePath(listPath, page + 1)} />}
 
   <PageHero variant="banner" {label} image={heroImage} imageHeight={340} position="75% center">
+    <nav slot="top" class="crumbs" aria-label="Breadcrumb">
+      <ol>
+        <li>
+          <a href="/">Home</a>
+        </li>
+        {active ? (
+          <>
+            <li>
+              <a href={rootPath}>{label}</a>
+            </li>
+            <li aria-current="page">{active.name}</li>
+          </>
+        ) : (
+          <li aria-current="page">{label}</li>
+        )}
+      </ol>
+    </nav>
     <Fragment slot="title">{heading}</Fragment>
     <p>{intro}</p>
-    <form
-      slot="actions"
-      class="search"
-      role="search"
-      data-article-form
-      data-needs-js
-      data-search-url={searchUrl}
-    >
-      <label class="visually-hidden" for="article-search">
-        Search articles
-      </label>
-      <input
-        id="article-search"
-        type="search"
-        placeholder="Search articles"
-        autocomplete="off"
-        maxlength="100"
-        data-article-search
-      />
-    </form>
+    {other && (
+      <a slot="extra" class="other" href={other.path}>
+        <span class="other__label">Also read</span>
+        <span class="other__name">
+          {other.label} <span aria-hidden="true">→</span>
+        </span>
+        <span class="other__teaser">{other.teaser}</span>
+      </a>
+    )}
   </PageHero>
 
-  <Section tone="soft" labelledby="articles-title">
-    <h2 class="visually-hidden" id="articles-title">
-      Articles
-    </h2>
-    <div data-article-index class="index">
-      <div data-search-results hidden>
-        <p class="results__status" role="status" aria-live="polite" data-search-status></p>
-        <ul class="results" data-search-list></ul>
-      </div>
-
-      <div class="browse" data-browse>
+  {kindTotal > 0 && (
+    <div class="toolbar">
+      <div class="container toolbar__inner">
         {categories.length > 0 && (
-          <nav class="chips" aria-label="Filter by category">
+          <nav class="chips" aria-label="Filter by category" data-chips>
             <a
               class="chip"
               href={rootPath}
               aria-current={activeCategory === null ? 'page' : undefined}
             >
-              All articles
+              All
+              <span class="chip__count">
+                <span class="visually-hidden">(</span>
+                {kindTotal}
+                <span class="visually-hidden"> articles)</span>
+              </span>
             </a>
             {categories.map((c) => (
               <a
@@ -117,11 +131,72 @@ const rest = featured ? articles.slice(1) : articles;
                 aria-current={activeCategory === c.slug ? 'page' : undefined}
               >
                 {c.name}
+                <span class="chip__count">
+                  <span class="visually-hidden">(</span>
+                  {c.count}
+                  <span class="visually-hidden"> articles)</span>
+                </span>
               </a>
             ))}
           </nav>
         )}
+        <form
+          class="search"
+          role="search"
+          data-article-form
+          data-needs-js
+          data-search-url={searchUrl}
+          data-category={active?.slug}
+          data-category-name={active?.name}
+          data-list-name={label}
+        >
+          <label class="visually-hidden" for="article-search">
+            Search articles
+          </label>
+          <svg
+            class="search__icon"
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            aria-hidden="true"
+          >
+            <circle cx="11" cy="11" r="7"></circle>
+            <path d="m20 20-3.5-3.5"></path>
+          </svg>
+          <input
+            id="article-search"
+            type="search"
+            placeholder={placeholder}
+            autocomplete="off"
+            maxlength="100"
+            data-article-search
+          />
+          <kbd class="search__key" aria-hidden="true">
+            /
+          </kbd>
+        </form>
+      </div>
+    </div>
+  )}
 
+  <Section labelledby="articles-title" class="list-band">
+    <h2 class="visually-hidden" id="articles-title">
+      Articles
+    </h2>
+    <div data-article-index class="index">
+      <div class="results" data-search-results hidden>
+        <p class="results__status" role="status" aria-live="polite" data-search-status></p>
+        <ul class="results__list" data-search-list></ul>
+        <p class="results__help">
+          Can’t find what you need? <a href="/#consultation">Ask our team</a>
+        </p>
+      </div>
+
+      <div class="browse" data-browse>
         {featured && <ArticleCard article={featured} featured />}
 
         {rest.length > 0 ? (
@@ -158,24 +233,217 @@ const rest = featured ? articles.slice(1) : articles;
 </script>
 
 <style>
-  /* Hidden until JavaScript is available, so nobody sees controls that do nothing. */
-  :global(html:not(.js)) [data-needs-js] {
+  .crumbs ol {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: 13px;
+    line-height: 20px;
+    color: var(--color-muted);
+  }
+
+  .crumbs li + li::before {
+    content: '›';
+    margin-right: 6px;
+  }
+
+  .crumbs a {
+    color: var(--color-muted);
+  }
+
+  .crumbs a:hover {
+    color: var(--color-blue);
+  }
+
+  .crumbs li[aria-current] {
+    color: var(--color-navy);
+  }
+
+  /* Link to the other kind of article, under the hero copy. */
+  .other {
+    display: grid;
+    justify-items: start;
+    gap: 2px;
+    padding: 12px 18px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card);
+    background: rgb(255 255 255 / 80%);
+  }
+
+  .other:hover {
+    border-color: var(--color-blue);
+  }
+
+  .other__label {
+    font: 600 12px / 18px var(--font-display);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-muted);
+  }
+
+  .other__name {
+    font: 600 17px / 26px var(--font-display);
+    color: var(--color-blue);
+  }
+
+  .other:hover .other__name {
+    color: var(--color-blue-deep);
+  }
+
+  .other__teaser {
+    font-size: var(--text-small);
+    line-height: var(--text-small-lh);
+    color: var(--color-muted);
+  }
+
+  /* The bar with the chips and the search: under the header while the list scrolls (not on phones, where it
+     would take a fifth of the screen). */
+  .toolbar {
+    position: sticky;
+    top: var(--header-h);
+    z-index: 40;
+    background: var(--color-white);
+    border-bottom: 1px solid var(--color-soft);
+    box-shadow: 0 8px 18px -16px rgb(2 15 50 / 45%);
+  }
+
+  .toolbar__inner {
+    display: flex;
+    align-items: center;
+    gap: 16px 24px;
+    padding-block: 12px;
+  }
+
+  .chips {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    /* Fades the edge where more chips are hidden. */
+    mask-image: linear-gradient(90deg, #000 calc(100% - 32px), transparent);
+    padding-right: 32px;
+  }
+
+  .chips::-webkit-scrollbar {
     display: none;
   }
 
-  .search input {
-    width: min(340px, 100%);
-    height: 48px;
-    padding: 0 20px;
+  .chip {
+    /* Keeps the visually hidden count text inside the scrolling row (it is absolutely positioned). */
+    position: relative;
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 40px;
+    padding: 0 16px;
     border: 1px solid var(--color-border);
     border-radius: 999px;
     background: var(--color-white);
-    font: 400 var(--text-body) / var(--text-body-lh) var(--font-sans);
+    font: 500 var(--text-small) / 1 var(--font-display);
+    color: var(--color-title);
+    white-space: nowrap;
+    transition:
+      background-color 0.15s,
+      border-color 0.15s,
+      color 0.15s;
+  }
+
+  .chip:hover {
+    border-color: var(--color-blue);
+  }
+
+  .chip__count {
+    min-width: 22px;
+    padding: 3px 7px;
+    border-radius: 999px;
+    background: var(--color-soft);
+    font-size: 12px;
+    font-weight: 600;
+    text-align: center;
+    color: var(--color-muted);
+  }
+
+  .chip[aria-current='page'] {
+    background: var(--color-blue);
+    border-color: var(--color-blue);
+    color: var(--color-white);
+  }
+
+  .chip[aria-current='page'] .chip__count {
+    background: rgb(255 255 255 / 22%);
+    color: var(--color-white);
+  }
+
+  .search {
+    position: relative;
+    flex: 0 1 300px;
+    min-width: 220px;
+    margin-left: auto;
+  }
+
+  .search__icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    translate: 0 -50%;
+    color: var(--color-muted);
+    pointer-events: none;
+  }
+
+  .search input {
+    width: 100%;
+    height: 44px;
+    padding: 0 40px 0 42px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-button);
+    background: var(--color-white);
+    font: 400 16px / 1 var(--font-sans);
     color: var(--color-navy);
   }
 
   .search input::placeholder {
     color: var(--color-muted);
+  }
+
+  .search input:focus {
+    outline: none;
+    border-color: var(--color-blue);
+    box-shadow: 0 0 0 3px rgb(0 86 229 / 15%);
+  }
+
+  .search__key {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    translate: 0 -50%;
+    padding: 2px 7px;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    font: 600 12px / 16px var(--font-sans);
+    color: var(--color-muted);
+    pointer-events: none;
+  }
+
+  /* The key hint only makes sense with a keyboard, and not once something is typed. */
+  .search input:focus ~ .search__key,
+  .search input:not(:placeholder-shown) ~ .search__key {
+    display: none;
+  }
+
+  @media (hover: none) {
+    .search__key {
+      display: none;
+    }
+  }
+
+  :global(section.band.list-band) {
+    padding-top: 40px;
   }
 
   .index {
@@ -185,47 +453,17 @@ const rest = featured ? articles.slice(1) : articles;
 
   .browse {
     display: grid;
-    gap: 32px;
+    gap: 40px;
   }
 
   .browse[hidden] {
     display: none;
   }
 
-  .chips {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 10px;
-  }
-
-  .chip {
-    padding: 8px 22px;
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-button);
-    background: var(--color-white);
-    font: 500 var(--text-small) / var(--text-small-lh) var(--font-display);
-    color: var(--color-title);
-    cursor: pointer;
-    transition:
-      background-color 0.15s,
-      color 0.15s;
-  }
-
-  .chip:hover {
-    border-color: var(--color-blue);
-  }
-
-  .chip[aria-current='page'] {
-    background: var(--color-blue);
-    border-color: var(--color-blue);
-    color: var(--color-white);
-  }
-
   .grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 28px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 40px 28px;
     margin: 0;
     padding: 0;
     list-style: none;
@@ -253,61 +491,135 @@ const rest = featured ? articles.slice(1) : articles;
   }
 
   /* Search results: built by article-filter.ts, so the rules reach its elements through :global. */
+  .results {
+    display: grid;
+    gap: 8px;
+    max-width: 760px;
+  }
+
+  .results[hidden] {
+    display: none;
+  }
+
   .results__status {
-    margin-bottom: 20px;
-    text-align: center;
+    font: 500 var(--text-small) / var(--text-small-lh) var(--font-display);
+    color: var(--color-muted);
+  }
+
+  .results__status :global(b) {
+    font-weight: 700;
     color: var(--color-navy);
   }
 
-  .results {
+  .results__list {
     display: grid;
-    gap: 16px;
-    max-width: 760px;
-    margin: 0 auto;
+    margin: 0;
     padding: 0;
     list-style: none;
   }
 
-  .results :global(li) {
+  .results__list :global(li) {
+    position: relative;
     display: grid;
     gap: 6px;
-    padding: 20px 24px;
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-card);
-    background: var(--color-white);
+    padding-block: 18px;
+    border-bottom: 1px solid var(--color-soft);
   }
 
-  .results :global(.result__category) {
+  .results__list :global(.result__category) {
     font: 700 12px / 18px var(--font-display);
     letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--color-blue);
   }
 
-  .results :global(.result__title) {
-    font: 700 22px / 28px var(--font-serif);
-    color: var(--color-title);
+  .results__list :global(.result__title) {
+    font: 600 19px / 27px var(--font-display);
+    color: var(--color-heading);
   }
 
-  .results :global(.result__title:hover) {
+  /* The whole row is the link. */
+  .results__list :global(.result__title::after) {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+
+  .results__list :global(li:hover .result__title) {
     color: var(--color-blue);
   }
 
-  .results :global(.result__excerpt) {
+  .results__list :global(.result__excerpt) {
     font-size: var(--text-small);
     line-height: var(--text-small-lh);
-    color: var(--color-navy);
+    color: var(--color-muted);
+  }
+
+  .results__list :global(mark) {
+    padding-inline: 1px;
+    border-radius: 2px;
+    background: #fff1b8;
+    color: inherit;
+  }
+
+  .results__help {
+    padding-top: 12px;
+    font-size: var(--text-small);
+    color: var(--color-muted);
+  }
+
+  .results__help a {
+    font-weight: 600;
+    color: var(--color-blue);
   }
 
   @media (max-width: 960px) {
     .grid {
-      grid-template-columns: repeat(2, 1fr);
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 768px) {
+    .toolbar {
+      position: static;
+      box-shadow: none;
+    }
+
+    .toolbar__inner {
+      flex-direction: column-reverse;
+      align-items: stretch;
+      gap: 12px;
+    }
+
+    .search {
+      flex: none;
+      min-width: 0;
+      margin-left: 0;
+    }
+
+    .search__key {
+      display: none;
+    }
+
+    .chips {
+      flex: none;
+      /* Chips run to the screen edge and scroll sideways. */
+      margin-right: calc(-1 * var(--gutter));
+    }
+
+    :global(section.band.list-band) {
+      padding-top: 16px;
     }
   }
 
   @media (max-width: 600px) {
     .grid {
-      grid-template-columns: 1fr;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 0;
+    }
+
+    .browse {
+      gap: 24px;
     }
   }
 </style>

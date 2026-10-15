@@ -2,6 +2,7 @@
 import Logo from './Logo.astro';
 import { getSiteContent } from '../lib/site-content';
 import { pageLink } from '../lib/links';
+import { isMenuGroup, type MenuGroup } from '../lib/menu';
 
 interface Props {
   /** Pathname of the current page, used to highlight the active link. */
@@ -23,6 +24,8 @@ const {
 } = Astro.props;
 const link = (href: string) => pageLink(href, consultationHere);
 const isActive = (href: string) => (href === '/' ? current === '/' : current.startsWith(href));
+// Links that share a drop-down name in the admin ("Guides") open as a small menu (ported from ui-improvements).
+const groupActive = (g: MenuGroup) => g.links.some((l) => isActive(l.href));
 ---
 
 <header class="header">
@@ -66,17 +69,60 @@ const isActive = (href: string) => (href === '/' ? current === '/' : current.sta
         </button>
         <nav id="site-menu" class="menu__panel" aria-label="Main">
           <ul class="menu__list">
-            {site.main.map((link) => (
-              <li>
-                <a
-                  class:list={['menu__link', { 'is-active': isActive(link.href) }]}
-                  href={pageLink(link.href, consultationHere)}
-                  aria-current={isActive(link.href) ? 'page' : undefined}
-                >
-                  {link.label}
-                </a>
-              </li>
-            ))}
+            {site.main.map((item, i) =>
+              isMenuGroup(item) ? (
+                <li class="menu__group" data-dropdown>
+                  <button
+                    class:list={['menu__link', 'menu__trigger', { 'is-active': groupActive(item) }]}
+                    type="button"
+                    aria-expanded="false"
+                    aria-controls={`menu-group-${i}`}
+                    data-dropdown-toggle
+                  >
+                    {item.label}
+                    <svg
+                      class="menu__chevron"
+                      width="12"
+                      height="12"
+                      viewBox="0 0 12 12"
+                      aria-hidden="true"
+                    >
+                      <path
+                        d="M2.5 4.5 6 8l3.5-3.5"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.6"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      ></path>
+                    </svg>
+                  </button>
+                  <ul class="menu__sub" id={`menu-group-${i}`}>
+                    {item.links.map((l) => (
+                      <li>
+                        <a
+                          class:list={['menu__sublink', { 'is-active': isActive(l.href) }]}
+                          href={pageLink(l.href, consultationHere)}
+                          aria-current={isActive(l.href) ? 'page' : undefined}
+                        >
+                          {l.label}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </li>
+              ) : (
+                <li>
+                  <a
+                    class:list={['menu__link', { 'is-active': isActive(item.href) }]}
+                    href={pageLink(item.href, consultationHere)}
+                    aria-current={isActive(item.href) ? 'page' : undefined}
+                  >
+                    {item.label}
+                  </a>
+                </li>
+              ),
+            )}
           </ul>
         </nav>
       </div>
@@ -104,7 +150,36 @@ const isActive = (href: string) => (href === '/' ? current === '/' : current.sta
   document.addEventListener('click', (e) => {
     const target = e.target as Node;
     if (!menu?.classList.contains('is-open')) return;
-    if (!menu.contains(target) || (target as Element).closest?.('.menu__link')) setOpen(false);
+    if (!menu.contains(target) || (target as Element).closest?.('a')) setOpen(false);
+  });
+
+  // Drop-downs ("Guides"): the button opens and closes its links; Escape, a click elsewhere or moving the focus
+  // out closes them. With a mouse they also open on hover (CSS). Without JavaScript they open on hover and focus.
+  const dropdowns = [...document.querySelectorAll<HTMLElement>('[data-dropdown]')];
+  const setDropdown = (dropdown: HTMLElement, open: boolean) => {
+    dropdown.classList.toggle('is-open', open);
+    dropdown.querySelector('[data-dropdown-toggle]')?.setAttribute('aria-expanded', String(open));
+  };
+  for (const dropdown of dropdowns) {
+    const button = dropdown.querySelector<HTMLButtonElement>('[data-dropdown-toggle]');
+    button?.addEventListener('click', () => {
+      const open = !dropdown.classList.contains('is-open');
+      for (const other of dropdowns) if (other !== dropdown) setDropdown(other, false);
+      setDropdown(dropdown, open);
+    });
+    dropdown.addEventListener('keydown', (e) => {
+      if (e.key !== 'Escape' || !dropdown.classList.contains('is-open')) return;
+      e.stopPropagation(); // close the drop-down only, not the small-screen menu around it
+      setDropdown(dropdown, false);
+      button?.focus();
+    });
+    dropdown.addEventListener('focusout', (e) => {
+      if (!dropdown.contains(e.relatedTarget as Node | null)) setDropdown(dropdown, false);
+    });
+  }
+  document.addEventListener('click', (e) => {
+    for (const dropdown of dropdowns)
+      if (!dropdown.contains(e.target as Node)) setDropdown(dropdown, false);
   });
 </script>
 
@@ -239,6 +314,103 @@ const isActive = (href: string) => (href === '/' ? current === '/' : current.sta
     color: var(--color-blue);
   }
 
+  /* Drop-down ("Guides"): a button that looks like the other links, and a small card of links under it. */
+  .menu__group {
+    position: relative;
+  }
+
+  .menu__trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0;
+    background: none;
+    border: 0;
+    cursor: pointer;
+  }
+
+  .menu__chevron {
+    transition: transform var(--dur-fast, 0.15s);
+  }
+
+  .menu__group.is-open .menu__chevron {
+    transform: rotate(180deg);
+  }
+
+  .menu__sub {
+    display: none;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .menu__group.is-open > .menu__sub {
+    display: grid;
+  }
+
+  .menu__sublink {
+    display: block;
+    padding: 10px 14px;
+    border-radius: var(--radius-control);
+    font: 500 var(--text-body) / var(--text-body-lh) var(--font-display);
+    color: var(--color-title);
+    white-space: nowrap;
+  }
+
+  .menu__sublink:hover {
+    background: var(--color-soft);
+    color: var(--color-blue);
+  }
+
+  .menu__sublink.is-active {
+    color: var(--color-blue);
+  }
+
+  @media (min-width: 1025px) {
+    .menu__sub {
+      position: absolute;
+      top: calc(100% + 14px);
+      left: 50%;
+      translate: -50% 0;
+      z-index: 10;
+      min-width: 220px;
+      padding: 8px;
+      background: var(--color-white);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-card);
+      box-shadow: 0 16px 36px rgb(0 19 169 / 12%);
+    }
+
+    /* Covers the gap between the button and the card, so the pointer can move down without closing it. */
+    .menu__sub::before {
+      content: '';
+      position: absolute;
+      inset: -16px 0 auto;
+      height: 16px;
+    }
+
+    @media (hover: hover) {
+      .menu__group:hover > .menu__sub {
+        display: grid;
+      }
+
+      .menu__group:hover .menu__chevron {
+        transform: rotate(180deg);
+      }
+    }
+
+    :global(html:not(.js)) .menu__group:focus-within > .menu__sub {
+      display: grid;
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+      .menu__group.is-open > .menu__sub,
+      .menu__group:hover > .menu__sub {
+        animation: menu-in var(--dur-base) var(--ease-out);
+      }
+    }
+  }
+
   @media (max-width: 1024px) {
     .menu {
       flex: 0;
@@ -273,6 +445,33 @@ const isActive = (href: string) => (href === '/' ? current === '/' : current.sta
     .menu__link {
       display: block;
       padding: 10px 4px;
+    }
+
+    /* In the panel the drop-down opens in place, its links set in a little. */
+    .menu__trigger {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      text-align: left;
+    }
+
+    .menu__sub {
+      padding: 0 0 6px 8px;
+    }
+
+    .menu__sublink {
+      padding: 10px 4px 10px 12px;
+      border-left: 2px solid var(--color-soft);
+      border-radius: 0;
+    }
+
+    .menu__sublink:hover {
+      background: none;
+    }
+
+    /* Without JavaScript the panel is always open, and so are its drop-downs. */
+    :global(html:not(.js)) .menu__sub {
+      display: grid;
     }
 
     /* With JS the panel is collapsed until toggled; without JS it stays visible */
