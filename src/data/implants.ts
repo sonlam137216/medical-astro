@@ -7,50 +7,66 @@
  * and claim here must be confirmed by the clinic before launch.
  */
 import type { Img } from './types';
-import dentalImplant from '../assets/images/photos/dental-implant.webp';
-import implantHero from '../assets/images/photos/implant-hero.webp';
+import { heroImage as homeHeroImage } from './home';
 
-export const heroImage: Img = {
-  src: implantHero,
-  alt: 'Illustration of a dental implant with a porcelain crown beside natural teeth',
-};
+// The current Figma hero is a light photo of a dentist with a patient; the Home chair photo stands in for it.
+export const heroImage: Img = homeHeroImage;
 
 export const hero = {
   label: 'Dental implants. Melatec Dental Clinic',
   title: 'Save more on implant treatment, get your plan before you fly',
   body: 'Comprehensive implant solutions, including single-tooth implants, All-on-4 and All-on-6 restorations, using premium implant systems for enhanced safety, stability and long-term function.',
+  // Figma shows three small claim badges under the banner; the owner must confirm each one.
+  chips: ['Actively responding 24/7', 'Consulting in English', 'Over 1,000 international patients'],
 };
+
+// PLACEHOLDER: prices and inclusions are the sample values of the current Figma file ("$400 per" is printed
+// that way in the design, with nothing after "per"). The clinic must confirm every figure before launch.
+const sharedInclusions = [
+  'Complimentary airport, hotel, and clinic transfers',
+  'Complimentary hotel stay',
+  'Free consultation with a specialist dentist',
+  'Free Cone Beam CT scan',
+];
 
 export const costs = {
   label: 'Treatment costs',
   title: 'What You Pay at Melatec',
-  // "$600" is the price printed in the design: confirm it before publishing.
   cards: [
     {
-      title: 'Single-tooth implant',
+      title: 'Single Dental Implant',
+      subtitle: 'Premium Korean Implant',
       inclusions: [
-        'A solution for replacing an individual missing tooth.',
-        'Confirm treatment inclusions and your final estimate with our team.',
+        '1 Korean implant fixture + abutment',
+        'Premium porcelain crown',
+        'Visa assistance',
+        ...sharedInclusions,
       ],
-      total: 'TOTAL: $600',
+      total: '$400 per',
     },
     {
-      title: 'All-on-4 restoration',
+      title: 'ALL-ON-4',
+      subtitle: 'Premium Korean Implant',
       inclusions: [
-        'Full-arch restoration supported by four implants.',
-        'Your estimate depends on your treatment plan and chosen implant system.',
+        '4 Korean implant fixtures + abutments',
+        'Temporary denture',
+        '12 premium Zirconia crowns',
+        ...sharedInclusions,
       ],
-      total: 'Personalised quote',
+      total: '$3,100 per',
     },
     {
-      title: 'All-on-6 restoration',
+      title: 'ALL-ON-6',
+      subtitle: 'Premium Korean Implant',
       inclusions: [
-        'Full-arch restoration supported by six implants.',
-        'Your estimate depends on your treatment plan and chosen implant system.',
+        '6 Korean implant fixtures + abutments',
+        'Temporary denture',
+        '14 premium Zirconia crowns',
+        ...sharedInclusions,
       ],
-      total: 'Personalised quote',
+      total: '$3,900 per',
     },
-  ].map((c) => ({ ...c, image: { src: dentalImplant, alt: '' } satisfies Img })),
+  ],
 };
 
 export const comparison = {

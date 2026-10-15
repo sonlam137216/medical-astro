@@ -19,8 +19,8 @@ Review with the owner before launch:
 - `photos/before-after.webp`: no longer used. It shows a real patient with the "BEFORE / AFTER" labels and slider baked in; keep it out of the site unless written consent and usage rights are confirmed.
 - `photos/dentist-digital-scan.webp`: replaced on 2026-10-10 by `image 1` from the new Figma file (no baked-in text this time). Confirm it is a licensed or consented photo.
 - `photos/home-hero.webp`: Home hero background (`image 19` of the new Figma file, 2000 px wide). Stock-looking photo, confirm the licence.
-- `photos/hanoi-tower-wide.webp`: wide Hanoi Turtle Tower photo (`image 34` of the new Figma file, 2000 px wide) used for the navy page heroes (Services, Our Doctors, Packages). Confirm the licence.
-- `photos/implant-hero.webp`: 3D illustration of an implant beside natural teeth (`image 35` of the new Figma file, 2000 px wide), hero of the Dental Implants page. Confirm the licence.
+- `photos/hanoi-tower-wide.webp` (unused since 2026-10-15): wide Hanoi Turtle Tower photo (`image 34` of the new Figma file, 2000 px wide) was used for the navy page heroes; since 2026-10-15 every page hero is the light `home-hero.webp` look and it is only kept as the Hanoi destination photo. Confirm the licence.
+- `photos/implant-hero.webp`: no longer used (2026-10-15: the Dental Implants hero now reuses `home-hero.webp`, as the current Figma hero is a light photo). 3D illustration of an implant beside natural teeth (`image 35` of the new Figma file, 2000 px wide), hero of the Dental Implants page. Confirm the licence.
 - `photos/panoramic-xray.webp`: a panoramic X-ray. Confirm it is a licensed stock image or a consented case.
 - `doctors/doctor-portrait.webp`: one portrait is reused for every doctor in the design.
 - `photos/hotel-room.webp`: reused for all five "Inside Melatec" tiles in the design.

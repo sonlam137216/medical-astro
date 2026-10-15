@@ -81,7 +81,10 @@ const seo = await getPageSeo('/our-doctors', {
             {d.languages.length > 0 && (
               <ul class="profile__langs" aria-label="Languages spoken">
                 {d.languages.map((l) => (
-                  <li>{l}</li>
+                  <li>
+                    {l === 'English' && <span aria-hidden="true">🇬🇧 </span>}
+                    {l}
+                  </li>
                 ))}
               </ul>
             )}
@@ -122,7 +125,7 @@ const seo = await getPageSeo('/our-doctors', {
   .profile__initials {
     display: grid;
     place-items: center;
-    font: 700 72px / 1 var(--font-serif);
+    font: 700 72px / 1 var(--font-display);
     color: var(--color-heading);
     background: var(--color-soft);
     border-radius: 12px;
@@ -135,9 +138,9 @@ const seo = await getPageSeo('/our-doctors', {
     color: var(--color-navy);
   }
 
-  /* Figma: role in serif blue above a bold navy name. */
+  /* Figma: role in bold blue Montserrat above a bold navy name. */
   .profile__role {
-    font: 700 22px / 28px var(--font-serif);
+    font: 700 20px / 28px var(--font-display);
     color: var(--color-blue);
   }
 

@@ -125,7 +125,7 @@ export async function getPageMeta(
 export async function getServiceLinks(): Promise<NavLink[]> {
   const snapshot = await loadSnapshot();
   if (snapshot?.services) {
-    return (await getServices()).map((s) => ({ label: s.title, href: s.href }));
+    return (await getServices('services')).map((s) => ({ label: s.title, href: s.href }));
   }
   return (await getSiteContent()).footerTreatments;
 }

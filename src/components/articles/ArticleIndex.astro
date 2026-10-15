@@ -5,7 +5,7 @@ import Section from '../Section.astro';
 import Button from '../Button.astro';
 import ArticleCard from './ArticleCard.astro';
 import Pagination from './Pagination.astro';
-import { towerImage } from '../../data/shared';
+import { heroImage } from '../../data/home';
 import { listPagePath } from '../../lib/cms/articles';
 import type { PublicArticle } from '../../lib/content';
 
@@ -65,7 +65,7 @@ const rest = featured ? articles.slice(1) : articles;
   {page > 1 && <link slot="head" rel="prev" href={listPagePath(listPath, page - 1)} />}
   {page < totalPages && <link slot="head" rel="next" href={listPagePath(listPath, page + 1)} />}
 
-  <PageHero variant="banner" dark {label} image={towerImage} imageHeight={340}>
+  <PageHero variant="banner" {label} image={heroImage} imageHeight={340} position="75% center">
     <Fragment slot="title">{heading}</Fragment>
     <p>{intro}</p>
     <form
@@ -167,7 +167,7 @@ const rest = featured ? articles.slice(1) : articles;
     width: min(340px, 100%);
     height: 48px;
     padding: 0 20px;
-    border: 1px solid transparent;
+    border: 1px solid var(--color-border);
     border-radius: 999px;
     background: var(--color-white);
     font: 400 var(--text-body) / var(--text-body-lh) var(--font-sans);

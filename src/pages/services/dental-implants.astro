@@ -5,7 +5,7 @@ import Section from '../../components/Section.astro';
 import SectionIntro from '../../components/SectionIntro.astro';
 import Button from '../../components/Button.astro';
 import InfoCard from '../../components/cards/InfoCard.astro';
-import PackageCard from '../../components/cards/PackageCard.astro';
+import PriceCard from '../../components/cards/PriceCard.astro';
 import TreatmentCosts from '../../components/home/TreatmentCosts.astro';
 import SeamlessJourney from '../../components/SeamlessJourney.astro';
 import PlanVisit from '../../components/PlanVisit.astro';
@@ -24,7 +24,6 @@ const hero = (await getSection('implants_hero'))!;
 const costs = (await getSection('implants_costs'))!;
 const why = (await getSection('implants_why'))!;
 const faq = (await getSection('implants_faq'))!;
-const statsSection = await getSection('about_stats');
 const faqs = await getFaqs('dental-implants', faq.questions);
 const seo = await getPageSeo('/services/dental-implants', {
   title: 'Dental implants · Melatec Dental Clinic',
@@ -32,8 +31,6 @@ const seo = await getPageSeo('/services/dental-implants', {
     'Single-tooth implants and All-on-4 and All-on-6 restorations, with a personalised treatment plan and estimate before you travel to Vietnam.',
 });
 const faqData = faqJsonLd(faqs);
-// The Figma row has one filled card (30,000+) and three empty ones: only the filled one is shown.
-const [stat] = statsSection?.items ?? [];
 ---
 
 <!-- The page has its own consultation block and no social row. The header is the standard one (the new Figma has no landing-page header variant). -->
@@ -47,7 +44,7 @@ const [stat] = statsSection?.items ?? [];
 >
   <PageHero
     variant="banner"
-    dark
+    upper
     label={hero.label}
     image={heroImage}
     imageHeight={440}
@@ -55,19 +52,18 @@ const [stat] = statsSection?.items ?? [];
   >
     <Fragment slot="title">{hero.title}</Fragment>
     <p>{hero.body}</p>
-    <Button slot="actions" variant="light" href="#consultation">
+    <Button slot="actions" href="#consultation">
       Book free consultation
     </Button>
   </PageHero>
 
-  {stat && (
-    <section class="stat" aria-label="Melatec at a glance">
-      <div class="container">
-        <p class="stat__card">
-          <span class="stat__value">{stat.value}</span>
-          <span class="stat__label">{stat.label}</span>
-        </p>
-      </div>
+  {hero.chips.length > 0 && (
+    <section class="chips" aria-label="Melatec at a glance">
+      <ul class="container chips__list">
+        {hero.chips.map((chip) => (
+          <li>{chip}</li>
+        ))}
+      </ul>
     </section>
   )}
 
@@ -76,15 +72,15 @@ const [stat] = statsSection?.items ?? [];
       <Fragment slot="title">{costs.title}</Fragment>
     </SectionIntro>
     <ul class="grid">
-      {costs.cards.map((c) => (
+      {costs.cards.map((c, i) => (
         <li>
-          <PackageCard
+          <PriceCard
             title={c.title}
+            subtitle={c.subtitle}
             inclusions={c.inclusions}
             total={c.total}
-            image={c.image}
             href="#consultation"
-            linkLabel="Request an estimate"
+            tone={i === 1 ? 'featured' : i === 2 ? 'tint' : 'default'}
           />
         </li>
       ))}
@@ -93,14 +89,14 @@ const [stat] = statsSection?.items ?? [];
 
   <TreatmentCosts sectionKey="implants_comparison" align="center" />
 
-  <Section tone="navy" labelledby="why-title">
+  <Section tone="blue" labelledby="why-title">
     <SectionIntro label={why.label} headingId="why-title" align="center" lined inverse>
       <Fragment slot="title">{why.title}</Fragment>
     </SectionIntro>
     <ul class="grid">
       {why.items.map((i) => (
         <li>
-          <InfoCard {...i} tone="dark" />
+          <InfoCard {...i} />
         </li>
       ))}
     </ul>
@@ -139,31 +135,31 @@ const [stat] = statsSection?.items ?? [];
 </SiteLayout>
 
 <style>
-  .stat {
-    padding-block: 40px 0;
+  /* Figma: three small outlined badges under the banner. */
+  .chips {
+    padding-block: 28px 0;
   }
 
-  .stat__card {
-    display: grid;
-    gap: 4px;
-    width: 260px;
-    margin-inline: auto;
-    padding: 20px 24px;
+  .chips__list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 16px;
+    margin-block: 0;
+    padding-block: 0;
+    list-style: none;
+  }
+
+  .chips__list li {
+    min-width: 200px;
+    padding: 14px 24px;
     background: var(--color-white);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-card);
     box-shadow: 0 6px 18px rgb(0 86 229 / 8%);
-    text-align: center;
-  }
-
-  .stat__value {
-    font: 700 48px / 56px var(--font-serif);
-    color: var(--color-title);
-  }
-
-  .stat__label {
     font: 500 var(--text-small) / var(--text-small-lh) var(--font-display);
-    color: var(--color-navy);
+    color: var(--color-title);
+    text-align: center;
   }
 
   .grid {

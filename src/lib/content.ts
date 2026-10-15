@@ -159,7 +159,11 @@ export interface PublicService {
 }
 
 /** Services for the public pages: the published list, or the sample cards before the first publish. */
-export async function getServices(): Promise<PublicService[]> {
+/**
+ * The services of the CMS. Until the first publish with services, the built-in samples stand in: `home` = the priced
+ * cards of the Home page, `services` = the five service cards of the Services page (different titles in Figma).
+ */
+export async function getServices(sample: 'home' | 'services' = 'home'): Promise<PublicService[]> {
   const snapshot = await loadSnapshot();
   if (snapshot?.services) {
     const publicBase = setting('R2_PUBLIC_BASE_URL');
@@ -173,6 +177,18 @@ export async function getServices(): Promise<PublicService[]> {
       image: (s.image && toPublicImage(snapshotImageInput(s.image), publicBase)) || undefined,
     }));
   }
+  if (sample === 'services') {
+    return sampleServiceDetails.map((s) => ({
+      slug: null,
+      title: s.title,
+      summary: s.body,
+      inclusions: [],
+      priceText: null,
+      href: s.href,
+      hasPage: true,
+      image: s.image,
+    }));
+  }
   return sampleServices.map((s, i) => ({
     slug: null,
     title: s.title,
@@ -181,7 +197,6 @@ export async function getServices(): Promise<PublicService[]> {
     priceText: s.total,
     href: s.href,
     hasPage: true,
-    image: s.image,
   }));
 }
 

@@ -6,7 +6,8 @@ import Button from '../../components/Button.astro';
 import PackageGrid from '../../components/PackageGrid.astro';
 import CtaBand from '../../components/CtaBand.astro';
 import TourismSupport from '../../components/TourismSupport.astro';
-import { towerImage } from '../../data/shared';
+import { careCta } from '../../data/shared';
+import { heroImage } from '../../data/home';
 import { getSection } from '../../lib/content';
 
 export const prerender = true;
@@ -21,22 +22,24 @@ const seo = await getPageSeo('/dental-packages', {
 
 <!-- Figma frame: "Dental Packages / Single Treatments" -->
 <SiteLayout title={seo.title} description={seo.description}>
-  <PageHero variant="banner" dark label={hero.label} image={towerImage} imageHeight={400}>
+  <PageHero
+    variant="banner"
+    upper
+    label={hero.label}
+    image={heroImage}
+    imageHeight={400}
+    position="75% center"
+  >
     <Fragment slot="title">{hero.title}</Fragment>
     {hero.body && <p>{hero.body}</p>}
     <!-- Not in Figma: the two package pages have no link between them there. Remove if the owner prefers another entry point. -->
-    <Button slot="actions" variant="light" href="/dental-packages/travel-combos">
+    <Button slot="actions" variant="outline" href="/dental-packages/travel-combos">
       See travel combos
     </Button>
   </PageHero>
 
   <PackageGrid kind="single_treatment" />
 
-  <CtaBand
-    actions={[
-      { label: 'Book a consultation', href: '#consultation' },
-      { label: 'Explore our services', href: '/services' },
-    ]}
-  />
+  <CtaBand {...careCta} />
   <TourismSupport />
 </SiteLayout>

@@ -9,7 +9,8 @@ import Button from '../../components/Button.astro';
 import LocationCard from '../../components/cards/LocationCard.astro';
 import PackageGrid from '../../components/PackageGrid.astro';
 import CtaBand from '../../components/CtaBand.astro';
-import { towerImage } from '../../data/shared';
+import { careCta } from '../../data/shared';
+import { heroImage } from '../../data/home';
 import { gallery, destinations, discover } from '../../data/packages';
 import { getDestinations, getLocations, getSection } from '../../lib/content';
 
@@ -32,11 +33,18 @@ const seo = await getPageSeo('/dental-packages/travel-combos', {
   current="/dental-packages"
   social={false}
 >
-  <PageHero variant="banner" dark label={hero.label} image={towerImage} imageHeight={400}>
+  <PageHero
+    variant="banner"
+    upper
+    label={hero.label}
+    image={heroImage}
+    imageHeight={400}
+    position="75% center"
+  >
     <Fragment slot="title">{hero.title}</Fragment>
     {hero.body && <p>{hero.body}</p>}
     <!-- Not in Figma: link back to the single-treatment page (see the note on that page). -->
-    <Button slot="actions" variant="light" href="/dental-packages">
+    <Button slot="actions" variant="outline" href="/dental-packages">
       See single treatments
     </Button>
   </PageHero>
@@ -79,12 +87,7 @@ const seo = await getPageSeo('/dental-packages/travel-combos', {
     </Section>
   )}
 
-  <CtaBand
-    actions={[
-      { label: 'Book a consultation', href: '#consultation' },
-      { label: 'Explore our services', href: '/services' },
-    ]}
-  />
+  <CtaBand {...careCta} />
 
   <PackageGrid
     kind="travel_combo"

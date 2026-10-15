@@ -21,8 +21,8 @@ interface Props {
   /** Show the "Stay Connected" social row above the footer. */
   social?: boolean;
   /**
-   * `sans` = Home and About look (Montserrat headings, bright blue consultation block and footer); default `serif` =
-   * the other inner pages (Cormorant headings, navy bands), as in Figma.
+   * `sans` (default) = the look of every page in the current Figma file (Montserrat headings, bright blue
+   * consultation block and footer); `serif` = the older inner-page look (Cormorant headings, navy bands).
    */
   theme?: 'serif' | 'sans';
   /** Link preview picture (path or address); absent: the default share picture. */
@@ -47,7 +47,7 @@ const {
   social = true,
   current,
   header,
-  theme = 'serif',
+  theme = 'sans',
   image,
   ogType,
   jsonLd,

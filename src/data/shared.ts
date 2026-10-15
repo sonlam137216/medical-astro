@@ -5,13 +5,8 @@
 import type { Img } from './types';
 import dentalImplant from '../assets/images/photos/dental-implant.webp';
 import dentalChair from '../assets/images/photos/dental-chair-wide.webp';
-import hanoiTower from '../assets/images/photos/hanoi-tower-wide.webp';
 import doctorPortrait from '../assets/images/doctors/doctor-portrait.webp';
 
-export const towerImage: Img = {
-  src: hanoiTower,
-  alt: 'Hanoi Turtle Tower reflected in the lake at dusk',
-};
 export const implantImage: Img = {
   src: dentalImplant,
   alt: 'Dental implant on a soft white background',
@@ -63,10 +58,18 @@ export const seamlessJourney = {
   } satisfies Img,
 };
 
-// PLACEHOLDER: five identical entries in the Figma Services page.
-export const serviceDetails = Array.from({ length: 5 }, () => ({
-  title: 'Dental Implants',
-  body: 'Comprehensive implant solutions, including single-tooth implants, All-on-4 and All-on-6 restorations, using premium implant systems for enhanced safety, stability and long-term function.',
+// PLACEHOLDER: the Figma Services page repeats one description for five different treatments.
+const serviceBody =
+  'Comprehensive implant solutions, including single-tooth implants, All-on-4 and All-on-6 restorations, using premium implant systems for enhanced safety, stability and long-term function.';
+export const serviceDetails = [
+  'Dental Implants',
+  'Dental Crowns',
+  'Porcelain Veneer',
+  'Orthodontics',
+  'General Dentistry',
+].map((title) => ({
+  title,
+  body: serviceBody,
   linkLabel: 'Explore services',
   href: '/services/dental-implants', // PROVISIONAL
   image: implantImage,
@@ -130,6 +133,16 @@ export const doctorProfiles = [
   image: { src: doctorPortrait, alt: `Portrait of ${d.name}` } satisfies Img,
 })); // PLACEHOLDER: one portrait for all
 
+// The blue "Your smile starts here" band that closes Services, Dental Packages and Travel Combos in the Figma file.
+export const careCta = {
+  label: 'Your smile starts here',
+  title: 'Exceptional Care, Every Step of the Way',
+  actions: [
+    { label: 'Contact us', href: '#consultation' },
+    { label: 'Our specialists', href: '/our-doctors' },
+  ],
+};
+
 // Page banners whose text is in the page itself rather than in a section of the design.
 export const servicesHero = {
   label: 'Our services.',
@@ -152,7 +165,7 @@ export const packagesHero = {
 };
 
 export const combosHero = {
-  label: 'Our dental packages.',
-  title: 'Comprehensive dental care for every smile',
+  label: 'Our travel combos.',
+  title: 'Discover Vietnam with all-in-one travel combos',
   body: 'Plan your dental care alongside a relaxing travel experience. Explore some of Vietnam’s most popular destinations while your treatment schedule is arranged around your trip.',
 };

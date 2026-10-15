@@ -3,7 +3,7 @@ import SiteLayout from '../layouts/SiteLayout.astro';
 import PageHero from '../components/PageHero.astro';
 import Section from '../components/Section.astro';
 import LocationCard from '../components/cards/LocationCard.astro';
-import { towerImage } from '../data/shared';
+import { heroImage } from '../data/home';
 import { getLocations } from '../lib/content';
 import { getPageSeo } from '../lib/site-content';
 
@@ -19,7 +19,13 @@ const seo = await getPageSeo('/locations', {
 
 <!-- Not in Figma (Home links to "See all locations"): the clinic cards of the Home page, as a list of their own. -->
 <SiteLayout title={seo.title} description={seo.description}>
-  <PageHero variant="banner" dark label="Our locations" image={towerImage} imageHeight={340}>
+  <PageHero
+    variant="banner"
+    label="Our locations"
+    image={heroImage}
+    imageHeight={340}
+    position="75% center"
+  >
     <Fragment slot="title">Find a Melatec clinic</Fragment>
   </PageHero>
 

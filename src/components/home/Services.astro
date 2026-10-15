@@ -2,7 +2,7 @@
 import Section from '../Section.astro';
 import SectionIntro from '../SectionIntro.astro';
 import Button from '../Button.astro';
-import PackageCard from '../cards/PackageCard.astro';
+import PriceCard from '../cards/PriceCard.astro';
 import { getSection, getServices } from '../../lib/content';
 
 const services = await getServices();
@@ -15,14 +15,14 @@ const heading = (await getSection('home_services'))!;
   </SectionIntro>
 
   <ul class="grid">
-    {services.map((s) => (
+    {services.map((s, i) => (
       <li>
-        <PackageCard
+        <PriceCard
           title={s.title}
           inclusions={s.inclusions}
           total={s.priceText}
           href={s.href}
-          image={s.image}
+          tone={i === 1 ? 'featured' : i === 2 ? 'tint' : 'default'}
         />
       </li>
     ))}

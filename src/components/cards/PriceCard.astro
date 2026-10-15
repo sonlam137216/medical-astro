@@ -1,0 +1,130 @@
+---
+import { Image } from 'astro:assets';
+import inclusionDot from '../../assets/images/icons/inclusion-dot.png';
+
+interface Props {
+  title: string;
+  /** A short line under the title ("Premium Korean Implant"). */
+  subtitle?: string | null;
+  inclusions: string[];
+  /** The price line, shown as written ("$400 per"); absent: none is shown. */
+  total?: string | null;
+  href: string;
+  linkLabel?: string;
+  /** `featured`: stronger outline (the middle card in Figma); `tint`: pale blue fill (the third card). */
+  tone?: 'default' | 'featured' | 'tint';
+}
+
+const {
+  title,
+  subtitle,
+  inclusions,
+  total,
+  href,
+  linkLabel = 'Learn more',
+  tone = 'default',
+} = Astro.props;
+---
+
+<article class:list={['price', `price--${tone}`]}>
+  <header class="price__head">
+    <h3 class="price__title">{title}</h3>
+    {subtitle && <p class="price__subtitle">{subtitle}</p>}
+  </header>
+  {total && <p class="price__total">{total}</p>}
+  {inclusions.length > 0 && (
+    <ul class="price__list">
+      {inclusions.map((item) => (
+        <li>
+          <Image
+            src={inclusionDot}
+            alt=""
+            width={20}
+            height={20}
+            densities={[1, 2]}
+            loading="lazy"
+          />
+          <span>{item}</span>
+        </li>
+      ))}
+    </ul>
+  )}
+  <a class="link-arrow price__link" href={href}>
+    {linkLabel} <span aria-hidden="true">→</span>
+  </a>
+</article>
+
+<style>
+  /* Figma "Treatments for every smile" and "What You Pay at Melatec": text-only card, centred title and price,
+     bullet list, "Learn more" at the foot. */
+  .price {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 28px 24px 24px;
+    background: var(--color-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card);
+  }
+
+  .price--featured {
+    border-color: var(--color-blue);
+    background: var(--color-white);
+    box-shadow: 0 8px 22px rgb(0 86 229 / 10%);
+  }
+
+  .price--tint {
+    background: var(--color-soft);
+  }
+
+  .price__head {
+    display: grid;
+    gap: 4px;
+    text-align: center;
+  }
+
+  .price__title {
+    font: 700 var(--text-h3) / var(--text-h3-lh) var(--font-display);
+    color: var(--color-title);
+  }
+
+  .price__subtitle {
+    font-size: var(--text-small);
+    line-height: var(--text-small-lh);
+    color: var(--color-muted);
+  }
+
+  .price__total {
+    font: 700 34px / 42px var(--font-display);
+    color: var(--color-blue);
+    text-align: center;
+  }
+
+  .price__list {
+    display: grid;
+    gap: 10px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .price__list li {
+    display: grid;
+    grid-template-columns: 20px 1fr;
+    align-items: start;
+    gap: 12px;
+    font-size: var(--text-small);
+    line-height: var(--text-small-lh);
+    color: var(--color-muted);
+  }
+
+  .price__list li :global(img) {
+    margin-top: 3px;
+  }
+
+  .price__link {
+    justify-content: center;
+    margin-top: auto;
+    padding-top: 4px;
+  }
+</style>

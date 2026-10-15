@@ -396,7 +396,18 @@ export const SECTIONS: SectionDef[] = [
     page: '/services/dental-implants',
     label: 'Dental Implants: top banner',
     where: 'The banner of the Dental Implants page.',
-    fields: [label, title, area('body', 'Text', 500)],
+    fields: [
+      label,
+      title,
+      area('body', 'Text', 500),
+      lines(
+        'chips',
+        'Highlights',
+        3,
+        60,
+        'Short claims shown as badges under the banner, for example “Consulting in English”. Only claims the clinic can back up.',
+      ),
+    ],
   },
   {
     key: 'implants_costs',
@@ -413,6 +424,7 @@ export const SECTIONS: SectionDef[] = [
         6,
         [
           col('title', 'Title', 'text', 80, true),
+          col('subtitle', 'Line under the title', 'text', 80),
           col('inclusions', 'Text lines', 'lines', 200, false, 'One point per line.'),
           col(
             'total',

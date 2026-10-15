@@ -9,7 +9,6 @@
 import type { Img } from './types';
 import { directionsUrl } from '../lib/maps';
 import hanoiTower from '../assets/images/photos/hanoi-turtle-tower.webp';
-import dentalImplant from '../assets/images/photos/dental-implant.webp';
 import digitalScan from '../assets/images/photos/dentist-digital-scan.webp';
 import hotelRoom from '../assets/images/photos/hotel-room.webp';
 import xray from '../assets/images/photos/panoramic-xray.webp';
@@ -47,15 +46,56 @@ export const patientSupport = [
   { number: '04', title: 'Dental Care Meets\nthe Vietnam Experience' },
 ];
 
-// PLACEHOLDER: five identical cards and "600$" are dummy values from the design; the four bullet lines are
-// English stand-ins for the design's Vietnamese sample text. Replaced by services from the CMS (A1).
-export const services = Array.from({ length: 5 }, () => ({
-  title: 'Dental Implants',
-  inclusions: Array.from({ length: 4 }, () => 'Lower cost, same quality of care'),
-  total: 'TOTAL: 600$',
-  href: '/services/dental-implants', // PROVISIONAL
-  image: { src: dentalImplant, alt: 'Dental implant on a soft white background' } satisfies Img,
-}));
+// PLACEHOLDER: the price cards of the current Figma file ("$400 per" is printed that way there). Every figure and
+// inclusion must be confirmed by the clinic; replaced by the services of the CMS (A1).
+const servicePerks = [
+  'Complimentary airport, hotel, and clinic transfers',
+  'Complimentary hotel stay',
+  'Free consultation with a specialist dentist',
+  'Free Cone Beam CT scan',
+];
+export const services = [
+  {
+    title: 'Single Dental Implant',
+    inclusions: [
+      '1 Korean implant fixture + abutment',
+      'Premium porcelain crown',
+      'Visa assistance',
+      ...servicePerks,
+    ],
+    total: '$400 per',
+  },
+  {
+    title: 'ALL-ON-4',
+    inclusions: [
+      '4 Korean implant fixtures + abutments',
+      'Temporary denture',
+      '12 premium Zirconia crowns',
+      ...servicePerks,
+    ],
+    total: '$3,100 per',
+  },
+  {
+    title: 'ALL-ON-6',
+    inclusions: [
+      '6 Korean implant fixtures + abutments',
+      'Temporary denture',
+      '14 premium Zirconia crowns',
+      ...servicePerks,
+    ],
+    total: '$3,900 per',
+  },
+  {
+    title: 'Porcelain Crowns',
+    inclusions: ['16 premium Zirconia crowns', 'Visa assistance', ...servicePerks],
+    total: '$850 per',
+  },
+  {
+    title: 'Porcelain Veneers',
+    inclusions: ['Premium porcelain veneers', 'Visa assistance', ...servicePerks],
+    total: '$150 per',
+  },
+].map((c) => ({ ...c, href: '/services/dental-implants' })); // PROVISIONAL link
 
 export const conversations = {
   label: 'Hear from our dentists & patients',
@@ -197,7 +237,7 @@ export const howItWorks = {
     },
   ].map((s) => ({ ...s, image: { src: xray, alt: '' } satisfies Img })), // PLACEHOLDER: same X-ray on every card
   helpTitle: 'Need help or have questions?',
-  helpBody: 'A dedicated team will support you at every step of your journey.',
+  helpBody: 'We’re here for you. A dedicated team will support you at every step of your journey.',
 };
 
 // PLACEHOLDER: the two pictures are drawn illustrations (not a real patient) standing in until the clinic chooses
