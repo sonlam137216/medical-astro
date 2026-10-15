@@ -124,7 +124,8 @@ export const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f
 export const PATH_RE = /^\/([a-z0-9]+(-[a-z0-9]+)*(\/[a-z0-9]+(-[a-z0-9]+)*)*)?$/;
 export const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 export const WEB_URL_RE = /^https?:\/\/[^\s]+$/i;
-export const LINK_RE = /^(\/|#|https:\/\/|http:\/\/|mailto:|tel:)/;
+// A page address starts with one "/": browsers read "//host" and "/\host" as a link to another site.
+export const LINK_RE = /^(\/(?![/\\])|#|https:\/\/|http:\/\/|mailto:|tel:)/;
 
 // ---------------------------------------------------------------------------
 // Parsing

@@ -58,6 +58,9 @@
     "prettier-plugin-astro": "^1.1.0",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.71.0",
-    "wrangler": "^4.147.0"
+    "wrangler": "^4.149.0"
+  },
+  "overrides": {
+    "@cloudflare/vite-plugin": "^1.63.1"
   }
 }

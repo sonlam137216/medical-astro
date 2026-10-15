@@ -105,6 +105,9 @@ test('links accept safe schemes only', () => {
     'example.com',
     'JAVASCRIPT:alert(1)',
     ' vbscript:x',
+    // Look like page addresses, but browsers open them on another site.
+    '//evil.example/x',
+    '/\\evil.example/x',
   ]) {
     assert.ok(errs({ title: 'X', href: bad }).href, bad);
   }

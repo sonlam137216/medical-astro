@@ -121,7 +121,8 @@ export type Block =
 
 const IMAGE_LINE =
   /^!\[([^\]]{0,200})\]\(media:([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\)$/;
-const SAFE_HREF = /^(\/|https:\/\/|http:\/\/|mailto:|tel:|#)[^\s]*$/i;
+// "//host" and "/\host" are links to another site, not page addresses, so a "/" must not be followed by / or \.
+const SAFE_HREF = /^(\/(?![/\\])|https:\/\/|http:\/\/|mailto:|tel:|#)[^\s]*$/i;
 // The link target may hold one level of parentheses, e.g. https://example.com/page_(info).
 const INLINE = /\*\*([^*]+)\*\*|\[([^\]]+)\]\(((?:[^()\s]|\([^()\s]*\))+)\)/g;
 

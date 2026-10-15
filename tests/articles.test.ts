@@ -86,6 +86,10 @@ test('markup typed by an editor stays text; unsafe link targets are dropped', ()
   assert.ok(inline.some((p) => p.text.includes('<script>alert(1)</script>')));
   assert.ok(inline.some((p) => p.bold && p.text === 'bold'));
   assert.deepEqual(parseInline('[bad](javascript:alert(1))'), [{ text: 'bad' }]);
+  // "//host" and "/\host" open another site, so they are dropped like any other unsafe target.
+  assert.deepEqual(parseInline('[x](//evil.example/a)'), [{ text: 'x' }]);
+  assert.deepEqual(parseInline('[x](/\\evil.example/a)'), [{ text: 'x' }]);
+  assert.deepEqual(parseInline('[x](/about#team)'), [{ text: 'x', href: '/about#team' }]);
 });
 
 test('empty or blank bodies have no blocks', () => {
