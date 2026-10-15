@@ -52,6 +52,30 @@
     }
   }
 
+  /* Price cards ("Treatments for every smile", "What You Pay"): lift on hover and the price swells a little. */
+  @media (hover: hover) {
+    .price {
+      transition:
+        transform var(--dur-base) var(--ease-out),
+        box-shadow var(--dur-base) var(--ease-out),
+        border-color var(--dur-base);
+    }
+
+    .price:hover {
+      transform: translateY(-6px);
+      border-color: var(--color-blue);
+      box-shadow: 0 16px 32px rgb(0 86 229 / 16%);
+    }
+
+    .price__total {
+      transition: scale var(--dur-base) var(--ease-out);
+    }
+
+    .price:hover .price__total {
+      scale: 1.06;
+    }
+  }
+
   /* Buttons rise a little on hover (`translate`, so the pressed `scale` in Button.astro still works). */
   @media (hover: hover) {
     .btn {
@@ -170,7 +194,9 @@
       .scroller,
       .method,
       .gallery,
-      .help
+      .help,
+      .price,
+      .services__actions
     ) {
       animation: reveal linear both;
       animation-timeline: view();
@@ -187,7 +213,8 @@
       .guide__item,
       .profile,
       .why__item,
-      .faq details
+      .faq details,
+      .price
     ) {
       &:nth-child(2),
       li:nth-child(2) > & {
@@ -233,6 +260,43 @@
       animation: pop linear both;
       animation-timeline: view();
       animation-range: entry calc(60px + var(--i, 0) * 30px) entry calc(280px + var(--i, 0) * 30px);
+    }
+
+    /* Price cards: the price pops in a moment after its card starts to appear, and the bullets follow one by one. */
+    .price__total {
+      animation: pop linear both;
+      animation-timeline: view();
+      animation-range: entry 80px entry 300px;
+    }
+
+    .price__list li {
+      animation: reveal linear both;
+      animation-timeline: view();
+      animation-range: entry calc(100px + var(--k, 0) * 18px) entry calc(260px + var(--k, 0) * 18px);
+
+      &:nth-child(2) {
+        --k: 1;
+      }
+
+      &:nth-child(3) {
+        --k: 2;
+      }
+
+      &:nth-child(4) {
+        --k: 3;
+      }
+
+      &:nth-child(5) {
+        --k: 4;
+      }
+
+      &:nth-child(6) {
+        --k: 5;
+      }
+
+      &:nth-child(n + 7) {
+        --k: 6;
+      }
     }
 
     /* Before/after knob swells once as the photo passes mid-screen: a hint that it can be dragged. */
