@@ -1,0 +1,118 @@
+---
+import type { VideoEmbed } from '../lib/video-embed';
+import ProfileImage from './ProfileImage.astro';
+import type { Img } from '../data/types';
+import type { PublicImage } from '../lib/media';
+
+// A YouTube or Vimeo video chosen in Site details. Nothing of the provider is loaded until the visitor presses
+// play: the page shows a picture with a play button (a link to the video's own page, which is what happens
+// without JavaScript) and the small script below swaps it for the player. No cookies and no third-party
+// request on page load.
+interface Props {
+  video: VideoEmbed;
+  /** The picture shown before play (the section's own photo). */
+  poster: Img | PublicImage;
+  title: string;
+  class?: string;
+}
+
+const { video, poster, title, class: className } = Astro.props;
+---
+
+<div
+  class:list={['embed', className]}
+  data-video-embed
+  data-embed-src={video.embedUrl}
+  data-embed-title={title}
+>
+  <a class="embed__poster" href={video.watchUrl} target="_blank" rel="noopener noreferrer">
+    <ProfileImage
+      class="embed__img"
+      image={poster}
+      slot="home-conversations"
+      sizes="(max-width: 960px) 100vw, 520px"
+    />
+    <span class="embed__play" aria-hidden="true"></span>
+    <span class="visually-hidden">
+      Play video: {title} (opens on {video.provider === 'youtube' ? 'YouTube' : 'Vimeo'} without
+      JavaScript)
+    </span>
+  </a>
+</div>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-video-embed]').forEach((root) => {
+    const link = root.querySelector('a');
+    const src = root.dataset.embedSrc;
+    if (!link || !src) return;
+    link.addEventListener('click', (event) => {
+      event.preventDefault();
+      const frame = document.createElement('iframe');
+      frame.src = `${src}${src.includes('?') ? '&' : '?'}autoplay=1`;
+      frame.title = root.dataset.embedTitle || 'Video';
+      frame.allow = 'autoplay; encrypted-media; picture-in-picture; fullscreen';
+      frame.allowFullscreen = true;
+      frame.referrerPolicy = 'strict-origin-when-cross-origin';
+      root.replaceChildren(frame);
+      frame.focus();
+    });
+  });
+</script>
+
+<style>
+  .embed {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    background: var(--color-soft);
+  }
+
+  .embed__poster {
+    position: absolute;
+    inset: 0;
+    display: block;
+  }
+
+  .embed__poster :global(.embed__img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* A round play button built from CSS (no extra file to load). */
+  .embed__play {
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: var(--color-blue);
+    box-shadow: 0 8px 24px rgb(0 19 90 / 35%);
+    transition: transform 0.2s;
+  }
+
+  .embed__play::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    translate: -35% -50%;
+    border-style: solid;
+    border-width: 14px 0 14px 22px;
+    border-color: transparent transparent transparent var(--color-white);
+  }
+
+  .embed__poster:hover .embed__play,
+  .embed__poster:focus-visible .embed__play {
+    transform: scale(1.08);
+  }
+
+  .embed :global(iframe) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+</style>

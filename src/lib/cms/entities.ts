@@ -645,6 +645,14 @@ export const SITE_FIELDS: Field[] = [
     where: { kind: 'video', status: 'active' },
     help: 'Shows the “Watch video” button and a player on the Home page. Use “Choose or upload a video…” to pick one from Media or upload an MP4 here (give it a cover image so people see a picture before pressing play). Choose “None” to show no video.',
   },
+  {
+    type: 'weburl',
+    name: 'intro_video_url',
+    label: 'Home page video link (YouTube or Vimeo)',
+    max: 300,
+    placeholder: 'https://www.youtube.com/watch?v=…',
+    help: 'Paste the address of a YouTube or Vimeo video instead of uploading a file. When both a link and an uploaded video are set, the link is shown. Leave empty to use the uploaded video (or none).',
+  },
   ...SOCIAL_PLATFORMS.map((p): Field => ({
     group: 'Social profiles',
     half: true,

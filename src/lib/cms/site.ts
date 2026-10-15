@@ -1,6 +1,7 @@
 import type { AdminDb } from '../admin-auth';
 import { isSameOrigin } from '../admin-auth';
 import { readBodyLimited } from '../consultation';
+import { parseVideoUrl } from '../video-embed';
 import { SITE_FIELDS, SOCIAL_PLATFORMS } from './entities';
 import { validateRefs } from './admin';
 import {
@@ -45,6 +46,17 @@ export async function processSitePost(request: Request, db: AdminDb): Promise<Si
 
   const parsed = parseFields(SITE_FIELDS, form);
   if (!parsed.ok) return { status: 422, values, errors: parsed.errors };
+
+  const videoUrl = parsed.value.intro_video_url;
+  if (typeof videoUrl === 'string' && !parseVideoUrl(videoUrl)) {
+    return {
+      status: 422,
+      values,
+      errors: {
+        intro_video_url: 'Paste the address of a YouTube or Vimeo video, starting with https://.',
+      },
+    };
+  }
 
   const refErrors = await validateRefs(db, SITE_FIELDS, parsed.value);
   if (Object.keys(refErrors).length > 0) return { status: 422, values, errors: refErrors };

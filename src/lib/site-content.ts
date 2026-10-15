@@ -10,6 +10,7 @@ import {
 import { loadSnapshot, getPublicBase, getServices, getLocations } from './content';
 import { DEFAULT_SHARE_IMAGE, absoluteUrl, organizationJsonLd } from './seo';
 import { snapshotImageInput, toPublicImage, toPublicVideo, type PublicVideo } from './media';
+import { parseVideoUrl, type VideoEmbed } from './video-embed';
 
 // BUILD-TIME ONLY (see content.ts). Site-wide details and menus for the header, footer and contact blocks.
 //
@@ -36,6 +37,8 @@ export interface SiteContent {
   footerLegal: NavLink[];
   /** The Home page video, when one is published. Never a sample: with none, the video button and player are hidden. */
   video: PublicVideo | null;
+  /** A YouTube or Vimeo video chosen in Site details; shown instead of `video` when both are set. */
+  videoEmbed: VideoEmbed | null;
 }
 
 const PLATFORM_NAMES: Record<string, string> = {
@@ -68,6 +71,7 @@ export async function getSiteContent(): Promise<SiteContent> {
 
   return {
     video,
+    videoEmbed: parseVideoUrl(s?.videoUrl),
     name: s?.name ?? sample.name,
     tagline: s ? s.tagline : sample.tagline,
     phoneDisplay: s ? s.phoneDisplay : sample.phoneDisplay,

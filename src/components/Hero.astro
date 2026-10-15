@@ -40,7 +40,7 @@ const hero = (await getSection('home_hero'))!;
           </Button>
         )}
         {/* Only when a video is chosen in Site details: it scrolls to the player further down the page. */}
-        {site.video && <Button href="#video">Watch video</Button>}
+        {(site.video || site.videoEmbed) && <Button href="#video">Watch video</Button>}
       </div>
       {hero.trust && <p class="hero__trust pre-line">{hero.trust}</p>}
     </div>

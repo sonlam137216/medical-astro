@@ -536,6 +536,7 @@ export interface Tables {
       default_og_image_id: string | null;
       id: number;
       intro_video_id: string | null;
+      intro_video_url: string | null;
       logo_asset_id: string | null;
       logo_light_asset_id: string | null;
       opening_hours: string | null;
@@ -554,6 +555,7 @@ export interface Tables {
       default_og_image_id?: string | null;
       id?: number;
       intro_video_id?: string | null;
+      intro_video_url?: string | null;
       logo_asset_id?: string | null;
       logo_light_asset_id?: string | null;
       opening_hours?: string | null;

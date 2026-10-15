@@ -45,7 +45,8 @@ export default defineConfig({
         `media-src ${sources("'self'", 'blob:', mediaOrigin)}`,
         "font-src 'self'",
         `connect-src ${sources("'self'", turnstile)}`,
-        `frame-src ${turnstile ?? "'none'"}`,
+        // The Home page video when it is a YouTube or Vimeo link (see src/components/VideoEmbed.astro).
+        `frame-src ${sources(turnstile, 'https://www.youtube-nocookie.com', 'https://player.vimeo.com')}`,
         "object-src 'none'",
         "base-uri 'self'",
         "form-action 'self'",

@@ -4,6 +4,7 @@ import { toFocus } from './image-slots.ts';
 import { articleProblems, bodyImageIds, parseArticleBody } from './cms/articles.ts';
 import { itemInput, parseFields, type Field } from './cms/fields.ts';
 import { REQUIRED_SECTIONS, sectionByKey } from './cms/sections.ts';
+import { parseVideoUrl } from './video-embed.ts';
 
 // What the public site is built from. A snapshot is a complete copy of the published content; the build
 // reads one snapshot (never the working-copy tables), so a half-edited draft cannot leak into a build.
@@ -89,6 +90,8 @@ export interface SnapshotSite {
   social: { platform: string; url: string }[];
   /** The video of the Home page; absent when none is chosen. */
   video?: SnapshotVideo | null;
+  /** A YouTube or Vimeo address for the Home page video (normalised watch address); absent when none is set. */
+  videoUrl?: string;
 }
 
 export interface SnapshotPage {
@@ -267,6 +270,8 @@ export async function buildSnapshot(db: AdminDb): Promise<Snapshot> {
             .map((s) => ({ platform: s.platform as string, url: s.url as string }))
         : [],
     };
+    const embed = parseVideoUrl(site.intro_video_url);
+    if (embed) snapshot.site.videoUrl = embed.watchUrl;
     if (site.intro_video_id) {
       const { data: video, error: videoError } = await db
         .from('media_assets')
@@ -788,6 +793,9 @@ export function isSnapshot(value: unknown): value is Snapshot {
     return false;
   const video = isObject(value.site) ? value.site.video : undefined;
   if (video !== undefined && video !== null && !(isObject(video) && typeof video.key === 'string'))
+    return false;
+  const videoUrl = isObject(value.site) ? value.site.videoUrl : undefined;
+  if (videoUrl !== undefined && !(typeof videoUrl === 'string' && parseVideoUrl(videoUrl)))
     return false;
 
   const articles = (value.articles ?? []) as unknown[];
