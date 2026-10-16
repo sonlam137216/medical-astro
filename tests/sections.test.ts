@@ -2,10 +2,12 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { BUILTIN_PAGES } from '../src/lib/cms/pages.ts';
 import {
+  ICON_CHOICES,
   REQUIRED_SECTIONS,
   SECTIONS,
   mergeSection,
   sectionByKey,
+  upgradeSectionData,
 } from '../src/lib/cms/sections.ts';
 import { itemInput, parseFields, valuesFromRow, type Field } from '../src/lib/cms/fields.ts';
 import { createDb } from '../src/lib/db.ts';
@@ -191,6 +193,49 @@ test('How it works: each step has an icon list, and a row saved before it was ad
     how.fields,
   );
   assert.equal(merged.steps[0].icon, '');
+});
+
+// (That every choice is a known icon is checked by `npm run check`, in src/lib/icons.ts.)
+test('cards and banner badges have an icon column with the shared choices', () => {
+  for (const [key, field] of [
+    ['about_why', 'items'],
+    ['shared_tourism', 'items'],
+    ['doctors_hero', 'chips'],
+    ['implants_hero', 'chips'],
+  ]) {
+    const f = sectionByKey(key)!.fields.find((x) => x.name === field);
+    assert.ok(f && f.type === 'items', key);
+    const icon = f.columns.find((c) => c.name === 'icon');
+    assert.ok(icon?.kind === 'choice', key);
+    assert.deepEqual(icon.options, ICON_CHOICES, key);
+  }
+});
+
+test('banner badges saved as plain lines are read as badges without an icon', () => {
+  const doctors = sectionByKey('doctors_hero')!;
+  const saved = { label: 'L', title: 'T', body: '', chips: ['15+ years', 'English'] };
+  const upgraded = upgradeSectionData(doctors.fields, saved);
+  assert.deepEqual(upgraded.chips, [{ text: '15+ years' }, { text: 'English' }]);
+  assert.deepEqual(saved.chips, ['15+ years', 'English'], 'the saved row is not changed');
+
+  // the admin form shows them in the text column
+  const values = valuesFromRow(doctors.fields, upgraded);
+  assert.equal(values[itemInput('chips', 1, 'text')], 'English');
+  assert.equal(values[itemInput('chips', 1, 'icon')], '');
+
+  // a page built from an older revision: the words, and no built-in icon next to them
+  const sample = { chips: [{ text: 'Built-in', icon: 'stethoscope' }] };
+  const merged = mergeSection(sample, saved, doctors.fields);
+  assert.deepEqual(merged.chips, [
+    { text: '15+ years', icon: '' },
+    { text: 'English', icon: '' },
+  ]);
+
+  // and such a row still passes the publish checks
+  assert.deepEqual(
+    snapshotProblems({ sections: [{ key: 'doctors_hero', visible: true, data: upgraded }] }),
+    [],
+  );
 });
 
 const setup = () => {

@@ -15,6 +15,8 @@ import SmileResults from '../../components/SmileResults.astro';
 import { getPageSeo, getPageBanner } from '../../lib/site-content';
 import { getFaqs, getSection, getService } from '../../lib/content';
 import { faqJsonLd } from '../../lib/seo';
+import Icon from '../../components/Icon.astro';
+import { isIconName } from '../../lib/icons';
 
 import { heroImage } from '../../data/implants';
 import { serviceFaq } from '../../data/shared';
@@ -57,6 +59,7 @@ const banner = await getPageBanner('/services/dental-implants');
     <Fragment slot="title">{hero.title}</Fragment>
     <p>{hero.body}</p>
     <Button slot="actions" href="#consultation">
+      <Icon name="calendar-time" />
       Book free consultation
     </Button>
   </PageHero>
@@ -65,7 +68,10 @@ const banner = await getPageBanner('/services/dental-implants');
     <section class="chips" aria-label="Melatec at a glance">
       <ul class="container chips__list">
         {hero.chips.map((chip) => (
-          <li>{chip}</li>
+          <li>
+            {isIconName(chip.icon) && <Icon class="chips__icon" name={chip.icon} size={28} />}
+            {chip.text}
+          </li>
         ))}
       </ul>
     </section>
@@ -109,7 +115,7 @@ const banner = await getPageBanner('/services/dental-implants');
 </SiteLayout>
 
 <style>
-  /* Figma: three small outlined badges under the banner. */
+  /* Figma: small outlined badges under the banner, each with an icon before its text. */
   .chips {
     padding-block: 28px 0;
   }
@@ -124,16 +130,26 @@ const banner = await getPageBanner('/services/dental-implants');
     list-style: none;
   }
 
+  /* Equal widths, four on one row on a wide screen as in Figma; the text wraps next to its icon. */
   .chips__list li {
-    min-width: 200px;
-    padding: 14px 24px;
+    display: flex;
+    flex: 1 1 200px;
+    align-items: center;
+    gap: 12px;
+    max-width: 280px;
+    padding: 14px 18px;
     background: var(--color-white);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-card);
     box-shadow: 0 6px 18px rgb(0 86 229 / 8%);
     font: 500 var(--text-small) / var(--text-small-lh) var(--font-display);
     color: var(--color-title);
-    text-align: center;
+    text-align: left;
+  }
+
+  .chips__icon {
+    flex: none;
+    color: var(--color-blue);
   }
 
   .grid {

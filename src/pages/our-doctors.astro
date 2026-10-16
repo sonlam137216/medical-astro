@@ -7,6 +7,8 @@ import PageHero from '../components/PageHero.astro';
 import Section from '../components/Section.astro';
 import { heroImage } from '../data/home';
 import { getDoctors, getSection } from '../lib/content';
+import Icon from '../components/Icon.astro';
+import { isIconName } from '../lib/icons';
 
 export const prerender = true;
 
@@ -34,7 +36,10 @@ const banner = await getPageBanner('/our-doctors');
     {hero.body && <p>{hero.body}</p>}
     <Fragment slot="extra">
       {hero.chips.map((chip) => (
-        <p class="hero-chip">{chip}</p>
+        <p class="hero-chip">
+          {isIconName(chip.icon) && <Icon name={chip.icon} />}
+          {chip.text}
+        </p>
       ))}
     </Fragment>
   </PageHero>

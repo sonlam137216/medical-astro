@@ -78,24 +78,60 @@ const choice = (
   help?: string,
 ): ItemColumn => ({ name, label, kind: 'choice', max: 40, options, help });
 
-/** Icons the admin can put on a "How it works" step (names from src/lib/icons.ts, which checks they exist). */
-export const STEP_ICONS = [
+/**
+ * Icons the admin can put on a "How it works" step, a card or a highlight badge (names from src/lib/icons.ts,
+ * which checks they exist). One list for every icon column, so the same picture means the same thing everywhere.
+ */
+export const ICON_CHOICES = [
   { value: 'camera', label: 'Camera (photos)' },
   { value: 'message-dots', label: 'Chat bubble (advice, questions)' },
+  { value: 'messages', label: 'Two chat bubbles (conversation, language)' },
+  { value: 'headset', label: 'Headset (always reachable)' },
+  { value: 'language', label: 'Language (spoken languages)' },
   { value: 'list-check', label: 'Checklist (compare, choose)' },
   { value: 'calendar-check', label: 'Calendar (book a date)' },
+  { value: 'calendar-time', label: 'Calendar with clock (plan, schedule)' },
   { value: 'plane-tilt', label: 'Plane (travel)' },
   { value: 'plane-arrival', label: 'Plane landing (arrival, pickup)' },
-  { value: 'hotel-service', label: 'Hotel bell (stay)' },
   { value: 'car', label: 'Car (transfer)' },
+  { value: 'hotel-service', label: 'Hotel bell (stay)' },
+  { value: 'building', label: 'Building (hotel, clinic)' },
+  { value: 'device-sim', label: 'SIM card (phone, connectivity)' },
+  { value: 'e-passport', label: 'Passport (visa)' },
+  { value: 'file-certificate', label: 'Document (paperwork, records)' },
   { value: 'map-pin', label: 'Map pin (place, clinic)' },
-  { value: 'stethoscope', label: 'Stethoscope (check-up)' },
+  { value: 'map-2', label: 'Map (local guide)' },
+  { value: 'stethoscope', label: 'Stethoscope (doctor, check-up)' },
   { value: 'dental', label: 'Tooth (treatment)' },
+  { value: 'device-desktop-analytics', label: 'Screen (technology, 3D imaging)' },
   { value: 'clipboard-check', label: 'Clipboard (plan, report)' },
   { value: 'certificate', label: 'Certificate (warranty)' },
+  { value: 'shield-check', label: 'Shield (safety, quality)' },
+  { value: 'coin', label: 'Coin (price)' },
+  { value: 'users-group', label: 'Group of people (team, patients)' },
+  { value: 'heart-handshake', label: 'Handshake (support, care)' },
   { value: 'mood-smile', label: 'Smile (result)' },
 ] as const;
-export type StepIcon = (typeof STEP_ICONS)[number]['value'];
+export type ChoiceIcon = (typeof ICON_CHOICES)[number]['value'];
+
+const iconColumn = (help: string) => choice('icon', 'Icon', ICON_CHOICES, help);
+
+/**
+ * The badges of a banner. Saved as a list of lines before they had icons (2026-10-17); upgradeSectionData turns
+ * those rows into cards.
+ */
+const highlights = (maxItems: number, help: string): Field =>
+  items(
+    'chips',
+    'Highlights',
+    'Highlight',
+    maxItems,
+    [
+      col('text', 'Text', 'text', 60, true),
+      iconColumn('Shown before the text. With “None” the badge has no icon.'),
+    ],
+    { help },
+  );
 
 const label = text('label', 'Small heading above the title', 120, { required: true });
 const title = text('title', 'Title', 200, { required: true });
@@ -289,10 +325,7 @@ export const SECTIONS: SectionDef[] = [
           false,
           'A short tag above the step, for example “Online” or “In Vietnam”. Leave empty for none.',
         ),
-        choice(
-          'icon',
-          'Icon',
-          STEP_ICONS,
+        iconColumn(
           'Shown in the circle, with the step number in its corner. With “None” the circle shows the number.',
         ),
       ]),
@@ -387,6 +420,7 @@ export const SECTIONS: SectionDef[] = [
       items('items', 'Cards', 'Card', 8, [
         col('title', 'Title', 'text', 120, true),
         col('body', 'Text', 'textarea', 300),
+        iconColumn('Shown above the title. With “None” the card has no icon.'),
       ]),
     ],
   },
@@ -417,6 +451,7 @@ export const SECTIONS: SectionDef[] = [
       items('items', 'Cards', 'Card', 8, [
         col('title', 'Title', 'text', 80, true),
         col('body', 'Text', 'textarea', 300),
+        iconColumn('Shown before the title. With “None” the card has no icon.'),
       ]),
     ],
   },
@@ -454,11 +489,8 @@ export const SECTIONS: SectionDef[] = [
       label,
       title,
       area('body', 'Text', 500),
-      lines(
-        'chips',
-        'Highlights',
+      highlights(
         3,
-        60,
         'Short claims shown as badges, for example “English-speaking doctors”. Only claims the clinic can back up.',
       ),
     ],
@@ -487,11 +519,8 @@ export const SECTIONS: SectionDef[] = [
       label,
       title,
       area('body', 'Text', 500),
-      lines(
-        'chips',
-        'Highlights',
-        3,
-        60,
+      highlights(
+        4,
         'Short claims shown as badges under the banner, for example “Consulting in English”. Only claims the clinic can back up.',
       ),
     ],
@@ -590,13 +619,33 @@ function fillMissingWords(fields: Field[], data: Obj): Obj {
 }
 
 /**
+ * Brings a saved row up to the current fields: a card list that was saved as plain lines (the banner highlights,
+ * before they had icons) becomes cards whose first column holds each line. Used wherever a saved row is read: the
+ * admin form, the snapshot, and the pages built from older revisions.
+ */
+export function upgradeSectionData(fields: readonly Field[], data: Obj): Obj {
+  let out = data;
+  for (const f of fields) {
+    if (f.type !== 'items') continue;
+    const v = data[f.name];
+    const first = f.columns[0]?.name;
+    if (!first || !Array.isArray(v) || !v.some((item) => typeof item === 'string')) continue;
+    out = {
+      ...out,
+      [f.name]: v.map((item) => (typeof item === 'string' ? { [first]: item } : item)),
+    };
+  }
+  return out;
+}
+
+/**
  * The words of a row replace the built-in words; anything the admin cannot edit (photos, links, fixed lists)
  * stays as built. Cards in a list keep the non-text parts of the built-in card at the same position (for
  * example its picture), and a "01", "02"... numbering follows the new order. With `fields`, a field the row has
  * no value for (it was added after the row was saved) is treated as empty rather than as the built-in words.
  */
 export function mergeSection<T extends Obj>(sample: T, saved: Obj, fields?: Field[]): T {
-  const data = fields ? fillMissingWords(fields, saved) : saved;
+  const data = fields ? fillMissingWords(fields, upgradeSectionData(fields, saved)) : saved;
   const out: Obj = { ...sample };
   for (const [key, value] of Object.entries(data)) {
     const base = sample[key];

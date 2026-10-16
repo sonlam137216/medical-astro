@@ -7,6 +7,7 @@
  * and claim here must be confirmed by the clinic before launch.
  */
 import type { Img } from './types';
+import type { ChoiceIcon } from '../lib/cms/sections';
 import { heroImage as homeHeroImage } from './home';
 
 // The current Figma hero is a light photo of a dentist with a patient; the Home chair photo stands in for it.
@@ -16,8 +17,13 @@ export const hero = {
   label: 'Dental implants. Melatec Dental Clinic',
   title: 'Save more on implant treatment, get your plan before you fly',
   body: 'Comprehensive implant solutions, including single-tooth implants, All-on-4 and All-on-6 restorations, using premium implant systems for enhanced safety, stability and long-term function.',
-  // Figma shows three small claim badges under the banner; the owner must confirm each one.
-  chips: ['Actively responding 24/7', 'Consulting in English', 'Over 1,000 international patients'],
+  // Figma shows four small claim badges with icons under the banner; the owner must confirm each one.
+  chips: [
+    { text: 'Actively responding 24/7', icon: 'headset' satisfies ChoiceIcon },
+    { text: 'Consulting in English', icon: 'messages' satisfies ChoiceIcon },
+    { text: 'Over 1,000 international patients', icon: 'users-group' satisfies ChoiceIcon },
+    { text: 'Premium implant systems', icon: 'shield-check' satisfies ChoiceIcon },
+  ],
 };
 
 // PLACEHOLDER: prices and inclusions are the sample values of the current Figma file ("$400 per" is printed

@@ -5,7 +5,9 @@
 import arrowLeft from '@tabler/icons/outline/arrow-left.svg?raw';
 import arrowRight from '@tabler/icons/outline/arrow-right.svg?raw';
 import brandWhatsapp from '@tabler/icons/outline/brand-whatsapp.svg?raw';
+import building from '@tabler/icons/outline/building.svg?raw';
 import calendarCheck from '@tabler/icons/outline/calendar-check.svg?raw';
+import calendarTime from '@tabler/icons/outline/calendar-time.svg?raw';
 import camera from '@tabler/icons/outline/camera.svg?raw';
 import car from '@tabler/icons/outline/car.svg?raw';
 import certificate from '@tabler/icons/outline/certificate.svg?raw';
@@ -13,15 +15,24 @@ import check from '@tabler/icons/outline/check.svg?raw';
 import chevronDown from '@tabler/icons/outline/chevron-down.svg?raw';
 import clipboardCheck from '@tabler/icons/outline/clipboard-check.svg?raw';
 import clock from '@tabler/icons/outline/clock.svg?raw';
+import coin from '@tabler/icons/outline/coin.svg?raw';
 import dental from '@tabler/icons/outline/dental.svg?raw';
+import deviceDesktopAnalytics from '@tabler/icons/outline/device-desktop-analytics.svg?raw';
+import deviceSim from '@tabler/icons/outline/device-sim.svg?raw';
 import directions from '@tabler/icons/outline/directions.svg?raw';
+import ePassport from '@tabler/icons/outline/e-passport.svg?raw';
+import fileCertificate from '@tabler/icons/outline/file-certificate.svg?raw';
+import headset from '@tabler/icons/outline/headset.svg?raw';
+import heartHandshake from '@tabler/icons/outline/heart-handshake.svg?raw';
 import hotelService from '@tabler/icons/outline/hotel-service.svg?raw';
 import language from '@tabler/icons/outline/language.svg?raw';
 import listCheck from '@tabler/icons/outline/list-check.svg?raw';
 import lock from '@tabler/icons/outline/lock.svg?raw';
 import mail from '@tabler/icons/outline/mail.svg?raw';
+import map2 from '@tabler/icons/outline/map-2.svg?raw';
 import mapPin from '@tabler/icons/outline/map-pin.svg?raw';
 import messageDots from '@tabler/icons/outline/message-dots.svg?raw';
+import messages from '@tabler/icons/outline/messages.svg?raw';
 import moodSmile from '@tabler/icons/outline/mood-smile.svg?raw';
 import phone from '@tabler/icons/outline/phone.svg?raw';
 import planeArrival from '@tabler/icons/outline/plane-arrival.svg?raw';
@@ -31,14 +42,17 @@ import search from '@tabler/icons/outline/search.svg?raw';
 import send from '@tabler/icons/outline/send.svg?raw';
 import shieldCheck from '@tabler/icons/outline/shield-check.svg?raw';
 import stethoscope from '@tabler/icons/outline/stethoscope.svg?raw';
+import usersGroup from '@tabler/icons/outline/users-group.svg?raw';
 import starFilled from '@tabler/icons/filled/star.svg?raw';
-import type { StepIcon } from './cms/sections';
+import type { ChoiceIcon } from './cms/sections';
 
 const ICONS = {
   'arrow-left': arrowLeft,
   'arrow-right': arrowRight,
   'brand-whatsapp': brandWhatsapp,
+  building,
   'calendar-check': calendarCheck,
+  'calendar-time': calendarTime,
   camera,
   car,
   certificate,
@@ -46,15 +60,24 @@ const ICONS = {
   'chevron-down': chevronDown,
   'clipboard-check': clipboardCheck,
   clock,
+  coin,
   dental,
+  'device-desktop-analytics': deviceDesktopAnalytics,
+  'device-sim': deviceSim,
   directions,
+  'e-passport': ePassport,
+  'file-certificate': fileCertificate,
+  headset,
+  'heart-handshake': heartHandshake,
   'hotel-service': hotelService,
   language,
   'list-check': listCheck,
   lock,
   mail,
+  'map-2': map2,
   'map-pin': mapPin,
   'message-dots': messageDots,
+  messages,
   'mood-smile': moodSmile,
   phone,
   'plane-arrival': planeArrival,
@@ -65,13 +88,14 @@ const ICONS = {
   'shield-check': shieldCheck,
   stethoscope,
   'star-filled': starFilled,
+  'users-group': usersGroup,
 };
 
 export type IconName = keyof typeof ICONS;
 
-// Every icon the admin can pick for a "How it works" step must exist here (checked by `npm run check`).
-const STEP_ICONS_EXIST: Record<StepIcon, string> = ICONS;
-void STEP_ICONS_EXIST;
+// Every icon the admin can pick (ICON_CHOICES) must exist here (checked by `npm run check`).
+const CHOICE_ICONS_EXIST: Record<ChoiceIcon, string> = ICONS;
+void CHOICE_ICONS_EXIST;
 
 export const isIconName = (v: unknown): v is IconName => typeof v === 'string' && v in ICONS;
 

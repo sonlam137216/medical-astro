@@ -1,6 +1,10 @@
 ---
+import Icon from '../Icon.astro';
+import { isIconName } from '../../lib/icons';
+
 // Text card used by "Dental tourism support" (white) and "Why choose Melatec" (translucent on navy).
 // Figma titles are set in the serif face; the number eyebrow of the old design is optional now.
+// The icon is chosen in the admin (Figma comments of 2026-10-17 ask for one on these cards); none, no icon.
 interface Props {
   eyebrow?: string;
   title: string;
@@ -9,14 +13,32 @@ interface Props {
   upper?: boolean;
   /** `dark`: translucent card with a light outline, for navy bands. */
   tone?: 'light' | 'dark';
+  icon?: string | null;
+  /** The icon before the title (Figma "Dental tourism support") rather than above it. */
+  iconBeside?: boolean;
 }
 
-const { eyebrow, title, body, upper = false, tone = 'light' } = Astro.props;
+const {
+  eyebrow,
+  title,
+  body,
+  upper = false,
+  tone = 'light',
+  icon,
+  iconBeside = false,
+} = Astro.props;
+const iconName = isIconName(icon) ? icon : null;
 ---
 
 <article class:list={['info', { 'info--dark': tone === 'dark', card: tone === 'light' }]}>
   {eyebrow && <p class="info__eyebrow">{eyebrow}</p>}
-  <h3 class:list={['info__title', { 'is-upper': upper }]}>{title}</h3>
+  {iconName && !iconBeside && <Icon class="info__icon" name={iconName} size={40} />}
+  <h3
+    class:list={['info__title', { 'is-upper': upper, 'info__title--icon': iconName && iconBeside }]}
+  >
+    {iconName && iconBeside && <Icon class="info__icon" name={iconName} size={36} />}
+    {title}
+  </h3>
   <p class="info__body">{body}</p>
 </article>
 
@@ -34,6 +56,17 @@ const { eyebrow, title, body, upper = false, tone = 'light' } = Astro.props;
     letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--color-blue);
+  }
+
+  .info__icon {
+    flex: none;
+    color: var(--color-blue);
+  }
+
+  .info__title--icon {
+    display: flex;
+    align-items: center;
+    gap: 12px;
   }
 
   .info__title {
@@ -76,7 +109,8 @@ const { eyebrow, title, body, upper = false, tone = 'light' } = Astro.props;
     border-radius: var(--radius-card);
   }
 
-  .info--dark .info__title {
+  .info--dark .info__title,
+  .info--dark .info__icon {
     color: var(--color-white);
   }
 

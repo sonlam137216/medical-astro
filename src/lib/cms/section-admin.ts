@@ -3,7 +3,7 @@ import { isSameOrigin } from '../admin-auth';
 import { readBodyLimited } from '../consultation';
 import { listPickerImages } from '../media-picker';
 import { BUILTIN_PAGES } from './pages';
-import { SECTION_DATA_VERSION, type SectionDef } from './sections';
+import { SECTION_DATA_VERSION, upgradeSectionData, type SectionDef } from './sections';
 import {
   emptyValues,
   parseFields,
@@ -68,7 +68,7 @@ export async function loadSection(db: AdminDb, def: SectionDef): Promise<LoadedS
   return {
     id: row.id as string,
     values: {
-      ...valuesFromRow(def.fields, (row.data ?? {}) as Row),
+      ...valuesFromRow(def.fields, upgradeSectionData(def.fields, (row.data ?? {}) as Row) as Row),
       is_visible: Boolean(row.is_visible),
     },
   };

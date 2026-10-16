@@ -4,6 +4,7 @@ import PageHero from '../../components/PageHero.astro';
 import Section from '../../components/Section.astro';
 import SectionIntro from '../../components/SectionIntro.astro';
 import Button from '../../components/Button.astro';
+import Icon from '../../components/Icon.astro';
 import TreatmentGrid from '../../components/TreatmentGrid.astro';
 import CtaBand from '../../components/CtaBand.astro';
 import TreatmentCosts from '../../components/home/TreatmentCosts.astro';
@@ -87,6 +88,7 @@ const servicesBanner = await getPageBanner('/services');
     <Fragment slot="title">{service.title}</Fragment>
     {service.summary && <p>{service.summary}</p>}
     <Button slot="actions" href="#consultation">
+      <Icon name="calendar-time" />
       Book free consultation
     </Button>
   </PageHero>

@@ -3,6 +3,7 @@
  * Copied from the Figma file on 2026-10-04. Items marked PLACEHOLDER are dummy values in the design.
  */
 import type { Img } from './types';
+import type { ChoiceIcon } from '../lib/cms/sections';
 import dentalImplant from '../assets/images/photos/dental-implant.webp';
 import dentalChair from '../assets/images/photos/dental-chair-wide.webp';
 import doctorPortrait from '../assets/images/doctors/doctor-portrait.webp';
@@ -19,31 +20,37 @@ export const tourismSupport = {
     {
       eyebrow: '01',
       title: 'Airport pickup & transportation',
+      icon: 'plane-arrival' satisfies ChoiceIcon,
       body: 'Complimentary airport pickup and local shuttle service between your hotel and the clinic.',
     },
     {
       eyebrow: '02',
       title: 'Hotel & travel assistance',
+      icon: 'building' satisfies ChoiceIcon,
       body: 'Support with hotel recommendations, booking arrangements and practical travel information during your stay.',
     },
     {
       eyebrow: '03',
       title: 'Local SIM support',
+      icon: 'device-sim' satisfies ChoiceIcon,
       body: 'Assistance with local SIM setup and essential connectivity so you can stay in touch throughout your trip.',
     },
     {
       eyebrow: '04',
       title: 'Visa assistance',
+      icon: 'e-passport' satisfies ChoiceIcon,
       body: 'Support with visa information and travel documentation before your trip to Vietnam.',
     },
     {
       eyebrow: '05',
       title: 'Local travel guide',
+      icon: 'map-2' satisfies ChoiceIcon,
       body: 'Recommendations for attractions, dining and places to explore during your dental trip in Vietnam.',
     },
     {
       eyebrow: '06',
       title: 'Document assistance',
+      icon: 'file-certificate' satisfies ChoiceIcon,
       body: 'Support with visa documents, insurance paperwork and treatment records.',
     },
   ],
@@ -154,7 +161,10 @@ export const doctorsHero = {
   label: 'Our doctors.',
   title: 'Meet our team of experienced specialists',
   body: 'From cosmetic dentistry and dental implants to restorative treatments and general dental care, Melatec Dental Clinic provides comprehensive solutions for patients who want to improve their smiles while enjoying their stay in Vietnam.',
-  chips: ['15+ Years of Experience', 'English-speaking doctors'],
+  chips: [
+    { text: '15+ Years of Experience', icon: 'stethoscope' satisfies ChoiceIcon },
+    { text: 'English-speaking doctors', icon: 'language' satisfies ChoiceIcon },
+  ],
 };
 
 export const packagesHero = {

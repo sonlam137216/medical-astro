@@ -6,6 +6,7 @@ import PageHero from '../components/PageHero.astro';
 import Section from '../components/Section.astro';
 import SectionIntro from '../components/SectionIntro.astro';
 import Button from '../components/Button.astro';
+import Icon from '../components/Icon.astro';
 import InfoCard from '../components/cards/InfoCard.astro';
 import DoctorCard from '../components/cards/DoctorCard.astro';
 import CtaBand from '../components/CtaBand.astro';
@@ -51,6 +52,7 @@ const banner = await getPageBanner('/about');
       <p>{p}</p>
     ))}
     <Button slot="actions" href="#consultation">
+      <Icon name="calendar-time" />
       Book free consultation
     </Button>
   </PageHero>

@@ -4,6 +4,7 @@
  * each one is accurate and can be substantiated before launch.
  */
 import type { Img } from './types';
+import type { ChoiceIcon } from '../lib/cms/sections';
 import clinicReception from '../assets/images/photos/clinic-reception.webp';
 import clinicLobby from '../assets/images/photos/clinic-lobby.webp';
 import clinicWaitingA from '../assets/images/photos/clinic-waiting-a.webp';
@@ -44,34 +45,40 @@ export const personalisedCare = {
   ],
 };
 
-// Copy from the Figma "Why choose Melatec" cards (the sixth card repeats the first in the design).
+// Copy and icons from the Figma "Why choose Melatec" cards (icons drawn with our Tabler set, 2026-10-17).
 export const whyChoose = {
   label: 'Why choose Melatec',
   title: 'Premium Care, Beautiful Smiles in Vietnam',
   items: [
     {
       title: 'Experienced team',
+      icon: 'users-group' satisfies ChoiceIcon,
       body: 'Dentists with international training and a team of nurses and coordinators who speak English.',
     },
     {
       title: 'Personalized Plans',
+      icon: 'calendar-time' satisfies ChoiceIcon,
       body: 'Every treatment is tailored to your oral health, aesthetic goals and individual needs.',
     },
     {
       title: 'Modern Technology',
+      icon: 'device-desktop-analytics' satisfies ChoiceIcon,
       body: 'Digital diagnostics, 3D imaging and modern CAD/CAM technology for precise treatment planning.',
     },
     {
       title: 'Transparent, Fair Pricing',
+      icon: 'coin' satisfies ChoiceIcon,
       body: 'Clear quotations, quality materials and carefully considered treatment options with no hidden costs.',
     },
     {
       title: 'Complete Support',
+      icon: 'heart-handshake' satisfies ChoiceIcon,
       body: 'From planning your visit to post-treatment follow-up, our team is here to support your journey.',
     },
     {
-      title: 'Experienced team',
-      body: 'Dentists with international training and a team of nurses and coordinators who speak English.',
+      title: 'Patient Safety & Hygiene',
+      icon: 'shield-check' satisfies ChoiceIcon,
+      body: 'We maintain strict hygiene and sterilization standards for your safety.',
     },
   ],
 };

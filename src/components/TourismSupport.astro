@@ -16,7 +16,7 @@ const t = await getSection('shared_tourism');
     <ul class="grid">
       {t.items.map((item) => (
         <li>
-          <InfoCard title={item.title} body={item.body} upper />
+          <InfoCard title={item.title} body={item.body} icon={item.icon} iconBeside upper />
         </li>
       ))}
     </ul>

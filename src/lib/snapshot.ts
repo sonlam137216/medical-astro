@@ -3,7 +3,7 @@ import { readColor } from './image-color.ts';
 import { toFocus } from './image-slots.ts';
 import { articleProblems, bodyImageIds, parseArticleBody } from './cms/articles.ts';
 import { itemInput, parseFields, type Field } from './cms/fields.ts';
-import { REQUIRED_SECTIONS, sectionByKey } from './cms/sections.ts';
+import { REQUIRED_SECTIONS, sectionByKey, upgradeSectionData } from './cms/sections.ts';
 import { parseVideoUrl } from './video-embed.ts';
 
 // What the public site is built from. A snapshot is a complete copy of the published content; the build
@@ -599,7 +599,7 @@ export async function buildSnapshot(db: AdminDb): Promise<Snapshot> {
     const entry: SnapshotSection = {
       key: r.type,
       visible: r.is_visible,
-      data: { ...(r.data as Record<string, unknown>) },
+      data: { ...upgradeSectionData(def.fields, r.data as Record<string, unknown>) },
     };
     for (const f of def.fields) {
       if (f.type !== 'image') continue;
