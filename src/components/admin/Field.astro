@@ -15,7 +15,8 @@ const { f, values, errors, options } = Astro.props;
 const error = errors[f.name];
 const text = (name: string) => String(values[name] ?? '');
 const invalid = (name: string) => (errors[name] ? 'true' : undefined);
-// Slots of an `items` field to show: the filled ones plus two empty ones (at most the field's maximum).
+// Slots of an `items` field shown without JavaScript: the filled ones plus two empty ones (at most the field's
+// maximum). The others are drawn hidden, for the "Add" button (src/scripts/items-field.ts).
 const slotsFor = (f: Extract<Field, { type: 'items' }>) => {
   let last = -1;
   for (let i = 0; i < f.maxItems; i++)
@@ -44,14 +45,19 @@ const slotsFor = (f: Extract<Field, { type: 'items' }>) => {
 )}
 
 {f.type === 'items' && (
-  <fieldset class="admin-items">
+  <fieldset class="admin-items" data-items={f.name}>
     <legend>{f.label}</legend>
     {f.help && <span class="admin-hint">{f.help}</span>}
-    {Array.from({ length: slotsFor(f) }, (_, i) => (
-      <div class="admin-item">
-        <p class="admin-item__title">
-          {f.itemLabel} {i + 1}
-        </p>
+    {Array.from({ length: f.maxItems }, (_, i) => (
+      <div class="admin-item" data-item hidden={i >= slotsFor(f)}>
+        <div class="admin-item__head">
+          <p class="admin-item__title">
+            {f.itemLabel} <span data-item-number>{i + 1}</span>
+          </p>
+          <button type="button" class="admin-btn admin-btn--ghost" data-item-remove hidden>
+            Remove
+          </button>
+        </div>
         {f.columns.map((c) => (
           <label>
             {c.label}
@@ -82,7 +88,10 @@ const slotsFor = (f: Extract<Field, { type: 'items' }>) => {
         ))}
       </div>
     ))}
-    <span class="admin-hint">
+    <button type="button" class="admin-btn admin-btn--ghost admin-items__add" data-item-add hidden>
+      + Add {f.itemLabel.toLowerCase()}
+    </button>
+    <span class="admin-hint" data-items-hint>
       Leave a card empty to leave it out. To add more than are shown, save and come back: two empty
       cards are offered each time (up to {f.maxItems}).
     </span>
@@ -267,4 +276,5 @@ const slotsFor = (f: Extract<Field, { type: 'items' }>) => {
   // The article writing tools are loaded only on pages that have them.
   if (document.querySelector('[data-article-editor]')) void import('../../scripts/article-editor');
   if (document.querySelector('select[data-media-video]')) void import('../../scripts/media-fields');
+  if (document.querySelector('[data-items]')) void import('../../scripts/items-field');
 </script>

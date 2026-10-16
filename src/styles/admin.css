@@ -805,6 +805,32 @@ a.admin-btn {
   border-radius: 10px;
 }
 
+.admin-item[hidden],
+.admin-items .admin-btn[hidden] {
+  display: none;
+}
+
+.admin-item__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.admin-item__head .admin-btn--ghost {
+  color: var(--a-muted);
+  font-size: 13px;
+}
+
+.admin-item__head .admin-btn--ghost:hover {
+  color: var(--color-error);
+}
+
+.admin-items__add {
+  justify-self: start;
+  color: var(--color-blue);
+}
+
 .admin-item__title {
   margin: 0;
   font: 600 12px / 1.2 var(--font-sans);
