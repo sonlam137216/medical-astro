@@ -25,6 +25,12 @@ export const IMAGE_SLOTS = {
     frames: [{ label: 'Service cards', width: 384, height: 190 }],
     position: { x: 50, y: 0 },
   },
+  // The top banner of a service's page: full width, the title and text over the left part (a white fade).
+  'service-banner': {
+    label: 'Service page banner',
+    frames: [{ label: 'Top of the service’s page', width: 1440, height: 400 }],
+    position: { x: 75, y: 50 },
+  },
   'package-card': {
     label: 'Package card',
     frames: [{ label: 'Package cards', width: 384, height: 190 }],
@@ -105,10 +111,13 @@ export function recommendedSize(slot: ImageSlot): { width: number; height: numbe
   return { width, height: Math.round(width / slotRatio(slot)) };
 }
 
-/** Below this width the picture looks soft even on an ordinary screen. */
+/**
+ * Below this width the picture looks soft even on an ordinary screen. Never more than 1200 px: the widest file made
+ * at upload is 1600 px, so a full-width banner cannot ask for more than that anyway.
+ */
 export function minimumWidth(slot: ImageSlot): number {
   const widest = Math.max(...slot.frames.map((f) => f.width));
-  return Math.round((widest * 1.5) / 10) * 10;
+  return Math.min(Math.round((widest * 1.5) / 10) * 10, 1200);
 }
 
 export interface FitReport {

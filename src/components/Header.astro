@@ -81,17 +81,46 @@ const groupActive = (g: MenuGroup) => g.links.some((l) => isActive(l.href));
           <ul class="menu__list">
             {site.main.map((item, i) =>
               isMenuGroup(item) ? (
-                <li class="menu__group" data-dropdown>
-                  <button
-                    class:list={['menu__link', 'menu__trigger', { 'is-active': groupActive(item) }]}
-                    type="button"
-                    aria-expanded="false"
-                    aria-controls={`menu-group-${i}`}
-                    data-dropdown-toggle
-                  >
-                    {item.label}
-                    <Icon name="chevron-down" size={16} class="menu__chevron" />
-                  </button>
+                <li class:list={['menu__group', { 'menu__group--link': item.href }]} data-dropdown>
+                  {item.href ? (
+                    <>
+                      <a
+                        class:list={[
+                          'menu__link',
+                          { 'is-active': isActive(item.href) || groupActive(item) },
+                        ]}
+                        href={pageLink(item.href, consultationHere)}
+                        aria-current={current === item.href ? 'page' : undefined}
+                      >
+                        {item.label}
+                      </a>
+                      <button
+                        class="menu__trigger menu__trigger--icon"
+                        type="button"
+                        aria-expanded="false"
+                        aria-controls={`menu-group-${i}`}
+                        data-dropdown-toggle
+                      >
+                        <span class="visually-hidden">Show the {item.label} menu</span>
+                        <Icon name="chevron-down" size={16} class="menu__chevron" />
+                      </button>
+                    </>
+                  ) : (
+                    <button
+                      class:list={[
+                        'menu__link',
+                        'menu__trigger',
+                        { 'is-active': groupActive(item) },
+                      ]}
+                      type="button"
+                      aria-expanded="false"
+                      aria-controls={`menu-group-${i}`}
+                      data-dropdown-toggle
+                    >
+                      {item.label}
+                      <Icon name="chevron-down" size={16} class="menu__chevron" />
+                    </button>
+                  )}
                   <ul class="menu__sub" id={`menu-group-${i}`}>
                     {item.links.map((l) => (
                       <li>
@@ -339,6 +368,25 @@ const groupActive = (g: MenuGroup) => g.links.some((l) => isActive(l.href));
     transition: transform var(--dur-fast, 0.15s);
   }
 
+  /* Services: the name is a link to the Services page, the chevron next to it opens the drop-down. */
+  .menu__group--link {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 2px;
+  }
+
+  .menu__trigger--icon {
+    justify-content: center;
+    min-width: 24px;
+    color: var(--color-title);
+  }
+
+  .menu__trigger--icon:hover,
+  .menu__group--link:has(.is-active) .menu__trigger--icon {
+    color: var(--color-blue);
+  }
+
   .menu__group.is-open .menu__chevron {
     transform: rotate(180deg);
   }
@@ -369,7 +417,8 @@ const groupActive = (g: MenuGroup) => g.links.some((l) => isActive(l.href));
   }
 
   .menu__sublink.is-active {
-    color: var(--color-blue);
+    background: var(--color-blue);
+    color: var(--color-white);
   }
 
   @media (min-width: 1025px) {
@@ -473,6 +522,27 @@ const groupActive = (g: MenuGroup) => g.links.some((l) => isActive(l.href));
 
     .menu__sublink:hover {
       background: none;
+    }
+
+    .menu__sublink.is-active {
+      background: none;
+      color: var(--color-blue);
+      border-left-color: var(--color-blue);
+    }
+
+    /* Services in the panel: the link fills the row, the chevron button sits at its end, the links below. */
+    .menu__group--link > .menu__link {
+      flex: 1;
+    }
+
+    .menu__group--link > .menu__trigger--icon {
+      justify-content: flex-end;
+      width: 44px;
+      min-height: 44px;
+    }
+
+    .menu__group--link > .menu__sub {
+      flex-basis: 100%;
     }
 
     /* Without JavaScript the panel is always open, and so are its drop-downs. */

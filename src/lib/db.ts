@@ -109,15 +109,19 @@ function parseSelect(table: string, source: string) {
   const columns: string[] = [];
   const embeds: Embed[] = [];
   for (const part of splitTop(source)) {
-    const embed = /^(?:([a-z_][a-z0-9_]*):)?([a-z_][a-z0-9_]*)\((.*)\)$/.exec(part);
+    // `alias:table(cols)`, or `alias:table!fk_column(cols)` when two columns point at the same table.
+    const embed =
+      /^(?:([a-z_][a-z0-9_]*):)?([a-z_][a-z0-9_]*)(?:!([a-z_][a-z0-9_]*))?\((.*)\)$/.exec(part);
     if (!embed) {
       if (part !== '*') ident(part);
       columns.push(part);
       continue;
     }
-    const [, alias, target, inner] = embed;
-    const fk = Object.entries(info(table).refs ?? {}).find(([, t]) => t === target)?.[0];
+    const [, alias, target, hint, inner] = embed;
+    const refs = Object.entries(info(table).refs ?? {}).filter(([, t]) => t === target);
+    const fk = hint ? refs.find(([column]) => column === hint)?.[0] : refs[0]?.[0];
     if (!fk) throw new Error(`no relation from ${table} to ${target}`);
+    if (!hint && refs.length > 1) throw new Error(`name the column: ${target}!<column>(…)`);
     const inside = splitTop(inner);
     if (inside.length === 0 || inside.includes('*')) throw new Error('list the embedded columns');
     inside.forEach(ident);

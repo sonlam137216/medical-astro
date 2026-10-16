@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createDb } from '../src/lib/db.ts';
-import { groupMenu, isMenuGroup, menuGroupError } from '../src/lib/menu.ts';
+import { groupMenu, isMenuGroup, menuGroupError, withServicesMenu } from '../src/lib/menu.ts';
 import { buildSnapshot } from '../src/lib/snapshot.ts';
 import { failure, testDb } from './helpers/sqlite.ts';
 
@@ -57,4 +57,30 @@ test('the snapshot carries the drop-down name only for links that have one', asy
     { location: 'header', label: 'Home', href: '/' },
     { location: 'header', label: 'Dental Knowledge', href: '/dental-knowledge', group: 'Guides' },
   ]);
+});
+
+test('the Services link opens a drop-down of the services and still links to the Services page', () => {
+  const services = [
+    { label: 'Dental Implants', href: '/services/dental-implants' },
+    { label: 'Orthodontics', href: '/services/orthodontics' },
+  ];
+  const guides = {
+    label: 'Guides',
+    links: [{ label: 'Dental Knowledge', href: '/dental-knowledge' }],
+  };
+  const menu = withServicesMenu(
+    [{ label: 'Home', href: '/' }, { label: 'Our services', href: '/services/' }, guides],
+    services,
+  );
+  assert.deepEqual(menu, [
+    { label: 'Home', href: '/' },
+    { label: 'Our services', href: '/services/', links: services },
+    guides,
+  ]);
+  // No services: a plain link. A Services link put in a drop-down by the admin is left as it is.
+  assert.deepEqual(withServicesMenu([{ label: 'Services', href: '/services' }], []), [
+    { label: 'Services', href: '/services' },
+  ]);
+  const grouped = [{ label: 'More', links: [{ label: 'Services', href: '/services' }] }];
+  assert.deepEqual(withServicesMenu(grouped, services), grouped);
 });

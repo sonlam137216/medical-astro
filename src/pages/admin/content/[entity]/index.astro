@@ -1,15 +1,33 @@
 ---
 import AdminLayout from '../../../../layouts/AdminLayout.astro';
 import { entityByKey } from '../../../../lib/cms/entities';
-import { listRows } from '../../../../lib/cms/admin';
+import { listRows, loadOptions } from '../../../../lib/cms/admin';
+import { UUID_RE } from '../../../../lib/cms/fields';
 
 export const prerender = false;
 
 const def = entityByKey(Astro.params.entity);
 if (!def) return new Response('Not found', { status: 404 });
 
-const { rows, failed } = await listRows(Astro.locals.db, def);
 const sp = Astro.url.searchParams;
+// A child entity (the treatments) can be filtered by its parent, and its parent is shown by name.
+const parents = def.parent
+  ? ((await loadOptions(Astro.locals.db, def)).refs[def.parent.field] ?? [])
+  : [];
+const parentDef = def.parent ? entityByKey(def.parent.entity) : undefined;
+const parentLabel = new Map(parents.map((p) => [p.value, p.label]));
+const parentId = def.parent ? (sp.get(def.parent.field) ?? '').toLowerCase() : '';
+const filter = UUID_RE.test(parentId) && parentLabel.has(parentId) ? parentId : null;
+const { rows: listed, failed } = await listRows(Astro.locals.db, def, filter);
+// Rows of one parent together, the parents in the same order as the filter (by name).
+const parentOrder = new Map(parents.map((p, i) => [p.value, i]));
+const rows = def.parent
+  ? [...listed].sort(
+      (a, b) =>
+        (parentOrder.get(String(a[def.parent!.field])) ?? 0) -
+        (parentOrder.get(String(b[def.parent!.field])) ?? 0),
+    )
+  : listed;
 
 const cell = (value: unknown) => {
   if (value === true) return 'yes';
@@ -20,6 +38,8 @@ const cell = (value: unknown) => {
 // Show the label of a select value (for example "Main menu" instead of "header").
 const labelFor = (field: string, value: unknown) => {
   const f = def.fields.find((x) => x.name === field);
+  if (f && f.type === 'ref' && field === def.parent?.field)
+    return parentLabel.get(String(value)) ?? cell(value);
   if (f && f.type === 'select') {
     const match = f.options.find(([key]) => key === String(value));
     if (match) return match[1];
@@ -33,7 +53,10 @@ const labelFor = (field: string, value: unknown) => {
     <div class="admin-actions">
       <h1>{def.plural}</h1>
       {def.creatable !== false && (
-        <a class="admin-btn" href={`/admin/content/${def.key}/new`}>
+        <a
+          class="admin-btn"
+          href={`/admin/content/${def.key}/new${filter && def.parent ? `?${def.parent.field}=${filter}` : ''}`}
+        >
           Add {def.singular}
         </a>
       )}
@@ -46,6 +69,25 @@ const labelFor = (field: string, value: unknown) => {
       )}
     </div>
     <p class="admin-muted">{def.intro}</p>
+
+    {def.parent && parents.length > 0 && (
+      <form class="admin-filters" method="get">
+        <label>
+          <span class="visually-hidden">{parentDef?.singular}</span>
+          <select name={def.parent.field}>
+            <option value="">All {parentDef?.plural.toLowerCase()}</option>
+            {parents.map((p) => (
+              <option value={p.value} selected={p.value === filter}>
+                {p.label}
+              </option>
+            ))}
+          </select>
+        </label>
+        <button class="admin-btn admin-btn--ghost" type="submit">
+          Show
+        </button>
+      </form>
+    )}
 
     {sp.has('saved') && (
       <p class="admin-notice" role="status">

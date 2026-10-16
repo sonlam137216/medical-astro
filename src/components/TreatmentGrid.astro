@@ -1,0 +1,69 @@
+---
+import PriceCard from './cards/PriceCard.astro';
+
+// The price cards of treatments (Home, Dental Implants and every service page): three per row, the last row centred
+// whatever the number of cards; the second card stands out and the third is tinted, as in Figma.
+
+interface Props {
+  items: {
+    title: string;
+    subtitle?: string | null;
+    inclusions: string[];
+    /** Shown as written; absent: no price line, and the card invites a quote request. */
+    priceText: string | null;
+    /** Where the card links; defaults to the consultation form of the page. */
+    href?: string;
+  }[];
+}
+
+const { items } = Astro.props;
+---
+
+<ul class="grid">
+  {items.map((c, i) => (
+    <li>
+      <PriceCard
+        title={c.title}
+        subtitle={c.subtitle}
+        inclusions={c.inclusions}
+        total={c.priceText}
+        href={c.href ?? '#consultation'}
+        linkLabel={c.href || c.priceText ? 'Learn more' : 'Request a quote'}
+        tone={i === 1 ? 'featured' : i === 2 ? 'tint' : 'default'}
+      />
+    </li>
+  ))}
+</ul>
+
+<style>
+  .grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 24px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .grid li {
+    flex: 0 0 calc((100% - 48px) / 3);
+    display: flex;
+  }
+
+  .grid li > :global(*) {
+    flex: 1;
+  }
+
+  @media (max-width: 1024px) {
+    .grid li {
+      flex-basis: calc((100% - 24px) / 2);
+    }
+  }
+
+  @media (max-width: 640px) {
+    .grid li {
+      flex-basis: 100%;
+    }
+  }
+</style>

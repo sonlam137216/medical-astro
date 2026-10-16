@@ -16,9 +16,11 @@ interface Props {
   none?: string;
   /** The place on the website that shows the picture: the field then says which size to use and previews the crop. */
   slot?: SlotKey;
+  /** A line about this field (the field's `help`). */
+  help?: string;
 }
 
-const { name, label, value, images, error, none = 'No image', slot } = Astro.props;
+const { name, label, value, images, error, none = 'No image', slot, help } = Astro.props;
 const hint = slot ? slotHint(IMAGE_SLOTS[slot]) : null;
 ---
 
@@ -47,6 +49,7 @@ const hint = slot ? slotHint(IMAGE_SLOTS[slot]) : null;
       </label>
     ))}
   </div>
+  {help && <span class="admin-hint">{help}</span>}
   {hint && <span class="admin-hint admin-hint--slot">{hint}</span>}
   <span class="admin-hint js-only">
     Choose from the library or upload a new one. Only use pictures you have the right to publish.

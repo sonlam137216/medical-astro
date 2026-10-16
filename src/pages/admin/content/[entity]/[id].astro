@@ -1,8 +1,14 @@
 ---
 import AdminLayout from '../../../../layouts/AdminLayout.astro';
 import EntityForm from '../../../../components/admin/EntityForm.astro';
-import { entityByKey } from '../../../../lib/cms/entities';
-import { loadOptions, loadRow, processPost, valuesFromRow } from '../../../../lib/cms/admin';
+import { ENTITIES, entityByKey } from '../../../../lib/cms/entities';
+import {
+  listRows,
+  loadOptions,
+  loadRow,
+  processPost,
+  valuesFromRow,
+} from '../../../../lib/cms/admin';
 import { UUID_RE } from '../../../../lib/cms/fields';
 
 export const prerender = false;
@@ -23,12 +29,31 @@ if (result) Astro.response.status = result.status;
 const options = await loadOptions(db, def);
 const sp = Astro.url.searchParams;
 const heading = String(row[def.titleField] ?? def.singular);
+
+// The rows that belong to this one (the treatments of a service), listed under the form.
+const children = await Promise.all(
+  ENTITIES.filter((e) => e.parent?.entity === def.key).map(async (child) => ({
+    def: child,
+    ...(await listRows(db, child, id)),
+  })),
+);
+// A treatment links back to its service.
+const parent = def.parent
+  ? options.refs[def.parent.field]?.find((o) => o.value === row[def.parent!.field])
+  : undefined;
+const yesNo = (value: unknown) => (value === true ? 'yes' : value === false ? 'no' : '—');
 ---
 
 <AdminLayout title={heading} current={`content:${def.key}`}>
   <main class="admin-main">
     <p>
-      <a href={`/admin/content/${def.key}`}>← {def.plural}</a>
+      {parent && def.parent ? (
+        <a href={`/admin/content/${def.parent.entity}/${parent.value}#children`}>
+          ← {parent.label}
+        </a>
+      ) : (
+        <a href={`/admin/content/${def.key}`}>← {def.plural}</a>
+      )}
     </p>
     <div class="admin-actions">
       <h1>{heading}</h1>
@@ -45,7 +70,19 @@ const heading = String(row[def.titleField] ?? def.singular);
     </div>
     {sp.get('error') === 'in_use' && (
       <p class="admin-notice admin-notice--error" role="alert">
-        This is still used by something else, so it cannot be deleted.
+        {children.some((c) => c.rows.length > 0)
+          ? `This ${def.singular} still has ${children.map((c) => c.def.plural.toLowerCase()).join(' and ')}: delete them first.`
+          : 'This is still used by something else, so it cannot be deleted.'}
+      </p>
+    )}
+    {sp.get('child') === 'saved' && (
+      <p class="admin-notice" role="status">
+        Saved. Publish to show the change on the website.
+      </p>
+    )}
+    {sp.get('child') === 'deleted' && (
+      <p class="admin-notice" role="status">
+        Deleted. Publish to remove it from the website.
       </p>
     )}
     {sp.get('error') === 'failed' && (
@@ -61,6 +98,66 @@ const heading = String(row[def.titleField] ?? def.singular);
       options={options}
       submitLabel="Save changes"
     />
+    {children.map((child) => (
+      <section class="admin-card" id="children" aria-labelledby={`children-${child.def.key}`}>
+        <div class="admin-actions">
+          <h2 class="t-h3" id={`children-${child.def.key}`}>
+            {child.def.plural}
+          </h2>
+          <a
+            class="admin-btn"
+            href={`/admin/content/${child.def.key}/new?${child.def.parent!.field}=${id}`}
+          >
+            Add {child.def.singular}
+          </a>
+        </div>
+        {child.failed && (
+          <p class="admin-notice admin-notice--error" role="alert">
+            Could not load the list.
+          </p>
+        )}
+        {child.rows.length > 0 ? (
+          <table class="admin-table">
+            <thead>
+              <tr>
+                {child.def.columns
+                  .filter((c) => c.field !== child.def.parent!.field)
+                  .map((c) => (
+                    <th>{c.label}</th>
+                  ))}
+              </tr>
+            </thead>
+            <tbody>
+              {child.rows.map((r) => (
+                <tr>
+                  {child.def.columns
+                    .filter((c) => c.field !== child.def.parent!.field)
+                    .map((c) => (
+                      <td>
+                        {c.field === child.def.titleField ? (
+                          <a href={`/admin/content/${child.def.key}/${r.id}`}>
+                            {String(r[c.field])}
+                          </a>
+                        ) : typeof r[c.field] === 'boolean' ? (
+                          yesNo(r[c.field])
+                        ) : (
+                          (r[c.field] ?? '—') || '—'
+                        )}
+                      </td>
+                    ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : (
+          <p class="admin-muted">
+            No {child.def.plural.toLowerCase()} yet.{' '}
+            {def.key === 'services' &&
+              'Without treatments, the page of this service shows its description and invites visitors to ask for a quote.'}
+          </p>
+        )}
+      </section>
+    ))}
     {def.deletable && (
       <form
         class="admin-form admin-card"

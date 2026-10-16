@@ -496,8 +496,37 @@ export interface Tables {
       updated_at?: string;
     };
   };
+  service_options: {
+    Row: {
+      created_at: string;
+      id: string;
+      inclusions: string[];
+      is_visible: boolean;
+      price_text: string | null;
+      service_id: string;
+      show_on_home: boolean;
+      sort_order: number;
+      subtitle: string | null;
+      title: string;
+      updated_at: string;
+    };
+    Insert: {
+      created_at?: string;
+      id?: string;
+      inclusions?: string[];
+      is_visible?: boolean;
+      price_text?: string | null;
+      service_id: string;
+      show_on_home?: boolean;
+      sort_order?: number;
+      subtitle?: string | null;
+      title: string;
+      updated_at?: string;
+    };
+  };
   services: {
     Row: {
+      banner_image_id: string | null;
       created_at: string;
       description: string | null;
       id: string;
@@ -514,6 +543,7 @@ export interface Tables {
       updated_at: string;
     };
     Insert: {
+      banner_image_id?: string | null;
       created_at?: string;
       description?: string | null;
       id?: string;
@@ -657,11 +687,17 @@ export const TABLES: Record<TableName, TableInfo> = {
   pages: { bool: ['noindex', 'is_enabled'], uuid: true, refs: { og_image_id: 'media_assets' } },
   publish_jobs: { uuid: true, refs: { revision_id: 'content_revisions' } },
   redirects: { uuid: true },
+  service_options: {
+    bool: ['is_visible', 'show_on_home'],
+    json: ['inclusions'],
+    uuid: true,
+    refs: { service_id: 'services' },
+  },
   services: {
     bool: ['is_visible'],
     json: ['inclusions'],
     uuid: true,
-    refs: { image_id: 'media_assets' },
+    refs: { image_id: 'media_assets', banner_image_id: 'media_assets' },
   },
   site_settings: { json: ['social_links'] },
 };

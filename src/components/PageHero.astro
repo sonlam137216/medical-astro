@@ -1,10 +1,13 @@
 ---
 import { Image } from 'astro:assets';
 import type { Img } from '../data/types';
+import type { PublicImage } from '../lib/media';
+import ProfileImage from './ProfileImage.astro';
 
 interface Props {
   label: string;
-  image: Img;
+  /** A sample photo bundled with the site, or (banner only) a picture from the media library. */
+  image: Img | PublicImage;
   /** Rendered image height in px (width is 568 for `split`; `banner` uses it as the band height). */
   imageHeight: number;
   /** Rounded 24px image (landing and packages pages) or square corners (About, Services, Doctors). */
@@ -39,16 +42,21 @@ const banner = variant === 'banner';
 
 {banner ? (
   <section class:list={['banner', { 'banner--dark': dark }]} aria-labelledby={headingId}>
-    <Image
-      class="banner__bg"
-      src={image.src}
-      alt={image.alt}
-      widths={[960, 1440, 2000]}
-      sizes="100vw"
-      loading="eager"
-      fetchpriority="high"
-      style={`object-position: ${position};`}
-    />
+    {'srcset' in image ? (
+      // From the media library (a service's banner): cropped as the 'service-banner' frame, its focus point in view.
+      <ProfileImage class="banner__bg" image={image} slot="service-banner" sizes="100vw" priority />
+    ) : (
+      <Image
+        class="banner__bg"
+        src={image.src}
+        alt={image.alt}
+        widths={[960, 1440, 2000]}
+        sizes="100vw"
+        loading="eager"
+        fetchpriority="high"
+        style={`object-position: ${position};`}
+      />
+    )}
     <div class="container banner__inner" style={`min-height: ${imageHeight}px;`}>
       <div class="hero__text">
         <div class="hero__top">
@@ -94,18 +102,27 @@ const banner = variant === 'banner';
           <slot name="extra" />
         </div>
       </div>
-      <Image
-        class:list={['hero__img', { 'is-rounded': rounded }]}
-        src={image.src}
-        alt={image.alt}
-        width={568}
-        height={imageHeight}
-        densities={[1, 2]}
-        sizes="(max-width: 900px) 100vw, 568px"
-        loading="eager"
-        fetchpriority="high"
-        style={`aspect-ratio: 568 / ${imageHeight};`}
-      />
+      {'srcset' in image ? (
+        <ProfileImage
+          class:list={['hero__img', { 'is-rounded': rounded }]}
+          image={image}
+          sizes="(max-width: 900px) 100vw, 568px"
+          priority
+        />
+      ) : (
+        <Image
+          class:list={['hero__img', { 'is-rounded': rounded }]}
+          src={image.src}
+          alt={image.alt}
+          width={568}
+          height={imageHeight}
+          densities={[1, 2]}
+          sizes="(max-width: 900px) 100vw, 568px"
+          loading="eager"
+          fetchpriority="high"
+          style={`aspect-ratio: 568 / ${imageHeight};`}
+        />
+      )}
     </div>
   </section>
 )}

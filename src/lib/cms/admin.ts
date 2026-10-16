@@ -13,6 +13,7 @@ import {
   type FieldErrors,
   type FormValues,
   type Row,
+  UUID_RE,
 } from './fields';
 
 // Server side of the generic admin content pages. The table name comes from the registry (never from the
@@ -157,7 +158,15 @@ export async function processPost(
     return { status: 404, values, errors: {}, formError: 'This item no longer exists.' };
   }
   if (before) await redirectMovedArticle(db, before, row);
-  return { redirect: redirectTo(`/admin/content/${def.key}?saved=1`) };
+  return { redirect: redirectTo(afterSave(def, row)) };
+}
+
+/** Where a save or a delete goes: the list, or the page of the parent row for a child entity (the treatments). */
+export function afterSave(def: EntityDef, row: Row | null, outcome: 'saved' | 'deleted' = 'saved') {
+  const parentId = def.parent && row ? row[def.parent.field] : null;
+  return typeof parentId === 'string' && UUID_RE.test(parentId)
+    ? `/admin/content/${def.parent!.entity}/${parentId}?child=${outcome}#children`
+    : `/admin/content/${def.key}?${outcome}=1`;
 }
 
 /**
@@ -222,8 +231,11 @@ export async function loadRow(db: AdminDb, def: EntityDef, id: string): Promise<
 export async function listRows(
   db: AdminDb,
   def: EntityDef,
+  /** Only the rows of one parent (a child entity's `parent.field` = this id). */
+  parentId?: string | null,
 ): Promise<{ rows: Row[]; failed: boolean }> {
   let query = anyDb(db).from(def.table).select('*');
+  if (def.parent && parentId) query = query.eq(def.parent.field, parentId);
   for (const o of def.order) query = query.order(o.column, { ascending: o.ascending ?? true });
   const { data, error } = await query.limit(500);
   return { rows: (data ?? []) as Row[], failed: Boolean(error) };

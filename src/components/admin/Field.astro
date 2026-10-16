@@ -38,6 +38,7 @@ const slotsFor = (f: Extract<Field, { type: 'items' }>) => {
     value={text(f.name)}
     images={options.images}
     slot={f.slot}
+    help={f.help}
     error={error}
   />
 )}
@@ -245,9 +246,10 @@ const slotsFor = (f: Extract<Field, { type: 'items' }>) => {
           name={f.name}
           aria-invalid={invalid(f.name)}
           data-media-video={f.where?.kind === 'video' ? '' : undefined}
+          required={f.required}
         >
-          <option value="" selected={text(f.name) === ''}>
-            None
+          <option value="" selected={text(f.name) === ''} disabled={f.required}>
+            {f.required ? 'Choose…' : 'None'}
           </option>
           {(options.refs[f.name] ?? []).map((o) => (
             <option value={o.value} selected={text(f.name) === o.value}>

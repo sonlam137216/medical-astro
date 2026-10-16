@@ -24,6 +24,12 @@ export interface EntityDef {
   deletable: boolean;
   /** Whether the entity has an `is_visible` column that the form should hide behind a checkbox. */
   menu?: boolean;
+  /**
+   * The rows belong to a row of another entity (the treatments of a service): `field` is the `ref` field naming it.
+   * The list can be filtered by it, "Add" from the parent's page starts with it chosen, saving or deleting goes back
+   * to the parent's page, and the parent's page lists its rows.
+   */
+  parent?: { field: string; entity: string };
 }
 
 const sortOrder: Field = {
@@ -156,11 +162,11 @@ export const ENTITIES: EntityDef[] = [
     singular: 'service',
     plural: 'Services',
     intro:
-      'The treatments shown on the Home page, the Services page, the consultation forms and the article sidebar. Only fill in what the clinic has confirmed: a price or an included item that is left empty is simply not shown. Changes go live after you publish the website.',
+      'The groups of treatments (Dental Implants, Porcelain Veneers…): the “Services” drop-down of the main menu, the cards of the Services page, a page of its own for each service and the consultation forms. The treatments of a service and their prices are added on the service’s page, under “Treatments”. Changes go live after you publish the website.',
     titleField: 'title',
     columns: [
       { field: 'title', label: 'Service' },
-      { field: 'price_text', label: 'Price text' },
+      { field: 'slug', label: 'Address' },
       { field: 'sort_order', label: 'Order' },
       { field: 'is_visible', label: 'Shown' },
     ],
@@ -171,7 +177,7 @@ export const ENTITIES: EntityDef[] = [
         name: 'slug',
         label: 'Address name',
         from: 'title',
-        help: 'Used to link to this service on the Services page. “dental-implants” links to the Dental Implants page.',
+        help: 'The page of the service is /services/<address name>, for example /services/dental-implants (that one has a page written for it).',
       },
       {
         type: 'textarea',
@@ -179,7 +185,85 @@ export const ENTITIES: EntityDef[] = [
         label: 'Short description',
         max: 400,
         rows: 4,
-        help: 'Shown on the Services page.',
+        help: 'Shown on the Services page card and at the top of the service’s page.',
+      },
+      {
+        type: 'textarea',
+        name: 'description',
+        label: 'About this service',
+        max: 6000,
+        rows: 10,
+        help: 'Shown on the service’s page under the treatments. Plain text; leave an empty line between paragraphs. Leave empty to show nothing.',
+      },
+      {
+        type: 'image',
+        name: 'image_id',
+        label: 'Photo',
+        slot: 'service-card',
+        help: 'The card on the Services page.',
+      },
+      {
+        type: 'image',
+        name: 'banner_image_id',
+        label: 'Banner picture',
+        slot: 'service-banner',
+        help: 'The wide picture at the top of the service’s page. The title sits over the left part, so keep the subject on the right. Empty: the site’s default banner.',
+      },
+      sortOrder,
+      visible,
+      {
+        type: 'text',
+        name: 'seo_title',
+        label: 'Search title',
+        max: 200,
+        group: 'Search engines',
+        help: 'Empty: “<name> · Melatec Dental Clinic”.',
+      },
+      {
+        type: 'textarea',
+        name: 'seo_description',
+        label: 'Search description',
+        max: 400,
+        rows: 3,
+        group: 'Search engines',
+        help: 'Empty: the short description.',
+      },
+    ],
+    order: [{ column: 'sort_order' }, { column: 'title' }],
+    deletable: true,
+  },
+  {
+    key: 'service-options',
+    table: 'service_options',
+    singular: 'treatment',
+    plural: 'Treatments',
+    intro:
+      'The treatments of each service (for example All-on-4 under Dental Implants), shown as price cards on the service’s page. Tick “Show on the Home page” for the cards of the Home page. Only fill in what the clinic has confirmed: a price or an included item that is left empty is simply not shown. Changes go live after you publish the website.',
+    titleField: 'title',
+    columns: [
+      { field: 'title', label: 'Treatment' },
+      { field: 'service_id', label: 'Service' },
+      { field: 'price_text', label: 'Price' },
+      { field: 'show_on_home', label: 'Home page' },
+      { field: 'sort_order', label: 'Order' },
+      { field: 'is_visible', label: 'Shown' },
+    ],
+    fields: [
+      {
+        type: 'ref',
+        name: 'service_id',
+        label: 'Service',
+        table: 'services',
+        labelColumn: 'title',
+        required: true,
+      },
+      { type: 'text', name: 'title', label: 'Name', max: 160, required: true },
+      {
+        type: 'text',
+        name: 'subtitle',
+        label: 'Second line',
+        max: 160,
+        help: 'A short line under the name, for example “Full-arch restoration”. Leave empty for none.',
       },
       {
         type: 'lines',
@@ -187,22 +271,28 @@ export const ENTITIES: EntityDef[] = [
         label: 'What is included',
         maxItems: 8,
         maxLength: 120,
-        help: 'One item per line, shown as a list on the Home page card.',
+        help: 'One item per line, shown as a list on the card.',
       },
       {
         type: 'text',
         name: 'price_text',
         label: 'Price text',
         max: 120,
-        placeholder: 'From $600',
-        help: 'Shown exactly as written on the Home page card. Leave empty to show no price.',
+        placeholder: 'From $400 per tooth',
+        help: 'Shown exactly as written on the card. Leave empty to show no price: the card then invites a quote request.',
       },
-      { type: 'image', name: 'image_id', label: 'Photo', slot: 'service-card' },
+      {
+        type: 'bool',
+        name: 'show_on_home',
+        label: 'Show on the Home page',
+        default: false,
+      },
       sortOrder,
       visible,
     ],
-    order: [{ column: 'sort_order' }, { column: 'title' }],
+    order: [{ column: 'service_id' }, { column: 'sort_order' }, { column: 'title' }],
     deletable: true,
+    parent: { field: 'service_id', entity: 'services' },
   },
   {
     key: 'packages',

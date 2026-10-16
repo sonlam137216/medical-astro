@@ -59,9 +59,7 @@ const complete: Snapshot = {
   ],
   destinations: [{ slug: 'd', name: 'D', summary: null, image: null }],
   sections: REQUIRED_SECTIONS.map((key) => ({ key, visible: false, data: {} })),
-  services: [
-    { slug: 's', title: 'S', summary: null, inclusions: [], priceText: null, image: null },
-  ],
+  services: [{ slug: 's', title: 'S', summary: null, image: null, options: [] }],
 };
 
 test('older revisions (only doctors) are still valid', () => {
@@ -165,19 +163,40 @@ test('locations: validated shape, photo needs a description', () => {
 });
 
 test('services: validated shape, photo needs a description, required for production', () => {
+  const option = (over = {}) => ({
+    title: 'All-on-4',
+    subtitle: null,
+    priceText: null,
+    inclusions: [],
+    home: false,
+    ...over,
+  });
   const service = (over = {}) => ({
     slug: 'dental-implants',
     title: 'Dental Implants',
     summary: null,
-    inclusions: [],
-    priceText: null,
     image: null,
+    description: null,
+    seoTitle: null,
+    seoDescription: null,
+    options: [option()],
     ...over,
   });
   assert.equal(isSnapshot({ services: [service()] }), true);
+  // Revisions published before the treatments: a price and inclusions on the service, no options.
+  assert.equal(
+    isSnapshot({
+      services: [
+        { slug: 's', title: 'S', summary: null, inclusions: [], priceText: null, image: null },
+      ],
+    }),
+    true,
+  );
   for (const bad of [
     { services: {} },
-    { services: [service({ inclusions: 'x' })] },
+    { services: [service({ options: 'x' })] },
+    { services: [service({ options: [option({ inclusions: 'x' })] })] },
+    { services: [service({ options: [option({ home: 'yes' })] })] },
     { services: [service({ image: { key: 5 } })] },
   ]) {
     assert.equal(isSnapshot(bad), false, JSON.stringify(bad));

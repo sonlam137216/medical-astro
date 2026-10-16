@@ -5,13 +5,13 @@ import Section from '../../components/Section.astro';
 import SectionIntro from '../../components/SectionIntro.astro';
 import Button from '../../components/Button.astro';
 import InfoCard from '../../components/cards/InfoCard.astro';
-import PriceCard from '../../components/cards/PriceCard.astro';
+import TreatmentGrid from '../../components/TreatmentGrid.astro';
 import TreatmentCosts from '../../components/home/TreatmentCosts.astro';
 import SeamlessJourney from '../../components/SeamlessJourney.astro';
 import PlanVisit from '../../components/PlanVisit.astro';
 import LatestArticles from '../../components/articles/LatestArticles.astro';
 import { getPageSeo } from '../../lib/site-content';
-import { getFaqs, getSection } from '../../lib/content';
+import { getFaqs, getSection, getService } from '../../lib/content';
 import { faqJsonLd } from '../../lib/seo';
 
 import { heroImage } from '../../data/implants';
@@ -22,6 +22,8 @@ export const prerender = true;
 const paragraphs = (text: string) => text.split(/\n{2,}/);
 const hero = (await getSection('implants_hero'))!;
 const costs = (await getSection('implants_costs'))!;
+// The price cards: the treatments of the Dental Implants service (Services > Dental Implants > Treatments).
+const treatments = (await getService('dental-implants'))?.options ?? [];
 const why = (await getSection('implants_why'))!;
 const faq = (await getSection('implants_faq'))!;
 const faqs = await getFaqs('dental-implants', faq.questions);
@@ -67,25 +69,14 @@ const faqData = faqJsonLd(faqs);
     </section>
   )}
 
-  <Section tone="soft" labelledby="prices-title">
-    <SectionIntro label={costs.label} headingId="prices-title" align="center" lined>
-      <Fragment slot="title">{costs.title}</Fragment>
-    </SectionIntro>
-    <ul class="grid">
-      {costs.cards.map((c, i) => (
-        <li>
-          <PriceCard
-            title={c.title}
-            subtitle={c.subtitle}
-            inclusions={c.inclusions}
-            total={c.total}
-            href="#consultation"
-            tone={i === 1 ? 'featured' : i === 2 ? 'tint' : 'default'}
-          />
-        </li>
-      ))}
-    </ul>
-  </Section>
+  {treatments.length > 0 && (
+    <Section tone="soft" labelledby="prices-title">
+      <SectionIntro label={costs.label} headingId="prices-title" align="center" lined>
+        <Fragment slot="title">{costs.title}</Fragment>
+      </SectionIntro>
+      <TreatmentGrid items={treatments} />
+    </Section>
+  )}
 
   <TreatmentCosts sectionKey="implants_comparison" align="center" />
 

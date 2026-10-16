@@ -3,6 +3,7 @@ import AdminLayout from '../../../../layouts/AdminLayout.astro';
 import EntityForm from '../../../../components/admin/EntityForm.astro';
 import { entityByKey } from '../../../../lib/cms/entities';
 import { emptyValues, loadOptions, processPost } from '../../../../lib/cms/admin';
+import { UUID_RE } from '../../../../lib/cms/fields';
 
 export const prerender = false;
 
@@ -16,17 +17,34 @@ if (result && 'redirect' in result) return result.redirect;
 if (result) Astro.response.status = result.status;
 
 const options = await loadOptions(db, def);
+
+// "Add treatment" on a service's page: start with that service chosen, and go back to it.
+const parentId = def.parent ? (Astro.url.searchParams.get(def.parent.field) ?? '') : '';
+const parent =
+  def.parent && UUID_RE.test(parentId)
+    ? options.refs[def.parent.field]?.find((o) => o.value === parentId.toLowerCase())
+    : undefined;
+const values = result?.values ?? {
+  ...emptyValues(def.fields),
+  ...(parent && def.parent ? { [def.parent.field]: parent.value } : {}),
+};
 ---
 
 <AdminLayout title={`Add ${def.singular}`} current={`content:${def.key}`}>
   <main class="admin-main">
     <p>
-      <a href={`/admin/content/${def.key}`}>← {def.plural}</a>
+      {parent && def.parent ? (
+        <a href={`/admin/content/${def.parent.entity}/${parent.value}#children`}>
+          ← {parent.label}
+        </a>
+      ) : (
+        <a href={`/admin/content/${def.key}`}>← {def.plural}</a>
+      )}
     </p>
     <h1>Add {def.singular}</h1>
     <EntityForm
       def={def}
-      values={result?.values ?? emptyValues(def.fields)}
+      values={values}
       errors={result?.errors}
       formError={result?.formError}
       options={options}

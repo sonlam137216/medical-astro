@@ -454,31 +454,10 @@ export const SECTIONS: SectionDef[] = [
     key: 'implants_costs',
     page: '/services/dental-implants',
     label: 'Dental Implants: what you pay',
-    where: 'The three price cards.',
-    fields: [
-      label,
-      title,
-      items(
-        'cards',
-        'Cards',
-        'Card',
-        6,
-        [
-          col('title', 'Title', 'text', 80, true),
-          col('subtitle', 'Line under the title', 'text', 80),
-          col('inclusions', 'Text lines', 'lines', 200, false, 'One point per line.'),
-          col(
-            'total',
-            'Price line',
-            'text',
-            80,
-            false,
-            'For example “TOTAL: $600” or “Personalised quote”.',
-          ),
-        ],
-        { required: true },
-      ),
-    ],
+    where:
+      'The heading above the price cards (the cards are the treatments of the Dental Implants service, in Services).',
+    canHide: false,
+    fields: [label, title],
   },
   {
     key: 'implants_comparison',
@@ -536,7 +515,6 @@ export const REQUIRED_SECTIONS = [
   'home_smile',
   'about_stats',
   'doctors_hero',
-  'implants_costs',
   'implants_comparison',
 ] as const;
 

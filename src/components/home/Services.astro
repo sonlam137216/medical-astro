@@ -2,77 +2,36 @@
 import Section from '../Section.astro';
 import SectionIntro from '../SectionIntro.astro';
 import Button from '../Button.astro';
-import PriceCard from '../cards/PriceCard.astro';
-import { getSection, getServices } from '../../lib/content';
+import TreatmentGrid from '../TreatmentGrid.astro';
+import { getHomeTreatments, getSection } from '../../lib/content';
 
-const services = await getServices();
+// The treatments ticked "Show on the Home page" (Services > a service > Treatments); none: no section.
+const treatments = await getHomeTreatments();
 const heading = (await getSection('home_services'))!;
 ---
 
-<Section labelledby="services-title">
-  <SectionIntro label={heading.label} headingId="services-title" align="center" lined>
-    <Fragment slot="title">{heading.title}</Fragment>
-  </SectionIntro>
+{treatments.length > 0 && (
+  <Section labelledby="services-title">
+    <SectionIntro label={heading.label} headingId="services-title" align="center" lined>
+      <Fragment slot="title">{heading.title}</Fragment>
+    </SectionIntro>
 
-  <ul class="grid">
-    {services.map((s, i) => (
-      <li>
-        <PriceCard
-          title={s.title}
-          inclusions={s.inclusions}
-          total={s.priceText}
-          href={s.href}
-          tone={i === 1 ? 'featured' : i === 2 ? 'tint' : 'default'}
-        />
-      </li>
-    ))}
-  </ul>
+    <TreatmentGrid items={treatments} />
 
-  <div class="actions services__actions">
-    <Button href="/services">Explore Our Dental Services</Button>
-    <Button variant="outline" href="/dental-packages">
-      Top Dental Packages
-    </Button>
-  </div>
-</Section>
+    <div class="actions services__actions">
+      <Button href="/services">Explore Our Dental Services</Button>
+      <Button variant="outline" href="/dental-packages">
+        Top Dental Packages
+      </Button>
+    </div>
+  </Section>
+)}
 
 <style>
-  /* 3 per row, the last row centred (Figma: 3 + 2) */
-  .grid {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 24px;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
-
-  .grid li {
-    flex: 0 0 calc((100% - 48px) / 3);
-    display: flex;
-  }
-
-  .grid li > :global(*) {
-    flex: 1;
-  }
-
   .actions {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
     gap: 16px;
-  }
-
-  @media (max-width: 1024px) {
-    .grid li {
-      flex-basis: calc((100% - 24px) / 2);
-    }
-  }
-
-  @media (max-width: 640px) {
-    .grid li {
-      flex-basis: 100%;
-    }
   }
 </style>

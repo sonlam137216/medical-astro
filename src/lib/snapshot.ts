@@ -106,14 +106,31 @@ export interface SnapshotPage {
   shareImage?: SnapshotImage;
 }
 
+/** A treatment of a service (a price card on the service's page and, when `home`, on the Home page). */
+export interface SnapshotServiceOption {
+  title: string;
+  subtitle: string | null;
+  /** Shown as written (for example "From $400 per tooth"); null: no price is shown. */
+  priceText: string | null;
+  inclusions: string[];
+  home: boolean;
+}
+
+/** A service: a group of treatments with a page of its own. */
 export interface SnapshotService {
   slug: string;
   title: string;
   summary: string | null;
-  inclusions: string[];
-  /** Shown as written (for example "From $600"); null: no price is shown. */
-  priceText: string | null;
   image: SnapshotImage | null;
+  // Absent in revisions published before the treatments existed (their services carried a price and
+  // "what is included" lines of their own, no longer shown).
+  description?: string | null;
+  seoTitle?: string | null;
+  seoDescription?: string | null;
+  /** The shown treatments, in order. */
+  options?: SnapshotServiceOption[];
+  /** The wide picture at the top of the service's page; absent: the default banner. */
+  banner?: SnapshotImage;
 }
 
 export interface SnapshotPackage {
@@ -475,20 +492,44 @@ export async function buildSnapshot(db: AdminDb): Promise<Snapshot> {
 
   const { data: services, error: servicesError } = await db
     .from('services')
-    .select(`slug, title, summary, inclusions, price_text, image:media_assets(${IMAGE_COLUMNS})`)
+    .select(
+      `id, slug, title, summary, description, seo_title, seo_description, image:media_assets!image_id(${IMAGE_COLUMNS}), banner:media_assets!banner_image_id(${IMAGE_COLUMNS})`,
+    )
     .eq('is_visible', true)
     .order('sort_order', { ascending: true })
     .order('title', { ascending: true });
   if (servicesError) throw fail('services', servicesError);
+  const { data: options, error: optionsError } = await db
+    .from('service_options')
+    .select('service_id, title, subtitle, price_text, inclusions, show_on_home')
+    .eq('is_visible', true)
+    .order('sort_order', { ascending: true })
+    .order('title', { ascending: true });
+  if (optionsError) throw fail('service_options', optionsError);
   if (services.length > 0) {
-    snapshot.services = services.map((s) => ({
-      slug: s.slug,
-      title: s.title,
-      summary: s.summary,
-      inclusions: s.inclusions,
-      priceText: s.price_text,
-      image: toSnapshotImage(s.image),
-    }));
+    snapshot.services = services.map((s) => {
+      const banner = toSnapshotImage(s.banner);
+      return {
+        slug: s.slug,
+        title: s.title,
+        summary: s.summary,
+        image: toSnapshotImage(s.image),
+        // Only when chosen, so services without one keep the same shape (and hash) as before.
+        ...(banner ? { banner } : {}),
+        description: s.description,
+        seoTitle: s.seo_title,
+        seoDescription: s.seo_description,
+        options: options
+          .filter((o) => o.service_id === s.id)
+          .map((o) => ({
+            title: o.title,
+            subtitle: o.subtitle,
+            priceText: o.price_text,
+            inclusions: o.inclusions,
+            home: o.show_on_home,
+          })),
+      };
+    });
   }
 
   const { data: packages, error: packagesError } = await db
@@ -700,6 +741,11 @@ export function snapshotProblems(snapshot: Snapshot, target: string = 'staging')
         `Service “${s.title}”: the photo has no description. Add one in Media, or mark the image as decorative.`,
       );
     }
+    if (s.banner && !s.banner.decorative && !s.banner.alt) {
+      problems.push(
+        `Service “${s.title}”: the banner picture has no description. Add one in Media, or mark the image as decorative.`,
+      );
+    }
   }
   for (const section of snapshot.sections ?? []) {
     const def = sectionByKey(section.key);
@@ -833,10 +879,19 @@ export function isSnapshot(value: unknown): value is Snapshot {
         isObject(x) &&
         typeof x.slug === 'string' &&
         typeof x.title === 'string' &&
-        Array.isArray(x.inclusions) &&
         (x.image === undefined ||
           x.image === null ||
-          (isObject(x.image) && typeof x.image.key === 'string')),
+          (isObject(x.image) && typeof x.image.key === 'string')) &&
+        (x.banner === undefined || (isObject(x.banner) && typeof x.banner.key === 'string')) &&
+        (x.options === undefined ||
+          (Array.isArray(x.options) &&
+            x.options.every(
+              (o) =>
+                isObject(o) &&
+                typeof o.title === 'string' &&
+                Array.isArray(o.inclusions) &&
+                typeof o.home === 'boolean',
+            ))),
     )
   )
     return false;

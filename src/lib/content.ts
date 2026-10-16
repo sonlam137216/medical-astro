@@ -8,6 +8,7 @@ import {
   packageCards as samplePackages,
 } from '../data/shared';
 import { discover as sampleDiscover } from '../data/packages';
+import { costCards as sampleImplantCards } from '../data/implants';
 import { formatPrice, servicePath } from './services';
 import { mergeSection, sectionByKey } from './cms/sections';
 import { SECTION_SAMPLES, type SectionKey } from '../data/sections';
@@ -143,27 +144,43 @@ export async function getDoctors(): Promise<PublicDoctor[]> {
   return doctorProfiles.map((d) => ({ ...d, languages: ['English'] }));
 }
 
-export interface PublicService {
-  slug: string | null;
+/** A treatment of a service: a price card. */
+export interface PublicServiceOption {
   title: string;
-  /** Short description for the Services page. */
-  summary: string | null;
+  subtitle: string | null;
   inclusions: string[];
-  /** Shown as written; null: no price line. */
+  /** Shown as written; null: no price line (the card invites a quote request). */
   priceText: string | null;
-  href: string;
-  /** True when the service has a page of its own to link to. */
-  hasPage: boolean;
-  /** A static sample photo or an image from the media library; absent: the card shows no picture. */
-  image?: Img | PublicImage;
 }
 
-/** Services for the public pages: the published list, or the sample cards before the first publish. */
+/** A service: a group of treatments with a page of its own at `href`. */
+export interface PublicService {
+  slug: string;
+  title: string;
+  /** Short description: the Services page card and the top of the service's page. */
+  summary: string | null;
+  /** Longer text of the service's page; paragraphs are separated by a blank line. */
+  description: string | null;
+  seoTitle: string | null;
+  seoDescription: string | null;
+  href: string;
+  /** A static sample photo or an image from the media library; absent: the card shows no picture. */
+  image?: Img | PublicImage;
+  /** The wide picture at the top of the service's page; absent: the default banner. */
+  banner?: PublicImage;
+  options: PublicServiceOption[];
+}
+
+/** A price card of the Home page: a treatment ticked "Show on the Home page", linking to its service. */
+export interface PublicHomeTreatment extends PublicServiceOption {
+  href: string;
+}
+
 /**
- * The services of the CMS. Until the first publish with services, the built-in samples stand in: `home` = the priced
- * cards of the Home page, `services` = the five service cards of the Services page (different titles in Figma).
+ * The services of the CMS, in order. Until the first publish with services, the built-in samples stand in (the five
+ * services of the Figma Services page, with the Home page price cards as the treatments of the first three).
  */
-export async function getServices(sample: 'home' | 'services' = 'home'): Promise<PublicService[]> {
+export async function getServices(): Promise<PublicService[]> {
   const snapshot = await loadSnapshot();
   if (snapshot?.services) {
     const publicBase = setting('R2_PUBLIC_BASE_URL');
@@ -171,32 +188,74 @@ export async function getServices(sample: 'home' | 'services' = 'home'): Promise
       slug: s.slug,
       title: s.title,
       summary: s.summary,
-      inclusions: s.inclusions,
-      priceText: s.priceText,
-      ...servicePath(s.slug),
+      description: s.description ?? null,
+      seoTitle: s.seoTitle ?? null,
+      seoDescription: s.seoDescription ?? null,
+      href: servicePath(s.slug),
       image: (s.image && toPublicImage(snapshotImageInput(s.image), publicBase)) || undefined,
+      banner: (s.banner && toPublicImage(snapshotImageInput(s.banner), publicBase)) || undefined,
+      options: (s.options ?? []).map((o) => ({
+        title: o.title,
+        subtitle: o.subtitle,
+        inclusions: o.inclusions,
+        priceText: o.priceText,
+      })),
     }));
   }
-  if (sample === 'services') {
-    return sampleServiceDetails.map((s) => ({
-      slug: null,
-      title: s.title,
-      summary: s.body,
-      inclusions: [],
-      priceText: null,
-      href: s.href,
-      hasPage: true,
-      image: s.image,
-    }));
-  }
-  return sampleServices.map((s, i) => ({
-    slug: null,
+  return sampleServiceDetails.map((s) => ({
+    slug: s.slug,
     title: s.title,
-    summary: sampleServiceDetails[i]?.body ?? null,
-    inclusions: s.inclusions,
-    priceText: s.total,
-    href: s.href,
-    hasPage: true,
+    summary: s.body,
+    description: null,
+    seoTitle: null,
+    seoDescription: null,
+    href: servicePath(s.slug),
+    image: s.image,
+    // The Dental Implants page has its own sample cards (with a second line); the others take the Home cards.
+    options:
+      s.slug === 'dental-implants'
+        ? sampleImplantCards.map((c) => ({ ...c, priceText: c.total }))
+        : sampleServices
+            .filter((c) => c.service === s.slug)
+            .map((c) => ({
+              title: c.title,
+              subtitle: null,
+              inclusions: c.inclusions,
+              priceText: c.total,
+            })),
+  }));
+}
+
+/** One service by its slug (the service's page). */
+export async function getService(slug: string): Promise<PublicService | undefined> {
+  return (await getServices()).find((s) => s.slug === slug);
+}
+
+/**
+ * The price cards of the Home page: the treatments ticked "Show on the Home page", in the order of their services.
+ * Before the first publish with services: the sample cards of the design.
+ */
+export async function getHomeTreatments(): Promise<PublicHomeTreatment[]> {
+  const snapshot = await loadSnapshot();
+  if (snapshot?.services) {
+    return snapshot.services.flatMap((s) =>
+      (s.options ?? [])
+        .filter((o) => o.home)
+        .map((o) => ({
+          title: o.title,
+          subtitle: o.subtitle,
+          inclusions: o.inclusions,
+          priceText: o.priceText,
+          href: servicePath(s.slug),
+        })),
+    );
+  }
+  return sampleServices.map((c) => ({
+    title: c.title,
+    subtitle: null,
+    inclusions: c.inclusions,
+    priceText: c.total,
+    href: servicePath(c.service),
   }));
 }
 
@@ -232,7 +291,7 @@ export async function getPackages(kind: PackageKind): Promise<PublicPackage[]> {
           inclusions: p.inclusions,
           total: p.price ? `TOTAL: ${formatPrice(p.price.amount, p.price.currency)}` : null,
           note: p.price ? p.priceConditions : null,
-          href: link?.href ?? '#consultation',
+          href: link ?? '#consultation',
           linkLabel: link ? 'Learn more' : 'Request a quote',
           image: toPublicImageOrUndefined(p.image),
         };

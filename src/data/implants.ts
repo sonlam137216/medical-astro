@@ -32,42 +32,45 @@ const sharedInclusions = [
 export const costs = {
   label: 'Treatment costs',
   title: 'What You Pay at Melatec',
-  cards: [
-    {
-      title: 'Single Dental Implant',
-      subtitle: 'Premium Korean Implant',
-      inclusions: [
-        '1 Korean implant fixture + abutment',
-        'Premium porcelain crown',
-        'Visa assistance',
-        ...sharedInclusions,
-      ],
-      total: '$400 per',
-    },
-    {
-      title: 'ALL-ON-4',
-      subtitle: 'Premium Korean Implant',
-      inclusions: [
-        '4 Korean implant fixtures + abutments',
-        'Temporary denture',
-        '12 premium Zirconia crowns',
-        ...sharedInclusions,
-      ],
-      total: '$3,100 per',
-    },
-    {
-      title: 'ALL-ON-6',
-      subtitle: 'Premium Korean Implant',
-      inclusions: [
-        '6 Korean implant fixtures + abutments',
-        'Temporary denture',
-        '14 premium Zirconia crowns',
-        ...sharedInclusions,
-      ],
-      total: '$3,900 per',
-    },
-  ],
 };
+
+// PLACEHOLDER: the price cards of the design, the sample treatments of the Dental Implants service until the
+// services are published (src/lib/content.ts). Every figure and inclusion must be confirmed by the clinic.
+export const costCards = [
+  {
+    title: 'Single Dental Implant',
+    subtitle: 'Premium Korean Implant',
+    inclusions: [
+      '1 Korean implant fixture + abutment',
+      'Premium porcelain crown',
+      'Visa assistance',
+      ...sharedInclusions,
+    ],
+    total: '$400 per',
+  },
+  {
+    title: 'ALL-ON-4',
+    subtitle: 'Premium Korean Implant',
+    inclusions: [
+      '4 Korean implant fixtures + abutments',
+      'Temporary denture',
+      '12 premium Zirconia crowns',
+      ...sharedInclusions,
+    ],
+    total: '$3,100 per',
+  },
+  {
+    title: 'ALL-ON-6',
+    subtitle: 'Premium Korean Implant',
+    inclusions: [
+      '6 Korean implant fixtures + abutments',
+      'Temporary denture',
+      '14 premium Zirconia crowns',
+      ...sharedInclusions,
+    ],
+    total: '$3,900 per',
+  },
+];
 
 export const comparison = {
   label: 'Cost comparison',

@@ -56,6 +56,7 @@ const servicePerks = [
 ];
 export const services = [
   {
+    service: 'dental-implants',
     title: 'Single Dental Implant',
     inclusions: [
       '1 Korean implant fixture + abutment',
@@ -66,6 +67,7 @@ export const services = [
     total: '$400 per',
   },
   {
+    service: 'dental-implants',
     title: 'ALL-ON-4',
     inclusions: [
       '4 Korean implant fixtures + abutments',
@@ -76,6 +78,7 @@ export const services = [
     total: '$3,100 per',
   },
   {
+    service: 'dental-implants',
     title: 'ALL-ON-6',
     inclusions: [
       '6 Korean implant fixtures + abutments',
@@ -86,16 +89,18 @@ export const services = [
     total: '$3,900 per',
   },
   {
+    service: 'dental-crowns',
     title: 'Porcelain Crowns',
     inclusions: ['16 premium Zirconia crowns', 'Visa assistance', ...servicePerks],
     total: '$850 per',
   },
   {
+    service: 'porcelain-veneers',
     title: 'Porcelain Veneers',
     inclusions: ['Premium porcelain veneers', 'Visa assistance', ...servicePerks],
     total: '$150 per',
   },
-].map((c) => ({ ...c, href: '/services/dental-implants' })); // PROVISIONAL link
+]; // `service`: the sample service (src/data/shared.ts) the card belongs to
 
 export const conversations = {
   label: 'Hear from our dentists & patients',

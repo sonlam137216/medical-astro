@@ -9,6 +9,8 @@ export interface MenuLink {
 
 export interface MenuGroup {
   label: string;
+  /** The name itself links to a page (Services); absent: the name only opens the drop-down (Guides). */
+  href?: string;
   links: MenuLink[];
 }
 
@@ -41,6 +43,26 @@ export function groupMenu(
     found.links.push({ label, href });
   }
   return out;
+}
+
+/** Address of the Services page: its main menu link opens a drop-down of the services. */
+export const SERVICES_PATH = '/services';
+
+/**
+ * The main menu link to the Services page becomes a drop-down of the services, so a service added in the admin is
+ * in the menu without a menu link of its own. The name still links to the Services page. Nothing changes when there
+ * are no services, or when the link is already in a drop-down group.
+ */
+export function withServicesMenu(
+  items: readonly MenuItem[],
+  services: readonly MenuLink[],
+): MenuItem[] {
+  if (services.length === 0) return [...items];
+  return items.map((item) =>
+    !isMenuGroup(item) && item.href.replace(/\/$/, '') === SERVICES_PATH
+      ? { label: item.label, href: item.href, links: [...services] }
+      : item,
+  );
 }
 
 /** Form check of a menu link (admin): only the main menu has drop-downs. */

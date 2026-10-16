@@ -133,3 +133,13 @@ insert or ignore into packages (slug, kind, title, service_id, sort_order) value
    (select id from services where slug = 'dental-implants'), 2),
   ('all-on-6', 'single_treatment', 'All-on-6 restoration',
    (select id from services where slug = 'dental-implants'), 3);
+
+-- The treatments of the Dental Implants service, as named on its page. No price and no "what is included" lines:
+-- the cards then invite a quote request until the clinic fills them in. None is ticked for the Home page.
+insert into service_options (service_id, title, sort_order)
+select s.id, o.title, o.sort_order
+from services s,
+  (select 'Single-tooth implant' as title, 1 as sort_order
+   union all select 'All-on-4 restoration', 2
+   union all select 'All-on-6 restoration', 3) o
+where s.slug = 'dental-implants' and not exists (select 1 from service_options);

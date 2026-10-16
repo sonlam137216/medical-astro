@@ -11,7 +11,7 @@ import { loadSnapshot, getPublicBase, getServices, getLocations } from './conten
 import { DEFAULT_SHARE_IMAGE, absoluteUrl, organizationJsonLd } from './seo';
 import { snapshotImageInput, toPublicImage, toPublicVideo, type PublicVideo } from './media';
 import { parseVideoUrl, type VideoEmbed } from './video-embed';
-import { groupMenu, type MenuItem } from './menu';
+import { groupMenu, withServicesMenu, type MenuItem } from './menu';
 
 // BUILD-TIME ONLY (see content.ts). Site-wide details and menus for the header, footer and contact blocks.
 //
@@ -91,7 +91,10 @@ export async function getSiteContent(): Promise<SiteContent> {
         }))
       : Object.entries(PLATFORM_NAMES).map(([platform, name]) => ({ platform, name, href: null })), // PLACEHOLDER
     utility: nav ? (at('utility')[0] ?? null) : sampleUtility,
-    main: nav ? groupMenu(nav.filter((n) => n.location === 'header')) : sampleMain,
+    main: withServicesMenu(
+      nav ? groupMenu(nav.filter((n) => n.location === 'header')) : sampleMain,
+      (await getServices()).map((s) => ({ label: s.title, href: s.href })),
+    ),
     footerTreatments: nav ? at('footer_treatment') : sampleTreatments,
     footerExplore: nav ? at('footer_explore') : sampleExplore,
     footerLegal: nav ? at('footer_legal') : sampleLegal,
@@ -124,16 +127,9 @@ export async function getPageMeta(
   return { noindex: page?.noindex ?? false, shareImage: shareImage ? shareImage.url : null };
 }
 
-/**
- * Treatments offered to visitors (consultation forms, article sidebar): the published services, or, before any
- * are published, the footer's treatment links.
- */
+/** Services offered to visitors (consultation forms, article sidebar): the published services, or the samples. */
 export async function getServiceLinks(): Promise<NavLink[]> {
-  const snapshot = await loadSnapshot();
-  if (snapshot?.services) {
-    return (await getServices('services')).map((s) => ({ label: s.title, href: s.href }));
-  }
-  return (await getSiteContent()).footerTreatments;
+  return (await getServices()).map((s) => ({ label: s.title, href: s.href }));
 }
 
 /**

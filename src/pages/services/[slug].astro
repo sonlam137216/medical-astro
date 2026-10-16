@@ -1,0 +1,172 @@
+---
+import SiteLayout from '../../layouts/SiteLayout.astro';
+import PageHero from '../../components/PageHero.astro';
+import Section from '../../components/Section.astro';
+import SectionIntro from '../../components/SectionIntro.astro';
+import Button from '../../components/Button.astro';
+import TreatmentGrid from '../../components/TreatmentGrid.astro';
+import CtaBand from '../../components/CtaBand.astro';
+import SeamlessJourney from '../../components/SeamlessJourney.astro';
+import { careCta } from '../../data/shared';
+import { heroImage } from '../../data/home';
+import { getServices, type PublicService } from '../../lib/content';
+import { HAND_BUILT_SERVICE_PAGES } from '../../lib/services';
+import { breadcrumbJsonLd, pageUrl } from '../../lib/seo';
+
+// The page of one service, built from the CMS (Services > a service, and its Treatments). Not in Figma: the layout
+// follows the Dental Implants page (banner, price cards, text, consultation form). Dental Implants keeps its own
+// page, written by hand at the same address.
+
+export const prerender = true;
+
+export async function getStaticPaths() {
+  return (await getServices())
+    .filter((service) => !HAND_BUILT_SERVICE_PAGES.includes(service.slug))
+    .map((service) => ({ params: { slug: service.slug }, props: { service } }));
+}
+
+interface Props {
+  service: PublicService;
+}
+
+const { service } = Astro.props;
+const title = service.seoTitle || `${service.title} · Melatec Dental Clinic`;
+const description = service.seoDescription || service.summary || undefined;
+// Paragraphs are separated by a blank line.
+const paragraphs = (service.description ?? '')
+  .split(/\n{2,}/)
+  .map((p) => p.trim())
+  .filter(Boolean);
+
+const site = Astro.site;
+const at = (path: string) => pageUrl(site, path);
+const jsonLd = site
+  ? [
+      breadcrumbJsonLd([
+        { name: 'Home', url: at('/') },
+        { name: 'Services', url: at('/services') },
+        { name: service.title },
+      ]),
+    ]
+  : [];
+---
+
+<SiteLayout {title} {description} {jsonLd}>
+  <PageHero
+    variant="banner"
+    upper
+    label="Our services"
+    image={service.banner ?? heroImage}
+    imageHeight={400}
+    position="75% center"
+  >
+    <nav slot="top" class="crumbs" aria-label="Breadcrumb">
+      <ol>
+        <li>
+          <a href="/">Home</a>
+        </li>
+        <li>
+          <a href="/services">Services</a>
+        </li>
+        <li aria-current="page">{service.title}</li>
+      </ol>
+    </nav>
+    <Fragment slot="title">{service.title}</Fragment>
+    {service.summary && <p>{service.summary}</p>}
+    <Button slot="actions" href="#consultation">
+      Book free consultation
+    </Button>
+  </PageHero>
+
+  <Section tone="soft" labelledby="treatments-title">
+    <SectionIntro label="Treatments" headingId="treatments-title" align="center" lined>
+      <Fragment slot="title">{service.title} options</Fragment>
+    </SectionIntro>
+    {service.options.length > 0 ? (
+      <TreatmentGrid items={service.options} />
+    ) : (
+      <div class="quote">
+        <p>
+          Every treatment plan is different. Send us your details and our team will prepare a
+          personalised plan and quote for you.
+        </p>
+        <Button href="#consultation">Request a quote</Button>
+      </div>
+    )}
+  </Section>
+
+  {paragraphs.length > 0 && (
+    <Section labelledby="about-title">
+      <SectionIntro label="About the treatment" headingId="about-title" align="center" lined>
+        <Fragment slot="title">About {service.title}</Fragment>
+      </SectionIntro>
+      <div class="prose">
+        {paragraphs.map((p) => (
+          <p>{p}</p>
+        ))}
+      </div>
+    </Section>
+  )}
+
+  <CtaBand {...careCta} />
+  <SeamlessJourney />
+</SiteLayout>
+
+<style>
+  .crumbs ol {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: 13px;
+    line-height: 20px;
+    color: var(--color-muted);
+  }
+
+  .crumbs li + li::before {
+    content: '›';
+    margin-right: 6px;
+  }
+
+  .crumbs a {
+    color: var(--color-muted);
+  }
+
+  .crumbs a:hover {
+    color: var(--color-blue);
+  }
+
+  .crumbs li[aria-current] {
+    color: var(--color-navy);
+  }
+
+  .quote {
+    display: grid;
+    justify-items: center;
+    gap: 20px;
+    max-width: 560px;
+    margin-inline: auto;
+    text-align: center;
+  }
+
+  .quote p {
+    margin: 0;
+    color: var(--color-muted);
+  }
+
+  .prose {
+    display: grid;
+    gap: 16px;
+    max-width: 720px;
+    margin-inline: auto;
+  }
+
+  .prose p {
+    margin: 0;
+    font-size: 17px;
+    line-height: 30px;
+    white-space: pre-line;
+  }
+</style>

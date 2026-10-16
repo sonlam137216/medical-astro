@@ -1,13 +1,8 @@
-// Where a service links to. Only some services have a page of their own (written by hand, not generated from
-// the CMS); the others are shown on the Services page, so their cards link to their place on that page.
-const OWN_PAGES: Record<string, string> = {
-  'dental-implants': '/services/dental-implants',
-};
+// Every service has a page at /services/<slug>. Most are built from the CMS by src/pages/services/[slug].astro;
+// the ones listed here have a page written by hand at the same address, which the generic page leaves alone.
+export const HAND_BUILT_SERVICE_PAGES: readonly string[] = ['dental-implants'];
 
-export function servicePath(slug: string): { href: string; hasPage: boolean } {
-  const page = OWN_PAGES[slug];
-  return page ? { href: page, hasPage: true } : { href: `/services#${slug}`, hasPage: false };
-}
+export const servicePath = (slug: string) => `/services/${slug}`;
 
 /** "$600", "A$1,250.50": a reference price as the cards show it (whole amounts without decimals). */
 export function formatPrice(amount: number, currency: string): string {

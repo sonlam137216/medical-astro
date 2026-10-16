@@ -14,7 +14,7 @@ import { getSection, getServices } from '../../lib/content';
 
 export const prerender = true;
 
-const services = await getServices('services');
+const services = await getServices();
 const hero = (await getSection('services_hero'))!;
 const seo = await getPageSeo('/services', {
   title: 'Dental services · Melatec Dental Clinic',
@@ -42,11 +42,11 @@ const seo = await getPageSeo('/services', {
     </h2>
     <ul class="grid">
       {services.map((s) => (
-        <li id={s.slug ?? undefined}>
+        <li>
           <ServiceCard
             title={s.title}
             body={s.summary}
-            href={s.hasPage ? s.href : null}
+            href={s.href}
             image={s.image}
             linkLabel="Explore services"
             detail

@@ -62,16 +62,15 @@ export const seamlessJourney = {
 const serviceBody =
   'Comprehensive implant solutions, including single-tooth implants, All-on-4 and All-on-6 restorations, using premium implant systems for enhanced safety, stability and long-term function.';
 export const serviceDetails = [
-  'Dental Implants',
-  'Dental Crowns',
-  'Porcelain Veneer',
-  'Orthodontics',
-  'General Dentistry',
-].map((title) => ({
+  ['dental-implants', 'Dental Implants'],
+  ['dental-crowns', 'Dental Crowns'],
+  ['porcelain-veneers', 'Porcelain Veneer'],
+  ['orthodontics', 'Orthodontics'],
+  ['general-dentistry', 'General Dentistry'],
+].map(([slug, title]) => ({
+  slug,
   title,
   body: serviceBody,
-  linkLabel: 'Explore services',
-  href: '/services/dental-implants', // PROVISIONAL
   image: implantImage,
 }));
 

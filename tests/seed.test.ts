@@ -23,11 +23,19 @@ test('the seed loads, can be run again, and never invents prices or text section
   assert.equal(count(raw, 'doctors'), 4);
   assert.equal(count(raw, 'services'), 5);
   assert.equal(count(raw, 'packages'), 3);
+  assert.equal(count(raw, 'service_options'), 3);
   assert.equal(count(raw, 'faqs'), 4);
   assert.equal(count(raw, 'pages'), BUILTIN_PAGES.length);
   assert.equal(count(raw, 'page_sections'), 0);
   assert.equal(count(raw, 'packages WHERE price_amount IS NOT NULL'), 0);
   assert.equal(count(raw, "services WHERE price_text IS NOT NULL OR inclusions <> '[]'"), 0);
+  assert.equal(
+    count(
+      raw,
+      "service_options WHERE price_text IS NOT NULL OR inclusions <> '[]' OR show_on_home = 1",
+    ),
+    0,
+  );
   assert.equal(count(raw, 'faqs WHERE answer IS NOT NULL'), 0);
 });
 
