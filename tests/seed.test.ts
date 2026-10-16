@@ -13,7 +13,7 @@ const seed = readFileSync(new URL('../db/seed.sql', import.meta.url), 'utf8');
 const count = (raw: ReturnType<typeof testDb>['raw'], table: string) =>
   (raw.prepare(`SELECT count(*) AS n FROM ${table}`).get() as { n: number }).n;
 
-test('the seed loads, can be run again, and never invents prices or text sections', () => {
+test('the seed loads, can be run again, and never invents prices or text sections beyond the sample cost table', () => {
   const { raw } = testDb();
   raw.exec(seed);
   raw.exec(seed);
@@ -26,7 +26,9 @@ test('the seed loads, can be run again, and never invents prices or text section
   assert.equal(count(raw, 'service_options'), 3);
   assert.equal(count(raw, 'faqs'), 4);
   assert.equal(count(raw, 'pages'), BUILTIN_PAGES.length);
-  assert.equal(count(raw, 'page_sections'), 0);
+  // Only the Home cost table, with the design's sample figures (owner's choice).
+  assert.equal(count(raw, 'page_sections'), 1);
+  assert.equal(count(raw, "page_sections WHERE type = 'home_costs'"), 1);
   assert.equal(count(raw, 'packages WHERE price_amount IS NOT NULL'), 0);
   assert.equal(count(raw, "services WHERE price_text IS NOT NULL OR inclusions <> '[]'"), 0);
   assert.equal(
@@ -48,6 +50,10 @@ test('a snapshot of the seed can be published to staging; production still waits
   assert.equal(snapshot.packages?.[0].service, 'dental-implants');
   assert.equal(snapshot.faqs, undefined); // unanswered questions are not published
   assert.deepEqual(snapshotProblems(snapshot, 'staging'), []);
+  const costs = snapshot.sections?.find((s) => s.key === 'home_costs');
+  assert.equal(costs?.visible, true);
+  assert.equal((costs?.data.rows as { cells: string[] }[]).length, 5);
+  assert.ok((costs?.data.rows as { cells: string[] }[]).every((r) => r.cells.length === 6));
   const production = snapshotProblems(snapshot, 'production');
   assert.ok(production.length > 0);
   assert.ok(

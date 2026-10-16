@@ -3,10 +3,12 @@
 -- (doctor credentials, branch addresses, contact details). It can be run again: rows that exist are kept.
 --
 -- Mirrors the structured content in src/data (copied from Figma, which in places is dummy data).
--- Prices, "what is included" lists and article text are intentionally NOT seeded: no invented numbers or claims.
--- page_sections is not seeded either: a section nobody has edited shows the built-in text from
--- src/data/sections.ts, and the "Page text" form starts from it. Seeding it would make unchecked sample claims
--- look like text the clinic had approved.
+-- Prices, "what is included" lists and article text are intentionally NOT seeded: no invented numbers or claims
+-- (the one exception, the Home cost table, carries the design's sample figures and says so).
+-- page_sections is not seeded either (a section nobody has edited shows the built-in text from
+-- src/data/sections.ts, and the "Page text" form starts from it; seeding it would make unchecked sample claims
+-- look like text the clinic had approved), EXCEPT the Home cost table, seeded with the design's sample figures
+-- at the end of this file.
 
 insert or ignore into site_settings (
   site_name, tagline, phone_display, phone_intl, whatsapp_url, contact_email,
@@ -143,3 +145,82 @@ from services s,
    union all select 'All-on-4 restoration', 2
    union all select 'All-on-6 restoration', 3) o
 where s.slug = 'dental-implants' and not exists (select 1 from service_options);
+
+-- The cost comparison table of the Home page (also shown on every service page except Dental Implants), filled
+-- with the design's SAMPLE figures (every cell "C$1,250 | 40 clinics") so the table can be tried on local and
+-- staging (owner's choice, 2026-10-16). These are NOT real prices: Page text > "Home: treatment costs table" must be
+-- rewritten with checked prices before production. The only Page text row of the seed; an edited row is kept.
+insert or ignore into page_sections (page_id, type, data)
+select id, 'home_costs', json('{
+  "label": "Treatment costs",
+  "title": "Exceptional dental care.\nMade more accessible.",
+  "rows": [
+    {
+      "name": "Dental implants",
+      "note": "Implant tooth replacement",
+      "cells": [
+        "C$1,250 | 40 clinics",
+        "C$1,250 | 40 clinics",
+        "C$1,250 | 40 clinics",
+        "C$1,250 | 40 clinics",
+        "C$1,250 | 40 clinics",
+        "C$1,250 | 40 clinics"
+      ],
+      "saving": ""
+    },
+    {
+      "name": "All-on-4 & All-on-6",
+      "note": "Full-arch restoration with four or six implants",
+      "cells": [
+        "C$1,250 | 40 clinics",
+        "C$1,250 | 40 clinics",
+        "C$1,250 | 40 clinics",
+        "C$1,250 | 40 clinics",
+        "C$1,250 | 40 clinics",
+        "C$1,250 | 40 clinics"
+      ],
+      "saving": ""
+    },
+    {
+      "name": "Porcelain veneers",
+      "note": "Thin porcelain shells for a natural smile",
+      "cells": [
+        "C$1,250 | 40 clinics",
+        "C$1,250 | 40 clinics",
+        "C$1,250 | 40 clinics",
+        "C$1,250 | 40 clinics",
+        "C$1,250 | 40 clinics",
+        "C$1,250 | 40 clinics"
+      ],
+      "saving": ""
+    },
+    {
+      "name": "Dental crowns",
+      "note": "Custom crowns for damaged or weakened teeth",
+      "cells": [
+        "C$1,250 | 40 clinics",
+        "C$1,250 | 40 clinics",
+        "C$1,250 | 40 clinics",
+        "C$1,250 | 40 clinics",
+        "C$1,250 | 40 clinics",
+        "C$1,250 | 40 clinics"
+      ],
+      "saving": ""
+    },
+    {
+      "name": "Root canal treatment",
+      "note": "Per tooth, crown excluded",
+      "cells": [
+        "C$1,250 | 40 clinics",
+        "C$1,250 | 40 clinics",
+        "C$1,250 | 40 clinics",
+        "C$1,250 | 40 clinics",
+        "C$1,250 | 40 clinics",
+        "C$1,250 | 40 clinics"
+      ],
+      "saving": ""
+    }
+  ],
+  "methodology": "SAMPLE FIGURES from the design, not real prices. Replace every figure with prices the clinic has checked before going live."
+}')
+from pages where path = '/';
