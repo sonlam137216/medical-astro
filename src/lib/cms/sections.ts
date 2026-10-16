@@ -188,7 +188,8 @@ export const SECTIONS: SectionDef[] = [
     key: 'home_costs',
     page: '/',
     label: 'Home: treatment costs table',
-    where: 'The price comparison table on the Home page.',
+    where:
+      'The price comparison table on the Home page. The same table shows on every service page (Services > a service), except Dental Implants, which has its own.',
     fields: [label, titleLines, costRows('rows', 'Treatments'), methodology],
   },
   {
