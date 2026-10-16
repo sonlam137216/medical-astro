@@ -34,6 +34,9 @@ const sources = (...list) => list.filter(Boolean).join(' ');
 // https://astro.build/config
 export default defineConfig({
   site,
+  // Pages are built as `about.html`, not `about/index.html`: Cloudflare then serves them at `/about` (the form every
+  // link and every CMS menu entry uses) and redirects `/about/` there, so links never go through a redirect.
+  build: { format: 'file' },
   integrations: [redirectsFile(), sitemapFile({ origin: site, indexable })],
   // No Markdown content on this site; also silences Astro's warning that Shiki's inline styles clash with the CSP.
   markdown: { syntaxHighlight: false },

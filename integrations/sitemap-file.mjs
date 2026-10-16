@@ -16,12 +16,15 @@ export function isSitemapPath(pathname) {
 /** Whether a page's HTML asks search engines to keep it out (a page hidden in Pages (SEO)). */
 export const isNoindexPage = (html) => /<meta name="robots" content="[^"]*noindex/.test(html);
 
+/** A page's address without a trailing slash, the form pages are served and linked at (build.format 'file'). */
+export const pagePathname = (pathname) => `/${pathname.replace(/^\/+|\/+$/g, '')}`;
+
 /** `pathnames` as the sitemap XML (sorted, no duplicates), each as an absolute URL under `origin`. */
 export function renderSitemap(origin, pathnames) {
   const urls = [
     ...new Set(
       pathnames
-        .map((p) => (p.startsWith('/') ? p : `/${p}`))
+        .map(pagePathname)
         .filter(isSitemapPath)
         .map((p) => `${origin}${p}`),
     ),
@@ -43,14 +46,15 @@ export default function sitemapFile({ origin, indexable }) {
         // A page that is noindex must not be offered to search engines in the sitemap either.
         const listed = [];
         for (const { pathname } of pages) {
-          // Astro names the Home page '' and the others 'about/'.
-          const file = new URL(
-            pathname === '' || pathname.endsWith('/')
-              ? `${pathname}index.html`
-              : `${pathname}.html`,
-            dir,
-          );
-          const html = await readFile(fileURLToPath(file), 'utf8').catch(() => '');
+          // Astro names the Home page '' and the others 'about' (or 'about/'); the files are index.html and
+          // about.html (build.format 'file'), or about/index.html for a directory-style build.
+          const path = pathname.replace(/\/+$/, '');
+          const files = path === '' ? ['index.html'] : [`${path}.html`, `${path}/index.html`];
+          let html = '';
+          for (const name of files) {
+            html = await readFile(fileURLToPath(new URL(name, dir)), 'utf8').catch(() => '');
+            if (html) break;
+          }
           if (!isNoindexPage(html)) listed.push(pathname);
         }
         const xml = renderSitemap(origin, listed);

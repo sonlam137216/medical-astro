@@ -4,6 +4,7 @@ import Logo from './Logo.astro';
 import { getSiteContent } from '../lib/site-content';
 import { pageLink } from '../lib/links';
 import { isMenuGroup, type MenuGroup } from '../lib/menu';
+import { pagePath } from '../lib/seo';
 
 interface Props {
   /** Pathname of the current page, used to highlight the active link. */
@@ -18,7 +19,7 @@ interface Props {
 
 const site = await getSiteContent();
 const {
-  current = Astro.url.pathname,
+  current = pagePath(Astro.url.pathname),
   utility = site.utility ?? undefined,
   cta = { label: 'Booking Now', href: '#consultation' },
   consultationHere = true,

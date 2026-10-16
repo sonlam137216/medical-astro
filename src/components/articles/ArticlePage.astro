@@ -16,7 +16,13 @@ import {
 } from '../../lib/cms/articles';
 import type { PublicArticle } from '../../lib/content';
 import { getSiteContent } from '../../lib/site-content';
-import { absoluteUrl, articleJsonLd, breadcrumbJsonLd, pageUrl } from '../../lib/seo';
+import {
+  absoluteUrl,
+  articleJsonLd,
+  breadcrumbJsonLd,
+  largestImageUrl,
+  pageUrl,
+} from '../../lib/seo';
 import logo from '../../assets/images/brand/logo.png';
 
 // One article (Figma "Single Post", laid out like a WordPress post): breadcrumb, category, title, summary
@@ -47,7 +53,9 @@ const description = article.seoDescription || article.excerpt || undefined;
 const site = Astro.site;
 const siteContent = await getSiteContent();
 const at = (path: string) => pageUrl(site, path);
-const coverUrl = article.cover ? absoluteUrl(site, article.cover.url) : undefined;
+// Link previews and structured data use the widest file of the cover (the smallest is too small for a large preview).
+const coverPath = article.cover ? largestImageUrl(article.cover) : undefined;
+const coverUrl = coverPath ? absoluteUrl(site, coverPath) : undefined;
 // Share on WhatsApp: a plain link (no third-party script). The script below swaps in the address of the page as
 // it is opened, so it also works on staging, where there is no public address at build time.
 const shareText = [article.title, at(article.path)].filter(Boolean).join(' ');
@@ -83,14 +91,7 @@ const jsonLd = site
   : [];
 ---
 
-<SiteLayout
-  {title}
-  {description}
-  {jsonLd}
-  image={article.cover?.url}
-  ogType="article"
-  social={false}
->
+<SiteLayout {title} {description} {jsonLd} image={coverPath} ogType="article" social={false}>
   <div class="progress" aria-hidden="true"></div>
   <article aria-labelledby="article-title">
     <!-- Top band in the light look of the other page heroes (PageHero): text on the left, cover on the right. -->

@@ -43,7 +43,10 @@ const TYPES = {
 };
 const server = createServer((req, res) => {
   let file = join(root, decodeURIComponent(new URL(req.url, 'http://x').pathname));
-  if (existsSync(file) && statSync(file).isDirectory()) file = join(file, 'index.html');
+  // Pages are built as `about.html` and served at `/about` (build.format 'file'); `/travel-guide` is both a
+  // page and a folder of pages, so the page file comes first.
+  if (existsSync(file + '.html')) file += '.html';
+  else if (existsSync(file) && statSync(file).isDirectory()) file = join(file, 'index.html');
   if (!existsSync(file) || !file.startsWith(root)) return void res.writeHead(404).end();
   res
     .writeHead(200, { 'content-type': TYPES[extname(file)] ?? 'application/octet-stream' })

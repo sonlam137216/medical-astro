@@ -24,12 +24,54 @@ export function absoluteUrl(site: URL | string | undefined, value: string): stri
 }
 
 /**
- * The address of a page of this site, in the form the build serves it (a trailing slash, like the canonical
- * address): `/about` becomes `https://site/about/`. Files (`/robots.txt`) are left alone.
+ * A page's address in the one form the site uses, without a trailing slash (`build.format: 'file'`): the
+ * pathname a page sees at build time (`/about.html`, `/about/`, `/index.html`) becomes `/about` or `/`.
+ */
+export function pagePath(pathname: string): string {
+  const path = pathname
+    .replace(/\.html$/, '')
+    .replace(/(^|\/)index$/, '$1')
+    .replace(/\/+$/, '');
+  return path === '' ? '/' : path;
+}
+
+/**
+ * The address of a page of this site, in the form the build serves it (no trailing slash, like the canonical
+ * address): `/about/` becomes `https://site/about`. Files (`/robots.txt`) are left alone.
  */
 export function pageUrl(site: URL | string | undefined, path: string): string | undefined {
-  const withSlash = path.endsWith('/') || /\.[a-z0-9]+$/i.test(path) ? path : `${path}/`;
-  return absoluteUrl(site, withSlash);
+  return absoluteUrl(site, /\.[a-z0-9]+$/i.test(path) ? path : pagePath(path));
+}
+
+/**
+ * The widest file of a library picture (the last `srcset` entry by width), for link previews: networks show a
+ * large preview only from about 1200px wide, and `url` is the smallest file. Falls back to `url`.
+ */
+export function largestImageUrl(image: { url: string; srcset: string }): string {
+  let best = { url: image.url, width: 0 };
+  for (const entry of image.srcset.split(',')) {
+    const [url, size] = entry.trim().split(/\s+/);
+    const width = Number(size?.replace(/w$/, ''));
+    if (url && width > best.width) best = { url, width };
+  }
+  return best.url;
+}
+
+/** Longest search description written into a page; search results show about this much. */
+export const DESCRIPTION_MAX = 160;
+
+/**
+ * `text` as a search description: whitespace collapsed, and when longer than DESCRIPTION_MAX, cut at the last
+ * word that fits and ended with '…' (never in the middle of a word).
+ */
+export function metaDescription(text: string | undefined | null): string | undefined {
+  const clean = (text ?? '').replace(/\s+/g, ' ').trim();
+  if (clean === '') return undefined;
+  if (clean.length <= DESCRIPTION_MAX) return clean;
+  const room = clean.slice(0, DESCRIPTION_MAX); // leaves one character for the '…'
+  const lastSpace = room.lastIndexOf(' ');
+  const cut = lastSpace > DESCRIPTION_MAX / 2 ? room.slice(0, lastSpace) : room.slice(0, -1);
+  return `${cut.replace(/[\s,;:.\-–—]+$/, '')}…`;
 }
 
 /** JSON for a `<script type="application/ld+json">`: `<` is escaped so no text can close the tag early. */

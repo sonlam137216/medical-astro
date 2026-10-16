@@ -1,0 +1,99 @@
+---
+import SiteLayout from '../layouts/SiteLayout.astro';
+import PageHero from '../components/PageHero.astro';
+import Section from '../components/Section.astro';
+import Button from '../components/Button.astro';
+import { heroImage } from '../data/home';
+import { getSiteContent } from '../lib/site-content';
+import { isMenuGroup } from '../lib/menu';
+import { pageLink } from '../lib/links';
+
+// Not in Figma: the page shown for an address that does not exist (built as 404.html, served with status 404).
+// It keeps the header and footer so a visitor who followed an old or mistyped link can go on from here, and it
+// is never indexed. The consultation form is the Home page's, so the "Booking Now" link goes there.
+export const prerender = true;
+
+const site = await getSiteContent();
+// The main menu's pages, one level deep: a drop-down that is a page itself (Services) counts as that page, a
+// drop-down that is only a name (Guides) as its links.
+const links = site.main.flatMap((item) =>
+  !isMenuGroup(item) ? [item] : item.href ? [{ label: item.label, href: item.href }] : item.links,
+);
+---
+
+<SiteLayout
+  title="Page not found · Melatec Dental Clinic"
+  description="The page you were looking for does not exist or has moved."
+  noindex
+  consultation={false}
+  social={false}
+>
+  <PageHero
+    variant="banner"
+    label="Page not found"
+    image={heroImage}
+    imageHeight={340}
+    position="75% center"
+  >
+    <Fragment slot="title">We couldn’t find that page</Fragment>
+  </PageHero>
+
+  <Section labelledby="lost-title">
+    <div class="lost">
+      <h2 id="lost-title">The page may have moved, or the address may be mistyped.</h2>
+      <p>Start again from the Home page, or go straight to one of these:</p>
+      {links.length > 0 && (
+        <ul class="lost__links">
+          {links.map((l) => (
+            <li>
+              <a class="link-arrow" href={pageLink(l.href, false)}>
+                {l.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      )}
+      <div class="lost__actions">
+        <Button href="/">Back to the Home page</Button>
+        <Button href="/#consultation" variant="outline">
+          Book a consultation
+        </Button>
+      </div>
+    </div>
+  </Section>
+</SiteLayout>
+
+<style>
+  .lost {
+    max-width: 640px;
+    margin-inline: auto;
+    text-align: center;
+  }
+
+  .lost h2 {
+    font: 600 var(--text-h3) / var(--text-h3-lh) var(--font-display);
+    margin: 0 0 12px;
+  }
+
+  .lost p {
+    color: var(--color-muted);
+    margin: 0 0 24px;
+  }
+
+  .lost__links {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px 24px;
+    padding: 0;
+    margin: 0 0 32px;
+    list-style: none;
+  }
+
+  .lost__actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 16px;
+  }
+</style>

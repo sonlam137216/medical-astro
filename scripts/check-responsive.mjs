@@ -51,8 +51,10 @@ const TYPES = {
 const server = createServer((req, res) => {
   let path = decodeURIComponent(new URL(req.url, 'http://x').pathname);
   let file = join(root, path);
-  if (existsSync(file) && statSync(file).isDirectory()) file = join(file, 'index.html');
-  else if (!existsSync(file) && existsSync(file + '.html')) file += '.html';
+  // Pages are built as `about.html` and served at `/about` (build.format 'file'); `/travel-guide` is both a
+  // page and a folder of pages, so the page file comes first.
+  if (existsSync(file + '.html')) file += '.html';
+  else if (existsSync(file) && statSync(file).isDirectory()) file = join(file, 'index.html');
   if (!existsSync(file) || !file.startsWith(root)) {
     res.writeHead(404).end('not found');
     return;

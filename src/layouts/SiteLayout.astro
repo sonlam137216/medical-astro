@@ -5,7 +5,7 @@ import Footer from '../components/Footer.astro';
 import ConsultationSection from '../components/ConsultationSection.astro';
 import SocialBar from '../components/SocialBar.astro';
 import { getMediaOrigin } from '../lib/content';
-import { SITE_INDEXABLE } from '../lib/seo';
+import { SITE_INDEXABLE, pagePath } from '../lib/seo';
 import { getPageMeta } from '../lib/site-content';
 
 interface Props {
@@ -18,6 +18,8 @@ interface Props {
    * has none, the "Booking Now" and "Contact" links go to the Home page's form instead of doing nothing.
    */
   consultationAnchor?: boolean;
+  /** Keep this page out of search engines whatever Pages (SEO) says (the 404 page). */
+  noindex?: boolean;
   /** Show the "Stay Connected" social row above the footer. */
   social?: boolean;
   /**
@@ -45,6 +47,7 @@ const {
   consultation = true,
   consultationAnchor = consultation,
   social = true,
+  noindex = false,
   current,
   header,
   theme = 'sans',
@@ -54,14 +57,15 @@ const {
 } = Astro.props;
 
 // Per-page settings from Pages (SEO): hidden from search engines, and the picture for link previews.
-const meta = await getPageMeta(Astro.url.pathname);
+const path = pagePath(Astro.url.pathname);
+const meta = await getPageMeta(path);
 ---
 
 <!-- Pages are indexable only on a build made with SITE_INDEXABLE=true and a SITE_URL (integrations/build-env.mjs). -->
 <BaseLayout
   title={title}
   description={description}
-  noindex={!SITE_INDEXABLE || meta.noindex}
+  noindex={noindex || !SITE_INDEXABLE || meta.noindex}
   mediaOrigin={getMediaOrigin()}
   image={image ?? meta.shareImage ?? undefined}
   {ogType}
@@ -72,7 +76,7 @@ const meta = await getPageMeta(Astro.url.pathname);
     Skip to content
   </a>
   <Header
-    current={current}
+    current={current ?? path}
     utility={header?.utility}
     cta={header?.cta}
     consultationHere={consultationAnchor}

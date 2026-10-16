@@ -6,7 +6,13 @@ import '@fontsource/roboto/latin-700.css';
 import '@fontsource/cormorant-garamond/latin-700.css';
 import '@fontsource/cormorant-garamond/vietnamese-700.css';
 import '../styles/global.css';
-import { DEFAULT_SHARE_IMAGE, absoluteUrl, jsonLdString } from '../lib/seo';
+import {
+  DEFAULT_SHARE_IMAGE,
+  absoluteUrl,
+  jsonLdString,
+  metaDescription,
+  pagePath,
+} from '../lib/seo';
 import { JS_FLAG_SCRIPT } from '../../integrations/inline-scripts.mjs';
 
 interface Props {
@@ -26,7 +32,7 @@ interface Props {
 
 const {
   title,
-  description,
+  description: rawDescription,
   noindex = false,
   mediaOrigin = null,
   image,
@@ -38,7 +44,10 @@ const {
 // site's address is known (SITE_URL). Staging and local builds therefore never point search engines or
 // social networks at the production address.
 const seo = !noindex && Astro.site !== undefined;
-const canonical = seo ? new URL(Astro.url.pathname, Astro.site).href : undefined;
+// Pages are built as `about.html` and served at `/about` (build.format in astro.config.mjs): that is the canonical form.
+const canonical = seo ? new URL(pagePath(Astro.url.pathname), Astro.site).href : undefined;
+// Search engines show about 160 characters; a longer summary (a fallback when no SEO text was written) is cut at a word.
+const description = metaDescription(rawDescription);
 const shareImage = seo ? absoluteUrl(Astro.site, image ?? DEFAULT_SHARE_IMAGE) : undefined;
 ---
 

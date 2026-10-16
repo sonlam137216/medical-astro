@@ -7,6 +7,10 @@ import {
   faqJsonLd,
   jsonLdString,
   pageUrl,
+  pagePath,
+  largestImageUrl,
+  metaDescription,
+  DESCRIPTION_MAX,
   organizationJsonLd,
 } from '../src/lib/seo.ts';
 import { isNoindexPage, isSitemapPath, renderSitemap } from '../integrations/sitemap-file.mjs';
@@ -94,25 +98,74 @@ test('the sitemap lists content pages only, once each, under the site origin', (
   assert.equal(isSitemapPath('/about/'), true);
   const xml = renderSitemap('https://melatec.example', [
     'about/',
+    'about',
     '/',
+    '',
     '/about/',
     '/admin/',
+    'admin',
     'search.json',
+    'travel-guide/page/2',
   ]);
-  assert.equal(xml.match(/<loc>/g)?.length, 2);
-  assert.ok(xml.includes('<loc>https://melatec.example/about/</loc>'));
+  assert.equal(xml.match(/<loc>/g)?.length, 3);
+  assert.ok(xml.includes('<loc>https://melatec.example/about</loc>'));
   assert.ok(xml.includes('<loc>https://melatec.example/</loc>'));
+  assert.ok(xml.includes('<loc>https://melatec.example/travel-guide/page/2</loc>'));
 });
 
-test('page addresses carry the trailing slash the build serves, files do not', () => {
-  assert.equal(pageUrl('https://melatec.example', '/about'), 'https://melatec.example/about/');
-  assert.equal(pageUrl('https://melatec.example', '/about/'), 'https://melatec.example/about/');
+test('page addresses have no trailing slash, like the pages the build serves; files are left alone', () => {
+  assert.equal(pageUrl('https://melatec.example', '/about'), 'https://melatec.example/about');
+  assert.equal(pageUrl('https://melatec.example', '/about/'), 'https://melatec.example/about');
   assert.equal(pageUrl('https://melatec.example', '/'), 'https://melatec.example/');
   assert.equal(
     pageUrl('https://melatec.example', '/og-default.jpg'),
     'https://melatec.example/og-default.jpg',
   );
   assert.equal(pageUrl(undefined, '/about'), undefined);
+});
+
+test('the pathname a page sees at build time becomes its address', () => {
+  assert.equal(pagePath('/about.html'), '/about');
+  assert.equal(pagePath('/about/'), '/about');
+  assert.equal(pagePath('/about'), '/about');
+  assert.equal(pagePath('/index.html'), '/');
+  assert.equal(pagePath('/'), '/');
+  assert.equal(pagePath(''), '/');
+  assert.equal(pagePath('/travel-guide/page/2.html'), '/travel-guide/page/2');
+  assert.equal(pagePath('/travel-guide/index.html'), '/travel-guide');
+  // Only a whole "index" segment is the folder's page.
+  assert.equal(pagePath('/services/reindex'), '/services/reindex');
+});
+
+test('link previews use the widest file of a library picture', () => {
+  assert.equal(
+    largestImageUrl({
+      url: '/media/a/v1/480.webp',
+      srcset: '/media/a/v1/480.webp 480w, /media/a/v1/1600.webp 1600w, /media/a/v1/960.webp 960w',
+    }),
+    '/media/a/v1/1600.webp',
+  );
+  assert.equal(
+    largestImageUrl({ url: '/media/a/v1/480.webp', srcset: '' }),
+    '/media/a/v1/480.webp',
+  );
+});
+
+test('search descriptions are cut at a word, never past the limit', () => {
+  assert.equal(metaDescription('  Short   text\n here. '), 'Short text here.');
+  assert.equal(metaDescription(''), undefined);
+  assert.equal(metaDescription(null), undefined);
+  const exact = 'a'.repeat(DESCRIPTION_MAX);
+  assert.equal(metaDescription(exact), exact);
+  const long = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. '.repeat(8);
+  const cut = metaDescription(long)!;
+  assert.ok(cut.length <= DESCRIPTION_MAX, `${cut.length} characters`);
+  assert.ok(cut.endsWith('…'));
+  assert.ok(long.startsWith(cut.slice(0, -1)), 'the cut keeps the text as written');
+  assert.match(cut, /[a-z]…$/, 'no trailing comma or space before the ellipsis');
+  assert.ok(/\s/.test(long[cut.length - 1] ?? ' '), 'the cut ends at a whole word');
+  // One very long word: cut anyway, within the limit.
+  assert.equal(metaDescription('x'.repeat(300))!.length, DESCRIPTION_MAX);
 });
 
 test('pages that ask for noindex are recognised', () => {

@@ -8,7 +8,7 @@ import {
   type NavLink,
 } from '../data/site';
 import { loadSnapshot, getPublicBase, getServices, getLocations } from './content';
-import { DEFAULT_SHARE_IMAGE, absoluteUrl, organizationJsonLd } from './seo';
+import { DEFAULT_SHARE_IMAGE, absoluteUrl, largestImageUrl, organizationJsonLd } from './seo';
 import { snapshotImageInput, toPublicImage, toPublicVideo, type PublicVideo } from './media';
 import { parseVideoUrl, type VideoEmbed } from './video-embed';
 import { groupMenu, withServicesMenu, type MenuItem } from './menu';
@@ -124,7 +124,10 @@ export async function getPageMeta(
   const page = (await loadSnapshot())?.pages?.find((p) => p.path === wanted);
   const shareImage =
     page?.shareImage && toPublicImage(snapshotImageInput(page.shareImage), getPublicBase());
-  return { noindex: page?.noindex ?? false, shareImage: shareImage ? shareImage.url : null };
+  return {
+    noindex: page?.noindex ?? false,
+    shareImage: shareImage ? largestImageUrl(shareImage) : null,
+  };
 }
 
 /** Services offered to visitors (consultation forms, article sidebar): the published services, or the samples. */
