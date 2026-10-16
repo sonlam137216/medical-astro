@@ -1,0 +1,100 @@
+---
+import Section from './Section.astro';
+import SectionIntro from './SectionIntro.astro';
+import type { PublicFaq } from '../lib/content';
+
+// The FAQ block of the service pages (Figma "General Service Template"): a heading and the questions as bordered
+// cards, the first one open. The questions come from FAQs (one list for every service page); the caller leaves the
+// block out when there are none.
+interface Props {
+  label: string;
+  title: string;
+  faqs: PublicFaq[];
+}
+
+const { label, title, faqs } = Astro.props;
+// Answers are plain text; a blank line starts a new paragraph.
+const paragraphs = (text: string) => text.split(/\n{2,}/);
+---
+
+<Section tone="soft" labelledby="faq-title">
+  <SectionIntro label={label} headingId="faq-title" align="center" lined>
+    <Fragment slot="title">{title}</Fragment>
+  </SectionIntro>
+  <div class="faq">
+    {faqs.map((item, i) => (
+      <details open={i === 0}>
+        <summary>{item.question}</summary>
+        {item.answer && (
+          <Fragment>
+            {paragraphs(item.answer).map((paragraph) => (
+              <p>{paragraph}</p>
+            ))}
+          </Fragment>
+        )}
+        {/* PLACEHOLDER: the design shows questions only; sample questions have no answer yet. */}
+        {!item.answer && <p class="muted">Answer to be provided by Melatec.</p>}
+      </details>
+    ))}
+  </div>
+</Section>
+
+<style>
+  /* Figma: each question is a bordered card; the open one is tinted. */
+  .faq {
+    display: grid;
+    gap: 12px;
+    max-width: 720px;
+    margin-inline: auto;
+    width: 100%;
+  }
+
+  .faq details {
+    padding: 16px 24px;
+    background: var(--color-white);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card);
+  }
+
+  .faq details[open] {
+    background: var(--color-card);
+  }
+
+  .faq summary {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    cursor: pointer;
+    list-style: none;
+    font: 700 var(--text-body) / var(--text-body-lh) var(--font-display);
+    color: var(--color-title);
+  }
+
+  @media (max-width: 768px) {
+    .faq summary {
+      align-items: center;
+      min-height: 44px;
+    }
+  }
+
+  .faq summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .faq summary::after {
+    content: '+';
+    font-size: 24px;
+    line-height: 26px;
+    color: var(--color-blue);
+  }
+
+  .faq details[open] summary::after {
+    content: '–';
+  }
+
+  .faq details p {
+    margin-top: 12px;
+    font-size: var(--text-small);
+    line-height: var(--text-small-lh);
+  }
+</style>

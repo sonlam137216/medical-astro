@@ -31,6 +31,7 @@ const included = [
     'treatments',
   ),
   count(snapshot.faqs?.length, 'answered question', 'answered questions'),
+  count(snapshot.smileResults?.length, 'before/after pair', 'before/after pairs'),
   count(snapshot.articles?.length, 'published article', 'published articles'),
   count(snapshot.articleCategories?.length, 'article category', 'article categories'),
   count(snapshot.legalPages?.length, 'legal page', 'legal pages'),

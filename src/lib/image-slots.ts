@@ -79,6 +79,12 @@ export const IMAGE_SLOTS = {
     frames: [{ label: 'Home page slider', width: 560, height: 440 }],
     position: { x: 50, y: 50 },
   },
+  // One card of the before/after slider on the service pages (Smile results): both pictures fill the same frame.
+  'smile-result': {
+    label: 'Before / after card',
+    frames: [{ label: 'Service pages, results slider', width: 448, height: 318 }],
+    position: { x: 50, y: 40 },
+  },
 } as const satisfies Record<string, ImageSlot>;
 
 export type SlotKey = keyof typeof IMAGE_SLOTS;

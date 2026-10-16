@@ -14,14 +14,19 @@ interface Props {
   /** The place the pair is shown: sets the shape of the comparison and keeps each photo's focus point in view. */
   slot: SlotKey;
   sizes: string;
+  /**
+   * Only a band across the middle (where the knob is) moves the divider, so a swipe elsewhere on the picture still
+   * scrolls what it sits in (the results slider of the service pages).
+   */
+  band?: boolean;
   class?: string;
 }
 
-const { before, after, slot, sizes, class: className } = Astro.props;
+const { before, after, slot, sizes, band = false, class: className } = Astro.props;
 ---
 
 <div
-  class:list={['ba', className]}
+  class:list={['ba', band && 'ba--band', className]}
   data-before-after
   style={`--pos: 50%; aspect-ratio: ${frameAspect(IMAGE_SLOTS[slot])}`}
 >
@@ -166,6 +171,13 @@ const { before, after, slot, sizes, class: className } = Astro.props;
     background: transparent;
     /* Horizontal drags move the divider, vertical drags still scroll the page. */
     touch-action: pan-y;
+  }
+
+  /* The knob's band only (64 px around the middle), and only that band takes horizontal swipes. */
+  .ba--band .ba__range {
+    inset: auto 0;
+    top: calc(50% - 32px);
+    height: 64px;
   }
 
   .ba__range::-webkit-slider-thumb {

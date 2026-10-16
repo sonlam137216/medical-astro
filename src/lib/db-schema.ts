@@ -562,6 +562,30 @@ export interface Tables {
       updated_at?: string;
     };
   };
+  smile_results: {
+    Row: {
+      after_image_id: string;
+      before_image_id: string;
+      consent_confirmed: boolean;
+      created_at: string;
+      id: string;
+      is_visible: boolean;
+      sort_order: number;
+      title: string;
+      updated_at: string;
+    };
+    Insert: {
+      after_image_id: string;
+      before_image_id: string;
+      consent_confirmed?: boolean;
+      created_at?: string;
+      id?: string;
+      is_visible?: boolean;
+      sort_order?: number;
+      title: string;
+      updated_at?: string;
+    };
+  };
   site_settings: {
     Row: {
       address_line: string | null;
@@ -704,6 +728,11 @@ export const TABLES: Record<TableName, TableInfo> = {
     json: ['inclusions'],
     uuid: true,
     refs: { image_id: 'media_assets', banner_image_id: 'media_assets' },
+  },
+  smile_results: {
+    bool: ['consent_confirmed', 'is_visible'],
+    uuid: true,
+    refs: { before_image_id: 'media_assets', after_image_id: 'media_assets' },
   },
   site_settings: { json: ['social_links'] },
 };

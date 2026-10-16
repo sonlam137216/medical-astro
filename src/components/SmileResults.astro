@@ -1,0 +1,179 @@
+---
+import BeforeAfter from './BeforeAfter.astro';
+import Icon from './Icon.astro';
+import Section from './Section.astro';
+import SectionIntro from './SectionIntro.astro';
+import { getSection, getSmileResults } from '../lib/content';
+
+// "Results: Real Stories. Real Smiles." of the service pages (Figma "General Service Template"): a row of
+// before/after cards, the same on every service page. The pairs are in Smile results, the heading in Page text
+// ("Service pages: results heading"). Nothing is shown without a published pair: the design's sample photos show a
+// real person, so there is no sample content.
+// The row is a plain horizontal scroller that snaps to each card, so it works by swipe, trackpad or keyboard without
+// JavaScript. Not in Figma (added): the two arrows under the row, drawn with JavaScript and only when the row is
+// wider than the screen. On each card only the band around the knob drags the divider, so swiping elsewhere on a
+// picture scrolls the row.
+
+const heading = await getSection('service_results');
+const pairs = heading ? await getSmileResults() : [];
+---
+
+{heading && pairs.length > 0 && (
+  <Section tone="soft" labelledby="results-title">
+    <SectionIntro label={heading.label} headingId="results-title" align="center" lined>
+      <Fragment slot="title">{heading.title}</Fragment>
+    </SectionIntro>
+
+    <div class="results" data-results>
+      <ul
+        class="results__track"
+        aria-label="Before and after photos"
+        tabindex="0"
+        data-results-track
+      >
+        {pairs.map((pair, i) => (
+          <li
+            class="results__card"
+            aria-roledescription="slide"
+            aria-label={`${i + 1} of ${pairs.length}`}
+          >
+            <BeforeAfter
+              before={pair.before}
+              after={pair.after}
+              slot="smile-result"
+              sizes="(max-width: 768px) 85vw, 448px"
+              band
+            />
+          </li>
+        ))}
+      </ul>
+      <div class="results__nav" hidden data-results-nav>
+        <button class="results__arrow" type="button" aria-label="Previous photos" data-results-prev>
+          <Icon name="arrow-left" size={20} />
+        </button>
+        <button class="results__arrow" type="button" aria-label="Next photos" data-results-next>
+          <Icon name="arrow-right" size={20} />
+        </button>
+      </div>
+    </div>
+  </Section>
+)}
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-results]').forEach((root) => {
+    const track = root.querySelector<HTMLElement>('[data-results-track]');
+    const nav = root.querySelector<HTMLElement>('[data-results-nav]');
+    const prev = root.querySelector<HTMLButtonElement>('[data-results-prev]');
+    const next = root.querySelector<HTMLButtonElement>('[data-results-next]');
+    if (!track || !nav || !prev || !next) return;
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // One card (plus the gap) per click; the snap points line the row up again.
+    const step = () => {
+      const card = track.firstElementChild as HTMLElement | null;
+      const gap = parseFloat(getComputedStyle(track).columnGap) || 0;
+      return card ? card.offsetWidth + gap : track.clientWidth;
+    };
+    const update = () => {
+      const overflow = track.scrollWidth - track.clientWidth > 1;
+      nav.hidden = !overflow;
+      prev.disabled = track.scrollLeft <= 1;
+      next.disabled = track.scrollLeft >= track.scrollWidth - track.clientWidth - 1;
+    };
+    const go = (direction: number) =>
+      track.scrollBy({ left: direction * step(), behavior: reduce ? 'auto' : 'smooth' });
+
+    prev.addEventListener('click', () => go(-1));
+    next.addEventListener('click', () => go(1));
+    track.addEventListener('scroll', update, { passive: true });
+    new ResizeObserver(update).observe(track);
+    update();
+  });
+</script>
+
+<style>
+  .results {
+    display: grid;
+    gap: 20px;
+    min-width: 0;
+  }
+
+  /* Two cards and a bit of the next one on wide screens, so it reads as a row that goes on (Figma shows the cards
+     running past the edge). With fewer cards than fit, they sit in the middle: the auto margins of the first and
+     last card share the free space and drop to zero once the row scrolls. */
+  .results__track {
+    --card: calc((100% - 24px) / 2.15);
+    display: flex;
+    gap: 24px;
+    margin: 0;
+    padding: 0;
+    overflow-x: auto;
+    list-style: none;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    overscroll-behavior-x: contain;
+  }
+
+  .results__track::-webkit-scrollbar {
+    display: none;
+  }
+
+  .results__track:focus-visible {
+    outline: 3px solid var(--color-blue);
+    outline-offset: 4px;
+    border-radius: var(--radius-image);
+  }
+
+  .results__card {
+    flex: 0 0 var(--card);
+    min-width: 0;
+    scroll-snap-align: start;
+  }
+
+  .results__card:first-child {
+    margin-inline-start: auto;
+  }
+
+  .results__card:last-child {
+    margin-inline-end: auto;
+  }
+
+  .results__nav {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+  }
+
+  .results__nav[hidden] {
+    display: none;
+  }
+
+  .results__arrow {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    background: var(--color-white);
+    border: 1px solid var(--color-border);
+    border-radius: 50%;
+    color: var(--color-blue);
+    cursor: pointer;
+  }
+
+  .results__arrow:hover:not(:disabled) {
+    border-color: var(--color-blue);
+  }
+
+  .results__arrow:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+
+  @media (max-width: 768px) {
+    .results__track {
+      --card: 85%;
+      gap: 16px;
+    }
+  }
+</style>

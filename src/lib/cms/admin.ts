@@ -4,6 +4,10 @@ import { readBodyLimited } from '../consultation';
 import { listPickerImages, type PickerImage } from '../media-picker';
 import { articleProblems, movedArticleRedirect } from './articles';
 import { menuGroupError } from '../menu';
+import { smileResultErrors } from './smile-results';
+
+/** The group new questions are saved in (FAQs have no groups any more; older rows keep theirs, unused). */
+const FAQ_GROUP = 'services';
 import type { EntityDef } from './entities';
 import {
   emptyValues,
@@ -105,6 +109,11 @@ export async function processPost(
     if (Object.keys(errors).length > 0) return { status: 422, values, errors };
   }
 
+  if (def.key === 'smile-results') {
+    const errors = smileResultErrors(parsed.value);
+    if (Object.keys(errors).length > 0) return { status: 422, values, errors };
+  }
+
   if (def.key === 'navigation') {
     const groupError = menuGroupError(parsed.value);
     if (groupError) return { status: 422, values, errors: { menu_group: groupError } };
@@ -112,6 +121,8 @@ export async function processPost(
 
   // `status_code` is the only numeric select; the column is an integer.
   const row: Row = { ...parsed.value };
+  // FAQs are one list for the whole site: the table still has a group column, which the form no longer shows.
+  if (def.key === 'faqs' && id === null) row.group_key = FAQ_GROUP;
   if (typeof row.status_code === 'string') row.status_code = Number(row.status_code);
 
   // Where a published article lived before this save: if the save moves it, the old address gets a redirect.

@@ -29,7 +29,6 @@ import {
   comparison as implantsComparison,
   why as implantsWhy,
   plan as implantsPlan,
-  faq as implantsFaq,
 } from './implants';
 import {
   servicesHero,
@@ -38,6 +37,7 @@ import {
   combosHero,
   tourismSupport,
   seamlessJourney,
+  serviceFaq,
 } from './shared';
 
 /** One row of a cost table. Built-in rows have no figures of their own: the table shows placeholders. */
@@ -73,6 +73,8 @@ export const SECTION_SAMPLES = {
   services_hero: servicesHero,
   shared_tourism: tourismSupport,
   shared_journey: seamlessJourney,
+  service_results: { label: 'Results', title: 'Real Stories. Real Smiles.' },
+  service_faq: { label: serviceFaq.label, title: serviceFaq.title },
   doctors_hero: doctorsHero,
   packages_hero: packagesHero,
   combos_hero: combosHero,
@@ -86,7 +88,6 @@ export const SECTION_SAMPLES = {
   },
   implants_why: implantsWhy,
   implants_plan: implantsPlan,
-  implants_faq: implantsFaq,
 };
 
 export type SectionKey = keyof typeof SECTION_SAMPLES;

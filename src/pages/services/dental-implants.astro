@@ -10,23 +10,25 @@ import TreatmentCosts from '../../components/home/TreatmentCosts.astro';
 import SeamlessJourney from '../../components/SeamlessJourney.astro';
 import PlanVisit from '../../components/PlanVisit.astro';
 import LatestArticles from '../../components/articles/LatestArticles.astro';
+import FaqList from '../../components/FaqList.astro';
+import SmileResults from '../../components/SmileResults.astro';
 import { getPageSeo, getPageBanner } from '../../lib/site-content';
 import { getFaqs, getSection, getService } from '../../lib/content';
 import { faqJsonLd } from '../../lib/seo';
 
 import { heroImage } from '../../data/implants';
+import { serviceFaq } from '../../data/shared';
 
 export const prerender = true;
 
-// Answers are plain text; a blank line starts a new paragraph.
-const paragraphs = (text: string) => text.split(/\n{2,}/);
 const hero = (await getSection('implants_hero'))!;
 const costs = (await getSection('implants_costs'))!;
 // The price cards: the treatments of the Dental Implants service (Services > Dental Implants > Treatments).
 const treatments = (await getService('dental-implants'))?.options ?? [];
 const why = (await getSection('implants_why'))!;
-const faq = (await getSection('implants_faq'))!;
-const faqs = await getFaqs('dental-implants', faq.questions);
+const faq = (await getSection('service_faq'))!;
+// The questions shared by every service page (FAQs).
+const faqs = await getFaqs(serviceFaq.questions);
 const seo = await getPageSeo('/services/dental-implants', {
   title: 'Dental implants · Melatec Dental Clinic',
   description:
@@ -97,32 +99,13 @@ const banner = await getPageBanner('/services/dental-implants');
 
   <SeamlessJourney />
 
-  <!-- Figma "Results: Real Stories. Real Smiles." (before/after carousel) is not built: the pictures show a real
-       patient, and consent and usage rights are not confirmed (see src/assets/images/SOURCES.md). -->
+  <!-- Figma "Results: Real Stories. Real Smiles.": the pairs of Smile results (shared by every service page), shown
+       only once a pair with the patient's consent is published. -->
+  <SmileResults />
 
   <LatestArticles />
 
-  <Section tone="soft" labelledby="faq-title">
-    <SectionIntro label={faq.label} headingId="faq-title" align="center" lined>
-      <Fragment slot="title">{faq.title}</Fragment>
-    </SectionIntro>
-    <div class="faq">
-      {faqs.map((item, i) => (
-        <details open={i === 0}>
-          <summary>{item.question}</summary>
-          {item.answer && (
-            <Fragment>
-              {paragraphs(item.answer).map((paragraph) => (
-                <p>{paragraph}</p>
-              ))}
-            </Fragment>
-          )}
-          {/* PLACEHOLDER: the design shows questions only; sample questions have no answer yet. */}
-          {!item.answer && <p class="muted">Answer to be provided by Melatec.</p>}
-        </details>
-      ))}
-    </div>
-  </Section>
+  {faqs.length > 0 && <FaqList label={faq.label} title={faq.title} {faqs} />}
 </SiteLayout>
 
 <style>
@@ -168,64 +151,6 @@ const banner = await getPageBanner('/services/dental-implants');
 
   .grid li > :global(*) {
     flex: 1;
-  }
-
-  /* Figma: each question is a bordered card; the open one is tinted. */
-  .faq {
-    display: grid;
-    gap: 12px;
-    max-width: 720px;
-    margin-inline: auto;
-    width: 100%;
-  }
-
-  .faq details {
-    padding: 16px 24px;
-    background: var(--color-white);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-card);
-  }
-
-  .faq details[open] {
-    background: var(--color-card);
-  }
-
-  .faq summary {
-    display: flex;
-    justify-content: space-between;
-    gap: 16px;
-    cursor: pointer;
-    list-style: none;
-    font: 700 var(--text-body) / var(--text-body-lh) var(--font-display);
-    color: var(--color-title);
-  }
-
-  @media (max-width: 768px) {
-    .faq summary {
-      align-items: center;
-      min-height: 44px;
-    }
-  }
-
-  .faq summary::-webkit-details-marker {
-    display: none;
-  }
-
-  .faq summary::after {
-    content: '+';
-    font-size: 24px;
-    line-height: 26px;
-    color: var(--color-blue);
-  }
-
-  .faq details[open] summary::after {
-    content: '–';
-  }
-
-  .faq details p {
-    margin-top: 12px;
-    font-size: var(--text-small);
-    line-height: var(--text-small-lh);
   }
 
   @media (max-width: 1024px) {

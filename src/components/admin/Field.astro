@@ -27,10 +27,16 @@ const slotsFor = (f: Extract<Field, { type: 'items' }>) => {
 
 {f.type === 'bool' && (
   <label class="admin-check">
-    <input type="checkbox" name={f.name} checked={Boolean(values[f.name])} />
+    <input
+      type="checkbox"
+      name={f.name}
+      checked={Boolean(values[f.name])}
+      aria-invalid={invalid(f.name)}
+    />
     {f.label}
   </label>
 )}
+{f.type === 'bool' && error && <span class="admin-field-error">{error}</span>}
 
 {f.type === 'image' && (
   <MediaPicker

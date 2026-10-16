@@ -429,6 +429,23 @@ export const SECTIONS: SectionDef[] = [
     fields: [label, title],
   },
   {
+    key: 'service_results',
+    page: '/services',
+    label: 'Service pages: results heading',
+    where:
+      'The heading above the before/after slider on every service page, Dental Implants included (the pictures are in Smile results). Without any picture pair the block is not shown.',
+    fields: [label, title],
+  },
+  {
+    key: 'service_faq',
+    page: '/services',
+    label: 'Service pages: FAQ heading',
+    where:
+      'The heading above the questions on every service page, Dental Implants included (the questions are in FAQs: one list for all the services).',
+    canHide: false,
+    fields: [label, title],
+  },
+  {
     key: 'doctors_hero',
     page: '/our-doctors',
     label: 'Doctors: top banner',
@@ -520,14 +537,6 @@ export const SECTIONS: SectionDef[] = [
       area('body', 'Text', 600),
       lines('bullets', 'Points', 5, 200, 'One point per line.'),
     ],
-  },
-  {
-    key: 'implants_faq',
-    page: '/services/dental-implants',
-    label: 'Dental Implants: FAQ heading',
-    where: 'The heading above the questions (the questions are in FAQs, group “dental-implants”).',
-    canHide: false,
-    fields: [label, title],
   },
 ];
 

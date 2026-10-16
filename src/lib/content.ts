@@ -392,12 +392,33 @@ export interface PublicFaq {
   answer: string | null;
 }
 
-/** Questions of one group: the published, answered ones, or the sample questions before any are published. */
-export async function getFaqs(group: string, sampleQuestions: string[]): Promise<PublicFaq[]> {
-  const published = (await loadSnapshot())?.faqs?.filter((f) => f.group === group) ?? [];
+/**
+ * The questions of the service pages (one list for the whole site): the published, answered ones, or the sample
+ * questions before any is published.
+ */
+export async function getFaqs(sampleQuestions: string[]): Promise<PublicFaq[]> {
+  const published = (await loadSnapshot())?.faqs ?? [];
   if (published.length > 0)
     return published.map((f) => ({ question: f.question, answer: f.answer }));
   return sampleQuestions.map((question) => ({ question, answer: null }));
+}
+
+export interface PublicSmileResult {
+  before: PublicImage;
+  after: PublicImage;
+}
+
+/**
+ * The before/after pairs of the service pages' results slider (Smile results). Empty before any is published:
+ * the design's sample photos show a real person, so there is no sample content and the block stays hidden.
+ */
+export async function getSmileResults(): Promise<PublicSmileResult[]> {
+  const pairs = (await loadSnapshot())?.smileResults ?? [];
+  return pairs.flatMap((p) => {
+    const before = toPublicImageOrUndefined(p.before);
+    const after = toPublicImageOrUndefined(p.after);
+    return before && after ? [{ before, after }] : [];
+  });
 }
 
 export interface PublicLegalPage {

@@ -8,16 +8,19 @@ import TreatmentGrid from '../../components/TreatmentGrid.astro';
 import CtaBand from '../../components/CtaBand.astro';
 import TreatmentCosts from '../../components/home/TreatmentCosts.astro';
 import SeamlessJourney from '../../components/SeamlessJourney.astro';
-import { careCta } from '../../data/shared';
+import FaqList from '../../components/FaqList.astro';
+import SmileResults from '../../components/SmileResults.astro';
+import { careCta, serviceFaq } from '../../data/shared';
 import { heroImage } from '../../data/home';
-import { getServices, type PublicService } from '../../lib/content';
+import { getFaqs, getSection, getServices, type PublicService } from '../../lib/content';
 import { HAND_BUILT_SERVICE_PAGES } from '../../lib/services';
-import { breadcrumbJsonLd, pageUrl } from '../../lib/seo';
+import { breadcrumbJsonLd, faqJsonLd, pageUrl } from '../../lib/seo';
 import { getPageBanner } from '../../lib/site-content';
 
-// The page of one service, built from the CMS (Services > a service, and its Treatments). Not in Figma: the layout
-// follows the Dental Implants page (banner, price cards, cost comparison, text, consultation form). The cost
-// comparison is the Home page's table (Page text > Home: treatment costs table), shared by every service page.
+// The page of one service, built from the CMS (Services > a service, and its Treatments), after the Figma
+// "General Service Template" (banner, price cards, cost comparison, how it works, results, FAQ; the About text and
+// the call to action are added). The cost comparison is the Home page's table (Page text > Home: treatment costs
+// table), the results slider (Smile results) and the FAQ (FAQs) are shared by every service page.
 // Dental Implants keeps its own page, written by hand at the same address, with its own table.
 
 export const prerender = true;
@@ -41,6 +44,11 @@ const paragraphs = (service.description ?? '')
   .map((p) => p.trim())
   .filter(Boolean);
 
+// The questions shared by every service page (FAQs): the sample questions before any is published.
+const faqHeading = (await getSection('service_faq'))!;
+const faqs = await getFaqs(serviceFaq.questions);
+const faqData = faqJsonLd(faqs);
+
 const site = Astro.site;
 const at = (path: string) => pageUrl(site, path);
 const jsonLd = site
@@ -50,6 +58,7 @@ const jsonLd = site
         { name: 'Services', url: at('/services') },
         { name: service.title },
       ]),
+      ...(faqData ? [faqData] : []),
     ]
   : [];
 // The service's own banner, else the Services page's (Pages), else the built-in picture.
@@ -116,6 +125,10 @@ const servicesBanner = await getPageBanner('/services');
 
   <CtaBand {...careCta} />
   <SeamlessJourney />
+
+  <SmileResults />
+
+  {faqs.length > 0 && <FaqList label={faqHeading.label} title={faqHeading.title} {faqs} />}
 </SiteLayout>
 
 <style>

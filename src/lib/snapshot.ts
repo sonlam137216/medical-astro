@@ -164,6 +164,12 @@ export interface SnapshotSection {
   images?: Record<string, SnapshotImage>;
 }
 
+/** A before/after pair of the service pages' results slider (Smile results); only pairs with the patient's consent. */
+export interface SnapshotSmileResult {
+  before: SnapshotImage;
+  after: SnapshotImage;
+}
+
 export interface SnapshotLocation {
   slug: string;
   name: string;
@@ -218,6 +224,7 @@ export interface Snapshot {
   destinations?: SnapshotDestination[];
   articleCategories?: SnapshotArticleCategory[];
   articles?: SnapshotArticle[];
+  smileResults?: SnapshotSmileResult[];
 }
 
 /** Sections the website cannot go live without: the sample versions are placeholders from the design. */
@@ -387,8 +394,8 @@ export async function buildSnapshot(db: AdminDb): Promise<Snapshot> {
     .select('group_key, question, answer')
     .eq('is_visible', true)
     .not('answer', 'is', null)
-    .order('group_key')
-    .order('sort_order');
+    .order('sort_order')
+    .order('question');
   if (faqsError) throw fail('FAQs', faqsError);
   const answered = faqs.filter((f) => f.answer && f.answer.trim() !== '');
   if (answered.length > 0) {
@@ -613,6 +620,26 @@ export async function buildSnapshot(db: AdminDb): Promise<Snapshot> {
   }
   if (sections.length > 0) snapshot.sections = sections;
 
+  // Before/after pairs: only shown ones whose consent is confirmed (the table refuses a shown pair without it),
+  // and only when both pictures are still usable.
+  const { data: results, error: resultsError } = await db
+    .from('smile_results')
+    .select(
+      `before:media_assets!before_image_id(${IMAGE_COLUMNS}), after:media_assets!after_image_id(${IMAGE_COLUMNS})`,
+    )
+    .eq('is_visible', true)
+    .eq('consent_confirmed', true)
+    .order('sort_order', { ascending: true })
+    .order('title', { ascending: true });
+  if (resultsError) throw fail('smile results', resultsError);
+  const pairs: SnapshotSmileResult[] = [];
+  for (const r of results) {
+    const before = toSnapshotImage(r.before);
+    const after = toSnapshotImage(r.after);
+    if (before && after) pairs.push({ before, after });
+  }
+  if (pairs.length > 0) snapshot.smileResults = pairs;
+
   const { data: locations, error: locationsError } = await db
     .from('locations')
     .select(`slug, name, address_line, directions_url, image:media_assets(${IMAGE_COLUMNS})`)
@@ -795,6 +822,18 @@ export function snapshotProblems(snapshot: Snapshot, target: string = 'staging')
       );
     }
   }
+  (snapshot.smileResults ?? []).forEach((pair, i) => {
+    for (const [side, image] of [
+      ['before', pair.before],
+      ['after', pair.after],
+    ] as const) {
+      if (!image.decorative && !image.alt) {
+        problems.push(
+          `Smile results, pair ${i + 1}: the ${side} photo has no description. Add one in Media.`,
+        );
+      }
+    }
+  });
   for (const l of snapshot.legalPages ?? []) {
     if (bodyImageIds(parseArticleBody(l.body)).length > 0) {
       problems.push(
@@ -848,6 +887,7 @@ export function isSnapshot(value: unknown): value is Snapshot {
       'sections',
       'articleCategories',
       'articles',
+      'smileResults',
     ].every((k) => arrayOrMissing(value[k]))
   )
     return false;
@@ -975,6 +1015,10 @@ export function isSnapshot(value: unknown): value is Snapshot {
     )
   )
     return false;
+
+  const isImage = (i: unknown) => isObject(i) && typeof i.key === 'string';
+  const pairs = (value.smileResults ?? []) as unknown[];
+  if (!pairs.every((p) => isObject(p) && isImage(p.before) && isImage(p.after))) return false;
 
   const doctors = (value.doctors ?? []) as unknown[];
   return doctors.every(

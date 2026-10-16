@@ -95,10 +95,10 @@ insert or ignore into doctors (slug, full_name, role_title, bio, credentials, so
 -- The design shows the questions only. Answers stay null until the clinic provides them.
 insert into faqs (group_key, question, sort_order)
 select * from (values
-  ('dental-implants', 'What should I send before my consultation?', 1),
-  ('dental-implants', 'How many visits will my treatment require?', 2),
-  ('dental-implants', 'What is included in my estimate?', 3),
-  ('dental-implants', 'Can you help with accommodation and transport?', 4)
+  ('services', 'What should I send before my consultation?', 1),
+  ('services', 'How many visits will my treatment require?', 2),
+  ('services', 'What is included in my estimate?', 3),
+  ('services', 'Can you help with accommodation and transport?', 4)
 ) where not exists (select 1 from faqs);
 
 -- The pages the website has, so their search text can be edited without pressing "Add the website's pages".

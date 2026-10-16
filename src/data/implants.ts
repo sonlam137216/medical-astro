@@ -125,15 +125,3 @@ export const plan = {
     'Know how many visits may be required and the estimated length of each stay.',
   ],
 };
-
-// The design shows the questions only. Answers must be supplied by the clinic.
-export const faq = {
-  label: 'FAQs',
-  title: 'Frequently Asked Questions',
-  questions: [
-    'What should I send before my consultation?',
-    'How many visits will my treatment require?',
-    'What is included in my estimate?',
-    'Can you help with accommodation and transport?',
-  ],
-};
