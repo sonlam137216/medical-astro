@@ -301,6 +301,28 @@ a.admin-btn {
   box-shadow: none;
 }
 
+/* A form that is being sent (src/scripts/form-busy.ts): a spinner before the label, the button stays readable. */
+.admin-btn[aria-busy='true'] {
+  opacity: 0.85;
+  cursor: progress;
+}
+
+.admin-btn[aria-busy='true']::before {
+  content: '';
+  width: 14px;
+  height: 14px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: admin-spin 0.7s linear infinite;
+}
+
+@keyframes admin-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 /* ---- Forms -------------------------------------------------------------------------------------------------- */
 .admin-form {
   display: grid;
@@ -512,6 +534,42 @@ a.admin-btn {
 .admin-status[data-status='spam'] {
   background: #f4dcda;
   color: var(--color-error);
+}
+
+/* Publish jobs: a build that is waiting or running turns a small spinner; the result is green or red. */
+.admin-status:is([data-status='queued'], [data-status='building']) {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--a-warn-bg);
+  color: #8a5300;
+}
+
+.admin-status:is([data-status='queued'], [data-status='building'])::before,
+.admin-busy-note::before {
+  content: '';
+  width: 10px;
+  height: 10px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: admin-spin 0.7s linear infinite;
+}
+
+.admin-status[data-status='deployed'] {
+  background: var(--a-ok-bg);
+  color: var(--a-ok);
+}
+
+.admin-status[data-status='failed'] {
+  background: #f4dcda;
+  color: var(--color-error);
+}
+
+.admin-busy-note {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .admin-tabs {

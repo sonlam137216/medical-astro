@@ -151,14 +151,14 @@ const build = sp.get('build');
           ` Revision ${latest.revision_number} is saved but not live yet.`}
       </p>
       {building && (
-        <p class="admin-muted" style="margin-top: 8px">
-          A build is running now.
+        <p class="admin-muted admin-busy-note" style="margin-top: 8px">
+          A build is running now. Reload this page to see when it is done.
         </p>
       )}
       {canRetry && (
-        <form method="post" action="/admin/publish/retry" style="margin-top: 12px">
-          <button class="admin-btn" type="submit">
-            Build again
+        <form method="post" action="/admin/publish/retry" style="margin-top: 12px" data-busy-form>
+          <button class="admin-btn" type="submit" data-busy-label="Starting the build…">
+            <span data-label>Build again</span>
           </button>
           <span class="admin-hint"> Starts a new build of revision {latest?.revision_number}.</span>
         </form>
@@ -188,14 +188,20 @@ const build = sp.get('build');
         method="post"
         action="/admin/publish/create"
         style="margin-top: 16px"
+        data-busy-form
       >
         <label>
           Note (optional)
           <input name="note" maxlength="500" placeholder="What changed?" />
         </label>
         <div>
-          <button class="admin-btn" type="submit" disabled={!hasChanges || problems.length > 0}>
-            Publish
+          <button
+            class="admin-btn"
+            type="submit"
+            disabled={!hasChanges || problems.length > 0}
+            data-busy-label="Publishing…"
+          >
+            <span data-label>Publish</span>
           </button>
         </div>
       </form>
@@ -247,3 +253,7 @@ const build = sp.get('build');
     </section>
   </main>
 </AdminLayout>
+
+<script>
+  import '../../../scripts/form-busy';
+</script>
