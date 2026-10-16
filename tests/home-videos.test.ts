@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { sectionByKey } from '../src/lib/cms/sections.ts';
+import { mergeSection, sectionByKey } from '../src/lib/cms/sections.ts';
 import { itemInput, parseFields } from '../src/lib/cms/fields.ts';
 import { parseVideoUrl, vimeoThumbnail, youtubeThumbnails } from '../src/lib/video-embed.ts';
 import { findThumbnail } from '../src/lib/video-thumbnail.ts';
@@ -34,6 +34,30 @@ test('home videos: any other link, or a title without a link, is refused', () =>
   const noLink = parseFields(fields, form({ [itemInput('videos', 0, 'title')]: 'Title only' }));
   assert.equal(noLink.ok, false);
   if (!noLink.ok) assert.match(noLink.errors.videos, /please fill in/);
+});
+
+test('"View all videos": a full web address, or empty for no button', () => {
+  const ok = parseFields(fields, form({ channelUrl: ' https://www.youtube.com/@melatec ' }));
+  assert.ok(ok.ok);
+  assert.equal(ok.value.channelUrl, 'https://www.youtube.com/@melatec');
+
+  const empty = parseFields(fields, form({}));
+  assert.ok(empty.ok);
+  assert.equal(empty.value.channelUrl, null);
+
+  for (const url of ['www.youtube.com/@melatec', '/videos', 'javascript:alert(1)']) {
+    const parsed = parseFields(fields, form({ channelUrl: url }));
+    assert.equal(parsed.ok, false, url);
+  }
+});
+
+test('"View all videos": a row saved before the link existed shows no button', () => {
+  const merged = mergeSection(
+    { label: '', title: '', videos: [], channelUrl: null },
+    { label: 'L', title: 'T', videos: [] },
+    sectionByKey('home_conversations')!.fields,
+  );
+  assert.equal(merged.channelUrl, null);
 });
 
 const embed = parseVideoUrl('https://www.youtube.com/watch?v=dQw4w9WgXcQ')!;

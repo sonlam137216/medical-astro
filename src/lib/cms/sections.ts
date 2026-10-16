@@ -221,6 +221,14 @@ export const SECTIONS: SectionDef[] = [
           help: 'Shown beside the text, one at a time with arrows to move between them. These replace the Home page video of Site details. The cover of each video is taken from YouTube or Vimeo when the website is built.',
         },
       ),
+      {
+        type: 'weburl',
+        name: 'channelUrl',
+        label: '“View all videos” link',
+        max: 300,
+        placeholder: 'https://www.youtube.com/@…',
+        help: 'The address of your YouTube channel (or any page with all your videos). Shows a “View all videos” button under the text. Leave empty to show no button.',
+      },
       image(
         'Shown when there are no videos here and none is chosen in Site details; also the cover of a video whose own cover cannot be found. Leave empty to keep the built-in picture.',
         'home-conversations',

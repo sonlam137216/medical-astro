@@ -113,6 +113,8 @@ export const conversations = {
   } satisfies Img,
   // No sample videos: the list is filled in Page text with the clinic's own YouTube or Vimeo links.
   videos: [] as { url: string; title: string }[],
+  // No sample link: the "View all videos" button only shows once the clinic's channel is filled in.
+  channelUrl: null as string | null,
 };
 
 // PLACEHOLDER: every cell in the Figma table is "C$1,250 / 40 clinics" and every saving is "—".

@@ -2,6 +2,8 @@
 import Section from '../Section.astro';
 import Video from '../Video.astro';
 import VideoEmbed from '../VideoEmbed.astro';
+import Button from '../Button.astro';
+import Icon from '../Icon.astro';
 
 import VideoReel from './VideoReel.astro';
 import { getSection } from '../../lib/content';
@@ -11,7 +13,8 @@ import { getHomeVideos } from '../../lib/home-videos';
 
 // The videos listed in Page text show one at a time beside the text; without any, a video chosen in Site details
 // replaces the picture. Either way the hero's "Watch video" button scrolls here. With no video at all the section
-// keeps its picture and shows no video controls or "View all videos" button: there is no videos page.
+// keeps its picture and shows no video controls. "View all videos" leads to the clinic's channel (Page text), and
+// only shows once that link is filled in: the site has no videos page of its own.
 const { video, videoEmbed } = await getSiteContent();
 // Switched off in Page text: no section (and no video).
 const conversations = await getSection('home_conversations');
@@ -32,6 +35,12 @@ const videos = conversations ? await getHomeVideos(conversations.videos) : [];
           {conversations.title}
         </h2>
         <p class="split__body">{conversations.body}</p>
+        {conversations.channelUrl && (
+          <Button variant="outline" href={conversations.channelUrl} class="split__all">
+            View all videos
+            <Icon name="arrow-right" />
+          </Button>
+        )}
       </div>
       {videos.length > 0 ? (
         <VideoReel
