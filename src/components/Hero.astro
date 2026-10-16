@@ -6,9 +6,15 @@ import ProfileImage from './ProfileImage.astro';
 import { getPageBanner, getSiteContent } from '../lib/site-content';
 import { heroImage } from '../data/home';
 import { getSection } from '../lib/content';
+import { parseVideoUrl } from '../lib/video-embed';
 
 const site = await getSiteContent();
 const hero = (await getSection('home_hero'))!;
+// Every Home video plays in the "dentists & patients" section, so there is none when it is switched off.
+const conversations = await getSection('home_conversations');
+const hasVideo =
+  conversations !== null &&
+  Boolean(site.video || site.videoEmbed || conversations.videos.some((v) => parseVideoUrl(v.url)));
 // The picture chosen for the Home row of Pages, else the built-in photo.
 const banner = await getPageBanner('/');
 ---
@@ -48,8 +54,8 @@ const banner = await getPageBanner('/');
             WhatsApp us
           </Button>
         )}
-        {/* Only when a video is chosen in Site details: it scrolls to the player further down the page. */}
-        {(site.video || site.videoEmbed) && (
+        {/* Only when there is a video (Page text or Site details): it scrolls to the player further down. */}
+        {hasVideo && (
           <Button href="#video">
             <Icon name="player-play" />
             Watch video

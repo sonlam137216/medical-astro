@@ -64,3 +64,46 @@ export function parseVideoUrl(input: string | null | undefined): VideoEmbed | nu
   }
   return null;
 }
+
+/** A video's cover picture on the provider's image host, with its size. */
+export interface VideoThumbnail {
+  url: string;
+  width: number;
+  height: number;
+}
+
+/**
+ * The covers YouTube may have for a video, largest first: `maxresdefault` exists only for HD uploads and
+ * `sddefault` not for every old video, `hqdefault` always does (both of those are 4:3 with black bars, which the
+ * 16:9 frame crops away). Vimeo has no fixed address: its cover comes from oEmbed (see video-thumbnail.ts).
+ */
+export function youtubeThumbnails(id: string): VideoThumbnail[] {
+  return [
+    { url: `https://i.ytimg.com/vi/${id}/maxresdefault.jpg`, width: 1280, height: 720 },
+    { url: `https://i.ytimg.com/vi/${id}/sddefault.jpg`, width: 640, height: 480 },
+    { url: `https://i.ytimg.com/vi/${id}/hqdefault.jpg`, width: 480, height: 360 },
+  ];
+}
+
+/** Image hosts the build may download covers from (`image.domains` in astro.config.mjs). */
+export const THUMBNAIL_HOSTS = ['i.ytimg.com', 'i.vimeocdn.com'] as const;
+
+/** The oEmbed answer of Vimeo -> its cover, or null when it has none on an allowed host. */
+export function vimeoThumbnail(data: unknown): VideoThumbnail | null {
+  if (typeof data !== 'object' || data === null) return null;
+  const {
+    thumbnail_url: url,
+    thumbnail_width: width,
+    thumbnail_height: height,
+  } = data as Record<string, unknown>;
+  if (typeof url !== 'string' || typeof width !== 'number' || typeof height !== 'number')
+    return null;
+  try {
+    const u = new URL(url);
+    if (u.protocol !== 'https:' || !(THUMBNAIL_HOSTS as readonly string[]).includes(u.hostname))
+      return null;
+  } catch {
+    return null;
+  }
+  return width > 0 && height > 0 ? { url, width, height } : null;
+}

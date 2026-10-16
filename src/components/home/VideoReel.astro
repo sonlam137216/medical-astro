@@ -1,0 +1,229 @@
+---
+import Icon from '../Icon.astro';
+import VideoEmbed from '../VideoEmbed.astro';
+import type { Img } from '../../data/types';
+import type { PublicImage } from '../../lib/media';
+import type { VideoEmbed as Embed, VideoThumbnail } from '../../lib/video-embed';
+
+// The videos of the Home "dentists & patients" section (Page text), one at a time. The row is a plain
+// horizontal scroller that snaps to each video, so it works by swipe or keyboard without JavaScript; the arrows
+// and dots are drawn only with it. Moving to another video stops the one playing (see VideoEmbed).
+interface Props {
+  videos: { embed: Embed; title: string; thumbnail: VideoThumbnail | null }[];
+  /** Cover of a video whose own cover could not be found, and the name of an untitled video. */
+  poster: Img | PublicImage;
+  label: string;
+  class?: string;
+}
+
+const { videos, poster, label, class: className } = Astro.props;
+const many = videos.length > 1;
+---
+
+<div class:list={['reel', className]} data-reel>
+  <ul class="reel__track" aria-label="Videos" tabindex={many ? 0 : undefined} data-reel-track>
+    {videos.map((v, i) => (
+      <li
+        class="reel__slide"
+        aria-roledescription={many ? 'slide' : undefined}
+        aria-label={many ? `${i + 1} of ${videos.length}` : undefined}
+      >
+        <VideoEmbed
+          class="reel__video"
+          video={v.embed}
+          poster={poster}
+          thumbnail={v.thumbnail}
+          title={v.title || label}
+        />
+        {v.title && <p class="reel__title">{v.title}</p>}
+      </li>
+    ))}
+  </ul>
+  {many && (
+    <div class="reel__nav">
+      <button class="reel__arrow" type="button" aria-label="Previous video" data-reel-prev>
+        <Icon name="arrow-left" size={20} />
+      </button>
+      <ol class="reel__dots">
+        {videos.map((v, i) => (
+          <li>
+            <button
+              class="reel__dot"
+              type="button"
+              aria-label={`Show video ${i + 1}${v.title ? `: ${v.title}` : ''}`}
+              aria-current={i === 0 ? 'true' : undefined}
+              data-reel-dot={i}
+            ></button>
+          </li>
+        ))}
+      </ol>
+      <button class="reel__arrow" type="button" aria-label="Next video" data-reel-next>
+        <Icon name="arrow-right" size={20} />
+      </button>
+    </div>
+  )}
+</div>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-reel]').forEach((reel) => {
+    const track = reel.querySelector<HTMLElement>('[data-reel-track]');
+    const slides = track ? [...track.children].map((el) => el as HTMLElement) : [];
+    const dots = [...reel.querySelectorAll<HTMLElement>('[data-reel-dot]')];
+    if (!track || slides.length < 2) return;
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let current = 0;
+    // Where an arrow sent the row while it is still scrolling there, so quick clicks add up.
+    let target: number | null = null;
+
+    const nearest = () => {
+      const left = track.scrollLeft;
+      let best = 0;
+      slides.forEach((s, i) => {
+        const offset = (el: HTMLElement) => el.offsetLeft - slides[0].offsetLeft;
+        if (Math.abs(offset(s) - left) < Math.abs(offset(slides[best]) - left)) best = i;
+      });
+      return best;
+    };
+    // The video that scrolled out of view is stopped (its picture comes back).
+    const settle = () => {
+      target = null;
+      const i = nearest();
+      if (i === current) return;
+      slides[current]
+        .querySelector('[data-video-embed]')
+        ?.dispatchEvent(new Event('video-embed:reset'));
+      current = i;
+      dots.forEach((d, n) => {
+        if (n === i) d.setAttribute('aria-current', 'true');
+        else d.removeAttribute('aria-current');
+      });
+    };
+    const go = (i: number) => {
+      const n = (i + slides.length) % slides.length;
+      target = n;
+      track.scrollTo({
+        left: slides[n].offsetLeft - slides[0].offsetLeft,
+        behavior: reduce ? 'auto' : 'smooth',
+      });
+    };
+
+    let timer: number | undefined;
+    track.addEventListener('scroll', () => {
+      window.clearTimeout(timer);
+      timer = window.setTimeout(settle, 120);
+    });
+    reel
+      .querySelector('[data-reel-prev]')
+      ?.addEventListener('click', () => go((target ?? current) - 1));
+    reel
+      .querySelector('[data-reel-next]')
+      ?.addEventListener('click', () => go((target ?? current) + 1));
+    dots.forEach((d, n) => d.addEventListener('click', () => go(n)));
+  });
+</script>
+
+<style>
+  .reel {
+    display: grid;
+    gap: 16px;
+    min-width: 0;
+  }
+
+  .reel__track {
+    display: flex;
+    gap: 16px;
+    margin: 0;
+    padding: 0;
+    overflow-x: auto;
+    list-style: none;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+
+  .reel__track::-webkit-scrollbar {
+    display: none;
+  }
+
+  .reel__slide {
+    display: grid;
+    align-content: start;
+    gap: 12px;
+    flex: 0 0 100%;
+    scroll-snap-align: start;
+  }
+
+  .reel__slide :global(.reel__video) {
+    border-radius: var(--radius-image);
+  }
+
+  .reel__title {
+    margin: 0;
+    font: 600 18px / 26px var(--font-display);
+    color: var(--color-title);
+  }
+
+  .reel__nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .reel__arrow {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    background: var(--color-white);
+    border: 1px solid var(--color-border);
+    border-radius: 50%;
+    color: var(--color-blue);
+    cursor: pointer;
+  }
+
+  .reel__arrow:hover {
+    border-color: var(--color-blue);
+  }
+
+  .reel__dots {
+    display: flex;
+    gap: 0;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  /* A 40 px target around a small dot. */
+  .reel__dot {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    background: none;
+    border: 0;
+    cursor: pointer;
+  }
+
+  .reel__dot::before {
+    content: '';
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--color-border);
+    transition:
+      background-color 0.2s,
+      scale 0.2s;
+  }
+
+  .reel__dot[aria-current='true']::before {
+    background: var(--color-blue);
+    scale: 1.2;
+  }
+
+  /* Without JS the arrows and dots do nothing: the row is swiped or scrolled instead. */
+  :global(html:not(.js)) .reel__nav {
+    display: none;
+  }
+</style>

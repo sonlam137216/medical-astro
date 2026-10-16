@@ -67,6 +67,15 @@ const slotsFor = (f: Extract<Field, { type: 'items' }>) => {
                 value={text(itemInput(f.name, i, c.name))}
                 maxlength={c.max}
               />
+            ) : c.kind === 'video' ? (
+              <input
+                type="url"
+                inputmode="url"
+                name={itemInput(f.name, i, c.name)}
+                value={text(itemInput(f.name, i, c.name))}
+                maxlength={c.max}
+                placeholder="https://www.youtube.com/watch?v=…"
+              />
             ) : c.kind === 'choice' ? (
               <select name={itemInput(f.name, i, c.name)}>
                 <option value="">None</option>

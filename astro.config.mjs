@@ -38,6 +38,9 @@ export default defineConfig({
   // link and every CMS menu entry uses) and redirects `/about/` there, so links never go through a redirect.
   build: { format: 'file' },
   integrations: [redirectsFile(), sitemapFile({ origin: site, indexable })],
+  // Covers of the Home page YouTube/Vimeo videos are downloaded at build time and served from this site
+  // (src/lib/video-thumbnail.ts; same list as THUMBNAIL_HOSTS in src/lib/video-embed.ts).
+  image: { domains: ['i.ytimg.com', 'i.vimeocdn.com'] },
   // No Markdown content on this site; also silences Astro's warning that Shiki's inline styles clash with the CSP.
   markdown: { syntaxHighlight: false },
   security: {

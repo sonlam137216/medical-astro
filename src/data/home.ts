@@ -111,6 +111,8 @@ export const conversations = {
     src: digitalScan,
     alt: 'A dentist reviewing a digital scan of teeth with a patient',
   } satisfies Img,
+  // No sample videos: the list is filled in Page text with the clinic's own YouTube or Vimeo links.
+  videos: [] as { url: string; title: string }[],
 };
 
 // PLACEHOLDER: every cell in the Figma table is "C$1,250 / 40 clinics" and every saving is "—".

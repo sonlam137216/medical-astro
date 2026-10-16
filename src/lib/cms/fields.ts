@@ -3,6 +3,7 @@
 // Limits mirror the CHECK constraints in the database; the database remains the last line of defence.
 
 import type { SlotKey } from '../image-slots.ts';
+import { parseVideoUrl } from '../video-embed.ts';
 
 export interface FieldBase {
   name: string;
@@ -19,12 +20,12 @@ export interface FieldBase {
 
 /**
  * One column of an `items` field. `lines` values are stored as an array of text; `choice` is one of `options`
- * (stored as its value, empty for none).
+ * (stored as its value, empty for none); `video` is a YouTube or Vimeo link (src/lib/video-embed.ts).
  */
 export interface ItemColumn {
   name: string;
   label: string;
-  kind: 'text' | 'textarea' | 'lines' | 'choice';
+  kind: 'text' | 'textarea' | 'lines' | 'choice' | 'video';
   max: number;
   required?: boolean;
   help?: string;
@@ -242,6 +243,9 @@ export function parseFields(fields: readonly Field[], form: URLSearchParams): Pa
               if (v.length > c.max) {
                 errors[field.name] =
                   `${field.itemLabel} ${i + 1}: keep “${c.label}” under ${c.max} characters.`;
+              } else if (c.kind === 'video' && v !== '' && !parseVideoUrl(v)) {
+                errors[field.name] =
+                  `${field.itemLabel} ${i + 1}: “${c.label}” must be a YouTube or Vimeo link, for example https://www.youtube.com/watch?v=…`;
               }
               if (v !== '') filled = true;
               item[c.name] = v;

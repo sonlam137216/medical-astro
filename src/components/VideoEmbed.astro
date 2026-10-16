@@ -1,22 +1,25 @@
 ---
-import type { VideoEmbed } from '../lib/video-embed';
+import { Image } from 'astro:assets';
+import type { VideoEmbed, VideoThumbnail } from '../lib/video-embed';
 import ProfileImage from './ProfileImage.astro';
 import type { Img } from '../data/types';
 import type { PublicImage } from '../lib/media';
 
-// A YouTube or Vimeo video chosen in Site details. Nothing of the provider is loaded until the visitor presses
-// play: the page shows a picture with a play button (a link to the video's own page, which is what happens
+// A YouTube or Vimeo video (Site details, or the video list of the Home page). Nothing of the provider is
+// loaded until the visitor presses play: the page shows a picture with a play button (a link to the video's own page, which is what happens
 // without JavaScript) and the small script below swaps it for the player. No cookies and no third-party
-// request on page load.
+// request on page load. A `video-embed:reset` event on the element puts the picture back (stops the player).
 interface Props {
   video: VideoEmbed;
   /** The picture shown before play (the section's own photo). */
   poster: Img | PublicImage;
+  /** The video's own cover from YouTube or Vimeo, downloaded at build time; replaces `poster` when found. */
+  thumbnail?: VideoThumbnail | null;
   title: string;
   class?: string;
 }
 
-const { video, poster, title, class: className } = Astro.props;
+const { video, poster, thumbnail, title, class: className } = Astro.props;
 ---
 
 <div
@@ -26,12 +29,26 @@ const { video, poster, title, class: className } = Astro.props;
   data-embed-title={title}
 >
   <a class="embed__poster" href={video.watchUrl} target="_blank" rel="noopener noreferrer">
-    <ProfileImage
-      class="embed__img"
-      image={poster}
-      slot="home-conversations"
-      sizes="(max-width: 960px) 100vw, 520px"
-    />
+    {thumbnail ? (
+      <Image
+        class="embed__img"
+        src={thumbnail.url}
+        alt=""
+        width={thumbnail.width}
+        height={thumbnail.height}
+        widths={[480, 640, 960, 1280].filter((w) => w <= thumbnail.width)}
+        sizes="(max-width: 960px) 100vw, 520px"
+        format="webp"
+        loading="lazy"
+      />
+    ) : (
+      <ProfileImage
+        class="embed__img"
+        image={poster}
+        slot="home-conversations"
+        sizes="(max-width: 960px) 100vw, 520px"
+      />
+    )}
     <span class="embed__play" aria-hidden="true"></span>
     <span class="visually-hidden">
       Play video: {title} (opens on {video.provider === 'youtube' ? 'YouTube' : 'Vimeo'} without
@@ -45,6 +62,9 @@ const { video, poster, title, class: className } = Astro.props;
     const link = root.querySelector('a');
     const src = root.dataset.embedSrc;
     if (!link || !src) return;
+    root.addEventListener('video-embed:reset', () => {
+      if (!root.contains(link)) root.replaceChildren(link);
+    });
     link.addEventListener('click', (event) => {
       event.preventDefault();
       const frame = document.createElement('iframe');
