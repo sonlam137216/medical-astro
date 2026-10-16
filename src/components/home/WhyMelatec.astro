@@ -100,4 +100,59 @@ const whyMelatec = await getSection('home_why');
       gap: 40px;
     }
   }
+
+  /*
+   * Self-added (after the "Why Choose" block of ktdental.com.vn): while scrolling, the cards stop one after another
+   * near the top and each slides over the one before, a few pixels lower so the edges of the earlier ones stay in
+   * view; on wide screens the intro stays beside them. Sticky positioning only, no script. Rows share one height
+   * so a shorter card never leaves the bottom of the one beneath showing. Off when the reader asks for less
+   * motion, and on screens too short to hold the stack.
+   */
+  @media (prefers-reduced-motion: no-preference) and (min-height: 600px) {
+    .why {
+      --why-top: 96px;
+    }
+
+    .why__list {
+      grid-auto-rows: 1fr;
+      gap: 28px;
+    }
+
+    .why__item {
+      position: sticky;
+      top: calc(var(--why-top) + var(--stack, 0) * 12px);
+    }
+
+    .why__item:nth-child(2) {
+      --stack: 1;
+    }
+
+    .why__item:nth-child(3) {
+      --stack: 2;
+    }
+
+    .why__item:nth-child(4) {
+      --stack: 3;
+    }
+
+    .why__item:nth-child(5) {
+      --stack: 4;
+    }
+
+    .why__item:nth-child(n + 6) {
+      --stack: 5;
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) and (min-height: 600px) and (min-width: 961px) {
+    .why__intro {
+      position: sticky;
+      top: var(--why-top);
+    }
+
+    /* The intro is taller than the finished stack: room below the cards keeps both in view until the end. */
+    .why__list {
+      padding-bottom: 160px;
+    }
+  }
 </style>
