@@ -25,11 +25,19 @@ export const IMAGE_SLOTS = {
     frames: [{ label: 'Service cards', width: 384, height: 190 }],
     position: { x: 50, y: 0 },
   },
-  // The top banner of a service's page: full width, the title and text over the left part (a white fade).
-  'service-banner': {
-    label: 'Service page banner',
-    frames: [{ label: 'Top of the service’s page', width: 1440, height: 400 }],
+  // The top banner of every page but Home (Pages, and each service's page): full width, one height on every page
+  // (--page-hero-height in tokens.css), the title and text over the left part (a white fade).
+  'page-banner': {
+    label: 'Page banner',
+    frames: [{ label: 'Top of the page', width: 1440, height: 480 }],
     position: { x: 75, y: 50 },
+  },
+  // The first screen of the Home page: taller than the other banners (560–700 px high, 662 px on a 1440 px
+  // screen), the title and text over the left part.
+  'home-hero': {
+    label: 'Home page banner',
+    frames: [{ label: 'First screen of the Home page', width: 1440, height: 662 }],
+    position: { x: 70, y: 50 },
   },
   'package-card': {
     label: 'Package card',

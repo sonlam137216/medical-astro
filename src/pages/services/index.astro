@@ -1,6 +1,6 @@
 ---
 import SiteLayout from '../../layouts/SiteLayout.astro';
-import { getPageSeo } from '../../lib/site-content';
+import { getPageSeo, getPageBanner } from '../../lib/site-content';
 import PageHero from '../../components/PageHero.astro';
 import Section from '../../components/Section.astro';
 import ServiceCard from '../../components/cards/ServiceCard.astro';
@@ -21,6 +21,7 @@ const seo = await getPageSeo('/services', {
   description:
     'Implant, cosmetic, orthodontic and restorative dental care in a modern, patient-focused clinic in Vietnam.',
 });
+const banner = await getPageBanner('/services');
 ---
 
 <SiteLayout title={seo.title} description={seo.description}>
@@ -28,8 +29,7 @@ const seo = await getPageSeo('/services', {
     variant="banner"
     upper
     label={hero.label}
-    image={heroImage}
-    imageHeight={400}
+    image={banner ?? heroImage}
     position="75% center"
   >
     <Fragment slot="title">{hero.title}</Fragment>

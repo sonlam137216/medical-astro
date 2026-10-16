@@ -8,8 +8,8 @@ interface Props {
   label: string;
   /** A sample photo bundled with the site, or (banner only) a picture from the media library. */
   image: Img | PublicImage;
-  /** Rendered image height in px (width is 568 for `split`; `banner` uses it as the band height). */
-  imageHeight: number;
+  /** `split` only: rendered image height in px (width 568). Banners all share one height (--page-hero-height). */
+  imageHeight?: number;
   /** Rounded 24px image (landing and packages pages) or square corners (About, Services, Doctors). */
   rounded?: boolean;
   /** Content pages set the h1 in capitals. */
@@ -29,7 +29,7 @@ interface Props {
 const {
   label,
   image,
-  imageHeight,
+  imageHeight = 420,
   rounded = false,
   upper = false,
   headingId = 'page-title',
@@ -43,8 +43,8 @@ const banner = variant === 'banner';
 {banner ? (
   <section class:list={['banner', { 'banner--dark': dark }]} aria-labelledby={headingId}>
     {'srcset' in image ? (
-      // From the media library (a service's banner): cropped as the 'service-banner' frame, its focus point in view.
-      <ProfileImage class="banner__bg" image={image} slot="service-banner" sizes="100vw" priority />
+      // From the media library (Pages, or a service's banner): cropped as the 'page-banner' frame, its focus point in view.
+      <ProfileImage class="banner__bg" image={image} slot="page-banner" sizes="100vw" priority />
     ) : (
       <Image
         class="banner__bg"
@@ -57,7 +57,7 @@ const banner = variant === 'banner';
         style={`object-position: ${position};`}
       />
     )}
-    <div class="container banner__inner" style={`min-height: ${imageHeight}px;`}>
+    <div class="container banner__inner">
       <div class="hero__text">
         <div class="hero__top">
           <slot name="top" />
@@ -213,8 +213,8 @@ const banner = variant === 'banner';
     z-index: -1;
     background: linear-gradient(
       90deg,
-      rgb(255 255 255 / 88%) 0%,
-      rgb(255 255 255 / 55%) 45%,
+      rgb(255 255 255 / 90%) 0%,
+      rgb(255 255 255 / 72%) 50%,
       rgb(255 255 255 / 0%) 100%
     );
   }
@@ -231,11 +231,19 @@ const banner = variant === 'banner';
   .banner__inner {
     display: grid;
     align-items: center;
-    padding-block: var(--section-pad-y);
+    min-height: var(--page-hero-height);
+    padding-block: 40px;
   }
 
+  /* Wide and tight enough that the usual copy (label, a two-line title, two short paragraphs, buttons) fits the
+     shared height, so every banner is the same height; longer copy makes that page's banner taller. */
   .banner .hero__text {
-    max-width: 620px;
+    max-width: 680px;
+    gap: 20px;
+  }
+
+  .banner .hero__body {
+    max-width: none;
   }
 
   .banner--dark .hero__label,

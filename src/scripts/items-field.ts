@@ -5,23 +5,25 @@
 // the form keeps its two empty slots and "save and come back" to add more.
 const NAME = /^(.+?)__\d+__(.+)$/;
 
+// The Workers types declare their own `Element` (remove() returns it), so a select cannot be a querySelectorAll type
+// argument: cast like the other admin scripts.
+type Control = HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement;
+const controls = (root: HTMLElement, selector: string) =>
+  Array.from(root.querySelectorAll(selector)) as unknown as Control[];
+
 function renumber(list: HTMLElement) {
   list.querySelectorAll<HTMLElement>('[data-item]').forEach((item, i) => {
-    item
-      .querySelectorAll<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>('[name]')
-      .forEach((input) => {
-        const m = NAME.exec(input.name);
-        if (m) input.name = `${m[1]}__${i}__${m[2]}`;
-      });
+    controls(item, '[name]').forEach((input) => {
+      const m = NAME.exec(input.name);
+      if (m) input.name = `${m[1]}__${i}__${m[2]}`;
+    });
     const number = item.querySelector('[data-item-number]');
     if (number) number.textContent = String(i + 1);
   });
 }
 
 const isEmpty = (item: HTMLElement) =>
-  Array.from(
-    item.querySelectorAll<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>('[name]'),
-  ).every((input) => input.value.trim() === '');
+  controls(item, '[name]').every((input) => input.value.trim() === '');
 
 for (const list of document.querySelectorAll<HTMLElement>('[data-items]')) {
   const items = () => Array.from(list.querySelectorAll<HTMLElement>('[data-item]'));
@@ -63,9 +65,9 @@ for (const list of document.querySelectorAll<HTMLElement>('[data-items]')) {
       .forEach((input) => {
         input.value = '';
       });
-    item
-      .querySelectorAll<HTMLSelectElement>('select[name]')
-      .forEach((select) => (select.selectedIndex = 0));
+    (controls(item, 'select[name]') as HTMLSelectElement[]).forEach(
+      (select) => (select.selectedIndex = 0),
+    );
     // Empty slots wait at the end, hidden, for "Add".
     item.hidden = true;
     list.insertBefore(item, add);
@@ -76,3 +78,5 @@ for (const list of document.querySelectorAll<HTMLElement>('[data-items]')) {
 
   update();
 }
+
+export {};

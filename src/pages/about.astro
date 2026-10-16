@@ -1,7 +1,7 @@
 ---
 import { Image } from 'astro:assets';
 import SiteLayout from '../layouts/SiteLayout.astro';
-import { getPageSeo } from '../lib/site-content';
+import { getPageSeo, getPageBanner } from '../lib/site-content';
 import PageHero from '../components/PageHero.astro';
 import Section from '../components/Section.astro';
 import SectionIntro from '../components/SectionIntro.astro';
@@ -35,14 +35,14 @@ const seo = await getPageSeo('/about', {
   description:
     'Learn about Melatec Dental Clinic: modern dental technology, experienced dentists and personalised care for international patients in Vietnam.',
 });
+const banner = await getPageBanner('/about');
 ---
 
 <SiteLayout title={seo.title} description={seo.description} theme="sans">
   <PageHero
     variant="banner"
     label={aboutHero.label}
-    image={heroImage}
-    imageHeight={480}
+    image={banner ?? heroImage}
     upper
     position="75% center"
   >

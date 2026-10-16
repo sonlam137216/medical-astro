@@ -10,7 +10,7 @@ import TreatmentCosts from '../../components/home/TreatmentCosts.astro';
 import SeamlessJourney from '../../components/SeamlessJourney.astro';
 import PlanVisit from '../../components/PlanVisit.astro';
 import LatestArticles from '../../components/articles/LatestArticles.astro';
-import { getPageSeo } from '../../lib/site-content';
+import { getPageSeo, getPageBanner } from '../../lib/site-content';
 import { getFaqs, getSection, getService } from '../../lib/content';
 import { faqJsonLd } from '../../lib/seo';
 
@@ -33,6 +33,7 @@ const seo = await getPageSeo('/services/dental-implants', {
     'Single-tooth implants and All-on-4 and All-on-6 restorations, with a personalised treatment plan and estimate before you travel to Vietnam.',
 });
 const faqData = faqJsonLd(faqs);
+const banner = await getPageBanner('/services/dental-implants');
 ---
 
 <!-- The page has its own consultation block and no social row. The header is the standard one (the new Figma has no landing-page header variant). -->
@@ -48,8 +49,7 @@ const faqData = faqJsonLd(faqs);
     variant="banner"
     upper
     label={hero.label}
-    image={heroImage}
-    imageHeight={440}
+    image={banner ?? heroImage}
     position="85% center"
   >
     <Fragment slot="title">{hero.title}</Fragment>

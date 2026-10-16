@@ -9,6 +9,7 @@ import Pagination from './Pagination.astro';
 import { listPagePath } from '../../lib/cms/articles';
 import type { PublicArticle } from '../../lib/content';
 import { heroImage } from '../../data/home';
+import { getPageBanner } from '../../lib/site-content';
 
 // Shared by the Travel Guide and Dental Knowledge lists, their category pages and their later pages.
 // UI update (2026-10-13, direction A, a deliberate change from Figma's navy hero with the search box in it):
@@ -71,13 +72,15 @@ const active = categories.find((c) => c.slug === activeCategory) ?? null;
 const featured = page === 1 && activeCategory === null && articles.length >= 4 ? articles[0] : null;
 const rest = featured ? articles.slice(1) : articles;
 const placeholder = active ? `Search in ${active.name}` : `Search ${activeTotal} articles`;
+// The banner picture chosen for the list's page in Pages (category pages use the same one).
+const banner = await getPageBanner(rootPath);
 ---
 
 <SiteLayout {title} {description} {current} consultation={false} social={false}>
   {page > 1 && <link slot="head" rel="prev" href={listPagePath(listPath, page - 1)} />}
   {page < totalPages && <link slot="head" rel="next" href={listPagePath(listPath, page + 1)} />}
 
-  <PageHero variant="banner" {label} image={heroImage} imageHeight={340} position="75% center">
+  <PageHero variant="banner" {label} image={banner ?? heroImage} position="75% center">
     <nav slot="top" class="crumbs" aria-label="Breadcrumb">
       <ol>
         <li>

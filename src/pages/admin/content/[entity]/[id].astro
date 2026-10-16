@@ -27,6 +27,8 @@ if (result && 'redirect' in result) return result.redirect;
 if (result) Astro.response.status = result.status;
 
 const options = await loadOptions(db, def);
+// Same fields as `def.fields`; some rows show other hints (the Home row of Pages asks for a taller banner).
+const fields = def.fieldsFor?.(row) ?? def.fields;
 const sp = Astro.url.searchParams;
 const heading = String(row[def.titleField] ?? def.singular);
 
@@ -91,8 +93,8 @@ const yesNo = (value: unknown) => (value === true ? 'yes' : value === false ? 'n
       </p>
     )}
     <EntityForm
-      def={def}
-      values={result?.values ?? valuesFromRow(def.fields, row)}
+      def={{ fields }}
+      values={result?.values ?? valuesFromRow(fields, row)}
       errors={result?.errors}
       formError={result?.formError}
       options={options}

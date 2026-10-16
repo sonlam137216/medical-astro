@@ -9,7 +9,13 @@ import {
 } from '../data/site';
 import { loadSnapshot, getPublicBase, getServices, getLocations } from './content';
 import { DEFAULT_SHARE_IMAGE, absoluteUrl, largestImageUrl, organizationJsonLd } from './seo';
-import { snapshotImageInput, toPublicImage, toPublicVideo, type PublicVideo } from './media';
+import {
+  snapshotImageInput,
+  toPublicImage,
+  toPublicVideo,
+  type PublicImage,
+  type PublicVideo,
+} from './media';
 import { parseVideoUrl, type VideoEmbed } from './video-embed';
 import { groupMenu, withServicesMenu, type MenuItem } from './menu';
 
@@ -128,6 +134,14 @@ export async function getPageMeta(
     noindex: page?.noindex ?? false,
     shareImage: shareImage ? largestImageUrl(shareImage) : null,
   };
+}
+
+/** The banner picture chosen for a page in Pages (`path` without a trailing slash), or null for the built-in one. */
+export async function getPageBanner(path: string): Promise<PublicImage | null> {
+  const page = (await loadSnapshot())?.pages?.find((p) => p.path === path);
+  return (
+    (page?.heroImage && toPublicImage(snapshotImageInput(page.heroImage), getPublicBase())) || null
+  );
 }
 
 /** Services offered to visitors (consultation forms, article sidebar): the published services, or the samples. */

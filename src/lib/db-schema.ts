@@ -429,6 +429,7 @@ export interface Tables {
       created_at: string;
       id: string;
       is_enabled: boolean;
+      hero_image_id: string | null;
       noindex: boolean;
       og_image_id: string | null;
       path: string;
@@ -441,6 +442,7 @@ export interface Tables {
       created_at?: string;
       id?: string;
       is_enabled?: boolean;
+      hero_image_id?: string | null;
       noindex?: boolean;
       og_image_id?: string | null;
       path: string;
@@ -684,7 +686,11 @@ export const TABLES: Record<TableName, TableInfo> = {
     refs: { image_id: 'media_assets', service_id: 'services' },
   },
   page_sections: { bool: ['is_visible'], json: ['data'], uuid: true, refs: { page_id: 'pages' } },
-  pages: { bool: ['noindex', 'is_enabled'], uuid: true, refs: { og_image_id: 'media_assets' } },
+  pages: {
+    bool: ['noindex', 'is_enabled'],
+    uuid: true,
+    refs: { og_image_id: 'media_assets', hero_image_id: 'media_assets' },
+  },
   publish_jobs: { uuid: true, refs: { revision_id: 'content_revisions' } },
   redirects: { uuid: true },
   service_options: {

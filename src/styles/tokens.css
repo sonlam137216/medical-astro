@@ -81,6 +81,9 @@
   --section-pad-y: 80px;
   --utility-bar-h: 38px;
   --nav-h: 88px;
+  /* One height for the top banner of every page but Home (PageHero banner; the 'page-banner' picture frame in
+     src/lib/image-slots.ts is 1440 × this). Taller copy grows the banner instead of being cut. */
+  --page-hero-height: 480px;
   /* Height of a sticky header. The header of this branch scrolls away, so sticky bars (article filters, the
      article rail) sit at the top of the screen. */
   --header-h: 0px;
@@ -114,5 +117,12 @@
     --text-h2-lh: 40px;
     --text-h2-sans: 30px;
     --text-h2-sans-lh: 38px;
+  }
+}
+
+/* Phones: the copy takes the full width and wraps more, so the banner follows its height from a lower minimum. */
+@media (max-width: 520px) {
+  :root {
+    --page-hero-height: 360px;
   }
 }

@@ -2,27 +2,34 @@
 import Icon from './Icon.astro';
 import Button from './Button.astro';
 import { Image } from 'astro:assets';
-import { getSiteContent } from '../lib/site-content';
+import ProfileImage from './ProfileImage.astro';
+import { getPageBanner, getSiteContent } from '../lib/site-content';
 import { heroImage } from '../data/home';
 import { getSection } from '../lib/content';
 
 const site = await getSiteContent();
 const hero = (await getSection('home_hero'))!;
+// The picture chosen for the Home row of Pages, else the built-in photo.
+const banner = await getPageBanner('/');
 ---
 
 <section class="hero" aria-labelledby="hero-title">
   <!-- Figma: one wide photo, copy on the plain left side of it. The picture is the LCP element. -->
-  <Image
-    class="hero__bg"
-    src={heroImage.src}
-    alt={heroImage.alt}
-    width={2000}
-    height={1046}
-    widths={[900, 1400, 2000]}
-    sizes="100vw"
-    loading="eager"
-    fetchpriority="high"
-  />
+  {banner ? (
+    <ProfileImage class="hero__bg" image={banner} slot="home-hero" sizes="100vw" priority />
+  ) : (
+    <Image
+      class="hero__bg"
+      src={heroImage.src}
+      alt={heroImage.alt}
+      width={2000}
+      height={1046}
+      widths={[900, 1400, 2000]}
+      sizes="100vw"
+      loading="eager"
+      fetchpriority="high"
+    />
+  )}
   <div class="container hero__inner">
     <div class="hero__content">
       <p class="t-label is-lined is-lead">{hero.label}</p>

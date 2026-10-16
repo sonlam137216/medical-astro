@@ -13,6 +13,7 @@ import { heroImage } from '../../data/home';
 import { getServices, type PublicService } from '../../lib/content';
 import { HAND_BUILT_SERVICE_PAGES } from '../../lib/services';
 import { breadcrumbJsonLd, pageUrl } from '../../lib/seo';
+import { getPageBanner } from '../../lib/site-content';
 
 // The page of one service, built from the CMS (Services > a service, and its Treatments). Not in Figma: the layout
 // follows the Dental Implants page (banner, price cards, cost comparison, text, consultation form). The cost
@@ -51,6 +52,8 @@ const jsonLd = site
       ]),
     ]
   : [];
+// The service's own banner, else the Services page's (Pages), else the built-in picture.
+const servicesBanner = await getPageBanner('/services');
 ---
 
 <SiteLayout {title} {description} {jsonLd}>
@@ -58,8 +61,7 @@ const jsonLd = site
     variant="banner"
     upper
     label="Our services"
-    image={service.banner ?? heroImage}
-    imageHeight={400}
+    image={service.banner ?? servicesBanner ?? heroImage}
     position="75% center"
   >
     <nav slot="top" class="crumbs" aria-label="Breadcrumb">

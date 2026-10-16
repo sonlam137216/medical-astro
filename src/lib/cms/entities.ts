@@ -30,6 +30,11 @@ export interface EntityDef {
    * to the parent's page, and the parent's page lists its rows.
    */
   parent?: { field: string; entity: string };
+  /**
+   * The form of one row, when it differs by row (the Home row of Pages has a taller banner): same field names as
+   * `fields`, only the hints change, so saving reads `fields`.
+   */
+  fieldsFor?: (row: Record<string, unknown>) => Field[];
 }
 
 const sortOrder: Field = {
@@ -46,6 +51,54 @@ const visible: Field = {
   label: 'Show on the website',
   default: true,
 };
+
+// The banner picture of a page in Pages: one height on every page but Home, whose first screen is taller.
+const pageBanner: Field = {
+  type: 'image',
+  name: 'hero_image_id',
+  label: 'Banner picture',
+  slot: 'page-banner',
+  help: 'The wide picture at the top of the page. The title sits over the left part, so keep the subject on the right. Empty: the built-in picture.',
+};
+const homeBanner: Field = {
+  ...pageBanner,
+  slot: 'home-hero',
+  help: 'The picture of the Home page’s first screen, taller than the other pages’ banners. The title sits over the left part, so keep the subject on the right; narrow screens cut more of the sides. Empty: the built-in picture.',
+};
+
+const pageFields: Field[] = [
+  { type: 'path', name: 'path', label: 'Address', readonly: true },
+  { type: 'text', name: 'title', label: 'Page name (for the admin)', max: 200, required: true },
+  {
+    type: 'text',
+    name: 'seo_title',
+    label: 'Search title',
+    max: 200,
+    help: 'Around 50–60 characters works well.',
+  },
+  {
+    type: 'textarea',
+    name: 'seo_description',
+    label: 'Search description',
+    max: 400,
+    rows: 3,
+    help: 'Around 150 characters works well.',
+  },
+  pageBanner,
+  {
+    type: 'image',
+    name: 'og_image_id',
+    label: 'Share picture',
+    slot: 'share',
+    help: 'Shown when the page is shared. Empty: the Melatec logo picture is used.',
+  },
+  {
+    type: 'bool',
+    name: 'noindex',
+    label: 'Hide this page from search engines',
+    default: false,
+  },
+];
 
 export const PACKAGE_KINDS = [
   ['single_treatment', 'Dental Packages (single treatments)'],
@@ -111,50 +164,22 @@ export const ENTITIES: EntityDef[] = [
     key: 'pages',
     table: 'pages',
     singular: 'page',
-    plural: 'Pages (SEO)',
+    plural: 'Pages',
     intro:
-      'The title and description search engines show for each page, the picture shown when the page is shared, and whether the page is kept out of search engines. Leave the texts empty to keep the built-in text. Pages cannot be added or renamed here.',
+      'The banner picture at the top of each page, the title and description search engines show, the picture shown when the page is shared, and whether the page is kept out of search engines. Leave a field empty to keep the built-in picture or text. Pages cannot be added or renamed here.',
     titleField: 'title',
     columns: [
       { field: 'title', label: 'Page' },
       { field: 'path', label: 'Address' },
       { field: 'seo_title', label: 'Search title' },
     ],
-    fields: [
-      { type: 'path', name: 'path', label: 'Address', readonly: true },
-      { type: 'text', name: 'title', label: 'Page name (for the admin)', max: 200, required: true },
-      {
-        type: 'text',
-        name: 'seo_title',
-        label: 'Search title',
-        max: 200,
-        help: 'Around 50–60 characters works well.',
-      },
-      {
-        type: 'textarea',
-        name: 'seo_description',
-        label: 'Search description',
-        max: 400,
-        rows: 3,
-        help: 'Around 150 characters works well.',
-      },
-      {
-        type: 'image',
-        name: 'og_image_id',
-        label: 'Share picture',
-        slot: 'share',
-        help: 'Shown when the page is shared. Empty: the Melatec logo picture is used.',
-      },
-      {
-        type: 'bool',
-        name: 'noindex',
-        label: 'Hide this page from search engines',
-        default: false,
-      },
-    ],
+    fields: pageFields,
     order: [{ column: 'path' }],
     creatable: false,
     deletable: false,
+    // Home's first screen is taller than the other pages' banners, so it asks for a different picture size.
+    fieldsFor: (row) =>
+      row.path === '/' ? pageFields.map((f) => (f === pageBanner ? homeBanner : f)) : pageFields,
   },
   {
     key: 'services',
@@ -206,8 +231,8 @@ export const ENTITIES: EntityDef[] = [
         type: 'image',
         name: 'banner_image_id',
         label: 'Banner picture',
-        slot: 'service-banner',
-        help: 'The wide picture at the top of the service’s page. The title sits over the left part, so keep the subject on the right. Empty: the site’s default banner.',
+        slot: 'page-banner',
+        help: 'The wide picture at the top of the service’s page. The title sits over the left part, so keep the subject on the right. Empty: the banner picture of the Services page (Pages).',
       },
       sortOrder,
       visible,

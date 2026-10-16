@@ -104,6 +104,8 @@ export interface SnapshotPage {
   noindex: boolean;
   /** Picture for link previews when the page is shared; absent: the default share picture. */
   shareImage?: SnapshotImage;
+  /** The banner picture at the top of the page; absent: the built-in picture. */
+  heroImage?: SnapshotImage;
 }
 
 /** A treatment of a service (a price card on the service's page and, when `home`, on the Home page). */
@@ -337,13 +339,14 @@ export async function buildSnapshot(db: AdminDb): Promise<Snapshot> {
   const { data: pages, error: pagesError } = await db
     .from('pages')
     .select(
-      `path, title, seo_title, seo_description, noindex, share_image:media_assets(${IMAGE_COLUMNS})`,
+      `path, title, seo_title, seo_description, noindex, share_image:media_assets!og_image_id(${IMAGE_COLUMNS}), hero_image:media_assets!hero_image_id(${IMAGE_COLUMNS})`,
     )
     .order('path');
   if (pagesError) throw fail('pages', pagesError);
   if (pages.length > 0) {
     snapshot.pages = pages.map((p) => {
       const shareImage = toSnapshotImage(p.share_image);
+      const heroImage = toSnapshotImage(p.hero_image);
       return {
         path: p.path,
         title: p.title,
@@ -352,6 +355,7 @@ export async function buildSnapshot(db: AdminDb): Promise<Snapshot> {
         noindex: p.noindex,
         // Only when chosen, so snapshots of earlier publishes keep their hash.
         ...(shareImage ? { shareImage } : {}),
+        ...(heroImage ? { heroImage } : {}),
       };
     });
   }
@@ -735,6 +739,13 @@ export function snapshotProblems(snapshot: Snapshot, target: string = 'staging')
       );
     }
   }
+  for (const p of snapshot.pages ?? []) {
+    if (p.heroImage && !p.heroImage.decorative && !p.heroImage.alt) {
+      problems.push(
+        `Page “${p.title}”: the banner picture has no description. Add one in Media, or mark the image as decorative.`,
+      );
+    }
+  }
   for (const s of snapshot.services ?? []) {
     if (s.image && !s.image.decorative && !s.image.alt) {
       problems.push(
@@ -868,6 +879,18 @@ export function isSnapshot(value: unknown): value is Snapshot {
   if (
     !categories.every(
       (c) => isObject(c) && typeof c.slug === 'string' && typeof c.name === 'string',
+    )
+  )
+    return false;
+
+  const pages = (value.pages ?? []) as unknown[];
+  if (
+    !pages.every(
+      (p) =>
+        isObject(p) &&
+        typeof p.path === 'string' &&
+        (p.heroImage === undefined ||
+          (isObject(p.heroImage) && typeof p.heroImage.key === 'string')),
     )
   )
     return false;

@@ -1,6 +1,6 @@
 ---
 import SiteLayout from '../../layouts/SiteLayout.astro';
-import { getPageSeo } from '../../lib/site-content';
+import { getPageSeo, getPageBanner } from '../../lib/site-content';
 import PageHero from '../../components/PageHero.astro';
 import Button from '../../components/Button.astro';
 import SeamlessJourney from '../../components/SeamlessJourney.astro';
@@ -19,6 +19,7 @@ const seo = await getPageSeo('/dental-packages', {
   description:
     'Explore the dental packages of Melatec Dental Clinic, from single treatments to combos you can pair with a trip in Vietnam.',
 });
+const banner = await getPageBanner('/dental-packages');
 ---
 
 <!-- Figma frame: "Dental Packages / Single Treatments" -->
@@ -27,8 +28,7 @@ const seo = await getPageSeo('/dental-packages', {
     variant="banner"
     upper
     label={hero.label}
-    image={heroImage}
-    imageHeight={400}
+    image={banner ?? heroImage}
     position="75% center"
   >
     <Fragment slot="title">{hero.title}</Fragment>

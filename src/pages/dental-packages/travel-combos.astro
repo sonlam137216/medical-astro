@@ -1,7 +1,7 @@
 ---
 import { Image } from 'astro:assets';
 import SiteLayout from '../../layouts/SiteLayout.astro';
-import { getPageSeo } from '../../lib/site-content';
+import { getPageSeo, getPageBanner } from '../../lib/site-content';
 import PageHero from '../../components/PageHero.astro';
 import Section from '../../components/Section.astro';
 import SectionIntro from '../../components/SectionIntro.astro';
@@ -25,6 +25,7 @@ const seo = await getPageSeo('/dental-packages/travel-combos', {
   description:
     'Plan your dental care alongside a relaxing trip: dental tourism packages and destinations in Vietnam.',
 });
+const banner = await getPageBanner('/dental-packages/travel-combos');
 ---
 
 <!-- Figma frame: "Dental Packages / Travel Combos". Order and the missing social row follow the design. -->
@@ -38,8 +39,7 @@ const seo = await getPageSeo('/dental-packages/travel-combos', {
     variant="banner"
     upper
     label={hero.label}
-    image={heroImage}
-    imageHeight={400}
+    image={banner ?? heroImage}
     position="75% center"
   >
     <Fragment slot="title">{hero.title}</Fragment>
