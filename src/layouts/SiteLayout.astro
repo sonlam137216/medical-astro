@@ -87,5 +87,5 @@ const meta = await getPageMeta(path);
   {consultation && <ConsultationSection bright={theme === 'sans'} />}
   <slot name="after-consultation" />
   {social && <SocialBar sans={theme === 'sans'} />}
-  <Footer consultationHere={consultationAnchor} bright={theme === 'sans'} />
+  <Footer consultationHere={consultationAnchor} />
 </BaseLayout>

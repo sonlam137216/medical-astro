@@ -922,7 +922,7 @@ export const SITE_FIELDS: Field[] = [
     name: 'opening_hours',
     label: 'Opening hours',
     max: 200,
-    placeholder: 'Monday–Sunday · 8:00–20:00',
+    placeholder: 'Monday to Sunday (8:00–20:00)',
   },
   { type: 'text', name: 'copyright_text', group: 'Footer', label: 'Copyright line', max: 200 },
   {

@@ -1,27 +1,28 @@
 ---
+import { Image } from 'astro:assets';
 import Icon from './Icon.astro';
-import Logo from './Logo.astro';
+import emblem from '../assets/images/brand/logo-emblem-white.png';
 import { getSiteContent } from '../lib/site-content';
 import { pageLink } from '../lib/links';
 
 interface Props {
   /** The page has its own `#consultation` block (see SiteLayout). */
   consultationHere?: boolean;
-  /** Bright blue band (Home and About in Figma) instead of the navy one. */
-  bright?: boolean;
 }
 
-const { consultationHere = true, bright = false } = Astro.props;
+const { consultationHere = true } = Astro.props;
 const site = await getSiteContent();
 const link = (href: string) => pageLink(href, consultationHere);
 ---
 
-<footer class:list={['footer', { 'footer--bright': bright }]}>
+<footer class="footer">
   <div class="container">
     <div class="footer__grid">
       <div class="footer__brand">
-        <Logo tone="light" />
-        <p class="footer__name t-h3">{site.name}</p>
+        <a href="/" class="footer__logo" aria-label={`${site.name} — home`}>
+          <Image src={emblem} alt="" width={91} densities={[1, 2]} />
+        </a>
+        <p class="footer__name">{site.name}</p>
         {site.tagline && <p class="footer__tagline">{site.tagline}</p>}
       </div>
 
@@ -52,20 +53,22 @@ const link = (href: string) => pageLink(href, consultationHere);
         <address>
           {site.addressLine && (
             <p>
-              <Icon name="map-pin" size={18} />
-              <span>{site.addressLine}</span>
+              <Icon name="map-pin" size={20} />
+              <span>Headquarters: {site.addressLine}</span>
             </p>
           )}
           {site.phoneIntl && (
             <p>
-              <Icon name="phone" size={18} />
-              <a href={`tel:${site.phoneIntl.replace(/\s/g, '')}`}>{site.phoneIntl}</a>
+              <Icon name="phone" size={20} />
+              <span>
+                Phone: <a href={`tel:${site.phoneIntl.replace(/\s/g, '')}`}>{site.phoneIntl}</a>
+              </span>
             </p>
           )}
           {site.hours && (
             <p>
-              <Icon name="clock" size={18} />
-              <span>{site.hours}</span>
+              <Icon name="clock" size={20} />
+              <span>Opening Hours: {site.hours}</span>
             </p>
           )}
         </address>
@@ -86,60 +89,75 @@ const link = (href: string) => pageLink(href, consultationHere);
 </footer>
 
 <style>
-  /* Figma Shared / Footer: dark blue gradient, Roboto, logo + 3 link columns, rule, legal row. */
+  /*
+   * Figma Shared / Footer (2026-10-17, same on every page): blue gradient picture, Montserrat, the white logo
+   * emblem above the clinic name, 3 link columns, a white rule, then the legal row. Sizes follow Figma 1:1
+   * (the footer frame is about as wide as the site container).
+   */
   .footer {
-    background: var(--gradient-band);
+    background: var(--gradient-footer);
     color: var(--color-white);
-    padding-block: 64px 32px;
-    font-family: var(--font-roboto);
-  }
-
-  .footer--bright {
-    background: var(--gradient-blue);
+    padding-block: 52px 32px;
+    font-family: var(--font-display);
   }
 
   .footer__grid {
     display: grid;
-    grid-template-columns: 1.3fr 1fr 1fr 1.25fr;
+    grid-template-columns: 1.35fr 1fr 1fr 1.6fr;
     gap: 0;
   }
 
   .footer__brand {
     display: flex;
     flex-direction: column;
-    gap: 16px;
-    padding-right: 48px;
+    align-items: flex-start;
+    width: fit-content;
+    max-width: 270px;
+    padding-right: 24px;
+  }
+
+  /* The emblem sits centred over the clinic name (Figma). */
+  .footer__logo {
+    display: block;
+    align-self: center;
+    line-height: 0;
+  }
+
+  .footer__logo img {
+    width: 91px;
+    height: auto;
   }
 
   .footer__name {
-    font-family: var(--font-roboto);
-    font-weight: 700;
-    color: var(--color-white);
-    margin-top: 8px;
-  }
-
-  .footer__tagline {
-    max-width: 320px;
-    line-height: 24px;
-  }
-
-  .footer__col {
-    font-size: var(--text-body);
-    line-height: 24px;
-  }
-
-  .footer__title {
-    margin: 0 0 20px;
-    font-family: var(--font-roboto);
+    margin: 4px 0 0;
     font-weight: 700;
     font-size: 20px;
     line-height: 28px;
+  }
+
+  .footer__tagline {
+    margin: 10px 0 0;
+    font-size: 17px;
+    line-height: 21px;
+  }
+
+  .footer__col {
+    font-size: 17px;
+    line-height: 21px;
+  }
+
+  .footer__title {
+    margin: 0 0 12px;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 25px;
+    line-height: 30px;
     text-transform: uppercase;
   }
 
   .footer__col ul {
     display: grid;
-    gap: 12px;
+    gap: 10px;
     margin: 0;
     padding: 0;
     list-style: none;
@@ -149,20 +167,20 @@ const link = (href: string) => pageLink(href, consultationHere);
     display: grid;
     gap: 12px;
     font-style: normal;
-    max-width: 280px;
+    max-width: 320px;
   }
 
-  /* Icons (added 2026-10-16, not in Figma) hang to the left of their line. */
+  /* Icons hang to the left of their line (Figma Home). */
   .footer__col address p {
     display: grid;
-    grid-template-columns: 18px 1fr;
-    gap: 10px;
+    grid-template-columns: 20px 1fr;
+    gap: 8px;
     align-items: start;
+    margin: 0;
   }
 
   .footer__col address :global(.icon) {
-    margin-top: 2px;
-    opacity: 0.9;
+    margin-top: 1px;
   }
 
   .footer a:hover {
@@ -173,10 +191,15 @@ const link = (href: string) => pageLink(href, consultationHere);
     display: flex;
     justify-content: space-between;
     gap: 24px;
-    margin-top: 48px;
-    padding-top: 24px;
-    border-top: 1px solid rgb(255 255 255 / 35%);
-    font-size: var(--text-small);
+    margin-top: 52px;
+    padding-top: 26px;
+    border-top: 1px solid var(--color-white);
+    font-size: 15px;
+    line-height: 20px;
+  }
+
+  .footer__bottom p {
+    margin: 0;
   }
 
   .footer__legal {
@@ -196,7 +219,17 @@ const link = (href: string) => pageLink(href, consultationHere);
 
     .footer__brand {
       grid-column: 1 / -1;
+      max-width: 320px;
       padding-right: 0;
+    }
+
+    .footer__logo {
+      align-self: flex-start;
+    }
+
+    .footer__title {
+      font-size: 22px;
+      line-height: 28px;
     }
   }
 
@@ -206,7 +239,7 @@ const link = (href: string) => pageLink(href, consultationHere);
       display: inline-flex;
       align-items: center;
       min-height: 40px;
-      margin-block: -8px;
+      margin-block: -10px;
     }
   }
 

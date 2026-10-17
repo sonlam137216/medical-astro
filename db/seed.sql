@@ -43,7 +43,7 @@ select * from (values
   ('footer_explore', 'About Us', '/about', 1, null),
   ('footer_explore', 'Dental Packages', '/dental-packages', 2, null),
   ('footer_explore', 'Dental Travel Guide', '/travel-guide', 3, null),
-  ('footer_explore', 'Contacts', '#consultation', 4, null),
+  ('footer_explore', 'Dental Knowledge', '/dental-knowledge', 4, null),
   ('footer_legal', 'Privacy Policy', '/privacy-policy', 1, null),
   ('footer_legal', 'Cookie settings', '/cookie-settings', 2, null),
   ('footer_legal', 'Legal Disclaimer', '/legal-disclaimer', 3, null)

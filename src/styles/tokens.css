@@ -42,6 +42,8 @@
     #0a63ff 0%,
     #0049cf 100%
   ); /* Home gallery and "How it works" bands */
+  /* Footer: sampled from the Figma footer picture (dark bottom left, bright top right). */
+  --gradient-footer: linear-gradient(to top right, #0133b6 0%, #0144d8 50%, #0156f5 100%);
   /* Not in Figma: form error state, added for Phase 4. */
   --color-error: #b3261e;
 

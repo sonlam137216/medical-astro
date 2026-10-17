@@ -21,7 +21,7 @@ export const site = {
   whatsappUrl: 'https://wa.me/84989402211',
   email: 'melatecdental26@gmail.com',
   addressLine: '26 Doan Thi Diem, O Cho Dua, Hanoi, Vietnam',
-  hours: 'Monday–Sunday · 8:00–20:00',
+  hours: 'Monday to Sunday (8:00–20:00)',
   tagline:
     "We're here to help you achieve a healthy, confident smile with advanced care you can trust.",
   copyright: '© 2026 Melatec Dental Clinic. All Rights Reserved.',
@@ -58,8 +58,8 @@ export const footerExplore: NavLink[] = [
   { label: 'About Us', href: '/about' },
   { label: 'Dental Packages', href: '/dental-packages' },
   { label: 'Dental Travel Guide', href: '/travel-guide' },
+  // Figma (2026-10-17) ends with 'News', which has no page yet; Dental Knowledge takes its place.
   { label: 'Dental Knowledge', href: '/dental-knowledge' },
-  { label: 'Contact', href: '#consultation' },
 ];
 
 export const footerLegal: NavLink[] = [
