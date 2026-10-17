@@ -706,7 +706,7 @@ export const ENTITIES: EntityDef[] = [
         name: 'show_on_service_pages',
         label: 'Show on the service pages',
         default: false,
-        help: 'Listed under the questions of every service page (Dental Implants included), behind the arrow button, newest first. One list for all the services: pick a few, for example the current offers.',
+        help: 'Listed under the questions of every service page (Dental Implants included), behind the arrow button, newest first. One list for all the services: pick a few useful guides.',
       },
     ],
     order: [{ column: 'published_on', ascending: false }, { column: 'title' }],

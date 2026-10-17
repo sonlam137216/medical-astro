@@ -78,7 +78,7 @@ export const SECTION_SAMPLES = {
   service_results: { label: 'Results', title: 'Real Stories. Real Smiles.' },
   service_faq: { label: serviceFaq.label, title: serviceFaq.title },
   // PLACEHOLDER (not in the Figma design, which shows the arrow alone): the words next to the arrow button.
-  service_articles: { button: 'See our special offers' },
+  service_articles: { button: 'See our guides' },
   doctors_hero: doctorsHero,
   packages_hero: packagesHero,
   combos_hero: combosHero,
