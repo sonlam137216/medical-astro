@@ -281,6 +281,31 @@ const heading = await getSection('service_situations');
     }
   }
 
+  /* Motion (with the scroll reveals and the circles' pop in styles/motion.css): a card lifts under the mouse and
+     gives a little when pressed. `transform` for the lift and `scale` for the press, since the scroll reveal uses
+     `translate`. */
+  @media (prefers-reduced-motion: no-preference) {
+    .fit__card {
+      transition:
+        background-color 0.2s ease,
+        border-color 0.2s ease,
+        transform var(--dur-base) var(--ease-out),
+        box-shadow var(--dur-base) var(--ease-out),
+        scale var(--dur-fast) var(--ease-out);
+    }
+
+    .fit__card:has(:global(.fit__choose:active)) {
+      scale: 0.98;
+    }
+
+    @media (hover: hover) {
+      .fit__card:has(:global(.fit__choose)):hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 26px rgb(0 86 229 / 14%);
+      }
+    }
+  }
+
   .fit__ask {
     display: flex;
     flex-wrap: wrap;

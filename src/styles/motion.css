@@ -308,11 +308,37 @@
       }
     }
 
-    /* Numbered circles ("Why Melatec", "Dental journey") pop in after their card starts to appear. */
-    :is(.why__no, .journey__no) {
+    /* Numbered circles ("Why Melatec", "Dental journey", "Which treatment fits") pop in after their card starts
+       to appear. */
+    :is(.why__no, .journey__no, .fit__num) {
       animation: pop linear both;
       animation-timeline: view();
       animation-range: entry calc(60px + var(--i, 0) * 30px) entry calc(280px + var(--i, 0) * 30px);
+    }
+
+    /* The circle of the card just chosen also bounces once (repeated here: a second animation replaces the list).
+       No fill, so the scroll pop keeps its say once the bounce is over. */
+    .fit__card.is-active .fit__num {
+      animation:
+        pop linear both,
+        nudge 420ms var(--ease-out);
+      animation-timeline: view(), auto;
+      animation-range:
+        entry calc(60px + var(--i, 0) * 30px) entry calc(280px + var(--i, 0) * 30px),
+        normal;
+    }
+
+    /* "Which treatment fits" pictures: the before photo, then the arrow dropping in, then the after photo. */
+    .fit__shot {
+      animation: reveal linear both;
+      animation-timeline: view();
+      animation-range: entry 40px entry 260px;
+    }
+
+    .fit__arrow {
+      animation: drop linear both;
+      animation-timeline: view();
+      animation-range: entry 20px entry 160px;
     }
 
     /* Price cards: the price pops in a moment after its card starts to appear, and the bullets follow one by one. */
@@ -417,6 +443,14 @@
     }
   }
 
+  /* "Which treatment fits": the circle of the card just chosen bounces once. Where scroll timelines exist, the
+     rule in the block above does it together with the scroll pop. */
+  @supports not (animation-timeline: view()) {
+    .fit__card.is-active .fit__num {
+      animation: nudge 420ms var(--ease-out);
+    }
+  }
+
   /* Accordions (FAQ, "How these figures are worked out"): open and close smoothly where supported. */
   @supports selector(details::details-content) {
     :root {
@@ -478,6 +512,20 @@
 
   to {
     opacity: 1;
+    scale: 1;
+  }
+}
+
+@keyframes drop {
+  from {
+    opacity: 0;
+    translate: 0 -14px;
+    scale: 0.6;
+  }
+
+  to {
+    opacity: 1;
+    translate: none;
     scale: 1;
   }
 }
