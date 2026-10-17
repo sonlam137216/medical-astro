@@ -45,6 +45,7 @@ export interface Tables {
       reviewed_on: string | null;
       seo_description: string | null;
       seo_title: string | null;
+      show_on_service_pages: boolean;
       slug: string;
       title: string;
       updated_at: string;
@@ -65,6 +66,7 @@ export interface Tables {
       reviewed_on?: string | null;
       seo_description?: string | null;
       seo_title?: string | null;
+      show_on_service_pages?: boolean;
       slug: string;
       title: string;
       updated_at?: string;
@@ -693,7 +695,7 @@ export interface TableInfo {
 export const TABLES: Record<TableName, TableInfo> = {
   article_categories: { bool: ['is_visible'], uuid: true },
   articles: {
-    bool: ['is_visible'],
+    bool: ['is_visible', 'show_on_service_pages'],
     uuid: true,
     refs: { category_id: 'article_categories', cover_image_id: 'media_assets' },
     // The body can be tens of kilobytes: the audit log records the other columns only.
@@ -711,6 +713,7 @@ export const TABLES: Record<TableName, TableInfo> = {
       'seo_title',
       'seo_description',
       'is_visible',
+      'show_on_service_pages',
     ],
   },
   audit_logs: { json: ['changes'], audit: false },

@@ -1,0 +1,136 @@
+---
+import Section from './Section.astro';
+import Icon from './Icon.astro';
+import ArticleCard from './articles/ArticleCard.astro';
+import { getSection, getServicePageArticles } from '../lib/content';
+
+// The round arrow button under the FAQ of the service pages (Figma "General Service Template"): it opens the
+// articles ticked "Show on the service pages" (one list for every service). A <details> element, so it works
+// without JavaScript and the articles are in the HTML for search engines. Self-added: the words under the arrow
+// (Page text "Service pages: articles under the FAQ"), since an arrow alone does not say what it opens.
+// Nothing is shown when no such article is published or the section is switched off.
+interface Props {
+  /** Wrap in a section of its own (when the page has no FAQ block to sit in). */
+  standalone?: boolean;
+}
+
+const { standalone = false } = Astro.props;
+const section = await getSection('service_articles');
+const articles = section ? await getServicePageArticles() : [];
+const Wrap = standalone ? Section : Fragment;
+const wrapProps = standalone ? { tone: 'soft' as const } : {};
+---
+
+{section && articles.length > 0 && (
+  <Wrap {...wrapProps}>
+    <details class="more">
+      <summary>
+        <span class="more__arrow" aria-hidden="true">
+          <Icon name="arrow-down" size={28} />
+        </span>
+        <span class="more__label">{section.button}</span>
+      </summary>
+      <ul class="grid">
+        {articles.map((a) => (
+          <li>
+            <ArticleCard article={a} />
+          </li>
+        ))}
+      </ul>
+    </details>
+  </Wrap>
+)}
+
+<style>
+  .more {
+    margin-top: 32px;
+  }
+
+  .more summary {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    width: fit-content;
+    margin-inline: auto;
+    cursor: pointer;
+    list-style: none;
+    font: 600 var(--text-small) / var(--text-small-lh) var(--font-display);
+    color: var(--color-blue-deep);
+  }
+
+  .more summary::-webkit-details-marker {
+    display: none;
+  }
+
+  /* Figma: a light blue circle with a blue arrow. */
+  .more__arrow {
+    display: grid;
+    place-items: center;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--color-border);
+    color: var(--color-blue);
+    transition:
+      background-color var(--dur-base) var(--ease-out),
+      color var(--dur-base) var(--ease-out),
+      rotate var(--dur-base) var(--ease-out);
+  }
+
+  .more[open] .more__arrow {
+    rotate: 180deg;
+  }
+
+  .more summary:hover .more__arrow,
+  .more summary:focus-visible .more__arrow {
+    background: var(--color-blue);
+    color: var(--color-white);
+  }
+
+  .more summary:focus-visible {
+    outline: none;
+  }
+
+  .more summary:focus-visible .more__arrow {
+    outline: 2px solid var(--color-blue);
+    outline-offset: 3px;
+  }
+
+  /* 3 per row; with fewer articles the row is centred (as LatestArticles). */
+  .grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 40px 28px;
+    margin: 32px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .grid li {
+    display: flex;
+    flex: 0 0 calc((100% - 56px) / 3);
+    min-width: 0;
+  }
+
+  .grid li > :global(*) {
+    flex: 1;
+  }
+
+  @media (max-width: 960px) {
+    .grid li {
+      flex-basis: calc((100% - 28px) / 2);
+    }
+  }
+
+  @media (max-width: 600px) {
+    .grid {
+      gap: 0;
+    }
+
+    .grid li {
+      flex-basis: 100%;
+    }
+  }
+</style>

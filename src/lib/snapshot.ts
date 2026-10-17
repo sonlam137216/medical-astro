@@ -228,6 +228,8 @@ export interface SnapshotArticle {
   updatedOn: string | null;
   seoTitle: string | null;
   seoDescription: string | null;
+  /** Listed under the FAQ of every service page. Only present when true, so older revisions keep their hash. */
+  onServicePages?: true;
 }
 
 export interface Snapshot {
@@ -466,7 +468,7 @@ export async function buildSnapshot(db: AdminDb): Promise<Snapshot> {
   const { data: articles, error: articlesError } = await db
     .from('articles')
     .select(
-      `slug, kind, title, excerpt, body, category_id, author_name, reviewed_by, reviewed_on, published_on, updated_at, seo_title, seo_description, cover:media_assets(${IMAGE_COLUMNS})`,
+      `slug, kind, title, excerpt, body, category_id, show_on_service_pages, author_name, reviewed_by, reviewed_on, published_on, updated_at, seo_title, seo_description, cover:media_assets(${IMAGE_COLUMNS})`,
     )
     .eq('is_visible', true)
     .order('published_on', { ascending: false })
@@ -518,6 +520,7 @@ export async function buildSnapshot(db: AdminDb): Promise<Snapshot> {
         updatedOn: a.updated_at ? a.updated_at.slice(0, 10) : null,
         seoTitle: a.seo_title,
         seoDescription: a.seo_description,
+        ...(a.show_on_service_pages ? { onServicePages: true as const } : {}),
       };
     });
   }
@@ -969,7 +972,8 @@ export function isSnapshot(value: unknown): value is Snapshot {
         (isObject(a.coverImage) && typeof a.coverImage.key === 'string')) &&
       (a.bodyImages === undefined ||
         (isObject(a.bodyImages) &&
-          Object.values(a.bodyImages).every((i) => isObject(i) && typeof i.key === 'string'))),
+          Object.values(a.bodyImages).every((i) => isObject(i) && typeof i.key === 'string'))) &&
+      (a.onServicePages === undefined || a.onServicePages === true),
   );
   if (!articlesValid) return false;
   const categories = (value.articleCategories ?? []) as unknown[];

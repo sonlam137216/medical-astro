@@ -365,6 +365,42 @@ test('article audit rows never carry the body text', async () => {
   assert.ok(rows.every((r) => !String(r.changes).includes('SECRET BODY TEXT')));
 });
 
+test('"Show on the service pages" is a 0/1 column, off by default, carried by the snapshot only when on', async () => {
+  const { raw, db } = setup();
+  assert.match(
+    failure(
+      raw,
+      "INSERT INTO articles (slug, kind, title, show_on_service_pages) VALUES ('x', 'travel_guide', 'x', 2)",
+    ),
+    /CHECK/,
+  );
+  insertArticle(raw, { slug: 'offer', title: 'Offer', show_on_service_pages: 1 });
+  insertArticle(raw, { slug: 'plain', title: 'Plain', published_on: '2026-09-01' });
+  insertArticle(raw, { slug: 'hidden-offer', is_visible: 0, show_on_service_pages: 1 });
+
+  const { data } = await db
+    .from('articles')
+    .select('slug, show_on_service_pages')
+    .eq('slug', 'plain');
+  assert.equal(data?.[0].show_on_service_pages, false);
+
+  const snapshot = await buildSnapshot(db);
+  assert.deepEqual(
+    snapshot.articles?.map((a) => [a.slug, a.onServicePages]),
+    [
+      ['offer', true],
+      ['plain', undefined],
+    ],
+  );
+  // Absent rather than false, so revisions made before the column keep their hash.
+  assert.equal('onServicePages' in (snapshot.articles?.[1] ?? {}), false);
+  assert.equal(isSnapshot(JSON.parse(JSON.stringify(snapshot))), true);
+  assert.equal(
+    isSnapshot({ ...snapshot, articles: [{ ...snapshot.articles?.[0], onServicePages: 'yes' }] }),
+    false,
+  );
+});
+
 // ---- pictures in the text --------------------------------------------------------------------------------
 const PIC = '3f2b8c1e-7a4d-4b6e-9c10-2d5e8f7a9b01';
 

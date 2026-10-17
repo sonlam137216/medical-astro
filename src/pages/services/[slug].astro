@@ -10,6 +10,7 @@ import CtaBand from '../../components/CtaBand.astro';
 import TreatmentCosts from '../../components/home/TreatmentCosts.astro';
 import SeamlessJourney from '../../components/SeamlessJourney.astro';
 import FaqList from '../../components/FaqList.astro';
+import ServiceArticles from '../../components/ServiceArticles.astro';
 import SmileResults from '../../components/SmileResults.astro';
 import TreatmentFit from '../../components/TreatmentFit.astro';
 import { careCta, serviceFaq } from '../../data/shared';
@@ -145,7 +146,13 @@ const servicesBanner = await getPageBanner('/services');
 
   <SmileResults />
 
-  {faqs.length > 0 && <FaqList label={faqHeading.label} title={faqHeading.title} {faqs} />}
+  {faqs.length > 0 ? (
+    <FaqList label={faqHeading.label} title={faqHeading.title} {faqs}>
+      <ServiceArticles />
+    </FaqList>
+  ) : (
+    <ServiceArticles standalone />
+  )}
 </SiteLayout>
 
 <style>

@@ -11,6 +11,7 @@ import SeamlessJourney from '../../components/SeamlessJourney.astro';
 import PlanVisit from '../../components/PlanVisit.astro';
 import LatestArticles from '../../components/articles/LatestArticles.astro';
 import FaqList from '../../components/FaqList.astro';
+import ServiceArticles from '../../components/ServiceArticles.astro';
 import SmileResults from '../../components/SmileResults.astro';
 import TreatmentFit from '../../components/TreatmentFit.astro';
 import { getPageSeo, getPageBanner } from '../../lib/site-content';
@@ -120,7 +121,13 @@ const banner = await getPageBanner('/services/dental-implants');
 
   <LatestArticles />
 
-  {faqs.length > 0 && <FaqList label={faq.label} title={faq.title} {faqs} />}
+  {faqs.length > 0 ? (
+    <FaqList label={faq.label} title={faq.title} {faqs}>
+      <ServiceArticles />
+    </FaqList>
+  ) : (
+    <ServiceArticles standalone />
+  )}
 </SiteLayout>
 
 <style>

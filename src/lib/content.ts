@@ -18,8 +18,14 @@ import { mergeSection, sectionByKey } from './cms/sections';
 import { SECTION_SAMPLES, type SectionKey } from '../data/sections';
 import { directionsUrl } from './maps';
 import { snapshotImageInput, toPublicImage, type PublicImage } from './media';
-import { SNAPSHOT_SCHEMA_VERSION, isSnapshot, type Snapshot, type SnapshotImage } from './snapshot';
-import { articlePath, type ArticleKind } from './cms/articles';
+import {
+  SNAPSHOT_SCHEMA_VERSION,
+  isSnapshot,
+  type Snapshot,
+  type SnapshotArticle,
+  type SnapshotImage,
+} from './snapshot';
+import { articlePath, isArticleKind, type ArticleKind } from './cms/articles';
 
 // BUILD-TIME ONLY. Public pages are prerendered, so this runs while `astro build` runs and never per
 // visit. Do not call it from a request handler: that would query the database on every page view.
@@ -524,42 +530,63 @@ export interface PublicArticle {
   seoDescription: string | null;
 }
 
+function toPublicArticle(
+  a: SnapshotArticle & { kind: ArticleKind },
+  categories: Map<string, string>,
+  publicBase: string | undefined,
+): PublicArticle {
+  return {
+    slug: a.slug,
+    kind: a.kind,
+    path: articlePath(a.kind, a.slug),
+    title: a.title,
+    excerpt: a.excerpt,
+    body: a.body,
+    cover: (a.coverImage && toPublicImage(snapshotImageInput(a.coverImage), publicBase)) || null,
+    bodyImages: Object.fromEntries(
+      Object.entries(a.bodyImages ?? {}).flatMap(([id, image]) => {
+        const photo = toPublicImageOrUndefined(image);
+        return photo ? [[id, photo] as const] : [];
+      }),
+    ),
+    category:
+      a.category && categories.has(a.category)
+        ? { slug: a.category, name: categories.get(a.category) as string }
+        : null,
+    author: a.author,
+    reviewedBy: a.reviewedBy,
+    reviewedOn: a.reviewedOn,
+    publishedOn: a.publishedOn,
+    updatedOn: a.updatedOn,
+    seoTitle: a.seoTitle,
+    seoDescription: a.seoDescription,
+  };
+}
+
+/** Published articles that pass `keep`, newest first (the snapshot order). */
+async function listArticles(keep: (a: SnapshotArticle) => boolean): Promise<PublicArticle[]> {
+  const snapshot = await loadSnapshot();
+  const publicBase = setting('R2_PUBLIC_BASE_URL');
+  const categories = new Map((snapshot?.articleCategories ?? []).map((c) => [c.slug, c.name]));
+  return (snapshot?.articles ?? [])
+    .filter((a): a is SnapshotArticle & { kind: ArticleKind } => isArticleKind(a.kind) && keep(a))
+    .map((a) => toPublicArticle(a, categories, publicBase));
+}
+
 /**
  * Published articles of one kind, newest first. Empty before the first publish that includes articles: there
  * is no sample article content, so pages that list articles show their sample cards (Home) or an empty state.
  */
 export async function getArticles(kind: ArticleKind): Promise<PublicArticle[]> {
-  const snapshot = await loadSnapshot();
-  const publicBase = setting('R2_PUBLIC_BASE_URL');
-  const categories = new Map((snapshot?.articleCategories ?? []).map((c) => [c.slug, c.name]));
-  return (snapshot?.articles ?? [])
-    .filter((a) => a.kind === kind)
-    .map((a) => ({
-      slug: a.slug,
-      kind,
-      path: articlePath(kind, a.slug),
-      title: a.title,
-      excerpt: a.excerpt,
-      body: a.body,
-      cover: (a.coverImage && toPublicImage(snapshotImageInput(a.coverImage), publicBase)) || null,
-      bodyImages: Object.fromEntries(
-        Object.entries(a.bodyImages ?? {}).flatMap(([id, image]) => {
-          const photo = toPublicImageOrUndefined(image);
-          return photo ? [[id, photo] as const] : [];
-        }),
-      ),
-      category:
-        a.category && categories.has(a.category)
-          ? { slug: a.category, name: categories.get(a.category) as string }
-          : null,
-      author: a.author,
-      reviewedBy: a.reviewedBy,
-      reviewedOn: a.reviewedOn,
-      publishedOn: a.publishedOn,
-      updatedOn: a.updatedOn,
-      seoTitle: a.seoTitle,
-      seoDescription: a.seoDescription,
-    }));
+  return listArticles((a) => a.kind === kind);
+}
+
+/**
+ * The articles ticked "Show on the service pages" (either kind), newest first: one list for every service page,
+ * shown under the FAQ. Empty (no button) until such an article is published.
+ */
+export async function getServicePageArticles(): Promise<PublicArticle[]> {
+  return listArticles((a) => a.onServicePages === true);
 }
 
 /** Categories of one kind that are shown, in display order (each has its own list page). */

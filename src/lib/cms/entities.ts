@@ -701,6 +701,13 @@ export const ENTITIES: EntityDef[] = [
         label: 'Published (visible on the website after you publish)',
         default: false,
       },
+      {
+        type: 'bool',
+        name: 'show_on_service_pages',
+        label: 'Show on the service pages',
+        default: false,
+        help: 'Listed under the questions of every service page (Dental Implants included), behind the arrow button, newest first. One list for all the services: pick a few, for example the current offers.',
+      },
     ],
     order: [{ column: 'published_on', ascending: false }, { column: 'title' }],
     deletable: true,
