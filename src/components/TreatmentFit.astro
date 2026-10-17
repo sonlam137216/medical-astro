@@ -12,8 +12,10 @@ import { getSection, type PublicService, type PublicSituation } from '../lib/con
 // picture pair (chosen in the service's form: one pair for all its cards, owner 2026-10-17); the heading and the
 // line under the cards are shared (Page text "Service pages: which treatment fits"); a service can have its own
 // small heading. Nothing is shown without a card; without pictures the cards take the whole width.
-// Figma comment: "click changes the colour": the chosen card turns blue. The first card starts chosen, which is all
-// a visitor without JavaScript sees; the script turns each card title into a button.
+// Figma comment: "click changes the colour"; the owner asked for it on hover instead (2026-10-17): the card under
+// the mouse turns blue and stays blue until the mouse reaches another card. A tap or a key press (no hover) chooses
+// a card the same way. The first card starts chosen, which is all a visitor without JavaScript sees; the script
+// turns each card title into a button.
 // Not in Figma (added): the mobile layout (pictures above, cards in one column).
 
 interface Props {
@@ -275,12 +277,6 @@ const heading = await getSection('service_situations');
     outline-offset: 3px;
   }
 
-  @media (hover: hover) {
-    .fit__card:has(:global(.fit__choose)):not(.is-active):hover {
-      border-color: var(--color-blue);
-    }
-  }
-
   /* Motion (with the scroll reveals and the circles' pop in styles/motion.css): a card lifts under the mouse and
      gives a little when pressed. `transform` for the lift and `scale` for the press, since the scroll reveal uses
      `translate`. */
@@ -378,13 +374,19 @@ const heading = await getSection('service_situations');
       return button;
     });
 
-    buttons.forEach((button, index) =>
-      button.addEventListener('click', () =>
-        cards.forEach((card, i) => {
-          card.classList.toggle('is-active', i === index);
-          buttons[i].setAttribute('aria-pressed', String(i === index));
-        }),
-      ),
-    );
+    const choose = (index: number) => {
+      if (cards[index].classList.contains('is-active')) return;
+      cards.forEach((card, i) => {
+        card.classList.toggle('is-active', i === index);
+        buttons[i].setAttribute('aria-pressed', String(i === index));
+      });
+    };
+    cards.forEach((card, index) => {
+      // A mouse chooses by pointing; touch and keyboard (no hover) by tapping or pressing the button.
+      card.addEventListener('pointerenter', (event) => {
+        if (event.pointerType === 'mouse') choose(index);
+      });
+      buttons[index].addEventListener('click', () => choose(index));
+    });
   });
 </script>
