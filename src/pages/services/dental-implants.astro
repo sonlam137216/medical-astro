@@ -91,7 +91,11 @@ const banner = await getPageBanner('/services/dental-implants');
 
   <TreatmentCosts sectionKey="implants_comparison" align="center" />
 
-  <TreatmentFit situations={service?.situations ?? []} label={service?.situationsLabel} />
+  <TreatmentFit
+    situations={service?.situations ?? []}
+    label={service?.situationsLabel}
+    images={service?.situationsImages}
+  />
 
   <Section tone="blue" labelledby="why-title">
     <SectionIntro label={why.label} headingId="why-title" align="center" lined inverse>

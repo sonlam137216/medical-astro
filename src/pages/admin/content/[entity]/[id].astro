@@ -149,6 +149,8 @@ const yesNo = (value: unknown) => (value === true ? 'yes' : value === false ? 'n
                           </a>
                         ) : typeof r[c.field] === 'boolean' ? (
                           yesNo(r[c.field])
+                        ) : r[c.field] === 0 ? (
+                          0
                         ) : (
                           (r[c.field] ?? '—') || '—'
                         )}

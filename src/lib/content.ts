@@ -157,13 +157,11 @@ export interface PublicServiceOption {
   priceText: string | null;
 }
 
-/** A card of "Which treatment fits your situation"; the pictures are a pair (both or neither). */
+/** A card of "Which treatment fits your situation". */
 export interface PublicSituation {
   tag: string | null;
   title: string;
   description: string | null;
-  before?: PublicImage;
-  after?: PublicImage;
 }
 
 /** A service: a group of treatments with a page of its own at `href`. */
@@ -186,6 +184,8 @@ export interface PublicService {
   situations: PublicSituation[];
   /** The small heading above the cards; null: the heading of Page text. */
   situationsLabel: string | null;
+  /** The before/after pair beside the cards; absent: the cards take the whole width. */
+  situationsImages?: { before: PublicImage; after: PublicImage };
 }
 
 /** A price card of the Home page: a treatment ticked "Show on the Home page", linking to its service. */
@@ -217,17 +217,13 @@ export async function getServices(): Promise<PublicService[]> {
         inclusions: o.inclusions,
         priceText: o.priceText,
       })),
-      situations: (s.situations ?? []).map((i) => {
-        const before = toPublicImageOrUndefined(i.before);
-        const after = toPublicImageOrUndefined(i.after);
-        return {
-          tag: i.tag,
-          title: i.title,
-          description: i.description,
-          ...(before && after ? { before, after } : {}),
-        };
-      }),
+      situations: (s.situations ?? []).map((i) => ({
+        tag: i.tag,
+        title: i.title,
+        description: i.description,
+      })),
       situationsLabel: s.situationsLabel ?? null,
+      situationsImages: publicPair(s.situationsImages),
     }));
   }
   return sampleServiceDetails.map((s) => ({
@@ -255,6 +251,13 @@ export async function getServices(): Promise<PublicService[]> {
     situations: s.slug === 'dental-implants' ? sampleImplantSituations : [],
     situationsLabel: s.slug === 'dental-implants' ? sampleImplantSituationsLabel : null,
   }));
+}
+
+/** A before/after pair of the snapshot, when both pictures can be shown. */
+function publicPair(pair: { before: SnapshotImage; after: SnapshotImage } | undefined) {
+  const before = toPublicImageOrUndefined(pair?.before);
+  const after = toPublicImageOrUndefined(pair?.after);
+  return before && after ? { before, after } : undefined;
 }
 
 /** One service by its slug (the service's page). */

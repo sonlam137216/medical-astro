@@ -1593,3 +1593,12 @@ html.js .no-js-only {
 .admin-cover__picker input[type='range'] {
   width: 100%;
 }
+
+.admin-notice > p,
+.admin-notice > ul {
+  margin: 0;
+}
+
+.admin-notice > ul {
+  padding-left: 20px;
+}

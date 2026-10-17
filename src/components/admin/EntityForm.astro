@@ -23,6 +23,12 @@ const side = def.fields.filter((f) => SIDE_TYPES.has(f.type));
 const photos = side.filter((f) => f.type === 'image');
 const settings = side.filter((f) => f.type !== 'image');
 
+// A failed save lists its problems at the top too: a message under a photo in the side column is easy to miss.
+const problems = Object.entries(errors).map(([name, message]) => {
+  const field = def.fields.find((f) => f.name === name);
+  return field ? `${field.label}: ${message}` : message;
+});
+
 // A heading is drawn when a field starts a new group.
 const rows = main.map((f: FieldDef, i) => ({
   f,
@@ -35,6 +41,16 @@ const rows = main.map((f: FieldDef, i) => ({
     <p class="admin-notice admin-notice--error admin-editor__wide" role="alert">
       {formError}
     </p>
+  )}
+  {!formError && problems.length > 0 && (
+    <div class="admin-notice admin-notice--error admin-editor__wide" role="alert">
+      <p>Not saved yet. Please fix:</p>
+      <ul>
+        {problems.map((p) => (
+          <li>{p}</li>
+        ))}
+      </ul>
+    </div>
   )}
 
   {main.length > 0 && (

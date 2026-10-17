@@ -299,7 +299,7 @@ export const ENTITIES: EntityDef[] = [
         label: 'Small heading of “Which treatment fits your situation”',
         max: 120,
         placeholder: 'Implant treatment options',
-        help: 'Shown above the situations of this service (added on this page, under “Treatment situations”). Empty: the heading of Page text “Service pages: which treatment fits”.',
+        help: 'Shown above the situations of this service (added on this page, under “Treatment situations”; the before/after pictures beside them are chosen on the right). Empty: the heading of Page text “Service pages: which treatment fits”.',
       },
       {
         type: 'image',
@@ -314,6 +314,27 @@ export const ENTITIES: EntityDef[] = [
         label: 'Banner picture',
         slot: 'page-banner',
         help: 'The wide picture at the top of the service’s page. The title sits over the left part, so keep the subject on the right. Empty: the banner picture of the Services page (Pages).',
+      },
+      {
+        type: 'image',
+        name: 'situations_before_image_id',
+        label: '“Which treatment fits”: before picture',
+        slot: 'treatment-situation',
+        help: 'Optional, usually an X-ray: one before/after pair beside all the situation cards of this service. Choose both pictures or neither.',
+      },
+      {
+        type: 'image',
+        name: 'situations_after_image_id',
+        label: '“Which treatment fits”: after picture',
+        slot: 'treatment-situation',
+        help: 'Same angle and framing as the before picture.',
+      },
+      {
+        type: 'bool',
+        name: 'situations_consent_confirmed',
+        label:
+          'The patient agreed in writing to show the “Which treatment fits” pictures on the website',
+        default: false,
       },
       sortOrder,
       visible,
@@ -406,7 +427,7 @@ export const ENTITIES: EntityDef[] = [
     singular: 'situation',
     plural: 'Treatment situations',
     intro:
-      'The “Which treatment fits your situation” cards of each service’s page (for example “One missing tooth: Single Dental Implant & Crown”). A card can have a before/after picture pair, usually X-rays, shown beside the cards when a visitor chooses the card. The pictures come from patients, so a card only shows them once you confirm the patient agreed in writing. Without any situation the block is not shown. Changes go live after you publish the website.',
+      'The numbered “Which treatment fits your situation” cards of each service’s page (for example “One missing tooth: Single Dental Implant & Crown”), numbered in display order. The before/after pictures beside the cards are one pair per service, chosen in the service’s form. Without any situation the block is not shown. Changes go live after you publish the website.',
     titleField: 'title',
     columns: [
       { field: 'title', label: 'Situation' },
@@ -447,26 +468,6 @@ export const ENTITIES: EntityDef[] = [
         max: 600,
         rows: 5,
         help: 'A few sentences on when this treatment is suitable. Treatment information must come from the clinic.',
-      },
-      {
-        type: 'image',
-        name: 'before_image_id',
-        label: 'Before picture',
-        slot: 'treatment-situation',
-        help: 'Optional, usually an X-ray. Choose both pictures or neither.',
-      },
-      {
-        type: 'image',
-        name: 'after_image_id',
-        label: 'After picture',
-        slot: 'treatment-situation',
-        help: 'Same angle and framing as the before picture.',
-      },
-      {
-        type: 'bool',
-        name: 'consent_confirmed',
-        label: 'The patient agreed in writing to show these pictures on the website',
-        default: false,
       },
       sortOrder,
       visible,

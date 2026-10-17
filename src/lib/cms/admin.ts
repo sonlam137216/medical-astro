@@ -5,7 +5,7 @@ import { listPickerImages, type PickerImage } from '../media-picker';
 import { articleProblems, movedArticleRedirect } from './articles';
 import { menuGroupError } from '../menu';
 import { smileResultErrors } from './smile-results';
-import { situationErrors } from './service-situations';
+import { situationPictureErrors } from './service-situations';
 
 /** The group new questions are saved in (FAQs have no groups any more; older rows keep theirs, unused). */
 const FAQ_GROUP = 'services';
@@ -115,8 +115,8 @@ export async function processPost(
     if (Object.keys(errors).length > 0) return { status: 422, values, errors };
   }
 
-  if (def.key === 'service-situations') {
-    const errors = situationErrors(parsed.value);
+  if (def.key === 'services') {
+    const errors = situationPictureErrors(parsed.value);
     if (Object.keys(errors).length > 0) return { status: 422, values, errors };
   }
 

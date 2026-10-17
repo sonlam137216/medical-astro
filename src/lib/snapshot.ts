@@ -119,15 +119,13 @@ export interface SnapshotServiceOption {
 }
 
 /**
- * A card of "Which treatment fits your situation" on a service's page. The pictures are a pair, only present when
- * the patient's consent is confirmed and both pictures are still usable.
+ * A card of "Which treatment fits your situation" on a service's page. (Revisions published before 2026-10-17
+ * evening may carry a picture pair per card; it is ignored: the pair is now the service's `situationsImages`.)
  */
 export interface SnapshotSituation {
   tag: string | null;
   title: string;
   description: string | null;
-  before?: SnapshotImage;
-  after?: SnapshotImage;
 }
 
 /** A service: a group of treatments with a page of its own. */
@@ -149,6 +147,11 @@ export interface SnapshotService {
   situations?: SnapshotSituation[];
   /** The small heading above the situations; absent: the heading of Page text. */
   situationsLabel?: string;
+  /**
+   * The before/after pair beside the situation cards; only when the patient's consent is confirmed and both
+   * pictures are still usable.
+   */
+  situationsImages?: { before: SnapshotImage; after: SnapshotImage };
 }
 
 export interface SnapshotPackage {
@@ -522,7 +525,7 @@ export async function buildSnapshot(db: AdminDb): Promise<Snapshot> {
   const { data: services, error: servicesError } = await db
     .from('services')
     .select(
-      `id, slug, title, summary, description, seo_title, seo_description, situations_label, image:media_assets!image_id(${IMAGE_COLUMNS}), banner:media_assets!banner_image_id(${IMAGE_COLUMNS})`,
+      `id, slug, title, summary, description, seo_title, seo_description, situations_label, situations_consent_confirmed, image:media_assets!image_id(${IMAGE_COLUMNS}), banner:media_assets!banner_image_id(${IMAGE_COLUMNS}), situations_before:media_assets!situations_before_image_id(${IMAGE_COLUMNS}), situations_after:media_assets!situations_after_image_id(${IMAGE_COLUMNS})`,
     )
     .eq('is_visible', true)
     .order('sort_order', { ascending: true })
@@ -535,13 +538,9 @@ export async function buildSnapshot(db: AdminDb): Promise<Snapshot> {
     .order('sort_order', { ascending: true })
     .order('title', { ascending: true });
   if (optionsError) throw fail('service_options', optionsError);
-  // The pictures of a card only with the patient's consent (the table refuses a shown card with pictures and
-  // without it) and only when both are still usable; the card itself is shown either way.
   const { data: situationRows, error: situationsError } = await db
     .from('service_situations')
-    .select(
-      `service_id, tag, title, description, consent_confirmed, before:media_assets!before_image_id(${IMAGE_COLUMNS}), after:media_assets!after_image_id(${IMAGE_COLUMNS})`,
-    )
+    .select('service_id, tag, title, description')
     .eq('is_visible', true)
     .order('sort_order', { ascending: true })
     .order('title', { ascending: true });
@@ -549,21 +548,16 @@ export async function buildSnapshot(db: AdminDb): Promise<Snapshot> {
   const situationsOf = (serviceId: string): SnapshotSituation[] =>
     situationRows
       .filter((r) => r.service_id === serviceId)
-      .map((r) => {
-        const before = r.consent_confirmed ? toSnapshotImage(r.before) : null;
-        const after = r.consent_confirmed ? toSnapshotImage(r.after) : null;
-        return {
-          tag: r.tag,
-          title: r.title,
-          description: r.description,
-          ...(before && after ? { before, after } : {}),
-        };
-      });
+      .map((r) => ({ tag: r.tag, title: r.title, description: r.description }));
   if (services.length > 0) {
     snapshot.services = services.map((s) => {
       const banner = toSnapshotImage(s.banner);
       const situations = situationsOf(s.id);
       const situationsLabel = s.situations_label?.trim();
+      // The pictures only with the patient's consent (the table refuses chosen pictures without it) and only when
+      // both are still usable.
+      const before = s.situations_consent_confirmed ? toSnapshotImage(s.situations_before) : null;
+      const after = s.situations_consent_confirmed ? toSnapshotImage(s.situations_after) : null;
       return {
         slug: s.slug,
         title: s.title,
@@ -586,6 +580,7 @@ export async function buildSnapshot(db: AdminDb): Promise<Snapshot> {
         // Only when there is something, so services without them keep the same shape (and hash) as before.
         ...(situations.length > 0 ? { situations } : {}),
         ...(situationsLabel ? { situationsLabel } : {}),
+        ...(before && after ? { situationsImages: { before, after } } : {}),
       };
     });
   }
@@ -836,16 +831,14 @@ export function snapshotProblems(snapshot: Snapshot, target: string = 'staging')
         `Service “${s.title}”: the banner picture has no description. Add one in Media, or mark the image as decorative.`,
       );
     }
-    for (const situation of s.situations ?? []) {
-      for (const [side, image] of [
-        ['before', situation.before],
-        ['after', situation.after],
-      ] as const) {
-        if (image && !image.decorative && !image.alt) {
-          problems.push(
-            `Service “${s.title}”, situation “${situation.title}”: the ${side} picture has no description. Add one in Media.`,
-          );
-        }
+    for (const [side, image] of [
+      ['before', s.situationsImages?.before],
+      ['after', s.situationsImages?.after],
+    ] as const) {
+      if (image && !image.decorative && !image.alt) {
+        problems.push(
+          `Service “${s.title}”: the “Which treatment fits” ${side} picture has no description. Add one in Media.`,
+        );
       }
     }
   }
@@ -1022,14 +1015,13 @@ export function isSnapshot(value: unknown): value is Snapshot {
         (x.situationsLabel === undefined || typeof x.situationsLabel === 'string') &&
         (x.situations === undefined ||
           (Array.isArray(x.situations) &&
-            x.situations.every(
-              (i) =>
-                isObject(i) &&
-                typeof i.title === 'string' &&
-                (i.before === undefined ||
-                  (isObject(i.before) && typeof i.before.key === 'string')) &&
-                (i.after === undefined || (isObject(i.after) && typeof i.after.key === 'string')),
-            ))),
+            x.situations.every((i) => isObject(i) && typeof i.title === 'string'))) &&
+        (x.situationsImages === undefined ||
+          (isObject(x.situationsImages) &&
+            isObject(x.situationsImages.before) &&
+            typeof x.situationsImages.before.key === 'string' &&
+            isObject(x.situationsImages.after) &&
+            typeof x.situationsImages.after.key === 'string')),
     )
   )
     return false;

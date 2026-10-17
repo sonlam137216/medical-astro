@@ -570,6 +570,9 @@ export interface Tables {
       price_text: string | null;
       seo_description: string | null;
       seo_title: string | null;
+      situations_after_image_id: string | null;
+      situations_before_image_id: string | null;
+      situations_consent_confirmed: boolean;
       situations_label: string | null;
       slug: string;
       sort_order: number;
@@ -588,6 +591,9 @@ export interface Tables {
       price_text?: string | null;
       seo_description?: string | null;
       seo_title?: string | null;
+      situations_after_image_id?: string | null;
+      situations_before_image_id?: string | null;
+      situations_consent_confirmed?: boolean;
       situations_label?: string | null;
       slug: string;
       sort_order?: number;
@@ -767,10 +773,15 @@ export const TABLES: Record<TableName, TableInfo> = {
     },
   },
   services: {
-    bool: ['is_visible'],
+    bool: ['is_visible', 'situations_consent_confirmed'],
     json: ['inclusions'],
     uuid: true,
-    refs: { image_id: 'media_assets', banner_image_id: 'media_assets' },
+    refs: {
+      image_id: 'media_assets',
+      banner_image_id: 'media_assets',
+      situations_before_image_id: 'media_assets',
+      situations_after_image_id: 'media_assets',
+    },
   },
   smile_results: {
     bool: ['consent_confirmed', 'is_visible'],

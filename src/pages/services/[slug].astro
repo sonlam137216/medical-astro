@@ -14,7 +14,13 @@ import SmileResults from '../../components/SmileResults.astro';
 import TreatmentFit from '../../components/TreatmentFit.astro';
 import { careCta, serviceFaq } from '../../data/shared';
 import { heroImage } from '../../data/home';
-import { getFaqs, getSection, getServices, type PublicService } from '../../lib/content';
+import {
+  getFaqs,
+  getSection,
+  getService,
+  getServices,
+  type PublicService,
+} from '../../lib/content';
 import { HAND_BUILT_SERVICE_PAGES } from '../../lib/services';
 import { breadcrumbJsonLd, faqJsonLd, pageUrl } from '../../lib/seo';
 import { getPageBanner } from '../../lib/site-content';
@@ -37,7 +43,9 @@ interface Props {
   service: PublicService;
 }
 
-const { service } = Astro.props;
+// Read again at render time: the dev server keeps the result of getStaticPaths, so its props would still be the
+// revision that was live when the server started (npm run dev:local shows each new publish). Same data in a build.
+const service = (await getService(Astro.props.service.slug)) ?? Astro.props.service;
 const title = service.seoTitle || `${service.title} · Melatec Dental Clinic`;
 const description = service.seoDescription || service.summary || undefined;
 // Paragraphs are separated by a blank line.
@@ -113,7 +121,11 @@ const servicesBanner = await getPageBanner('/services');
 
   <TreatmentCosts sectionKey="home_costs" align="center" />
 
-  <TreatmentFit situations={service.situations} label={service.situationsLabel} />
+  <TreatmentFit
+    situations={service.situations}
+    label={service.situationsLabel}
+    images={service.situationsImages}
+  />
 
   {paragraphs.length > 0 && (
     <Section labelledby="about-title">

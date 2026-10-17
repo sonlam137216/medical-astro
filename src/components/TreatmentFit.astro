@@ -4,34 +4,28 @@ import Icon from './Icon.astro';
 import ProfileImage from './ProfileImage.astro';
 import Section from './Section.astro';
 import SectionIntro from './SectionIntro.astro';
-import { getSection, type PublicSituation } from '../lib/content';
+import { getSection, type PublicService, type PublicSituation } from '../lib/content';
 
 // "Which treatment fits your situation" of the service pages (Figma "General Service Template", after the cost
-// comparison): numbered situation cards beside a before/after picture pair, then a "Not sure…?" line with the
-// consultation button. The cards are the service's (Services > a service > Treatment situations), the heading and
-// the line under the cards are shared (Page text "Service pages: which treatment fits"); a service can have its
-// own small heading. Nothing is shown without a card.
-// Figma comment: "click changes the colour". The chosen card turns blue and, when it has pictures, the pair beside
-// the cards becomes its pair (each pair is captioned with its card). The first card starts chosen, which is all a
-// visitor without JavaScript sees; the script turns each card title into a button.
-// Not in Figma (added): the caption under the pictures, the mobile layout (pictures above, cards in one column).
+// comparison): numbered situation cards beside one before/after picture pair, then a "Not sure…?" line with the
+// consultation button. The cards are the service's (Services > a service > Treatment situations), and so is the
+// picture pair (chosen in the service's form: one pair for all its cards, owner 2026-10-17); the heading and the
+// line under the cards are shared (Page text "Service pages: which treatment fits"); a service can have its own
+// small heading. Nothing is shown without a card; without pictures the cards take the whole width.
+// Figma comment: "click changes the colour": the chosen card turns blue. The first card starts chosen, which is all
+// a visitor without JavaScript sees; the script turns each card title into a button.
+// Not in Figma (added): the mobile layout (pictures above, cards in one column).
 
 interface Props {
   situations: PublicSituation[];
   /** The service's own small heading; null: the shared one. */
   label?: string | null;
+  /** The service's before/after pair; absent: no picture column. */
+  images?: PublicService['situationsImages'];
 }
 
-const { situations, label } = Astro.props;
+const { situations, label, images } = Astro.props;
 const heading = await getSection('service_situations');
-const pairs = situations
-  .map((situation, index) => ({ situation, index }))
-  .filter(
-    (p): p is { situation: Required<PublicSituation>; index: number } =>
-      !!p.situation.before && !!p.situation.after,
-  );
-// The pair shown first: the first card's, else the first card that has one.
-const shown = pairs.find((p) => p.index === 0)?.index ?? pairs[0]?.index;
 ---
 
 {heading && situations.length > 0 && (
@@ -40,38 +34,30 @@ const shown = pairs.find((p) => p.index === 0)?.index ?? pairs[0]?.index;
       <Fragment slot="title">{heading.title}</Fragment>
     </SectionIntro>
 
-    <div class:list={['fit', pairs.length > 0 && 'fit--media']} data-fit>
-      {pairs.length > 0 && (
+    <div class:list={['fit', images && 'fit--media']} data-fit>
+      {images && (
         <div class="fit__media">
-          {pairs.map(({ situation, index }) => (
-            <figure
-              class="fit__pair"
-              id={`fit-pair-${index}`}
-              hidden={index !== shown}
-              data-fit-pair={index}
-            >
-              <div class="fit__shot">
-                <ProfileImage
-                  image={situation.before}
-                  slot="treatment-situation"
-                  sizes="(max-width: 900px) min(90vw, 420px), 328px"
-                />
-                <span class="fit__pill">Before</span>
-              </div>
-              <span class="fit__arrow" aria-hidden="true">
-                <Icon name="arrow-down" size={24} />
-              </span>
-              <div class="fit__shot">
-                <ProfileImage
-                  image={situation.after}
-                  slot="treatment-situation"
-                  sizes="(max-width: 900px) min(90vw, 420px), 328px"
-                />
-                <span class="fit__pill">After</span>
-              </div>
-              <figcaption class="fit__caption">{situation.title}</figcaption>
-            </figure>
-          ))}
+          <figure class="fit__pair">
+            <div class="fit__shot">
+              <ProfileImage
+                image={images.before}
+                slot="treatment-situation"
+                sizes="(max-width: 900px) min(90vw, 420px), 328px"
+              />
+              <span class="fit__pill">Before</span>
+            </div>
+            <span class="fit__arrow" aria-hidden="true">
+              <Icon name="arrow-down" size={24} />
+            </span>
+            <div class="fit__shot">
+              <ProfileImage
+                image={images.after}
+                slot="treatment-situation"
+                sizes="(max-width: 900px) min(90vw, 420px), 328px"
+              />
+              <span class="fit__pill">After</span>
+            </div>
+          </figure>
         </div>
       )}
 
@@ -131,10 +117,6 @@ const shown = pairs.find((p) => p.index === 0)?.index ?? pairs[0]?.index;
     box-shadow: 0 4px 16px rgb(0 86 229 / 8%);
   }
 
-  .fit__pair[hidden] {
-    display: none;
-  }
-
   .fit__shot {
     position: relative;
     overflow: hidden;
@@ -175,13 +157,6 @@ const shown = pairs.find((p) => p.index === 0)?.index ?? pairs[0]?.index;
     border-radius: 50%;
     background: var(--color-blue);
     color: var(--color-white);
-  }
-
-  .fit__caption {
-    color: var(--color-muted);
-    font-size: 13px;
-    line-height: 18px;
-    text-align: center;
   }
 
   .fit__cards {
@@ -365,9 +340,6 @@ const shown = pairs.find((p) => p.index === 0)?.index ?? pairs[0]?.index;
 <script>
   document.querySelectorAll<HTMLElement>('[data-fit]').forEach((root) => {
     const cards = [...root.querySelectorAll<HTMLElement>('[data-fit-card]')];
-    const pairs = new Map(
-      [...root.querySelectorAll<HTMLElement>('[data-fit-pair]')].map((p) => [p.dataset.fitPair, p]),
-    );
 
     // Each title becomes a button (with JavaScript only, so a visitor without it never meets a dead button).
     const buttons = cards.map((card) => {
@@ -377,21 +349,17 @@ const shown = pairs.find((p) => p.index === 0)?.index ?? pairs[0]?.index;
       button.className = 'fit__choose';
       button.textContent = title?.textContent ?? '';
       button.setAttribute('aria-pressed', String(card.classList.contains('is-active')));
-      const pair = pairs.get(card.dataset.fitCard);
-      if (pair) button.setAttribute('aria-controls', pair.id);
       title?.replaceWith(button);
       return button;
     });
 
-    const choose = (index: number) => {
-      cards.forEach((card, i) => {
-        card.classList.toggle('is-active', i === index);
-        buttons[i].setAttribute('aria-pressed', String(i === index));
-      });
-      // A card without pictures leaves the pair that is shown (its caption says which card it belongs to).
-      const pair = pairs.get(String(index));
-      if (pair) pairs.forEach((p) => (p.hidden = p !== pair));
-    };
-    buttons.forEach((button, i) => button.addEventListener('click', () => choose(i)));
+    buttons.forEach((button, index) =>
+      button.addEventListener('click', () =>
+        cards.forEach((card, i) => {
+          card.classList.toggle('is-active', i === index);
+          buttons[i].setAttribute('aria-pressed', String(i === index));
+        }),
+      ),
+    );
   });
 </script>
