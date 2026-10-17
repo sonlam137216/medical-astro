@@ -2,7 +2,8 @@
 import SectionIntro from './SectionIntro.astro';
 import Section from './Section.astro';
 import PackageCard from './cards/PackageCard.astro';
-import { getPackages, type PackageKind } from '../lib/content';
+import ComboCard from './cards/ComboCard.astro';
+import { getPackages, getTravelCombos, type PackageKind } from '../lib/content';
 
 interface Props {
   /** Travel Combos shows a "Cost / Dental Tourism Package Prices" intro, Single Treatments does not. */
@@ -13,10 +14,13 @@ interface Props {
 }
 
 const { intro, tone = 'soft', kind } = Astro.props;
-const packages = await getPackages(kind);
+// Travel Combos has its own cards (Figma "Dental Tourism Package Prices", two columns); Dental Packages keeps the
+// photo cards.
+const combos = kind === 'travel_combo' ? await getTravelCombos() : [];
+const packages = kind === 'travel_combo' ? [] : await getPackages(kind);
 ---
 
-{packages.length > 0 && (
+{(packages.length > 0 || combos.length > 0) && (
   <Section {tone} labelledby="packages-title">
     {intro ? (
       <SectionIntro label={intro.label} headingId="packages-title" align="center" lined>
@@ -27,13 +31,23 @@ const packages = await getPackages(kind);
         Dental packages
       </h2>
     )}
-    <ul class="grid">
-      {packages.map((p) => (
-        <li>
-          <PackageCard {...p} />
-        </li>
-      ))}
-    </ul>
+    {combos.length > 0 ? (
+      <ul class="grid grid--combos">
+        {combos.map((c) => (
+          <li>
+            <ComboCard {...c} />
+          </li>
+        ))}
+      </ul>
+    ) : (
+      <ul class="grid">
+        {packages.map((p) => (
+          <li>
+            <PackageCard {...p} />
+          </li>
+        ))}
+      </ul>
+    )}
   </Section>
 )}
 
@@ -45,6 +59,13 @@ const packages = await getPackages(kind);
     margin: 0;
     padding: 0;
     list-style: none;
+  }
+
+  /* Two wider cards per row, the block centred (Figma). */
+  .grid--combos {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    max-width: 820px;
+    margin-inline: auto;
   }
 
   .grid li {
@@ -62,7 +83,8 @@ const packages = await getPackages(kind);
   }
 
   @media (max-width: 640px) {
-    .grid {
+    .grid,
+    .grid--combos {
       grid-template-columns: 1fr;
     }
   }

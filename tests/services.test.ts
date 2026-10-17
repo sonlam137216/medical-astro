@@ -128,6 +128,33 @@ test('packages: price and service link come through; hidden ones stay out', asyn
   assert.equal(isSnapshot(JSON.parse(JSON.stringify(snapshot))), true);
 });
 
+test('a package price unit reaches the snapshot only when set, and is short', async () => {
+  const { raw, db } = setup();
+  const insert = raw.prepare(
+    'INSERT INTO packages (slug, kind, title, price_amount, currency, price_unit) VALUES (?, ?, ?, ?, ?, ?)',
+  );
+  insert.run('da-lat', 'travel_combo', 'Ha Noi - Da Lat', 199, 'USD', ' per person ');
+  insert.run('sa-pa', 'travel_combo', 'Ha Noi - Sa Pa', 119, 'USD', '  ');
+  insert.run('implant', 'single_treatment', 'Implant', 400, 'USD', null);
+  assert.match(
+    failure(
+      raw,
+      "INSERT INTO packages (slug, kind, title, price_unit) VALUES ('x', 'travel_combo', 'X', ?)",
+      'x'.repeat(41),
+    ),
+    /CHECK/,
+  );
+
+  const snapshot = await buildSnapshot(db);
+  const bySlug = (slug: string) => snapshot.packages?.find((p) => p.slug === slug);
+  assert.equal(bySlug('da-lat')?.priceUnit, 'per person');
+  assert.equal('priceUnit' in bySlug('sa-pa')!, false);
+  assert.equal('priceUnit' in bySlug('implant')!, false);
+  assert.equal(isSnapshot(JSON.parse(JSON.stringify(snapshot))), true);
+  const base = { slug: 'a', kind: 'travel_combo', title: 'A', inclusions: [], price: null };
+  assert.equal(isSnapshot({ packages: [{ ...base, priceUnit: 3 }] }), false);
+});
+
 test('a package price needs a currency', () => {
   const { raw } = setup();
   assert.match(

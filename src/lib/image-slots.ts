@@ -44,6 +44,12 @@ export const IMAGE_SLOTS = {
     frames: [{ label: 'Package cards', width: 384, height: 190 }],
     position: { x: 50, y: 0 },
   },
+  // A Travel Combos card: a taller photo than the single-treatment cards, with the route written over its top-left.
+  'combo-card': {
+    label: 'Travel combo card',
+    frames: [{ label: 'Travel Combos cards', width: 390, height: 260 }],
+    position: { x: 50, y: 50 },
+  },
   'location-card': {
     label: 'Clinic or destination card',
     frames: [{ label: 'Clinic and Discover Vietnam cards', width: 384, height: 216 }],

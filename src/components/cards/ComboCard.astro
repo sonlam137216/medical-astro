@@ -1,0 +1,166 @@
+---
+import Button from '../Button.astro';
+import Icon from '../Icon.astro';
+import ProfileImage from '../ProfileImage.astro';
+import type { PublicCombo } from '../../lib/content';
+import { frameAspect, IMAGE_SLOTS } from '../../lib/image-slots';
+
+// A Travel Combos price card (Figma "Dental Tourism Package Prices", 2026-10-17): the route on a white tag over the
+// photo, the price with its unit, what is included, and a button to the consultation form. The list keeps the
+// site's tick (the design has green checks) so every price list looks the same.
+
+type Props = PublicCombo;
+
+const { title, inclusions, price, unit, note, image } = Astro.props;
+---
+
+<article class="card combo">
+  <div class="combo__media">
+    {image ? (
+      <ProfileImage
+        class="card__media"
+        image={image}
+        slot="combo-card"
+        sizes="(max-width: 640px) 100vw, 390px"
+      />
+    ) : (
+      <div
+        class="card__media combo__empty"
+        style={`aspect-ratio: ${frameAspect(IMAGE_SLOTS['combo-card'])}`}
+        aria-hidden="true"
+      ></div>
+    )}
+    <h3 class="combo__title">{title}</h3>
+  </div>
+  <div class="card__body combo__body">
+    {price && (
+      <p class="combo__price">
+        {price}
+        {unit && <span class="combo__unit"> {unit}</span>}
+      </p>
+    )}
+    {price && note && <p class="combo__note">{note}</p>}
+    {inclusions.length > 0 && (
+      <ul class="combo__list">
+        {inclusions.map((item) => (
+          <li>
+            <span class="tick" aria-hidden="true">
+              <Icon name="check" size={14} />
+            </span>
+            <span>{item}</span>
+          </li>
+        ))}
+      </ul>
+    )}
+    <Button class="combo__cta" variant="outline" href="#consultation">
+      Get a Consultation
+      <Icon name="arrow-right" size={18} />
+    </Button>
+  </div>
+</article>
+
+<style>
+  .combo {
+    background: var(--color-white);
+  }
+
+  .combo__media {
+    position: relative;
+  }
+
+  /* No photo yet: a plain blue frame, so the tag still has something to sit on. */
+  .combo__empty {
+    background: linear-gradient(135deg, var(--color-soft) 0%, #dbe7fb 100%);
+  }
+
+  /* The route, on a white tag over the top-left corner of the photo. */
+  .combo__title {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    max-width: calc(100% - 32px);
+    margin: 0;
+    padding: 6px 14px;
+    border-radius: 10px;
+    background: var(--color-white);
+    box-shadow: 0 2px 8px rgb(2 15 50 / 12%);
+    color: var(--color-blue);
+    font-family: var(--font-display);
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 20px;
+  }
+
+  .combo__body {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+  }
+
+  .combo__price {
+    margin: 0;
+    color: var(--color-blue);
+    font-family: var(--font-display);
+    font-size: 32px;
+    font-weight: 700;
+    line-height: 40px;
+  }
+
+  .combo__unit {
+    font-size: 24px;
+  }
+
+  .combo__note {
+    margin: -8px 0 0;
+    color: var(--color-muted);
+    font-size: var(--text-small);
+    line-height: var(--text-small-lh);
+  }
+
+  .combo__list {
+    display: grid;
+    gap: 10px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .combo__list li {
+    display: grid;
+    grid-template-columns: 20px 1fr;
+    align-items: start;
+    gap: 12px;
+    color: var(--color-muted);
+    font-size: var(--text-small);
+    line-height: var(--text-small-lh);
+  }
+
+  /* Same tick as the other package cards (PackageCard). */
+  .tick {
+    display: grid;
+    place-items: center;
+    width: 20px;
+    height: 20px;
+    margin-top: 1px;
+    border-radius: 50%;
+    background: var(--color-blue);
+    color: var(--color-white);
+  }
+
+  /* The button sits at the bottom, so the buttons of a row line up whatever the length of the lists. */
+  .combo :global(.combo__cta) {
+    align-self: flex-start;
+    margin-top: auto;
+  }
+
+  @media (max-width: 400px) {
+    .combo__price {
+      font-size: 28px;
+      line-height: 36px;
+    }
+
+    .combo__unit {
+      font-size: 20px;
+    }
+  }
+</style>

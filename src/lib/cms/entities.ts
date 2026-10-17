@@ -119,6 +119,79 @@ export const NAV_LOCATIONS = [
   ['footer_legal', 'Footer: legal links'],
 ] as const;
 
+// The fields of Packages. The photo hint depends on the page the package is shown on (see `fieldsFor`).
+const packagePhoto: Field = {
+  type: 'image',
+  name: 'image_id',
+  label: 'Photo',
+  slot: 'package-card',
+};
+const comboPhoto: Field = {
+  ...packagePhoto,
+  slot: 'combo-card',
+  help: 'The name of the combo is written over the top-left corner of the photo.',
+};
+const packageFields: Field[] = [
+  {
+    type: 'select',
+    name: 'kind',
+    label: 'Shown on',
+    options: PACKAGE_KINDS,
+    default: 'single_treatment',
+  },
+  {
+    type: 'text',
+    name: 'title',
+    label: 'Name',
+    max: 160,
+    required: true,
+    help: 'For a travel combo, the route, for example “Ha Noi - Da Lat”.',
+  },
+  { type: 'slug', name: 'slug', label: 'Address name', from: 'title' },
+  {
+    type: 'lines',
+    name: 'inclusions',
+    label: 'What is included',
+    maxItems: 8,
+    maxLength: 120,
+    help: 'One item per line, shown as a list on the card.',
+  },
+  {
+    type: 'money',
+    name: 'price_amount',
+    label: 'Price',
+    currencyName: 'currency',
+    help: 'Dental Packages: shown as “TOTAL: …”. Travel Combos: shown large, followed by the unit. Leave empty to show no price.',
+  },
+  {
+    type: 'text',
+    name: 'price_unit',
+    label: 'Price unit',
+    max: 40,
+    placeholder: 'per person',
+    help: 'Travel Combos only: written after the price, for example “$199 per person”. Leave empty for the price alone.',
+  },
+  {
+    type: 'text',
+    name: 'price_conditions',
+    label: 'Price note',
+    max: 400,
+    placeholder: 'Flights not included',
+    help: 'A short condition shown under the price. Only appears when a price is set.',
+  },
+  {
+    type: 'ref',
+    name: 'service_id',
+    label: 'Related service',
+    table: 'services',
+    labelColumn: 'title',
+    help: 'Dental Packages only: the card links to this service.',
+  },
+  packagePhoto,
+  sortOrder,
+  visible,
+];
+
 export const ENTITIES: EntityDef[] = [
   {
     key: 'navigation',
@@ -408,7 +481,7 @@ export const ENTITIES: EntityDef[] = [
     singular: 'package',
     plural: 'Packages',
     intro:
-      'The price cards on the Dental Packages page (single treatments) and the Travel Combos page. A price is optional: without one the card shows no price. Link a package to a service to send visitors to that service; otherwise the card invites them to request a quote. Changes go live after you publish the website.',
+      'The price cards on the Dental Packages page (single treatments) and the Travel Combos page. A price is optional: without one the card shows no price. On Dental Packages, link a package to a service to send visitors to that service; otherwise the card invites them to request a quote. Every Travel Combos card has a “Get a Consultation” button to the consultation form. Changes go live after you publish the website.',
     titleField: 'title',
     columns: [
       { field: 'title', label: 'Package' },
@@ -417,50 +490,12 @@ export const ENTITIES: EntityDef[] = [
       { field: 'sort_order', label: 'Order' },
       { field: 'is_visible', label: 'Shown' },
     ],
-    fields: [
-      {
-        type: 'select',
-        name: 'kind',
-        label: 'Shown on',
-        options: PACKAGE_KINDS,
-        default: 'single_treatment',
-      },
-      { type: 'text', name: 'title', label: 'Name', max: 160, required: true },
-      { type: 'slug', name: 'slug', label: 'Address name', from: 'title' },
-      {
-        type: 'lines',
-        name: 'inclusions',
-        label: 'What is included',
-        maxItems: 8,
-        maxLength: 120,
-        help: 'One item per line, shown as a list on the card.',
-      },
-      {
-        type: 'money',
-        name: 'price_amount',
-        label: 'Price',
-        currencyName: 'currency',
-        help: 'Shown as “TOTAL: …” on the card. Leave empty to show no price.',
-      },
-      {
-        type: 'text',
-        name: 'price_conditions',
-        label: 'Price note',
-        max: 400,
-        placeholder: 'Per person, flights not included',
-        help: 'A short condition shown under the price. Only appears when a price is set.',
-      },
-      {
-        type: 'ref',
-        name: 'service_id',
-        label: 'Related service',
-        table: 'services',
-        labelColumn: 'title',
-      },
-      { type: 'image', name: 'image_id', label: 'Photo', slot: 'package-card' },
-      sortOrder,
-      visible,
-    ],
+    fields: packageFields,
+    // A Travel Combos card has a taller picture than a single-treatment card.
+    fieldsFor: (row) =>
+      row.kind === 'travel_combo'
+        ? packageFields.map((f) => (f === packagePhoto ? comboPhoto : f))
+        : packageFields,
     order: [{ column: 'kind' }, { column: 'sort_order' }, { column: 'title' }],
     deletable: true,
   },

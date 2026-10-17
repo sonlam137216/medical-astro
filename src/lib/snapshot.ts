@@ -159,6 +159,8 @@ export interface SnapshotPackage {
   /** A reference price; null: the card shows no price. */
   price: { amount: number; currency: string } | null;
   priceConditions: string | null;
+  /** What the price is for ("per person"); absent when not set. */
+  priceUnit?: string;
   /** Slug of the related service, if one is chosen. */
   service: string | null;
   image: SnapshotImage | null;
@@ -591,7 +593,7 @@ export async function buildSnapshot(db: AdminDb): Promise<Snapshot> {
   const { data: packages, error: packagesError } = await db
     .from('packages')
     .select(
-      `slug, kind, title, inclusions, price_amount, currency, price_conditions, service:services(slug), image:media_assets(${IMAGE_COLUMNS})`,
+      `slug, kind, title, inclusions, price_amount, currency, price_conditions, price_unit, service:services(slug), image:media_assets(${IMAGE_COLUMNS})`,
     )
     .eq('is_visible', true)
     .order('kind')
@@ -599,19 +601,24 @@ export async function buildSnapshot(db: AdminDb): Promise<Snapshot> {
     .order('title', { ascending: true });
   if (packagesError) throw fail('packages', packagesError);
   if (packages.length > 0) {
-    snapshot.packages = packages.map((p) => ({
-      slug: p.slug,
-      kind: p.kind,
-      title: p.title,
-      inclusions: p.inclusions,
-      price:
-        p.price_amount !== null && p.currency
-          ? { amount: p.price_amount, currency: p.currency }
-          : null,
-      priceConditions: p.price_conditions,
-      service: p.service?.slug ?? null,
-      image: toSnapshotImage(p.image),
-    }));
+    snapshot.packages = packages.map((p) => {
+      const priceUnit = p.price_unit?.trim();
+      return {
+        slug: p.slug,
+        kind: p.kind,
+        title: p.title,
+        inclusions: p.inclusions,
+        price:
+          p.price_amount !== null && p.currency
+            ? { amount: p.price_amount, currency: p.currency }
+            : null,
+        priceConditions: p.price_conditions,
+        // Only when set, so packages without one keep the same shape (and hash) as before.
+        ...(priceUnit ? { priceUnit } : {}),
+        service: p.service?.slug ?? null,
+        image: toSnapshotImage(p.image),
+      };
+    });
   }
 
   const { data: destinations, error: destinationsError } = await db
@@ -1058,6 +1065,7 @@ export function isSnapshot(value: unknown): value is Snapshot {
           (isObject(x.price) &&
             typeof x.price.amount === 'number' &&
             typeof x.price.currency === 'string')) &&
+        (x.priceUnit === undefined || typeof x.priceUnit === 'string') &&
         hasImage(x),
     )
   )

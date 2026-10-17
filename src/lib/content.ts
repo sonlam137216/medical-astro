@@ -7,7 +7,7 @@ import {
   serviceDetails as sampleServiceDetails,
   packageCards as samplePackages,
 } from '../data/shared';
-import { discover as sampleDiscover } from '../data/packages';
+import { comboCards as sampleCombos, discover as sampleDiscover } from '../data/packages';
 import {
   costCards as sampleImplantCards,
   situations as sampleImplantSituations,
@@ -337,6 +337,40 @@ export async function getPackages(kind: PackageKind): Promise<PublicPackage[]> {
     linkLabel: 'Learn more',
     image: p.image,
   }));
+}
+
+/** A Travel Combos price card: the route over the photo, the price and its unit, what is included. */
+export interface PublicCombo {
+  title: string;
+  inclusions: string[];
+  /** The amount ("$199"); null: no price line. */
+  price: string | null;
+  /** What the price is for ("per person"); null: the amount alone. */
+  unit: string | null;
+  /** A short condition under the price. */
+  note: string | null;
+  image?: Img | PublicImage;
+}
+
+/**
+ * The Travel Combos price cards: the published combos, or the design's sample combos before the first publish.
+ * Published but no combo: an empty list (the page then hides the section).
+ */
+export async function getTravelCombos(): Promise<PublicCombo[]> {
+  const snapshot = await loadSnapshot();
+  if (snapshot?.packages) {
+    return snapshot.packages
+      .filter((p) => p.kind === 'travel_combo')
+      .map((p) => ({
+        title: p.title,
+        inclusions: p.inclusions,
+        price: p.price ? formatPrice(p.price.amount, p.price.currency) : null,
+        unit: p.price ? (p.priceUnit ?? null) : null,
+        note: p.price ? p.priceConditions : null,
+        image: toPublicImageOrUndefined(p.image),
+      }));
+  }
+  return sampleCombos.map((c) => ({ ...c, note: null }));
 }
 
 export interface PublicDestination {

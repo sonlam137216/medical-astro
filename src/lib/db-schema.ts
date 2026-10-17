@@ -376,6 +376,7 @@ export interface Tables {
       kind: string;
       price_amount: number | null;
       price_conditions: string | null;
+      price_unit: string | null;
       service_id: string | null;
       slug: string;
       sort_order: number;
@@ -393,6 +394,7 @@ export interface Tables {
       kind: string;
       price_amount?: number | null;
       price_conditions?: string | null;
+      price_unit?: string | null;
       service_id?: string | null;
       slug: string;
       sort_order?: number;

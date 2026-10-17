@@ -46,3 +46,58 @@ export const discover = {
   })),
   cta: { label: 'View all', href: '/travel-guide' },
 };
+
+// The Travel Combos price cards until combos are published (Packages, "Shown on: Travel Combos"). SAMPLE routes,
+// prices and inclusions of the design (2026-10-17), not confirmed by the clinic. Only the Da Nang card has a photo:
+// the design's photos have no known source, and the gallery has no picture of the other places.
+export const comboCards = [
+  {
+    title: 'Ha Noi - Da Lat',
+    price: '$199',
+    unit: 'per person',
+    inclusions: [
+      '3 night hotel stay - 3 buffet breakfasts',
+      'Round-trip flights: Vietnam Airlines (one-way with checked baggage) and VietJet Air (one-way)',
+      'Complimentary in-room coffee and water',
+      'Centrally located hotel with convenient access to local attractions',
+    ],
+  },
+  {
+    title: 'Ha Noi - Da Nang',
+    price: '$139',
+    unit: 'per person',
+    inclusions: [
+      '3 night hotel stay - 3 buffet breakfasts',
+      'Round-trip flights',
+      'Complimentary in-room coffee and water',
+      'Hotel just a 2-minute walk from the beach',
+    ],
+    image: {
+      src: vietnam4,
+      alt: 'A golden footbridge held by two giant stone hands above the clouds',
+    } satisfies Img,
+  },
+  {
+    title: 'Ha Noi - Phu Quoc',
+    price: '$139',
+    unit: 'per person',
+    inclusions: [
+      '3 night hotel stay - 3 buffet breakfasts',
+      'Round-trip flights with checked baggage included both ways (Sun PhuQuoc Airways one way, VietJet Air the other)',
+      'Complimentary in-room coffee and water',
+      'Hotel just a 2-minute walk from the beach',
+    ],
+  },
+  {
+    title: 'Ha Noi - Sa Pa',
+    price: '$119',
+    unit: 'per person',
+    inclusions: [
+      '3 night hotel stay',
+      'Round-trip cabin bus tickets',
+      'Complimentary in-room coffee and water',
+      'Centrally located hotel near the town square, with convenient access to local attractions',
+      'Approximately 1 km from the Fansipan cable car station',
+    ],
+  },
+];
