@@ -118,6 +118,18 @@ export interface SnapshotServiceOption {
   home: boolean;
 }
 
+/**
+ * A card of "Which treatment fits your situation" on a service's page. The pictures are a pair, only present when
+ * the patient's consent is confirmed and both pictures are still usable.
+ */
+export interface SnapshotSituation {
+  tag: string | null;
+  title: string;
+  description: string | null;
+  before?: SnapshotImage;
+  after?: SnapshotImage;
+}
+
 /** A service: a group of treatments with a page of its own. */
 export interface SnapshotService {
   slug: string;
@@ -133,6 +145,10 @@ export interface SnapshotService {
   options?: SnapshotServiceOption[];
   /** The wide picture at the top of the service's page; absent: the default banner. */
   banner?: SnapshotImage;
+  /** The shown situation cards, in order; absent when there are none. */
+  situations?: SnapshotSituation[];
+  /** The small heading above the situations; absent: the heading of Page text. */
+  situationsLabel?: string;
 }
 
 export interface SnapshotPackage {
@@ -504,7 +520,7 @@ export async function buildSnapshot(db: AdminDb): Promise<Snapshot> {
   const { data: services, error: servicesError } = await db
     .from('services')
     .select(
-      `id, slug, title, summary, description, seo_title, seo_description, image:media_assets!image_id(${IMAGE_COLUMNS}), banner:media_assets!banner_image_id(${IMAGE_COLUMNS})`,
+      `id, slug, title, summary, description, seo_title, seo_description, situations_label, image:media_assets!image_id(${IMAGE_COLUMNS}), banner:media_assets!banner_image_id(${IMAGE_COLUMNS})`,
     )
     .eq('is_visible', true)
     .order('sort_order', { ascending: true })
@@ -517,9 +533,35 @@ export async function buildSnapshot(db: AdminDb): Promise<Snapshot> {
     .order('sort_order', { ascending: true })
     .order('title', { ascending: true });
   if (optionsError) throw fail('service_options', optionsError);
+  // The pictures of a card only with the patient's consent (the table refuses a shown card with pictures and
+  // without it) and only when both are still usable; the card itself is shown either way.
+  const { data: situationRows, error: situationsError } = await db
+    .from('service_situations')
+    .select(
+      `service_id, tag, title, description, consent_confirmed, before:media_assets!before_image_id(${IMAGE_COLUMNS}), after:media_assets!after_image_id(${IMAGE_COLUMNS})`,
+    )
+    .eq('is_visible', true)
+    .order('sort_order', { ascending: true })
+    .order('title', { ascending: true });
+  if (situationsError) throw fail('service situations', situationsError);
+  const situationsOf = (serviceId: string): SnapshotSituation[] =>
+    situationRows
+      .filter((r) => r.service_id === serviceId)
+      .map((r) => {
+        const before = r.consent_confirmed ? toSnapshotImage(r.before) : null;
+        const after = r.consent_confirmed ? toSnapshotImage(r.after) : null;
+        return {
+          tag: r.tag,
+          title: r.title,
+          description: r.description,
+          ...(before && after ? { before, after } : {}),
+        };
+      });
   if (services.length > 0) {
     snapshot.services = services.map((s) => {
       const banner = toSnapshotImage(s.banner);
+      const situations = situationsOf(s.id);
+      const situationsLabel = s.situations_label?.trim();
       return {
         slug: s.slug,
         title: s.title,
@@ -539,6 +581,9 @@ export async function buildSnapshot(db: AdminDb): Promise<Snapshot> {
             inclusions: o.inclusions,
             home: o.show_on_home,
           })),
+        // Only when there is something, so services without them keep the same shape (and hash) as before.
+        ...(situations.length > 0 ? { situations } : {}),
+        ...(situationsLabel ? { situationsLabel } : {}),
       };
     });
   }
@@ -784,6 +829,18 @@ export function snapshotProblems(snapshot: Snapshot, target: string = 'staging')
         `Service “${s.title}”: the banner picture has no description. Add one in Media, or mark the image as decorative.`,
       );
     }
+    for (const situation of s.situations ?? []) {
+      for (const [side, image] of [
+        ['before', situation.before],
+        ['after', situation.after],
+      ] as const) {
+        if (image && !image.decorative && !image.alt) {
+          problems.push(
+            `Service “${s.title}”, situation “${situation.title}”: the ${side} picture has no description. Add one in Media.`,
+          );
+        }
+      }
+    }
   }
   for (const section of snapshot.sections ?? []) {
     const def = sectionByKey(section.key);
@@ -954,6 +1011,17 @@ export function isSnapshot(value: unknown): value is Snapshot {
                 typeof o.title === 'string' &&
                 Array.isArray(o.inclusions) &&
                 typeof o.home === 'boolean',
+            ))) &&
+        (x.situationsLabel === undefined || typeof x.situationsLabel === 'string') &&
+        (x.situations === undefined ||
+          (Array.isArray(x.situations) &&
+            x.situations.every(
+              (i) =>
+                isObject(i) &&
+                typeof i.title === 'string' &&
+                (i.before === undefined ||
+                  (isObject(i.before) && typeof i.before.key === 'string')) &&
+                (i.after === undefined || (isObject(i.after) && typeof i.after.key === 'string')),
             ))),
     )
   )

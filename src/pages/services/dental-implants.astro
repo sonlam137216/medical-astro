@@ -12,6 +12,7 @@ import PlanVisit from '../../components/PlanVisit.astro';
 import LatestArticles from '../../components/articles/LatestArticles.astro';
 import FaqList from '../../components/FaqList.astro';
 import SmileResults from '../../components/SmileResults.astro';
+import TreatmentFit from '../../components/TreatmentFit.astro';
 import { getPageSeo, getPageBanner } from '../../lib/site-content';
 import { getFaqs, getSection, getService } from '../../lib/content';
 import { faqJsonLd } from '../../lib/seo';
@@ -25,8 +26,10 @@ export const prerender = true;
 
 const hero = (await getSection('implants_hero'))!;
 const costs = (await getSection('implants_costs'))!;
-// The price cards: the treatments of the Dental Implants service (Services > Dental Implants > Treatments).
-const treatments = (await getService('dental-implants'))?.options ?? [];
+// The price cards: the treatments of the Dental Implants service (Services > Dental Implants > Treatments), and
+// the "Which treatment fits your situation" cards (Treatment situations).
+const service = await getService('dental-implants');
+const treatments = service?.options ?? [];
 const why = (await getSection('implants_why'))!;
 const faq = (await getSection('service_faq'))!;
 // The questions shared by every service page (FAQs).
@@ -87,6 +90,8 @@ const banner = await getPageBanner('/services/dental-implants');
   )}
 
   <TreatmentCosts sectionKey="implants_comparison" align="center" />
+
+  <TreatmentFit situations={service?.situations ?? []} label={service?.situationsLabel} />
 
   <Section tone="blue" labelledby="why-title">
     <SectionIntro label={why.label} headingId="why-title" align="center" lined inverse>

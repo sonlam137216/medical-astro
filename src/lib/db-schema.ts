@@ -526,6 +526,36 @@ export interface Tables {
       updated_at?: string;
     };
   };
+  service_situations: {
+    Row: {
+      after_image_id: string | null;
+      before_image_id: string | null;
+      consent_confirmed: boolean;
+      created_at: string;
+      description: string | null;
+      id: string;
+      is_visible: boolean;
+      service_id: string;
+      sort_order: number;
+      tag: string | null;
+      title: string;
+      updated_at: string;
+    };
+    Insert: {
+      after_image_id?: string | null;
+      before_image_id?: string | null;
+      consent_confirmed?: boolean;
+      created_at?: string;
+      description?: string | null;
+      id?: string;
+      is_visible?: boolean;
+      service_id: string;
+      sort_order?: number;
+      tag?: string | null;
+      title: string;
+      updated_at?: string;
+    };
+  };
   services: {
     Row: {
       banner_image_id: string | null;
@@ -538,6 +568,7 @@ export interface Tables {
       price_text: string | null;
       seo_description: string | null;
       seo_title: string | null;
+      situations_label: string | null;
       slug: string;
       sort_order: number;
       summary: string | null;
@@ -555,6 +586,7 @@ export interface Tables {
       price_text?: string | null;
       seo_description?: string | null;
       seo_title?: string | null;
+      situations_label?: string | null;
       slug: string;
       sort_order?: number;
       summary?: string | null;
@@ -722,6 +754,15 @@ export const TABLES: Record<TableName, TableInfo> = {
     json: ['inclusions'],
     uuid: true,
     refs: { service_id: 'services' },
+  },
+  service_situations: {
+    bool: ['consent_confirmed', 'is_visible'],
+    uuid: true,
+    refs: {
+      service_id: 'services',
+      before_image_id: 'media_assets',
+      after_image_id: 'media_assets',
+    },
   },
   services: {
     bool: ['is_visible'],

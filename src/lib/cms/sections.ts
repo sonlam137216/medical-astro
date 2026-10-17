@@ -464,6 +464,21 @@ export const SECTIONS: SectionDef[] = [
     fields: [label, title],
   },
   {
+    key: 'service_situations',
+    page: '/services',
+    label: 'Service pages: which treatment fits',
+    where:
+      'The heading and the “Not sure which option is right for you?” line of the “Which treatment fits your situation” block on every service page, Dental Implants included. The cards are added per service (Services > a service > Treatment situations), and a service can have its own small heading. A service without situations does not show the block.',
+    fields: [
+      label,
+      title,
+      text('askTitle', 'Question under the cards', 160, { required: true }),
+      area('askBody', 'Text under the question', 400, {
+        help: 'Shown beside the “Book free consultation” button.',
+      }),
+    ],
+  },
+  {
     key: 'service_results',
     page: '/services',
     label: 'Service pages: results heading',

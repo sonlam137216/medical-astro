@@ -34,7 +34,7 @@ const values = result?.values ?? {
   <main class="admin-main">
     <p>
       {parent && def.parent ? (
-        <a href={`/admin/content/${def.parent.entity}/${parent.value}#children`}>
+        <a href={`/admin/content/${def.parent.entity}/${parent.value}#children-${def.key}`}>
           ← {parent.label}
         </a>
       ) : (

@@ -8,7 +8,11 @@ import {
   packageCards as samplePackages,
 } from '../data/shared';
 import { discover as sampleDiscover } from '../data/packages';
-import { costCards as sampleImplantCards } from '../data/implants';
+import {
+  costCards as sampleImplantCards,
+  situations as sampleImplantSituations,
+  situationsLabel as sampleImplantSituationsLabel,
+} from '../data/implants';
 import { formatPrice, servicePath } from './services';
 import { mergeSection, sectionByKey } from './cms/sections';
 import { SECTION_SAMPLES, type SectionKey } from '../data/sections';
@@ -153,6 +157,15 @@ export interface PublicServiceOption {
   priceText: string | null;
 }
 
+/** A card of "Which treatment fits your situation"; the pictures are a pair (both or neither). */
+export interface PublicSituation {
+  tag: string | null;
+  title: string;
+  description: string | null;
+  before?: PublicImage;
+  after?: PublicImage;
+}
+
 /** A service: a group of treatments with a page of its own at `href`. */
 export interface PublicService {
   slug: string;
@@ -169,6 +182,10 @@ export interface PublicService {
   /** The wide picture at the top of the service's page; absent: the default banner. */
   banner?: PublicImage;
   options: PublicServiceOption[];
+  /** The "Which treatment fits your situation" cards; empty: the block is not shown. */
+  situations: PublicSituation[];
+  /** The small heading above the cards; null: the heading of Page text. */
+  situationsLabel: string | null;
 }
 
 /** A price card of the Home page: a treatment ticked "Show on the Home page", linking to its service. */
@@ -200,6 +217,17 @@ export async function getServices(): Promise<PublicService[]> {
         inclusions: o.inclusions,
         priceText: o.priceText,
       })),
+      situations: (s.situations ?? []).map((i) => {
+        const before = toPublicImageOrUndefined(i.before);
+        const after = toPublicImageOrUndefined(i.after);
+        return {
+          tag: i.tag,
+          title: i.title,
+          description: i.description,
+          ...(before && after ? { before, after } : {}),
+        };
+      }),
+      situationsLabel: s.situationsLabel ?? null,
     }));
   }
   return sampleServiceDetails.map((s) => ({
@@ -223,6 +251,9 @@ export async function getServices(): Promise<PublicService[]> {
               inclusions: c.inclusions,
               priceText: c.total,
             })),
+    // Only Dental Implants has sample situations (the design's); the clinic writes those of the other services.
+    situations: s.slug === 'dental-implants' ? sampleImplantSituations : [],
+    situationsLabel: s.slug === 'dental-implants' ? sampleImplantSituationsLabel : null,
   }));
 }
 

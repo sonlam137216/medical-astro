@@ -11,6 +11,7 @@ import TreatmentCosts from '../../components/home/TreatmentCosts.astro';
 import SeamlessJourney from '../../components/SeamlessJourney.astro';
 import FaqList from '../../components/FaqList.astro';
 import SmileResults from '../../components/SmileResults.astro';
+import TreatmentFit from '../../components/TreatmentFit.astro';
 import { careCta, serviceFaq } from '../../data/shared';
 import { heroImage } from '../../data/home';
 import { getFaqs, getSection, getServices, type PublicService } from '../../lib/content';
@@ -19,8 +20,8 @@ import { breadcrumbJsonLd, faqJsonLd, pageUrl } from '../../lib/seo';
 import { getPageBanner } from '../../lib/site-content';
 
 // The page of one service, built from the CMS (Services > a service, and its Treatments), after the Figma
-// "General Service Template" (banner, price cards, cost comparison, how it works, results, FAQ; the About text and
-// the call to action are added). The cost comparison is the Home page's table (Page text > Home: treatment costs
+// "General Service Template" (banner, price cards, cost comparison, which treatment fits, how it works, results, FAQ;
+// the About text and the call to action are added). The cost comparison is the Home page's table (Page text > Home: treatment costs
 // table), the results slider (Smile results) and the FAQ (FAQs) are shared by every service page.
 // Dental Implants keeps its own page, written by hand at the same address, with its own table.
 
@@ -111,6 +112,8 @@ const servicesBanner = await getPageBanner('/services');
   </Section>
 
   <TreatmentCosts sectionKey="home_costs" align="center" />
+
+  <TreatmentFit situations={service.situations} label={service.situationsLabel} />
 
   {paragraphs.length > 0 && (
     <Section labelledby="about-title">

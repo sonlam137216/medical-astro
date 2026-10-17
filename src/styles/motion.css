@@ -245,7 +245,10 @@
       .gallery,
       .help,
       .price,
-      .services__actions
+      .services__actions,
+      .fit__media,
+      .fit__card,
+      .fit__ask
     ) {
       animation: reveal linear both;
       animation-timeline: view();
@@ -263,7 +266,8 @@
       .profile,
       .why__item,
       .faq details,
-      .price
+      .price,
+      .fit__card
     ) {
       &:nth-child(2),
       li:nth-child(2) > & {

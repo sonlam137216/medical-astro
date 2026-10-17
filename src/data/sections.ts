@@ -38,6 +38,7 @@ import {
   tourismSupport,
   seamlessJourney,
   serviceFaq,
+  serviceSituations,
 } from './shared';
 
 /** One row of a cost table. Built-in rows have no figures of their own: the table shows placeholders. */
@@ -73,6 +74,7 @@ export const SECTION_SAMPLES = {
   services_hero: servicesHero,
   shared_tourism: tourismSupport,
   shared_journey: seamlessJourney,
+  service_situations: serviceSituations,
   service_results: { label: 'Results', title: 'Real Stories. Real Smiles.' },
   service_faq: { label: serviceFaq.label, title: serviceFaq.title },
   doctors_hero: doctorsHero,

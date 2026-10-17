@@ -85,6 +85,13 @@ export const IMAGE_SLOTS = {
     frames: [{ label: 'Service pages, results slider', width: 448, height: 318 }],
     position: { x: 50, y: 40 },
   },
+  // One picture of a "Which treatment fits your situation" pair on a service's page (usually an X-ray): the before
+  // and after pictures sit one above the other beside the cards.
+  'treatment-situation': {
+    label: 'Treatment situation picture',
+    frames: [{ label: 'Service pages, which treatment fits', width: 328, height: 230 }],
+    position: { x: 50, y: 50 },
+  },
 } as const satisfies Record<string, ImageSlot>;
 
 export type SlotKey = keyof typeof IMAGE_SLOTS;

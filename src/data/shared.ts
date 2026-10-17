@@ -191,3 +191,13 @@ export const serviceFaq = {
     'Can you help with accommodation and transport?',
   ],
 };
+
+// "Which treatment fits your situation" of the service pages (Figma "General Service Template"). The Figma line
+// names another clinic ("Send the Smilux dental team…"); Melatec is used here.
+export const serviceSituations = {
+  label: 'Treatment options',
+  title: 'Which treatment fits your situation',
+  askTitle: 'Not sure which option is right for you?',
+  askBody:
+    'Send the Melatec dental team a clear close-up photo of the area where your tooth is missing. We’ll review your case and recommend the most suitable treatment option for you.',
+};

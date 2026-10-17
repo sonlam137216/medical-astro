@@ -30,6 +30,11 @@ const included = [
     'treatment',
     'treatments',
   ),
+  count(
+    snapshot.services?.reduce((n, s) => n + (s.situations?.length ?? 0), 0),
+    'treatment situation',
+    'treatment situations',
+  ),
   count(snapshot.faqs?.length, 'answered question', 'answered questions'),
   count(snapshot.smileResults?.length, 'before/after pair', 'before/after pairs'),
   count(snapshot.articles?.length, 'published article', 'published articles'),

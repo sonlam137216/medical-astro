@@ -119,7 +119,11 @@ const probe = (narrow) => {
   if (narrow) {
     for (const el of document.querySelectorAll('a[href], button, summary, [role="button"]')) {
       if (!visible(el) || el.closest('.visually-hidden')) continue;
-      const r = el.getBoundingClientRect();
+      // A link or button stretched over its card by an absolute ::after is tapped anywhere on the card.
+      const after = getComputedStyle(el, '::after');
+      const stretched =
+        after.content !== 'none' && after.position === 'absolute' && el.offsetParent;
+      const r = (stretched ? el.offsetParent : el).getBoundingClientRect();
       // Inline links inside a paragraph are exempt (WCAG 2.5.8 inline exception).
       if (getComputedStyle(el).display === 'inline') continue;
       if (r.height < 40 || r.width < 40) {

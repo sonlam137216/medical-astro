@@ -131,3 +131,34 @@ export const plan = {
     'Know how many visits may be required and the estimated length of each stay.',
   ],
 };
+
+// The cards of "Which treatment fits your situation" until the Dental Implants service has situations of its own
+// (Services > Dental Implants > Treatment situations). SAMPLE text of the design, to be confirmed by the clinic; no
+// pictures (the design's X-rays come from another clinic's website).
+export const situationsLabel = 'Implant treatment options';
+export const situations = [
+  {
+    tag: 'One missing tooth',
+    title: 'Single Dental Implant & Crown',
+    description:
+      'Replace a missing or severely damaged tooth with a single dental implant and crown, without affecting adjacent healthy teeth. In suitable cases, implant placement may be performed immediately after tooth extraction.',
+  },
+  {
+    tag: 'Several missing teeth',
+    title: 'Implants or an implant bridge',
+    description:
+      'Replace several missing teeth with individual implants or an implant-supported bridge. When adjacent teeth are missing, a bridge may be supported by two or more implants, depending on your clinical needs.',
+  },
+  {
+    tag: 'A full arch',
+    title: 'All-on-4 or All-on-6 Implants',
+    description:
+      'Replace most or all missing teeth in one jaw with a fixed full-arch bridge supported by four or six dental implants.',
+  },
+  {
+    tag: 'Insufficient jawbone',
+    title: 'Bone Graft or Sinus Lift',
+    description:
+      'If your jawbone lacks sufficient volume, a bone graft, sinus lift, or shorter implants may be considered. Treatment options can be discussed before your trip, subject to clinical examination.',
+  },
+];

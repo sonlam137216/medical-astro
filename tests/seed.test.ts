@@ -24,6 +24,11 @@ test('the seed loads, can be run again, and never invents prices or text section
   assert.equal(count(raw, 'services'), 5);
   assert.equal(count(raw, 'packages'), 3);
   assert.equal(count(raw, 'service_options'), 3);
+  assert.equal(count(raw, 'service_situations'), 4);
+  assert.equal(
+    count(raw, 'service_situations WHERE description IS NOT NULL OR before_image_id IS NOT NULL'),
+    0,
+  );
   assert.equal(count(raw, 'faqs'), 4);
   assert.equal(count(raw, 'pages'), BUILTIN_PAGES.length);
   // Only the Home cost table, with the design's sample figures (owner's choice).
@@ -48,6 +53,12 @@ test('a snapshot of the seed can be published to staging; production still waits
   assert.equal(isSnapshot(JSON.parse(JSON.stringify(snapshot))), true);
   assert.equal(snapshot.services?.length, 5);
   assert.equal(snapshot.packages?.[0].service, 'dental-implants');
+  const implants = snapshot.services?.find((s) => s.slug === 'dental-implants');
+  assert.equal(implants?.situationsLabel, 'Implant treatment options');
+  assert.deepEqual(
+    implants?.situations?.map((i) => i.tag),
+    ['One missing tooth', 'Several missing teeth', 'A full arch', 'Insufficient jawbone'],
+  );
   assert.equal(snapshot.faqs, undefined); // unanswered questions are not published
   assert.deepEqual(snapshotProblems(snapshot, 'staging'), []);
   const costs = snapshot.sections?.find((s) => s.key === 'home_costs');

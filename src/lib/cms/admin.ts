@@ -5,6 +5,7 @@ import { listPickerImages, type PickerImage } from '../media-picker';
 import { articleProblems, movedArticleRedirect } from './articles';
 import { menuGroupError } from '../menu';
 import { smileResultErrors } from './smile-results';
+import { situationErrors } from './service-situations';
 
 /** The group new questions are saved in (FAQs have no groups any more; older rows keep theirs, unused). */
 const FAQ_GROUP = 'services';
@@ -114,6 +115,11 @@ export async function processPost(
     if (Object.keys(errors).length > 0) return { status: 422, values, errors };
   }
 
+  if (def.key === 'service-situations') {
+    const errors = situationErrors(parsed.value);
+    if (Object.keys(errors).length > 0) return { status: 422, values, errors };
+  }
+
   if (def.key === 'navigation') {
     const groupError = menuGroupError(parsed.value);
     if (groupError) return { status: 422, values, errors: { menu_group: groupError } };
@@ -172,11 +178,11 @@ export async function processPost(
   return { redirect: redirectTo(afterSave(def, row)) };
 }
 
-/** Where a save or a delete goes: the list, or the page of the parent row for a child entity (the treatments). */
+/** Where a save or a delete goes: the list, or the list of this entity on its parent row's page (the treatments). */
 export function afterSave(def: EntityDef, row: Row | null, outcome: 'saved' | 'deleted' = 'saved') {
   const parentId = def.parent && row ? row[def.parent.field] : null;
   return typeof parentId === 'string' && UUID_RE.test(parentId)
-    ? `/admin/content/${def.parent!.entity}/${parentId}?child=${outcome}#children`
+    ? `/admin/content/${def.parent!.entity}/${parentId}?child=${outcome}#children-${def.key}`
     : `/admin/content/${def.key}?${outcome}=1`;
 }
 

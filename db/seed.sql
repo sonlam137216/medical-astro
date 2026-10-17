@@ -117,14 +117,14 @@ insert or ignore into pages (path, title) values
 
 -- The five treatments of the footer list. Only the Dental Implants description comes from the design; no price
 -- and no "what is included" lines: the clinic fills those in.
-insert or ignore into services (slug, title, summary, sort_order) values
+insert or ignore into services (slug, title, summary, sort_order, situations_label) values
   ('dental-implants', 'Dental Implants',
    'Comprehensive implant solutions, including single-tooth implants, All-on-4 and All-on-6 restorations, using premium implant systems for enhanced safety, stability and long-term function.',
-   1),
-  ('porcelain-veneers', 'Porcelain Veneers', null, 2),
-  ('dental-crowns', 'Dental Crowns', null, 3),
-  ('orthodontic-braces', 'Orthodontic Braces', null, 4),
-  ('general-dentistry', 'General Dentistry', null, 5);
+   1, 'Implant treatment options'),
+  ('porcelain-veneers', 'Porcelain Veneers', null, 2, null),
+  ('dental-crowns', 'Dental Crowns', null, 3, null),
+  ('orthodontic-braces', 'Orthodontic Braces', null, 4, null),
+  ('general-dentistry', 'General Dentistry', null, 5, null);
 
 -- The three implant options named on the Dental Implants page. No price: the cards then invite a quote request.
 -- There are no Travel Combos: nothing in the design says what a combo contains.
@@ -145,6 +145,17 @@ from services s,
    union all select 'All-on-4 restoration', 2
    union all select 'All-on-6 restoration', 3) o
 where s.slug = 'dental-implants' and not exists (select 1 from service_options);
+
+-- The "Which treatment fits your situation" cards of the Dental Implants page, as named in the design. No text and
+-- no pictures: treatment information comes from the clinic (the design's X-rays come from another clinic's site).
+insert into service_situations (service_id, tag, title, sort_order)
+select s.id, o.tag, o.title, o.sort_order
+from services s,
+  (select 'One missing tooth' as tag, 'Single Dental Implant & Crown' as title, 1 as sort_order
+   union all select 'Several missing teeth', 'Implants or an implant bridge', 2
+   union all select 'A full arch', 'All-on-4 or All-on-6 Implants', 3
+   union all select 'Insufficient jawbone', 'Bone Graft or Sinus Lift', 4) o
+where s.slug = 'dental-implants' and not exists (select 1 from service_situations);
 
 -- The cost comparison table of the Home page (also shown on every service page except Dental Implants), filled
 -- with the design's SAMPLE figures (every cell "C$1,250 | 40 clinics") so the table can be tried on local and

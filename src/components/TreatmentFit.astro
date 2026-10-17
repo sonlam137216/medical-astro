@@ -1,0 +1,397 @@
+---
+import Button from './Button.astro';
+import Icon from './Icon.astro';
+import ProfileImage from './ProfileImage.astro';
+import Section from './Section.astro';
+import SectionIntro from './SectionIntro.astro';
+import { getSection, type PublicSituation } from '../lib/content';
+
+// "Which treatment fits your situation" of the service pages (Figma "General Service Template", after the cost
+// comparison): numbered situation cards beside a before/after picture pair, then a "Not sure…?" line with the
+// consultation button. The cards are the service's (Services > a service > Treatment situations), the heading and
+// the line under the cards are shared (Page text "Service pages: which treatment fits"); a service can have its
+// own small heading. Nothing is shown without a card.
+// Figma comment: "click changes the colour". The chosen card turns blue and, when it has pictures, the pair beside
+// the cards becomes its pair (each pair is captioned with its card). The first card starts chosen, which is all a
+// visitor without JavaScript sees; the script turns each card title into a button.
+// Not in Figma (added): the caption under the pictures, the mobile layout (pictures above, cards in one column).
+
+interface Props {
+  situations: PublicSituation[];
+  /** The service's own small heading; null: the shared one. */
+  label?: string | null;
+}
+
+const { situations, label } = Astro.props;
+const heading = await getSection('service_situations');
+const pairs = situations
+  .map((situation, index) => ({ situation, index }))
+  .filter(
+    (p): p is { situation: Required<PublicSituation>; index: number } =>
+      !!p.situation.before && !!p.situation.after,
+  );
+// The pair shown first: the first card's, else the first card that has one.
+const shown = pairs.find((p) => p.index === 0)?.index ?? pairs[0]?.index;
+---
+
+{heading && situations.length > 0 && (
+  <Section labelledby="fit-title">
+    <SectionIntro label={label || heading.label} headingId="fit-title" align="center" lined>
+      <Fragment slot="title">{heading.title}</Fragment>
+    </SectionIntro>
+
+    <div class:list={['fit', pairs.length > 0 && 'fit--media']} data-fit>
+      {pairs.length > 0 && (
+        <div class="fit__media">
+          {pairs.map(({ situation, index }) => (
+            <figure
+              class="fit__pair"
+              id={`fit-pair-${index}`}
+              hidden={index !== shown}
+              data-fit-pair={index}
+            >
+              <div class="fit__shot">
+                <ProfileImage
+                  image={situation.before}
+                  slot="treatment-situation"
+                  sizes="(max-width: 900px) min(90vw, 420px), 328px"
+                />
+                <span class="fit__pill">Before</span>
+              </div>
+              <span class="fit__arrow" aria-hidden="true">
+                <Icon name="arrow-down" size={24} />
+              </span>
+              <div class="fit__shot">
+                <ProfileImage
+                  image={situation.after}
+                  slot="treatment-situation"
+                  sizes="(max-width: 900px) min(90vw, 420px), 328px"
+                />
+                <span class="fit__pill">After</span>
+              </div>
+              <figcaption class="fit__caption">{situation.title}</figcaption>
+            </figure>
+          ))}
+        </div>
+      )}
+
+      <ol class="fit__cards">
+        {situations.map((situation, index) => (
+          <li class:list={['fit__card', index === 0 && 'is-active']} data-fit-card={index}>
+            <span class="fit__num" aria-hidden="true">
+              {index + 1}
+            </span>
+            {situation.tag && <p class="fit__tag">{situation.tag}</p>}
+            <h3 class="fit__title">
+              <span data-fit-title>{situation.title}</span>
+            </h3>
+            {situation.description && <p class="fit__text">{situation.description}</p>}
+          </li>
+        ))}
+      </ol>
+    </div>
+
+    <div class="fit__ask">
+      <div class="fit__ask-text">
+        <h3>{heading.askTitle}</h3>
+        {heading.askBody && <p>{heading.askBody}</p>}
+      </div>
+      <Button href="#consultation">
+        <Icon name="calendar-time" />
+        Book free consultation
+      </Button>
+    </div>
+  </Section>
+)}
+
+<style>
+  .fit {
+    display: grid;
+    gap: 24px;
+  }
+
+  .fit--media {
+    grid-template-columns: minmax(0, 4fr) minmax(0, 6fr);
+    align-items: start;
+  }
+
+  .fit__media {
+    padding: 12px;
+    border-radius: var(--radius-card);
+    background: var(--color-soft);
+  }
+
+  .fit__pair {
+    display: grid;
+    gap: 12px;
+    margin: 0;
+    padding: 8px;
+    border-radius: var(--radius-card);
+    background: var(--color-white);
+    box-shadow: 0 4px 16px rgb(0 86 229 / 8%);
+  }
+
+  .fit__pair[hidden] {
+    display: none;
+  }
+
+  .fit__shot {
+    position: relative;
+    overflow: hidden;
+    border-radius: 12px;
+  }
+
+  .fit__shot :global(img) {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  .fit__pill {
+    position: absolute;
+    bottom: 8px;
+    left: 8px;
+    padding: 4px 18px;
+    border-radius: 999px;
+    background: var(--color-blue-deep);
+    color: var(--color-white);
+    font-family: var(--font-display);
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 18px;
+    text-transform: uppercase;
+  }
+
+  /* Over the gap between the two pictures: the row is 44px high and the margins pull the pictures back to 12px. */
+  .fit__arrow {
+    z-index: 1;
+    display: grid;
+    place-items: center;
+    justify-self: center;
+    width: 44px;
+    height: 44px;
+    margin-block: -28px;
+    border: 3px solid var(--color-white);
+    border-radius: 50%;
+    background: var(--color-blue);
+    color: var(--color-white);
+  }
+
+  .fit__caption {
+    color: var(--color-muted);
+    font-size: 13px;
+    line-height: 18px;
+    text-align: center;
+  }
+
+  .fit__cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 24px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .fit--media .fit__cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .fit__card {
+    position: relative;
+    display: grid;
+    align-content: start;
+    gap: 6px;
+    padding: 16px 18px 20px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card);
+    background: var(--color-white);
+    transition:
+      background-color 0.2s ease,
+      border-color 0.2s ease;
+  }
+
+  .fit__num {
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    margin-bottom: 2px;
+    border: 1.5px solid var(--color-blue);
+    border-radius: 50%;
+    color: var(--color-blue);
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 1;
+  }
+
+  .fit__tag {
+    margin: 0;
+    color: var(--color-blue);
+    font-family: var(--font-display);
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 20px;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+
+  .fit__title {
+    margin: 0;
+    color: var(--color-title);
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 25px;
+  }
+
+  .fit__text {
+    margin: 4px 0 0;
+    color: var(--color-muted);
+    font-size: 14px;
+    line-height: 21px;
+  }
+
+  .fit__num,
+  .fit__tag,
+  .fit__title,
+  .fit__text {
+    transition:
+      color 0.2s ease,
+      border-color 0.2s ease;
+  }
+
+  /* The chosen card. */
+  .fit__card.is-active {
+    border-color: var(--color-blue);
+    background: var(--color-blue);
+  }
+
+  .fit__card.is-active :is(.fit__num, .fit__tag, .fit__title, .fit__text) {
+    border-color: var(--color-white);
+    color: var(--color-white);
+  }
+
+  /* The button the script puts in each title: it looks like the title and covers the whole card. */
+  .fit__card :global(.fit__choose) {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .fit__card :global(.fit__choose)::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+  }
+
+  .fit__card :global(.fit__choose:focus-visible) {
+    outline: none;
+  }
+
+  .fit__card:has(:global(.fit__choose:focus-visible)) {
+    outline: 3px solid var(--color-blue-deep);
+    outline-offset: 3px;
+  }
+
+  @media (hover: hover) {
+    .fit__card:has(:global(.fit__choose)):not(.is-active):hover {
+      border-color: var(--color-blue);
+    }
+  }
+
+  .fit__ask {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px 40px;
+    margin-top: 48px;
+  }
+
+  .fit__ask-text {
+    display: grid;
+    flex: 1 1 420px;
+    gap: 8px;
+    max-width: 560px;
+  }
+
+  .fit__ask h3 {
+    margin: 0;
+    color: var(--color-title);
+    font-family: var(--font-display);
+    font-size: 26px;
+    font-weight: 700;
+    line-height: 32px;
+  }
+
+  .fit__ask p {
+    margin: 0;
+    color: var(--color-muted);
+    font-size: 16px;
+    line-height: 24px;
+  }
+
+  @media (max-width: 900px) {
+    .fit--media {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .fit__media {
+      justify-self: center;
+      width: min(100%, 444px);
+    }
+  }
+
+  @media (max-width: 560px) {
+    .fit--media .fit__cards,
+    .fit__cards {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .fit__ask h3 {
+      font-size: 22px;
+      line-height: 28px;
+    }
+  }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-fit]').forEach((root) => {
+    const cards = [...root.querySelectorAll<HTMLElement>('[data-fit-card]')];
+    const pairs = new Map(
+      [...root.querySelectorAll<HTMLElement>('[data-fit-pair]')].map((p) => [p.dataset.fitPair, p]),
+    );
+
+    // Each title becomes a button (with JavaScript only, so a visitor without it never meets a dead button).
+    const buttons = cards.map((card) => {
+      const title = card.querySelector('[data-fit-title]');
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'fit__choose';
+      button.textContent = title?.textContent ?? '';
+      button.setAttribute('aria-pressed', String(card.classList.contains('is-active')));
+      const pair = pairs.get(card.dataset.fitCard);
+      if (pair) button.setAttribute('aria-controls', pair.id);
+      title?.replaceWith(button);
+      return button;
+    });
+
+    const choose = (index: number) => {
+      cards.forEach((card, i) => {
+        card.classList.toggle('is-active', i === index);
+        buttons[i].setAttribute('aria-pressed', String(i === index));
+      });
+      // A card without pictures leaves the pair that is shown (its caption says which card it belongs to).
+      const pair = pairs.get(String(index));
+      if (pair) pairs.forEach((p) => (p.hidden = p !== pair));
+    };
+    buttons.forEach((button, i) => button.addEventListener('click', () => choose(i)));
+  });
+</script>

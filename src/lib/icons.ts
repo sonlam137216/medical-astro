@@ -2,6 +2,7 @@
 // chosen by the owner on 2026-10-16 over Phosphor. Figma has almost no icons, so where they appear
 // is our own addition. Each SVG is read as text at build time and inlined by Icon.astro: no icon font, no script,
 // and only the icons listed here end up in the HTML. To add one, import it below and add it to ICONS.
+import arrowDown from '@tabler/icons/outline/arrow-down.svg?raw';
 import arrowLeft from '@tabler/icons/outline/arrow-left.svg?raw';
 import arrowRight from '@tabler/icons/outline/arrow-right.svg?raw';
 import brandWhatsapp from '@tabler/icons/outline/brand-whatsapp.svg?raw';
@@ -47,6 +48,7 @@ import starFilled from '@tabler/icons/filled/star.svg?raw';
 import type { ChoiceIcon } from './cms/sections';
 
 const ICONS = {
+  'arrow-down': arrowDown,
   'arrow-left': arrowLeft,
   'arrow-right': arrowRight,
   'brand-whatsapp': brandWhatsapp,
