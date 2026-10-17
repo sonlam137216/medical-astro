@@ -2,6 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { BUILTIN_PAGES } from '../src/lib/cms/pages.ts';
 import {
+  CLINIC_PHOTOS,
   ICON_CHOICES,
   REQUIRED_SECTIONS,
   SECTIONS,
@@ -289,6 +290,46 @@ test('the snapshot holds the page text rows, with hidden ones and photos resolve
   const missing = sampleSections(snapshot);
   assert.ok(!missing.some((m) => m.includes('Home: treatment costs table')));
   assert.ok(missing.some((m) => m.includes('About: figures')));
+});
+
+test('the About clinic photos: six places, each one chosen on its own', async () => {
+  const fields = sectionByKey('about_inside')!.fields;
+  const photoFields = fields.filter((f) => f.type === 'image');
+  assert.deepEqual(
+    photoFields.map((f) => f.name),
+    CLINIC_PHOTOS.map(([name]) => name),
+  );
+  assert.equal(photoFields.length, 6);
+
+  const { raw, db } = setup();
+  raw.prepare("INSERT INTO pages (id, path, title) VALUES ('p1', '/about', 'About')").run();
+  raw
+    .prepare(
+      `INSERT INTO media_assets (id, r2_key, kind, mime_type, size_bytes, width, height, alt_text, variant_widths)
+       VALUES ('22222222-2222-4222-8222-222222222222', 'media/22222222-2222-4222-8222-222222222222/v1/960.webp',
+               'image', 'image/webp', 1000, 960, 640, 'Treatment room', '[960]')`,
+    )
+    .run();
+  raw
+    .prepare('INSERT INTO page_sections (page_id, type, is_visible, data) VALUES (?, ?, ?, ?)')
+    .run(
+      'p1',
+      'about_inside',
+      1,
+      JSON.stringify({
+        label: 'Our dental clinic',
+        title: 'Inside',
+        photo3: '22222222-2222-4222-8222-222222222222',
+      }),
+    );
+  const snapshot = await buildSnapshot(db);
+  const inside = snapshot.sections?.find((s) => s.key === 'about_inside');
+  // only the chosen place has a photo; the others keep the built-in ones on the page
+  assert.deepEqual(Object.keys(inside?.images ?? {}), ['photo3']);
+  assert.equal(inside?.images?.photo3.alt, 'Treatment room');
+  assert.deepEqual(snapshotProblems(snapshot), []);
+  const merged = mergeSection({ label: '', title: '', photos: ['a', 'b'] }, inside!.data, fields);
+  assert.deepEqual(merged.photos, ['a', 'b']);
 });
 
 test('text that breaks the form rules is reported before publishing', () => {

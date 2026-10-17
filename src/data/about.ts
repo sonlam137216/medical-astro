@@ -86,10 +86,14 @@ export const whyChoose = {
 export const insideClinic = {
   label: 'Our dental clinic',
   title: 'Inside Melatec Dental Clinic',
+  // One per place of the layout (CLINIC_PHOTOS in cms/sections.ts); a photo chosen in Page text replaces it.
+  // PLACEHOLDER: the design repeats each of the three photos twice.
   photos: [
     { src: clinicLobby, alt: 'Clinic lobby with seating area' },
-    { src: clinicLobby, alt: 'Clinic lobby with seating area' }, // PLACEHOLDER: repeated in the design
+    { src: clinicLobby, alt: 'Clinic lobby with seating area' },
     { src: clinicWaitingA, alt: 'Waiting lounge and reception' },
+    { src: clinicWaitingA, alt: 'Waiting lounge and reception' },
+    { src: clinicWaitingB, alt: 'Waiting lounge seating' },
     { src: clinicWaitingB, alt: 'Waiting lounge seating' },
   ] satisfies Img[],
 };

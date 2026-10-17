@@ -11,6 +11,8 @@ import InfoCard from '../components/cards/InfoCard.astro';
 import DoctorCard from '../components/cards/DoctorCard.astro';
 import CtaBand from '../components/CtaBand.astro';
 import SeamlessJourney from '../components/SeamlessJourney.astro';
+import ProfileImage from '../components/ProfileImage.astro';
+import { CLINIC_PHOTOS } from '../lib/cms/sections';
 import { heroImage } from '../data/home';
 import { getDoctors, getSection } from '../lib/content';
 
@@ -20,16 +22,19 @@ const aboutHero = (await getSection('about_hero'))!;
 const statsSection = await getSection('about_stats');
 const personalisedCare = (await getSection('about_care'))!;
 const whyChoose = (await getSection('about_why'))!;
-const insideClinic = (await getSection('about_inside'))!;
+const insideClinic = await getSection('about_inside');
 const doctors = (await getDoctors())
   .slice(0, 4)
   .map(({ name, role, image }) => ({ name, role, image }));
 
-// Figma lays the clinic photos out as two columns, the right one shifted down.
-const galleryColumns = [
-  insideClinic.photos.filter((_, i) => i % 2 === 0),
-  insideClinic.photos.filter((_, i) => i % 2 === 1),
-];
+// Figma (2026-10-17): two big photos on the left; two smaller ones over two squares on the right. Each place shows
+// the photo chosen for it in Page text, or the built-in one.
+const clinicPhotos =
+  insideClinic &&
+  CLINIC_PHOTOS.map(([name, , slot], i) => ({
+    image: insideClinic.chosenPhotos[name] ?? insideClinic.photos[i]!,
+    slot,
+  }));
 
 const seo = await getPageSeo('/about', {
   title: 'About us · Melatec Dental Clinic',
@@ -111,31 +116,39 @@ const banner = await getPageBanner('/about');
     </ul>
   </Section>
 
-  <Section labelledby="inside-title">
-    <SectionIntro label={insideClinic.label} headingId="inside-title" align="center" lined>
-      <Fragment slot="title">{insideClinic.title}</Fragment>
-    </SectionIntro>
-    <div class="photos">
-      {galleryColumns.map((column) => (
-        <ul class="photos__col">
-          {column.map((p) => (
+  {insideClinic && clinicPhotos && (
+    <Section labelledby="inside-title">
+      <SectionIntro label={insideClinic.label} headingId="inside-title" align="center" lined>
+        <Fragment slot="title">{insideClinic.title}</Fragment>
+      </SectionIntro>
+      <div class="photos">
+        <ul class="photos__big">
+          {clinicPhotos.slice(0, 2).map((p) => (
             <li>
-              <Image
+              <ProfileImage
                 class="photos__img"
-                src={p.src}
-                alt={p.alt}
-                width={512}
-                height={384}
-                densities={[1, 2]}
-                sizes="(max-width: 640px) 100vw, 512px"
-                loading="lazy"
+                image={p.image}
+                slot={p.slot}
+                sizes="(max-width: 768px) 50vw, 400px"
               />
             </li>
           ))}
         </ul>
-      ))}
-    </div>
-  </Section>
+        <ul class="photos__small">
+          {clinicPhotos.slice(2).map((p) => (
+            <li>
+              <ProfileImage
+                class="photos__img"
+                image={p.image}
+                slot={p.slot}
+                sizes="(max-width: 768px) 50vw, 320px"
+              />
+            </li>
+          ))}
+        </ul>
+      </div>
+    </Section>
+  )}
 
   <CtaBand
     bright
@@ -257,33 +270,47 @@ const banner = await getPageBanner('/about');
     list-style: none;
   }
 
+  /* Clinic photos: Figma widths 356 | 279 + 279, the right block as tall as the left one. */
   .photos {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 356fr 583fr;
     gap: 24px;
-    max-width: 800px;
-    margin-inline: auto;
   }
 
-  .photos__col {
-    display: grid;
-    align-content: start;
-    gap: 24px;
+  .photos ul {
     margin: 0;
     padding: 0;
     list-style: none;
   }
 
-  .photos__col:nth-child(even) {
-    padding-top: 48px;
+  .photos__big {
+    display: grid;
+    align-content: start;
+    gap: 20px;
+  }
+
+  .photos__small {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto 1fr;
+    gap: 24px;
+  }
+
+  .photos li {
+    min-width: 0;
+    min-height: 0;
   }
 
   .photos__img {
+    display: block;
     width: 100%;
     height: auto;
-    aspect-ratio: 4 / 3;
-    object-fit: cover;
-    border-radius: var(--radius-card);
+    border-radius: 10px;
+  }
+
+  /* The squares fill what is left under the top pair, so both sides end on the same line. */
+  .photos__small li:nth-child(n + 3) .photos__img {
+    height: 100%;
   }
 
   .doctors {
@@ -332,6 +359,27 @@ const banner = await getPageBanner('/about');
     }
   }
 
+  /* Not in Figma: tablets and phones stack the two blocks, the big photos side by side. */
+  @media (max-width: 768px) {
+    .photos {
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+
+    .photos__big {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .photos__big,
+    .photos__small {
+      gap: 16px;
+    }
+
+    .photos__small li:nth-child(n + 3) .photos__img {
+      height: auto;
+    }
+  }
+
   @media (max-width: 600px) {
     .cards,
     .doctors {
@@ -349,18 +397,6 @@ const banner = await getPageBanner('/about');
     .stats__value {
       font-size: 26px;
       line-height: 34px;
-    }
-
-    .photos {
-      gap: 16px;
-    }
-
-    .photos__col {
-      gap: 16px;
-    }
-
-    .photos__col:nth-child(even) {
-      padding-top: 24px;
     }
   }
 </style>

@@ -148,6 +148,16 @@ const image = (help: string, slot: SlotKey, name = 'image', fieldLabel = 'Photo'
   slot,
 });
 
+/** The photo fields of "About: clinic photos", in reading order of the layout (about.astro). */
+export const CLINIC_PHOTOS = [
+  ['photo1', 'Photo 1 (left, top)', 'about-clinic'],
+  ['photo2', 'Photo 2 (left, bottom)', 'about-clinic'],
+  ['photo3', 'Photo 3 (right, top left)', 'about-clinic'],
+  ['photo4', 'Photo 4 (right, top right)', 'about-clinic'],
+  ['photo5', 'Photo 5 (right, bottom left)', 'about-clinic-square'],
+  ['photo6', 'Photo 6 (right, bottom right)', 'about-clinic-square'],
+] as const satisfies readonly (readonly [string, string, SlotKey])[];
+
 const COUNTRY_ORDER = 'Vietnam, United States, Australia, United Kingdom, Canada, New Zealand';
 const costRows = (name: string, label: string) =>
   items(
@@ -427,10 +437,21 @@ export const SECTIONS: SectionDef[] = [
   {
     key: 'about_inside',
     page: '/about',
-    label: 'About: clinic photos heading',
-    where: 'The heading above the clinic photos.',
-    canHide: false,
-    fields: [label, title],
+    label: 'About: clinic photos',
+    where:
+      'The six clinic photos on the About page (“Inside Melatec Dental Clinic”): two big ones on the left, two smaller ones and two squares on the right.',
+    fields: [
+      label,
+      title,
+      ...CLINIC_PHOTOS.map(([name, fieldLabel, slot]) =>
+        image(
+          'Leave empty to keep the built-in photo in this place. Pick photos of the clinic itself (rooms, reception, equipment); people in them must have agreed to it.',
+          slot,
+          name,
+          fieldLabel,
+        ),
+      ),
+    ],
   },
   // ---- Services, doctors, packages ------------------------------------------------------------------------------
   {
