@@ -68,21 +68,19 @@ test('the service’s pictures are a pair of two, need consent, and cannot be de
   assert.equal(failure(raw, setPictures, null, null, 0, service), '');
 });
 
-test('the form says why the pictures cannot be saved', () => {
-  const pair = (before: string | null, after: string | null, consent: boolean) =>
+test('the form says why the pictures cannot be saved (no consent box: the clinic has it beforehand)', () => {
+  const pair = (before: string | null, after: string | null) =>
     Object.keys(
       situationPictureErrors({
         situations_before_image_id: before,
         situations_after_image_id: after,
-        situations_consent_confirmed: consent,
       }),
     );
-  assert.deepEqual(pair(null, null, false), []);
-  assert.deepEqual(pair(ids.a, ids.b, true), []);
-  assert.deepEqual(pair(ids.a, null, true), ['situations_after_image_id']);
-  assert.deepEqual(pair(null, ids.b, true), ['situations_before_image_id']);
-  assert.deepEqual(pair(ids.a, ids.a, true), ['situations_after_image_id']);
-  assert.deepEqual(pair(ids.a, ids.b, false), ['situations_consent_confirmed']);
+  assert.deepEqual(pair(null, null), []);
+  assert.deepEqual(pair(ids.a, ids.b), []);
+  assert.deepEqual(pair(ids.a, null), ['situations_after_image_id']);
+  assert.deepEqual(pair(null, ids.b), ['situations_before_image_id']);
+  assert.deepEqual(pair(ids.a, ids.a), ['situations_after_image_id']);
 });
 
 test('the snapshot has each service’s shown cards in order and one picture pair', async () => {

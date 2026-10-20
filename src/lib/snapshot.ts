@@ -148,8 +148,7 @@ export interface SnapshotService {
   /** The small heading above the situations; absent: the heading of Page text. */
   situationsLabel?: string;
   /**
-   * The before/after pair beside the situation cards; only when the patient's consent is confirmed and both
-   * pictures are still usable.
+   * The before/after pair beside the situation cards; only when both pictures are still usable.
    */
   situationsImages?: { before: SnapshotImage; after: SnapshotImage };
 }
@@ -185,7 +184,7 @@ export interface SnapshotSection {
   images?: Record<string, SnapshotImage>;
 }
 
-/** A before/after pair of the service pages' results slider (Smile results); only pairs with the patient's consent. */
+/** A before/after pair of the service pages' results slider (Smile results). */
 export interface SnapshotSmileResult {
   before: SnapshotImage;
   after: SnapshotImage;
@@ -528,7 +527,7 @@ export async function buildSnapshot(db: AdminDb): Promise<Snapshot> {
   const { data: services, error: servicesError } = await db
     .from('services')
     .select(
-      `id, slug, title, summary, description, seo_title, seo_description, situations_label, situations_consent_confirmed, image:media_assets!image_id(${IMAGE_COLUMNS}), banner:media_assets!banner_image_id(${IMAGE_COLUMNS}), situations_before:media_assets!situations_before_image_id(${IMAGE_COLUMNS}), situations_after:media_assets!situations_after_image_id(${IMAGE_COLUMNS})`,
+      `id, slug, title, summary, description, seo_title, seo_description, situations_label, image:media_assets!image_id(${IMAGE_COLUMNS}), banner:media_assets!banner_image_id(${IMAGE_COLUMNS}), situations_before:media_assets!situations_before_image_id(${IMAGE_COLUMNS}), situations_after:media_assets!situations_after_image_id(${IMAGE_COLUMNS})`,
     )
     .eq('is_visible', true)
     .order('sort_order', { ascending: true })
@@ -557,10 +556,9 @@ export async function buildSnapshot(db: AdminDb): Promise<Snapshot> {
       const banner = toSnapshotImage(s.banner);
       const situations = situationsOf(s.id);
       const situationsLabel = s.situations_label?.trim();
-      // The pictures only with the patient's consent (the table refuses chosen pictures without it) and only when
-      // both are still usable.
-      const before = s.situations_consent_confirmed ? toSnapshotImage(s.situations_before) : null;
-      const after = s.situations_consent_confirmed ? toSnapshotImage(s.situations_after) : null;
+      // The pictures only when both are still usable.
+      const before = toSnapshotImage(s.situations_before);
+      const after = toSnapshotImage(s.situations_after);
       return {
         slug: s.slug,
         title: s.title,
@@ -670,15 +668,13 @@ export async function buildSnapshot(db: AdminDb): Promise<Snapshot> {
   }
   if (sections.length > 0) snapshot.sections = sections;
 
-  // Before/after pairs: only shown ones whose consent is confirmed (the table refuses a shown pair without it),
-  // and only when both pictures are still usable.
+  // Before/after pairs: only shown ones, and only when both pictures are still usable.
   const { data: results, error: resultsError } = await db
     .from('smile_results')
     .select(
       `before:media_assets!before_image_id(${IMAGE_COLUMNS}), after:media_assets!after_image_id(${IMAGE_COLUMNS})`,
     )
     .eq('is_visible', true)
-    .eq('consent_confirmed', true)
     .order('sort_order', { ascending: true })
     .order('title', { ascending: true });
   if (resultsError) throw fail('smile results', resultsError);

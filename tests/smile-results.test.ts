@@ -42,35 +42,16 @@ test('a shown pair needs consent and two different pictures, and keeps its pictu
   assert.match(failure(raw, 'DELETE FROM media_assets WHERE id = ?', ids.b), /FOREIGN KEY/);
 });
 
-test('the form says why a pair cannot be shown', () => {
+test('the form says why a pair cannot be saved (no consent box: the clinic has it beforehand)', () => {
   assert.deepEqual(
-    smileResultErrors({
-      before_image_id: ids.a,
-      after_image_id: ids.b,
-      consent_confirmed: true,
-      is_visible: true,
-    }),
+    smileResultErrors({ before_image_id: ids.a, after_image_id: ids.b, is_visible: true }),
     {},
   );
   assert.deepEqual(
     Object.keys(
-      smileResultErrors({
-        before_image_id: ids.a,
-        after_image_id: ids.a,
-        consent_confirmed: false,
-        is_visible: true,
-      }),
-    ).sort(),
-    ['after_image_id', 'consent_confirmed'],
-  );
-  assert.deepEqual(
-    smileResultErrors({
-      before_image_id: ids.a,
-      after_image_id: ids.b,
-      consent_confirmed: false,
-      is_visible: false,
-    }),
-    {},
+      smileResultErrors({ before_image_id: ids.a, after_image_id: ids.a, is_visible: true }),
+    ),
+    ['after_image_id'],
   );
 });
 

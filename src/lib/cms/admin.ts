@@ -130,6 +130,10 @@ export async function processPost(
   // FAQs are one list for the whole site: the table still has a group column, which the form no longer shows.
   if (def.key === 'faqs' && id === null) row.group_key = FAQ_GROUP;
   if (typeof row.status_code === 'string') row.status_code = Number(row.status_code);
+  // Patient photos: the clinic has the patients' consent beforehand, so the forms have no consent box. The tables
+  // still require the flag (CHECK), so every save sets it.
+  if (def.key === 'smile-results') row.consent_confirmed = true;
+  if (def.key === 'services') row.situations_consent_confirmed = true;
 
   // Where a published article lived before this save: if the save moves it, the old address gets a redirect.
   const before = def.key === 'articles' && id !== null ? await loadRow(db, def, id) : null;

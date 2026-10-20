@@ -329,13 +329,6 @@ export const ENTITIES: EntityDef[] = [
         slot: 'treatment-situation',
         help: 'Same angle and framing as the before picture.',
       },
-      {
-        type: 'bool',
-        name: 'situations_consent_confirmed',
-        label:
-          'The patient agreed in writing to show the “Which treatment fits” pictures on the website',
-        default: false,
-      },
       sortOrder,
       visible,
       {
@@ -763,11 +756,10 @@ export const ENTITIES: EntityDef[] = [
     singular: 'before/after pair',
     plural: 'Smile results',
     intro:
-      'Before/after photos of real patients, shown as the “Real Stories. Real Smiles.” slider on every service page (one list for all services). Use two photos of the same patient taken from the same angle. A pair is only shown once you confirm the patient agreed in writing to publish the photos. Changes go live after you publish the website.',
+      'Before/after photos of real patients, shown as the “Real Stories. Real Smiles.” slider on every service page (one list for all services). Use two photos of the same patient taken from the same angle. Changes go live after you publish the website.',
     titleField: 'title',
     columns: [
       { field: 'title', label: 'Pair' },
-      { field: 'consent_confirmed', label: 'Consent' },
       { field: 'sort_order', label: 'Order' },
       { field: 'is_visible', label: 'Shown' },
     ],
@@ -796,12 +788,6 @@ export const ENTITIES: EntityDef[] = [
         slot: 'smile-result',
         required: true,
         help: 'Shown on the right of the slider. Same angle and framing as the before photo.',
-      },
-      {
-        type: 'bool',
-        name: 'consent_confirmed',
-        label: 'The patient agreed in writing to show these photos on the website',
-        default: false,
       },
       sortOrder,
       visible,
