@@ -122,7 +122,9 @@ export const costComparison = {
   label: 'Treatment costs',
   title: 'Exceptional dental care.\nMade more accessible.',
   subtitle: 'Compare against prices in Australia',
+  // The columns (Vietnam first) and the one selected when the page opens; the admin can change both.
   countries: ['Vietnam', 'United States', 'Australia', 'United Kingdom', 'Canada', 'New Zealand'],
+  compare: 'Australia',
   rows: [
     { name: 'Dental implants', note: 'Implant tooth replacement' },
     { name: 'All-on-4 & All-on-6', note: 'Full-arch restoration with four or six implants' },

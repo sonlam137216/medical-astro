@@ -2,8 +2,13 @@ import type { AdminDb } from './admin-auth';
 import { readColor } from './image-color.ts';
 import { toFocus } from './image-slots.ts';
 import { articleProblems, bodyImageIds, parseArticleBody } from './cms/articles.ts';
-import { itemInput, parseFields, type Field } from './cms/fields.ts';
-import { REQUIRED_SECTIONS, sectionByKey, upgradeSectionData } from './cms/sections.ts';
+import { itemInput, parseFields } from './cms/fields.ts';
+import {
+  REQUIRED_SECTIONS,
+  sectionByKey,
+  upgradeSectionData,
+  type SectionDef,
+} from './cms/sections.ts';
 import { parseVideoUrl } from './video-embed.ts';
 
 // What the public site is built from. A snapshot is a complete copy of the published content; the build
@@ -732,7 +737,10 @@ export function sampleSections(snapshot: Snapshot): string[] {
 }
 
 /** The stored data of a section back through the same rules as the admin form. */
-function sectionDataProblems(fields: readonly Field[], data: Record<string, unknown>): string[] {
+function sectionDataProblems(
+  { fields, check }: Pick<SectionDef, 'fields' | 'check'>,
+  data: Record<string, unknown>,
+): string[] {
   const form = new URLSearchParams();
   for (const f of fields) {
     const v = data[f.name];
@@ -753,7 +761,8 @@ function sectionDataProblems(fields: readonly Field[], data: Record<string, unkn
     fields.filter((f) => f.type !== 'image'),
     form,
   );
-  return parsed.ok ? [] : Object.values(parsed.errors);
+  if (!parsed.ok) return Object.values(parsed.errors);
+  return Object.values(check?.(parsed.value) ?? {});
 }
 
 /**
@@ -845,7 +854,7 @@ export function snapshotProblems(snapshot: Snapshot, target: string = 'staging')
     const def = sectionByKey(section.key);
     if (!def) continue;
     if (section.visible) {
-      for (const message of sectionDataProblems(def.fields, section.data)) {
+      for (const message of sectionDataProblems(def, section.data)) {
         problems.push(`Page text “${def.label}”: ${message}`);
       }
     }

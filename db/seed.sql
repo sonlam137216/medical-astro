@@ -160,22 +160,25 @@ where s.slug = 'dental-implants' and not exists (select 1 from service_situation
 -- The cost comparison table of the Home page (also shown on every service page except Dental Implants), filled
 -- with the design's SAMPLE figures (every cell "C$1,250 | 40 clinics") so the table can be tried on local and
 -- staging (owner's choice, 2026-10-16). These are NOT real prices: Page text > "Home: treatment costs table" must be
--- rewritten with checked prices before production. The only Page text row of the seed; an edited row is kept.
+-- rewritten with checked prices before production. Each price line names its country (the columns are the
+-- "countries" list). The only Page text row of the seed; an edited row is kept.
 insert or ignore into page_sections (page_id, type, data)
 select id, 'home_costs', json('{
   "label": "Treatment costs",
   "title": "Exceptional dental care.\nMade more accessible.",
+  "countries": ["Vietnam", "United States", "Australia", "United Kingdom", "Canada", "New Zealand"],
+  "compare": "Australia",
   "rows": [
     {
       "name": "Dental implants",
       "note": "Implant tooth replacement",
       "cells": [
-        "C$1,250 | 40 clinics",
-        "C$1,250 | 40 clinics",
-        "C$1,250 | 40 clinics",
-        "C$1,250 | 40 clinics",
-        "C$1,250 | 40 clinics",
-        "C$1,250 | 40 clinics"
+        "Vietnam: C$1,250 | 40 clinics",
+        "United States: C$1,250 | 40 clinics",
+        "Australia: C$1,250 | 40 clinics",
+        "United Kingdom: C$1,250 | 40 clinics",
+        "Canada: C$1,250 | 40 clinics",
+        "New Zealand: C$1,250 | 40 clinics"
       ],
       "saving": ""
     },
@@ -183,12 +186,12 @@ select id, 'home_costs', json('{
       "name": "All-on-4 & All-on-6",
       "note": "Full-arch restoration with four or six implants",
       "cells": [
-        "C$1,250 | 40 clinics",
-        "C$1,250 | 40 clinics",
-        "C$1,250 | 40 clinics",
-        "C$1,250 | 40 clinics",
-        "C$1,250 | 40 clinics",
-        "C$1,250 | 40 clinics"
+        "Vietnam: C$1,250 | 40 clinics",
+        "United States: C$1,250 | 40 clinics",
+        "Australia: C$1,250 | 40 clinics",
+        "United Kingdom: C$1,250 | 40 clinics",
+        "Canada: C$1,250 | 40 clinics",
+        "New Zealand: C$1,250 | 40 clinics"
       ],
       "saving": ""
     },
@@ -196,12 +199,12 @@ select id, 'home_costs', json('{
       "name": "Porcelain veneers",
       "note": "Thin porcelain shells for a natural smile",
       "cells": [
-        "C$1,250 | 40 clinics",
-        "C$1,250 | 40 clinics",
-        "C$1,250 | 40 clinics",
-        "C$1,250 | 40 clinics",
-        "C$1,250 | 40 clinics",
-        "C$1,250 | 40 clinics"
+        "Vietnam: C$1,250 | 40 clinics",
+        "United States: C$1,250 | 40 clinics",
+        "Australia: C$1,250 | 40 clinics",
+        "United Kingdom: C$1,250 | 40 clinics",
+        "Canada: C$1,250 | 40 clinics",
+        "New Zealand: C$1,250 | 40 clinics"
       ],
       "saving": ""
     },
@@ -209,12 +212,12 @@ select id, 'home_costs', json('{
       "name": "Dental crowns",
       "note": "Custom crowns for damaged or weakened teeth",
       "cells": [
-        "C$1,250 | 40 clinics",
-        "C$1,250 | 40 clinics",
-        "C$1,250 | 40 clinics",
-        "C$1,250 | 40 clinics",
-        "C$1,250 | 40 clinics",
-        "C$1,250 | 40 clinics"
+        "Vietnam: C$1,250 | 40 clinics",
+        "United States: C$1,250 | 40 clinics",
+        "Australia: C$1,250 | 40 clinics",
+        "United Kingdom: C$1,250 | 40 clinics",
+        "Canada: C$1,250 | 40 clinics",
+        "New Zealand: C$1,250 | 40 clinics"
       ],
       "saving": ""
     },
@@ -222,12 +225,12 @@ select id, 'home_costs', json('{
       "name": "Root canal treatment",
       "note": "Per tooth, crown excluded",
       "cells": [
-        "C$1,250 | 40 clinics",
-        "C$1,250 | 40 clinics",
-        "C$1,250 | 40 clinics",
-        "C$1,250 | 40 clinics",
-        "C$1,250 | 40 clinics",
-        "C$1,250 | 40 clinics"
+        "Vietnam: C$1,250 | 40 clinics",
+        "United States: C$1,250 | 40 clinics",
+        "Australia: C$1,250 | 40 clinics",
+        "United Kingdom: C$1,250 | 40 clinics",
+        "Canada: C$1,250 | 40 clinics",
+        "New Zealand: C$1,250 | 40 clinics"
       ],
       "saving": ""
     }

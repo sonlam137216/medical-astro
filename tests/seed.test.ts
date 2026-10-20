@@ -65,6 +65,10 @@ test('a snapshot of the seed can be published to staging; production still waits
   assert.equal(costs?.visible, true);
   assert.equal((costs?.data.rows as { cells: string[] }[]).length, 5);
   assert.ok((costs?.data.rows as { cells: string[] }[]).every((r) => r.cells.length === 6));
+  assert.equal((costs?.data.countries as string[]).length, 6);
+  assert.ok(
+    (costs?.data.rows as { cells: string[] }[]).every((r) => r.cells[2].startsWith('Australia: ')),
+  );
   const production = snapshotProblems(snapshot, 'production');
   assert.ok(production.length > 0);
   assert.ok(

@@ -4,6 +4,7 @@ import SectionIntro from '../SectionIntro.astro';
 import { costComparison as c } from '../../data/home';
 import { getSection } from '../../lib/content';
 import type { CostRow } from '../../data/sections';
+import { cellFor, sameCountry } from '../../lib/cms/cost-table';
 
 // Shared by Home, the service pages (both with home_costs) and the Dental Implants page: the same table with the rows, title and figures of each page's
 // "Page text" section. Before the section is edited the rows show the design's placeholder figures.
@@ -16,14 +17,19 @@ const { sectionKey, align = 'start' } = Astro.props;
 type Row = CostRow;
 const data = await getSection(sectionKey);
 
-// Vietnam is always shown first; the visitor picks which other country to compare against.
-const [home, ...others] = c.countries;
-const defaultCountry = others.includes('Australia') ? 'Australia' : others[0];
+// The columns are the section's countries (Page text). The first (Vietnam) is always highlighted; the visitor
+// picks which other country to compare against, starting with the section's choice or else the second column.
+const countries = data?.countries?.length ? data.countries : c.countries;
+const home = countries[0];
+const defaultIndex = Math.max(
+  1,
+  countries.findIndex((country, i) => i > 0 && sameCountry(country, data?.compare ?? '')),
+);
 
-// "A$1,250 | 40 clinics" -> two lines. Empty: a dash. Built-in rows: the design's placeholder figures.
-const cellLines = (row: Row, i: number): string[] => {
+// "Australia: A$1,250 | 40 clinics" -> two lines. No price: a dash. Built-in rows: the design's placeholder figures.
+const cellLines = (row: Row, country: string): string[] => {
   if (!data?.edited) return [c.cell.price, c.cell.clinics];
-  const value = (row.cells?.[i] ?? '').trim();
+  const value = cellFor(row.cells, country);
   return value ? value.split(/\s*\|\s*/) : ['—'];
 };
 const saving = (row: Row) => (data?.edited ? row.saving || '—' : c.saving);
@@ -45,29 +51,32 @@ const methodParagraphs = (data?.methodology ?? '')
         Compare against prices in
       </label>
       <select class="compare__select" id="compare-country" data-compare-select>
-        {others.map((country) => (
-          <option value={country} selected={country === defaultCountry}>
-            {country}
-          </option>
-        ))}
+        {countries.map(
+          (country, i) =>
+            i > 0 && (
+              <option value={i} selected={i === defaultIndex}>
+                {country}
+              </option>
+            ),
+        )}
       </select>
     </div>
 
     <div class="scroller" tabindex="0" role="region" aria-label="Treatment cost comparison">
-      <table class="table" data-compare-table>
+      <table class="table" data-compare-table style={`--countries: ${countries.length}`}>
         <caption class="visually-hidden">
-          Treatment prices in{home}compared with the selected country
+          Treatment prices in {home} compared with the selected country
         </caption>
         <thead>
           <tr>
             <th scope="col">Treatment</th>
-            {c.countries.map((country, i) => (
+            {countries.map((country, i) => (
               <th
                 scope="col"
-                data-country={country}
+                data-country={i}
                 class:list={{
                   'is-home': i === 0,
-                  'is-selected': country === defaultCountry,
+                  'is-selected': i === defaultIndex,
                 }}
               >
                 {country}
@@ -83,15 +92,15 @@ const methodParagraphs = (data?.methodology ?? '')
                 <span class="row__name">{row.name}</span>
                 <span class="row__note">{row.note}</span>
               </th>
-              {c.countries.map((country, i) => (
+              {countries.map((country, i) => (
                 <td
-                  data-country={country}
+                  data-country={i}
                   class:list={{
                     'is-home': i === 0,
-                    'is-selected': country === defaultCountry,
+                    'is-selected': i === defaultIndex,
                   }}
                 >
-                  {cellLines(row, i).map((line, n) => (
+                  {cellLines(row, country).map((line, n) => (
                     <>
                       {n > 0 && <br />}
                       {line}
@@ -118,7 +127,7 @@ const methodParagraphs = (data?.methodology ?? '')
 )}
 
 <script>
-  // Highlights the column of the chosen country. The table already renders every country, so
+  // Highlights the column of the chosen country (cells and options carry the column number). The table already renders every country, so
   // without JavaScript the default country stays highlighted and nothing is lost.
   document.querySelectorAll<HTMLElement>('[data-compare]').forEach((box) => {
     const select = box.querySelector('select');
@@ -180,9 +189,10 @@ const methodParagraphs = (data?.methodology ?? '')
     border-radius: var(--radius-card);
   }
 
+  /* Room for the treatment column plus about 106 px per country and the saving column (960 px with six). */
   .table {
     width: 100%;
-    min-width: 960px;
+    min-width: calc(220px + (var(--countries, 6) + 1) * 106px);
     border-collapse: collapse;
     table-layout: fixed;
     font-size: var(--text-small);
@@ -248,7 +258,7 @@ const methodParagraphs = (data?.methodology ?? '')
   /* Phones: keep the treatment names in view while the country columns scroll under them */
   @media (max-width: 768px) {
     .table {
-      min-width: 720px;
+      min-width: calc(140px + (var(--countries, 6) + 1) * 83px);
     }
 
     thead th:first-child,

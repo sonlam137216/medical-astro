@@ -110,6 +110,8 @@ export async function processSectionPost(
 
   const parsed = parseFields(def.fields, form);
   if (!parsed.ok) return { status: 422, values, errors: parsed.errors };
+  const crossErrors = def.check?.(parsed.value) ?? {};
+  if (Object.keys(crossErrors).length > 0) return { status: 422, values, errors: crossErrors };
 
   // A photo must be one of the active images of the library (a hand-made request could send any id).
   for (const f of def.fields) {

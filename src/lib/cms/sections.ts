@@ -1,5 +1,12 @@
 import type { SlotKey } from '../image-slots';
-import type { Field, ItemColumn } from './fields';
+import type { Field, FieldErrors, ItemColumn, Row } from './fields';
+import {
+  COMPARE_FIELD,
+  COUNTRIES_FIELD,
+  MAX_COUNTRIES,
+  costTableErrors,
+  upgradeCostTable,
+} from './cost-table.ts';
 
 // The text of the page sections that the admin can edit ("Page text"). Each section is one row of `page_sections`
 // (type = the key below), with its content in the `data` column. The code owns the layout and the built-in
@@ -18,6 +25,8 @@ export interface SectionDef {
   fields: Field[];
   /** False for a heading that has no content of its own to switch off. Defaults to true. */
   canHide?: boolean;
+  /** Rules that need more than one field, run after each field's own rules (on Save and on Publish). */
+  check?: (value: Row) => FieldErrors;
 }
 
 export const SECTION_DATA_VERSION = 1;
@@ -158,7 +167,19 @@ export const CLINIC_PHOTOS = [
   ['photo6', 'Photo 6 (right, bottom right)', 'about-clinic-square'],
 ] as const satisfies readonly (readonly [string, string, SlotKey])[];
 
-const COUNTRY_ORDER = 'Vietnam, United States, Australia, United Kingdom, Canada, New Zealand';
+const countries: Field = {
+  ...lines(
+    COUNTRIES_FIELD,
+    'Countries (table columns)',
+    MAX_COUNTRIES,
+    40,
+    'One country per line, in the order of the columns. The first is Vietnam (Melatec’s prices, in blue); the visitor compares it with one of the others. Removing a country also means removing its price line from each treatment.',
+  ),
+  required: true,
+};
+const compare = text(COMPARE_FIELD, 'Country compared when the page opens', 40, {
+  help: 'One of the countries above, other than the first. Leave empty to use the second one.',
+});
 const costRows = (name: string, label: string) =>
   items(
     name,
@@ -172,9 +193,9 @@ const costRows = (name: string, label: string) =>
         'cells',
         'Prices by country',
         'lines',
-        80,
+        120,
         false,
-        `One line per country, in this order: ${COUNTRY_ORDER}. Write the price, then “ | ” and the number of clinics, for example “A$1,250 | 40 clinics”. Only enter figures the clinic can back up. An empty line shows “—”.`,
+        'One line per country: the country as written in the Countries list, a colon, the price, then “ | ” and the number of clinics, for example “Australia: A$1,250 | 40 clinics”. Only enter figures the clinic can back up. A country with no line shows “—”.',
       ),
       col(
         'saving',
@@ -186,7 +207,7 @@ const costRows = (name: string, label: string) =>
       ),
     ],
     {
-      help: 'Only use real, checked prices. The country columns are fixed; the visitor chooses which country to compare with Vietnam.',
+      help: 'Only use real, checked prices. The visitor chooses which country to compare with the first one.',
     },
   );
 const methodology = area('methodology', 'How these figures are worked out', 1500, {
@@ -236,7 +257,8 @@ export const SECTIONS: SectionDef[] = [
     label: 'Home: treatment costs table',
     where:
       'The price comparison table on the Home page. The same table shows on every service page (Services > a service), except Dental Implants, which has its own.',
-    fields: [label, titleLines, costRows('rows', 'Treatments'), methodology],
+    fields: [label, titleLines, countries, compare, costRows('rows', 'Treatments'), methodology],
+    check: costTableErrors,
   },
   {
     key: 'home_conversations',
@@ -583,7 +605,8 @@ export const SECTIONS: SectionDef[] = [
     page: '/services/dental-implants',
     label: 'Dental Implants: cost comparison',
     where: 'The price table on the Dental Implants page.',
-    fields: [label, title, costRows('rows', 'Treatments'), methodology],
+    fields: [label, title, countries, compare, costRows('rows', 'Treatments'), methodology],
+    check: costTableErrors,
   },
   {
     key: 'implants_why',
@@ -664,14 +687,15 @@ function fillMissingWords(fields: Field[], data: Obj): Obj {
 
 /**
  * Brings a saved row up to the current fields: a card list that was saved as plain lines (the banner highlights,
- * before they had icons) becomes cards whose first column holds each line. Used wherever a saved row is read: the
+ * before they had icons) becomes cards whose first column holds each line; a cost table saved before its countries
+ * could be edited gets the old columns (upgradeCostTable). Used wherever a saved row is read: the
  * admin form, the snapshot, and the pages built from older revisions.
  */
 export function upgradeSectionData(fields: readonly Field[], data: Obj): Obj {
-  let out = data;
+  let out = fields.some((f) => f.name === COUNTRIES_FIELD) ? upgradeCostTable(data) : data;
   for (const f of fields) {
     if (f.type !== 'items') continue;
-    const v = data[f.name];
+    const v = out[f.name];
     const first = f.columns[0]?.name;
     if (!first || !Array.isArray(v) || !v.some((item) => typeof item === 'string')) continue;
     out = {

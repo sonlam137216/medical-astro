@@ -45,6 +45,7 @@ import {
 export interface CostRow {
   name: string;
   note: string;
+  /** One line per country, "Australia: A$1,250 | 40 clinics" (see src/lib/cms/cost-table.ts). */
   cells?: string[];
   saving?: string;
 }
@@ -56,6 +57,8 @@ export const SECTION_SAMPLES = {
   home_costs: {
     label: costComparison.label,
     title: costComparison.title,
+    countries: costComparison.countries,
+    compare: costComparison.compare,
     rows: costComparison.rows as CostRow[],
     methodology: '',
   },
@@ -87,6 +90,8 @@ export const SECTION_SAMPLES = {
   implants_comparison: {
     label: implantsComparison.label,
     title: implantsComparison.title,
+    countries: costComparison.countries,
+    compare: costComparison.compare,
     rows: implantsComparison.rows as CostRow[],
     methodology: '',
   },
