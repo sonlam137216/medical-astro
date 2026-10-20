@@ -378,7 +378,7 @@ export const SECTIONS: SectionDef[] = [
     page: '/',
     label: 'Home: smile transformation',
     where:
-      'The heading above the before/after slides. The slides (story and photos) are in Smile stories; until one is published the block shows the built-in sample story.',
+      'The heading above the before/after slides. The slides (story and photos) are in “Home: smile stories”; until one is published the block shows the built-in sample story.',
     fields: [label, title],
   },
   {
@@ -516,7 +516,7 @@ export const SECTIONS: SectionDef[] = [
     page: '/services',
     label: 'Service pages: results heading',
     where:
-      'The heading above the before/after slider on every service page, Dental Implants included (the pictures are in Smile results). Without any picture pair the block is not shown.',
+      'The heading above the before/after slider on every service page, Dental Implants included (the pictures are in “Service pages: smile results”). Without any picture pair the block is not shown.',
     fields: [label, title],
   },
   {

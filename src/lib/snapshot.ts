@@ -925,7 +925,7 @@ export function snapshotProblems(snapshot: Snapshot, target: string = 'staging')
     ] as const) {
       if (!image.decorative && !image.alt) {
         problems.push(
-          `Smile results, pair ${i + 1}: the ${side} photo has no description. Add one in Media.`,
+          `Service pages: smile results, pair ${i + 1}: the ${side} photo has no description. Add one in Media.`,
         );
       }
     }
@@ -937,12 +937,12 @@ export function snapshotProblems(snapshot: Snapshot, target: string = 'staging')
     ] as const) {
       if (!image.decorative && !image.alt) {
         problems.push(
-          `Smile stories, slide ${i + 1}: the ${side} photo has no description. Add one in Media.`,
+          `Home: smile stories, slide ${i + 1}: the ${side} photo has no description. Add one in Media.`,
         );
       }
     }
     if (bodyImageIds(parseArticleBody(story.body)).length > 0) {
-      problems.push(`Smile stories, slide ${i + 1}: ${STORY_PICTURE_ERROR}`);
+      problems.push(`Home: smile stories, slide ${i + 1}: ${STORY_PICTURE_ERROR}`);
     }
   });
   for (const l of snapshot.legalPages ?? []) {

@@ -755,9 +755,10 @@ export const ENTITIES: EntityDef[] = [
     key: 'smile-results',
     table: 'smile_results',
     singular: 'before/after pair',
-    plural: 'Smile results',
+    // The page first, so the two before/after lists are told apart in the menu.
+    plural: 'Service pages: smile results',
     intro:
-      'Before/after photos of real patients, shown as the “Real Stories. Real Smiles.” slider on every service page (one list for all services). Use two photos of the same patient taken from the same angle. Changes go live after you publish the website.',
+      'Before/after photos of real patients, shown as the “Real Stories. Real Smiles.” slider on every service page (one list for all services). Use two photos of the same patient taken from the same angle. The slides with text on the Home page are a separate list (“Home: smile stories”). Changes go live after you publish the website.',
     titleField: 'title',
     columns: [
       { field: 'title', label: 'Pair' },
@@ -800,9 +801,9 @@ export const ENTITIES: EntityDef[] = [
     key: 'smile-stories',
     table: 'smile_stories',
     singular: 'smile story',
-    plural: 'Smile stories',
+    plural: 'Home: smile stories',
     intro:
-      'The slides of the “Smile transformations” block on the Home page: each slide is a short story beside a before/after slider of the same patient. The heading above the slides is in Page text (“Home: smile transformation”). Changes go live after you publish the website.',
+      'The slides of the “Smile transformations” block on the Home page: each slide is a short story beside a before/after slider of the same patient. The heading above the slides is in Page text (“Home: smile transformation”). The before/after cards of the service pages are a separate list (“Service pages: smile results”). Changes go live after you publish the website.',
     titleField: 'title',
     columns: [
       { field: 'title', label: 'Story' },

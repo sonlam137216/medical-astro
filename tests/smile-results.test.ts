@@ -84,7 +84,7 @@ test('no pair, no smileResults; a picture without a description blocks the publi
 
   raw.prepare(insertPair).run('Pair', ids.a, ids.d, 1, 0, 1);
   assert.deepEqual(snapshotProblems(await buildSnapshot(db)), [
-    'Smile results, pair 1: the after photo has no description. Add one in Media.',
+    'Service pages: smile results, pair 1: the after photo has no description. Add one in Media.',
   ]);
 });
 

@@ -103,7 +103,7 @@ test('no story, no smileStories; a picture without a description blocks the publ
 
   raw.prepare(insertStory).run('Story', 'Text', ids.a, ids.d, 0, 1);
   assert.deepEqual(snapshotProblems(await buildSnapshot(db)), [
-    'Smile stories, slide 1: the after photo has no description. Add one in Media.',
+    'Home: smile stories, slide 1: the after photo has no description. Add one in Media.',
   ]);
 });
 
