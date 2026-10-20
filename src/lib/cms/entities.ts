@@ -1,6 +1,7 @@
 import type { Field } from './fields';
 import { ARTICLE_KINDS, MAX_ARTICLE_BODY } from './articles';
 import { MENU_GROUP_MAX } from '../menu';
+import { MAX_SMILE_STORY } from './smile-stories';
 
 // Every kind of content the admin can edit with the generic list / add / edit pages, described as data.
 // Adding a module = adding an entry here (plus its part of the snapshot and its public pages).
@@ -786,6 +787,61 @@ export const ENTITIES: EntityDef[] = [
         name: 'after_image_id',
         label: 'After photo',
         slot: 'smile-result',
+        required: true,
+        help: 'Shown on the right of the slider. Same angle and framing as the before photo.',
+      },
+      sortOrder,
+      visible,
+    ],
+    order: [{ column: 'sort_order' }, { column: 'title' }],
+    deletable: true,
+  },
+  {
+    key: 'smile-stories',
+    table: 'smile_stories',
+    singular: 'smile story',
+    plural: 'Smile stories',
+    intro:
+      'The slides of the “Smile transformations” block on the Home page: each slide is a short story beside a before/after slider of the same patient. The heading above the slides is in Page text (“Home: smile transformation”). Changes go live after you publish the website.',
+    titleField: 'title',
+    columns: [
+      { field: 'title', label: 'Story' },
+      { field: 'sort_order', label: 'Order' },
+      { field: 'is_visible', label: 'Shown' },
+    ],
+    fields: [
+      {
+        type: 'text',
+        name: 'title',
+        label: 'Name (for the admin)',
+        max: 160,
+        required: true,
+        placeholder: 'Veneers, 20 restorations (2026)',
+        help: 'Only shown here, never on the website.',
+      },
+      {
+        type: 'textarea',
+        name: 'body',
+        label: 'Story',
+        max: MAX_SMILE_STORY,
+        rows: 12,
+        required: true,
+        editor: 'text',
+        help: 'Shown beside the photos. Use the buttons above the text, or type: “### Heading” a small heading (for example “Treatment Details”), “- item” a bullet, “1. item” a numbered point, “**bold**” bold text and “[words](https://…)” a link. A blank line starts a new paragraph. Keep it short so it fits beside the photos.',
+      },
+      {
+        type: 'image',
+        name: 'before_image_id',
+        label: 'Before photo',
+        slot: 'home-smile',
+        required: true,
+        help: 'Shown on the left of the slider. Use two photos of the same patient taken from the same angle.',
+      },
+      {
+        type: 'image',
+        name: 'after_image_id',
+        label: 'After photo',
+        slot: 'home-smile',
         required: true,
         help: 'Shown on the right of the slider. Same angle and framing as the before photo.',
       },

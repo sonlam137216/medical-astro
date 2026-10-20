@@ -1,0 +1,23 @@
+---
+import type { Inline } from '../../lib/cms/articles';
+
+// One run of formatted text (article format): links, bold words and plain words. The links were vetted by the
+// parser (safe targets only); a link to another site opens without passing on this page.
+interface Props {
+  parts: Inline[];
+}
+const { parts } = Astro.props;
+const external = (href: string) => /^https?:\/\//i.test(href);
+---
+
+{parts.map((p) =>
+  p.href ? (
+    <a href={p.href} rel={external(p.href) ? 'noopener noreferrer' : undefined}>
+      {p.text}
+    </a>
+  ) : p.bold ? (
+    <strong>{p.text}</strong>
+  ) : (
+    p.text
+  ),
+)}

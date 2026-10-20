@@ -264,21 +264,29 @@ export const howItWorks = {
 // PLACEHOLDER: the two pictures are drawn illustrations (not a real patient) standing in until the clinic chooses
 // a before/after pair in the admin (Page text > Home: smile transformation). Real patient photos need the
 // patient's written consent and usage rights before they go public.
+// The heading is Page text ("Home: smile transformation"); the slides are Smile stories. Before any story is
+// published the block shows this one sample slide: the design's text with two drawn (not real) pictures.
 export const smileStories = {
   label: 'Smile transformations',
   title: 'Real Stories. Real Smiles.',
-  summary:
-    'The patient had multiple spaces between the teeth, including several areas with more noticeable gaps. The teeth were also discolored, with uneven coloration that affected the overall harmony of the smile',
-  detailsTitle: 'Treatment Details',
-  details: ['Smile design planning with digital preview', '20 DIDIBIO porcelain restorations'],
-  before: {
-    src: smileBefore,
-    alt: 'Illustration of uneven, discoloured teeth before treatment (placeholder)',
-  } satisfies Img,
-  after: {
-    src: smileAfter,
-    alt: 'Illustration of even, white teeth after treatment (placeholder)',
-  } satisfies Img,
+  sample: {
+    // Same format as a Smile story (src/lib/cms/articles.ts).
+    body: [
+      'The patient had multiple spaces between the teeth, including several areas with more noticeable gaps. The teeth were also discolored, with uneven coloration that affected the overall harmony of the smile',
+      '',
+      '### Treatment Details',
+      '- Smile design planning with digital preview',
+      '- 20 DIDIBIO porcelain restorations',
+    ].join('\n'),
+    before: {
+      src: smileBefore,
+      alt: 'Illustration of uneven, discoloured teeth before treatment (placeholder)',
+    } satisfies Img,
+    after: {
+      src: smileAfter,
+      alt: 'Illustration of even, white teeth after treatment (placeholder)',
+    } satisfies Img,
+  },
 };
 
 // PLACEHOLDER: the design repeats one sample article four times. Shown only before the first publish; after

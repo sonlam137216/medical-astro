@@ -496,6 +496,27 @@ export async function getSmileResults(): Promise<PublicSmileResult[]> {
   });
 }
 
+export interface PublicSmileStory {
+  /** Text in the format of src/lib/cms/articles.ts; render it with parseArticleBody. */
+  body: string;
+  before: PublicImage;
+  after: PublicImage;
+}
+
+/**
+ * The slides of the Home page's "Smile transformations" block (Smile stories), or null before any is published:
+ * the block then shows its sample story (built-in text) or nothing (the heading was edited, so it is live).
+ */
+export async function getSmileStories(): Promise<PublicSmileStory[] | null> {
+  const stories = (await loadSnapshot())?.smileStories;
+  if (!stories) return null;
+  return stories.flatMap((s) => {
+    const before = toPublicImageOrUndefined(s.before);
+    const after = toPublicImageOrUndefined(s.after);
+    return before && after ? [{ body: s.body, before, after }] : [];
+  });
+}
+
 export interface PublicLegalPage {
   slug: string;
   title: string;

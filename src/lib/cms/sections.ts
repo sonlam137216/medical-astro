@@ -378,26 +378,8 @@ export const SECTIONS: SectionDef[] = [
     page: '/',
     label: 'Home: smile transformation',
     where:
-      'The before/after story with a slider the visitor drags to compare the two photos. It shows a real patient: only publish it with their written consent.',
-    fields: [
-      label,
-      title,
-      area('summary', 'Story', 700, { required: true }),
-      text('detailsTitle', 'Details heading', 80),
-      lines('details', 'Treatment details', 6, 160, 'One item per line.'),
-      image(
-        'The “before” picture, the one shown on the left of the slider. Both pictures need to be chosen for the slider to appear; use two photos of the same patient taken from the same angle, and only photos the patient agreed in writing to share.',
-        'home-smile',
-        'before',
-        'Before photo',
-      ),
-      image(
-        'The “after” picture, shown on the right of the slider. Same angle and framing as the before photo.',
-        'home-smile',
-        'after',
-        'After photo',
-      ),
-    ],
+      'The heading above the before/after slides. The slides (story and photos) are in Smile stories; until one is published the block shows the built-in sample story.',
+    fields: [label, title],
   },
   {
     key: 'home_travel',

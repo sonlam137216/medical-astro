@@ -11,6 +11,7 @@ import {
   type SectionDef,
 } from './cms/sections.ts';
 import { parseVideoUrl } from './video-embed.ts';
+import { STORY_PICTURE_ERROR } from './cms/smile-stories.ts';
 
 // What the public site is built from. A snapshot is a complete copy of the published content; the build
 // reads one snapshot (never the working-copy tables), so a half-edited draft cannot leak into a build.
@@ -196,6 +197,14 @@ export interface SnapshotSmileResult {
   after: SnapshotImage;
 }
 
+/** A slide of the Home page's "Smile transformations" block (Smile stories). */
+export interface SnapshotSmileStory {
+  /** Text in the format of src/lib/cms/articles.ts (no pictures). */
+  body: string;
+  before: SnapshotImage;
+  after: SnapshotImage;
+}
+
 export interface SnapshotLocation {
   slug: string;
   name: string;
@@ -253,6 +262,7 @@ export interface Snapshot {
   articleCategories?: SnapshotArticleCategory[];
   articles?: SnapshotArticle[];
   smileResults?: SnapshotSmileResult[];
+  smileStories?: SnapshotSmileStory[];
 }
 
 /** Sections the website cannot go live without: the sample versions are placeholders from the design. */
@@ -692,6 +702,24 @@ export async function buildSnapshot(db: AdminDb): Promise<Snapshot> {
   }
   if (pairs.length > 0) snapshot.smileResults = pairs;
 
+  // Home slides: only shown ones, and only when both pictures are still usable. The admin name stays out.
+  const { data: storyRows, error: storiesError } = await db
+    .from('smile_stories')
+    .select(
+      `body, before:media_assets!before_image_id(${IMAGE_COLUMNS}), after:media_assets!after_image_id(${IMAGE_COLUMNS})`,
+    )
+    .eq('is_visible', true)
+    .order('sort_order', { ascending: true })
+    .order('title', { ascending: true });
+  if (storiesError) throw fail('smile stories', storiesError);
+  const stories: SnapshotSmileStory[] = [];
+  for (const r of storyRows) {
+    const before = toSnapshotImage(r.before);
+    const after = toSnapshotImage(r.after);
+    if (before && after) stories.push({ body: r.body, before, after });
+  }
+  if (stories.length > 0) snapshot.smileStories = stories;
+
   const { data: locations, error: locationsError } = await db
     .from('locations')
     .select(`slug, name, address_line, directions_url, image:media_assets(${IMAGE_COLUMNS})`)
@@ -731,6 +759,8 @@ export function sampleSections(snapshot: Snapshot): string[] {
     (s) => s.label,
   );
   const have = new Set((snapshot.sections ?? []).map((s) => s.key));
+  // The Home smile block shows the published slides instead of its sample story once there are any.
+  if (snapshot.smileStories?.length) have.add('home_smile');
   for (const key of REQUIRED_SECTIONS) {
     if (!have.has(key)) missing.push(`Page text: ${sectionByKey(key)?.label ?? key}`);
   }
@@ -900,6 +930,21 @@ export function snapshotProblems(snapshot: Snapshot, target: string = 'staging')
       }
     }
   });
+  (snapshot.smileStories ?? []).forEach((story, i) => {
+    for (const [side, image] of [
+      ['before', story.before],
+      ['after', story.after],
+    ] as const) {
+      if (!image.decorative && !image.alt) {
+        problems.push(
+          `Smile stories, slide ${i + 1}: the ${side} photo has no description. Add one in Media.`,
+        );
+      }
+    }
+    if (bodyImageIds(parseArticleBody(story.body)).length > 0) {
+      problems.push(`Smile stories, slide ${i + 1}: ${STORY_PICTURE_ERROR}`);
+    }
+  });
   for (const l of snapshot.legalPages ?? []) {
     if (bodyImageIds(parseArticleBody(l.body)).length > 0) {
       problems.push(
@@ -954,6 +999,7 @@ export function isSnapshot(value: unknown): value is Snapshot {
       'articleCategories',
       'articles',
       'smileResults',
+      'smileStories',
     ].every((k) => arrayOrMissing(value[k]))
   )
     return false;
@@ -1097,6 +1143,13 @@ export function isSnapshot(value: unknown): value is Snapshot {
   const isImage = (i: unknown) => isObject(i) && typeof i.key === 'string';
   const pairs = (value.smileResults ?? []) as unknown[];
   if (!pairs.every((p) => isObject(p) && isImage(p.before) && isImage(p.after))) return false;
+  const stories = (value.smileStories ?? []) as unknown[];
+  if (
+    !stories.every(
+      (p) => isObject(p) && typeof p.body === 'string' && isImage(p.before) && isImage(p.after),
+    )
+  )
+    return false;
 
   const doctors = (value.doctors ?? []) as unknown[];
   return doctors.every(

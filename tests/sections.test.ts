@@ -260,16 +260,9 @@ test('the snapshot holds the page text rows, with hidden ones and photos resolve
   );
   insert.run(
     'p1',
-    'home_smile',
+    'home_conversations',
     1,
-    JSON.stringify({
-      label: 'L',
-      title: 'T',
-      summary: 'S',
-      detailsTitle: 'D',
-      details: ['x'],
-      before: '11111111-1111-4111-8111-111111111111',
-    }),
+    JSON.stringify({ label: 'L', title: 'T', image: '11111111-1111-4111-8111-111111111111' }),
   );
   insert.run('p1', 'home_costs', 0, '{}');
   insert.run('p1', 'no_such_section', 1, '{}');
@@ -278,13 +271,13 @@ test('the snapshot holds the page text rows, with hidden ones and photos resolve
   assert.deepEqual(
     snapshot.sections?.map((s) => [s.key, s.visible]),
     [
+      ['home_conversations', true],
       ['home_costs', false],
-      ['home_smile', true],
     ],
   );
-  const smile = snapshot.sections?.find((s) => s.key === 'home_smile');
-  assert.equal(smile?.images?.before.alt, 'A smile');
-  assert.equal('before' in (smile?.data ?? {}), false);
+  const conversations = snapshot.sections?.find((s) => s.key === 'home_conversations');
+  assert.equal(conversations?.images?.image.alt, 'A smile');
+  assert.equal('image' in (conversations?.data ?? {}), false);
   assert.equal(isSnapshot(JSON.parse(JSON.stringify(snapshot))), true);
   assert.deepEqual(snapshotProblems(snapshot), []);
   // a hidden required section counts as decided; the others are still missing for production

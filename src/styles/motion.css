@@ -237,8 +237,7 @@
       .why__item,
       .split__text,
       .split__img,
-      .story__text,
-      .story__img,
+      .stories,
       .compare,
       .scroller,
       .method,
@@ -299,11 +298,11 @@
 
     /* Eyebrow rules grow out from the text while their block reveals (not the hero eyebrow, which is on the
        first screen). Each block is a named timeline so the rules move in step with the block's fade. */
-    :is(.intro, .why__intro, .split__text, .story__text) {
+    :is(.intro, .why__intro, .split__text) {
       view-timeline: --blk block;
     }
 
-    :is(.intro, .why__intro, .split__text, .story__text) .t-label.is-lined {
+    :is(.intro, .why__intro, .split__text) .t-label.is-lined {
       &::before,
       &::after {
         animation: grow-x linear both;

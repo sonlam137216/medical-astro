@@ -5,6 +5,7 @@ import { listPickerImages, type PickerImage } from '../media-picker';
 import { articleProblems, movedArticleRedirect } from './articles';
 import { menuGroupError } from '../menu';
 import { smileResultErrors } from './smile-results';
+import { smileStoryErrors } from './smile-stories';
 import { situationPictureErrors } from './service-situations';
 
 /** The group new questions are saved in (FAQs have no groups any more; older rows keep theirs, unused). */
@@ -112,6 +113,11 @@ export async function processPost(
 
   if (def.key === 'smile-results') {
     const errors = smileResultErrors(parsed.value);
+    if (Object.keys(errors).length > 0) return { status: 422, values, errors };
+  }
+
+  if (def.key === 'smile-stories') {
+    const errors = smileStoryErrors(parsed.value);
     if (Object.keys(errors).length > 0) return { status: 422, values, errors };
   }
 

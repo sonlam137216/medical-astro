@@ -1,0 +1,92 @@
+---
+import InlineText from '../articles/InlineText.astro';
+import type { Block } from '../../lib/cms/articles';
+
+// The formatted text of a Smile story (the article format of src/lib/cms/articles.ts, without pictures): paragraphs,
+// small headings such as "Treatment Details", lists, quotes, bold words and links. The parser returns data, never
+// HTML, so every word goes through Astro's escaping. Headings are h3 under the block's h2, whatever their level.
+interface Props {
+  blocks: Block[];
+}
+const { blocks } = Astro.props;
+---
+
+<div class="story-text">
+  {blocks.map((b) => {
+    if (b.type === 'heading') return <h3>{b.text}</h3>;
+    if (b.type === 'paragraph')
+      return (
+        <p>
+          <InlineText parts={b.children} />
+        </p>
+      );
+    if (b.type === 'quote')
+      return (
+        <blockquote>
+          <InlineText parts={b.children} />
+        </blockquote>
+      );
+    if (b.type === 'list') {
+      const Tag = b.ordered ? 'ol' : 'ul';
+      return (
+        <Tag>
+          {b.items.map((item) => (
+            <li>
+              <InlineText parts={item} />
+            </li>
+          ))}
+        </Tag>
+      );
+    }
+    return null; // pictures are not used in a story
+  })}
+</div>
+
+<style>
+  .story-text {
+    display: grid;
+    gap: 16px;
+    color: var(--color-muted);
+  }
+
+  .story-text > * {
+    margin: 0;
+  }
+
+  /* A heading sits close to the list or paragraph it introduces, as "Treatment Details" did. */
+  .story-text h3 {
+    margin-top: 12px;
+    margin-bottom: -8px;
+    font: 700 var(--text-body) / var(--text-body-lh) var(--font-body);
+    color: var(--color-blue);
+  }
+
+  .story-text h3:first-child {
+    margin-top: 0;
+  }
+
+  .story-text ul,
+  .story-text ol {
+    display: grid;
+    gap: 6px;
+    padding-left: 20px;
+  }
+
+  /* Bold words and links come from InlineText, so the scoped rules reach them with :global. */
+  .story-text :global(strong) {
+    font-weight: 700;
+    color: var(--color-title);
+  }
+
+  .story-text :global(a) {
+    color: var(--color-blue);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .story-text blockquote {
+    padding-left: 16px;
+    border-left: 3px solid var(--color-blue);
+    font-style: italic;
+  }
+</style>
