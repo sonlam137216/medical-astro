@@ -3,7 +3,13 @@ import { isSameOrigin } from '../admin-auth';
 import { readBodyLimited } from '../consultation';
 import { listPickerImages } from '../media-picker';
 import { BUILTIN_PAGES } from './pages';
-import { SECTION_DATA_VERSION, upgradeSectionData, type SectionDef } from './sections';
+import {
+  SECTION_DATA_VERSION,
+  sectionByKey,
+  sectionShown,
+  upgradeSectionData,
+  type SectionDef,
+} from './sections';
 import {
   emptyValues,
   parseFields,
@@ -39,7 +45,10 @@ export async function loadSectionStates(
   const { data, error } = await anyDb(db).from('page_sections').select('type, is_visible');
   const states = new Map<string, SectionState>();
   for (const r of (data ?? []) as { type: string; is_visible: boolean }[]) {
-    states.set(r.type, r.is_visible ? 'custom' : 'hidden');
+    states.set(
+      r.type,
+      sectionShown(sectionByKey(r.type) ?? {}, r.is_visible) ? 'custom' : 'hidden',
+    );
   }
   return { states, failed: Boolean(error) };
 }
@@ -105,7 +114,7 @@ export async function processSectionPost(
   const form = new URLSearchParams(text);
   const values: FormValues = {
     ...valuesFromForm(def.fields, form),
-    is_visible: form.has('is_visible'),
+    is_visible: sectionShown(def, form.has('is_visible')),
   };
 
   const parsed = parseFields(def.fields, form);

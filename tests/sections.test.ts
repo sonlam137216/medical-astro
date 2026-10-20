@@ -8,6 +8,7 @@ import {
   SECTIONS,
   mergeSection,
   sectionByKey,
+  sectionShown,
   upgradeSectionData,
 } from '../src/lib/cms/sections.ts';
 import { itemInput, parseFields, valuesFromRow, type Field } from '../src/lib/cms/fields.ts';
@@ -344,6 +345,36 @@ test('text that breaks the form rules is reported before publishing', () => {
   assert.ok(problems.some((p) => p.includes('About: figures')));
   assert.ok(problems.some((p) => p.includes('Home: why Melatec')));
   assert.ok(!problems.some((p) => p.includes('treatment costs')));
+});
+
+test('a section that cannot be switched off is saved and published as shown', async () => {
+  const { raw, db } = setup();
+  const def = sectionByKey('home_locations')!;
+  assert.equal(def.canHide, false);
+  // its form has no "Show" checkbox, so saving it must still record it as shown
+  assert.equal(sectionShown(def, false), true);
+  assert.equal(sectionShown(sectionByKey('home_why')!, false), false);
+  raw.prepare("INSERT INTO pages (id, path, title) VALUES ('p1', '/', 'Home')").run();
+  raw
+    .prepare(
+      "INSERT INTO page_sections (page_id, type, is_visible, data) VALUES ('p1', 'home_locations', 1, ?)",
+    )
+    .run(JSON.stringify({ label: 'Clinics', title: 'Discover Melatec', body: 'Text' }));
+
+  // rows saved hidden before this was fixed still reach the website
+  raw
+    .prepare(
+      "INSERT INTO page_sections (page_id, type, is_visible, data) SELECT page_id, 'home_doctors', 0, '{}' FROM page_sections LIMIT 1",
+    )
+    .run();
+  const snapshot = await buildSnapshot(db);
+  assert.deepEqual(
+    snapshot.sections?.map((s) => [s.key, s.visible]),
+    [
+      ['home_doctors', true],
+      ['home_locations', true],
+    ],
+  );
 });
 
 test('a page has one row per section type', () => {

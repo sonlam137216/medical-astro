@@ -14,7 +14,7 @@ import {
   situationsLabel as sampleImplantSituationsLabel,
 } from '../data/implants';
 import { formatPrice, servicePath } from './services';
-import { mergeSection, sectionByKey } from './cms/sections';
+import { mergeSection, sectionByKey, sectionShown } from './cms/sections';
 import { SECTION_SAMPLES, type SectionKey } from '../data/sections';
 import { directionsUrl } from './maps';
 import { snapshotImageInput, toPublicImage, type PublicImage } from './media';
@@ -447,14 +447,15 @@ export async function getSection<K extends SectionKey>(key: K): Promise<Section<
   const sample = SECTION_SAMPLES[key];
   const row = (await loadSnapshot())?.sections?.find((s) => s.key === key);
   if (!row) return { ...sample, chosenPhotos: {}, edited: false } as Section<K>;
-  if (!row.visible) return null;
+  const def = sectionByKey(key);
+  if (!sectionShown(def ?? {}, row.visible)) return null;
   const photos: Record<string, PublicImage> = {};
   for (const [name, image] of Object.entries(row.images ?? {})) {
     const photo = toPublicImageOrUndefined(image);
     if (photo) photos[name] = photo;
   }
   return {
-    ...mergeSection(sample as Record<string, unknown>, row.data, sectionByKey(key)?.fields),
+    ...mergeSection(sample as Record<string, unknown>, row.data, def?.fields),
     chosenPhotos: photos,
     edited: true,
   } as Section<K>;

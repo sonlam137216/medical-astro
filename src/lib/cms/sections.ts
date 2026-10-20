@@ -330,6 +330,14 @@ export const SECTIONS: SectionDef[] = [
     ],
   },
   {
+    key: 'home_locations',
+    page: '/',
+    label: 'Home: clinic locations heading',
+    where: 'The heading above the clinic cards (the clinics are in Locations).',
+    canHide: false,
+    fields: [label, title, area('body', 'Text', 400)],
+  },
+  {
     key: 'home_doctors',
     page: '/',
     label: 'Home: doctors heading',
@@ -637,6 +645,13 @@ export const SECTIONS: SectionDef[] = [
 ];
 
 export const sectionByKey = (key: string | undefined) => SECTIONS.find((s) => s.key === key);
+
+/**
+ * Whether a section is shown. One that cannot be switched off has no "Show" checkbox in its form and is always
+ * shown (rows saved before 2026-10-20 recorded it as hidden).
+ */
+export const sectionShown = (def: Pick<SectionDef, 'canHide'>, isVisible: boolean) =>
+  def.canHide === false || isVisible;
 
 /**
  * Sections that carry claims or figures nobody has checked yet in the built-in content (prices, patient counts,

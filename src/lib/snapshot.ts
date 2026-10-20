@@ -6,6 +6,7 @@ import { itemInput, parseFields } from './cms/fields.ts';
 import {
   REQUIRED_SECTIONS,
   sectionByKey,
+  sectionShown,
   upgradeSectionData,
   type SectionDef,
 } from './cms/sections.ts';
@@ -651,7 +652,7 @@ export async function buildSnapshot(db: AdminDb): Promise<Snapshot> {
     if (!def) continue;
     const entry: SnapshotSection = {
       key: r.type,
-      visible: r.is_visible,
+      visible: sectionShown(def, r.is_visible),
       data: { ...upgradeSectionData(def.fields, r.data as Record<string, unknown>) },
     };
     for (const f of def.fields) {

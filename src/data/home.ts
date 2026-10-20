@@ -188,6 +188,8 @@ export const insideClinic = {
 
 export const destinations = {
   label: 'Dental destinations in Vietnam',
+  title: 'Discover Melatec Dental Across Vietnam',
+  body: 'Explore our clinics and find the right destination for your dental journey.',
   cta: { label: 'See all locations', href: '/locations' },
   locations: [
     { name: 'Melatec Ha Noi', address: '26 Doan Thi Diem Street, O Cho Dua Ward, Ha Noi' },
