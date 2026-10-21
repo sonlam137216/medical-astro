@@ -1,5 +1,4 @@
 ---
-import { Image } from 'astro:assets';
 import SiteLayout from '../layouts/SiteLayout.astro';
 import { getPageSeo, getPageBanner } from '../lib/site-content';
 import PageHero from '../components/PageHero.astro';
@@ -12,6 +11,7 @@ import DoctorCard from '../components/cards/DoctorCard.astro';
 import CtaBand from '../components/CtaBand.astro';
 import SeamlessJourney from '../components/SeamlessJourney.astro';
 import ProfileImage from '../components/ProfileImage.astro';
+import { itemInput } from '../lib/cms/fields';
 import { CLINIC_PHOTOS } from '../lib/cms/sections';
 import { heroImage } from '../data/home';
 import { getDoctors, getSection } from '../lib/content';
@@ -82,17 +82,15 @@ const banner = await getPageBanner('/about');
       <Fragment slot="title">{personalisedCare.title}</Fragment>
     </SectionIntro>
     <div class="care">
-      {personalisedCare.rows.map((row) => (
+      {personalisedCare.rows.map((row, i) => (
         <div class="care__row">
-          <Image
+          <ProfileImage
             class="care__img"
-            src={row.image.src}
-            alt={row.image.alt}
+            image={personalisedCare.chosenPhotos[itemInput('rows', i, 'photo')] ?? row.image}
+            slot="about-care"
             width={568}
             height={379}
-            densities={[1, 2]}
             sizes="(max-width: 900px) 100vw, 520px"
-            loading="lazy"
           />
           <div class="care__text">
             <h3 class="care__title">{row.title}</h3>

@@ -440,3 +440,51 @@ test('clinic slide photos are resolved into the published snapshot independently
   assert.ok(isSnapshot(JSON.parse(JSON.stringify(snapshot))));
   assert.deepEqual(snapshotProblems(snapshot), []);
 });
+
+test('About care: row photos publish independently and older text keeps its fallback image', async () => {
+  const fields = sectionByKey('about_care')!.fields;
+  const id = '11111111-1111-4111-8111-111111111111';
+  const data = {
+    label: 'Your home away from home',
+    title: 'Personalized Care, International Standards',
+    rows: [
+      { title: 'Implant care', body: 'Personal care', photo: id },
+      { title: 'Aesthetic care', body: 'Natural results' },
+    ],
+  };
+  const parsed = parseFields(fields, formFromData(fields, data));
+  assert.ok(parsed.ok);
+  assert.equal(valuesFromRow(fields, parsed.value)[itemInput('rows', 0, 'photo')], id);
+  assert.deepEqual(imageReferences(fields, parsed.value), [
+    { name: 'rows__0__photo', field: 'rows', id },
+  ]);
+  const invalid = formFromData(fields, data);
+  invalid.set(itemInput('rows', 0, 'photo'), 'not-a-media-id');
+  assert.equal(parseFields(fields, invalid).ok, false);
+
+  const { raw, db } = setup();
+  raw.prepare("INSERT INTO pages (id, path, title) VALUES ('p1', '/about', 'About')").run();
+  raw
+    .prepare(
+      `INSERT INTO media_assets (id, r2_key, kind, mime_type, size_bytes, width, height, alt_text, variant_widths)
+     VALUES (?, ?, 'image', 'image/webp', 1000, 960, 640, 'Personalised care', '[960]')`,
+    )
+    .run(id, `media/${id}/v1/960.webp`);
+  raw
+    .prepare('INSERT INTO page_sections (page_id, type, data) VALUES (?, ?, ?)')
+    .run('p1', 'about_care', JSON.stringify(parsed.value));
+  const snapshot = await buildSnapshot(db);
+  const care = snapshot.sections?.find((s) => s.key === 'about_care');
+  assert.deepEqual(Object.keys(care?.images ?? {}), ['rows__0__photo']);
+  assert.equal(care?.images?.rows__0__photo.alt, 'Personalised care');
+  assert.ok(isSnapshot(JSON.parse(JSON.stringify(snapshot))));
+  assert.deepEqual(snapshotProblems(snapshot), []);
+
+  const merged = mergeSection(
+    { rows: [{ image: 'built-in-first' }, { image: 'built-in-second' }] },
+    care!.data,
+    fields,
+  );
+  assert.equal(merged.rows[0].image, 'built-in-first');
+  assert.equal(merged.rows[1].image, 'built-in-second');
+});
