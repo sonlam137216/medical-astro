@@ -69,6 +69,11 @@ export const IMAGE_SLOTS = {
     frames: [{ label: 'Article page, lists and cards', width: 680, height: 453 }],
     position: { x: 50, y: 50 },
   },
+  'about-care': {
+    label: 'Personalised care photo',
+    frames: [{ label: 'About page, personalised care rows', width: 568, height: 379 }],
+    position: { x: 50, y: 50 },
+  },
   // "Inside Melatec Dental Clinic" on the About page: two big photos on the left, then two smaller ones of the same
   // shape and two squares on the right (Figma, 2026-10-17).
   'about-clinic': {

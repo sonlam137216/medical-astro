@@ -438,13 +438,22 @@ export const SECTIONS: SectionDef[] = [
     key: 'about_care',
     page: '/about',
     label: 'About: personalised care',
-    where: 'The two rows with photos. The photos stay as built; this edits the words.',
+    where:
+      'The rows with photos under “Personalized Care, International Standards”. Edit the words and choose a photo for each row.',
     fields: [
       label,
       title,
       items('rows', 'Rows', 'Row', 4, [
         col('title', 'Title', 'text', 120, true),
         col('body', 'Text', 'textarea', 400),
+        {
+          name: 'photo',
+          label: 'Photo',
+          kind: 'image',
+          max: 36,
+          slot: 'about-care',
+          help: 'Choose or upload a photo for this row. Leave empty to keep the built-in picture.',
+        },
       ]),
     ],
   },
