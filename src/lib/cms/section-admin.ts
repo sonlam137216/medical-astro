@@ -12,6 +12,7 @@ import {
 } from './sections';
 import {
   emptyValues,
+  imageReferences,
   parseFields,
   valuesFromForm,
   valuesFromRow,
@@ -84,7 +85,11 @@ export async function loadSection(db: AdminDb, def: SectionDef): Promise<LoadedS
 }
 
 export async function loadSectionOptions(db: AdminDb, def: SectionDef): Promise<FormOptions> {
-  const images = def.fields.some((f) => f.type === 'image') ? await listPickerImages(db) : [];
+  const images = def.fields.some(
+    (f) => f.type === 'image' || (f.type === 'items' && f.columns.some((c) => c.kind === 'image')),
+  )
+    ? await listPickerImages(db)
+    : [];
   return { images, refs: {} };
 }
 
@@ -123,9 +128,7 @@ export async function processSectionPost(
   if (Object.keys(crossErrors).length > 0) return { status: 422, values, errors: crossErrors };
 
   // A photo must be one of the active images of the library (a hand-made request could send any id).
-  for (const f of def.fields) {
-    const id = parsed.value[f.name];
-    if (f.type !== 'image' || typeof id !== 'string') continue;
+  for (const { id, field } of imageReferences(def.fields, parsed.value)) {
     const { data } = await anyDb(db)
       .from('media_assets')
       .select('id')
@@ -134,7 +137,7 @@ export async function processSectionPost(
       .eq('status', 'active')
       .maybeSingle();
     if (!data)
-      return { status: 422, values, errors: { [f.name]: 'Please choose a photo from the list.' } };
+      return { status: 422, values, errors: { [field]: 'Please choose a photo from the list.' } };
   }
 
   const pageId = await ensurePage(db, def.page);

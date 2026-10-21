@@ -322,11 +322,20 @@ export const SECTIONS: SectionDef[] = [
     key: 'home_inside',
     page: '/',
     label: 'Home: clinic photo strip',
-    where:
-      'The row of clinic photos. The photos themselves stay as built; this edits the captions.',
+    where: 'The row of clinic photos. Choose a photo and edit the caption for each slide.',
     fields: [
       title,
-      items('tiles', 'Captions', 'Caption', 8, [col('caption', 'Caption', 'text', 80, true)]),
+      items('tiles', 'Slides', 'Slide', 8, [
+        col('caption', 'Caption', 'text', 80, true),
+        {
+          name: 'photo',
+          label: 'Photo',
+          kind: 'image',
+          max: 36,
+          slot: 'home-inside',
+          help: 'Choose or upload a photo for this slide. Leave empty to keep the built-in picture.',
+        },
+      ]),
     ],
   },
   {

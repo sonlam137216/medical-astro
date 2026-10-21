@@ -12,19 +12,27 @@ const controls = (root: HTMLElement, selector: string) =>
   Array.from(root.querySelectorAll(selector)) as unknown as Control[];
 
 function renumber(list: HTMLElement) {
+  const renamed: { input: Control; name: string }[] = [];
   list.querySelectorAll<HTMLElement>('[data-item]').forEach((item, i) => {
     controls(item, '[name]').forEach((input) => {
       const m = NAME.exec(input.name);
-      if (m) input.name = `${m[1]}__${i}__${m[2]}`;
+      if (m) renamed.push({ input, name: `${m[1]}__${i}__${m[2]}` });
     });
     const number = item.querySelector('[data-item-number]');
     if (number) number.textContent = String(i + 1);
   });
+  // Move radios out of their old groups first so renaming cannot deselect another slide's photo.
+  renamed.forEach(({ input }, i) => {
+    if (input.type === 'radio') input.name = `item-renumber-${i}`;
+  });
+  renamed.forEach(({ input, name }) => (input.name = name));
 }
 
 // `data-item-keep`: a value the form fills in itself (the country of a price row), not something typed.
 const isEmpty = (item: HTMLElement) =>
-  controls(item, '[name]:not([data-item-keep])').every((input) => input.value.trim() === '');
+  controls(item, '[name]:not([data-item-keep]):not([type=radio]), input[type=radio]:checked').every(
+    (input) => input.value.trim() === '',
+  );
 
 for (const list of document.querySelectorAll<HTMLElement>('[data-items]')) {
   const items = () => Array.from(list.querySelectorAll<HTMLElement>('[data-item]'));
@@ -66,11 +74,16 @@ for (const list of document.querySelectorAll<HTMLElement>('[data-items]')) {
         'input[name]:not([data-item-keep]), textarea[name]',
       )
       .forEach((input) => {
-        input.value = '';
+        if (input instanceof HTMLInputElement && input.type === 'radio')
+          input.checked = input.value === '';
+        else input.value = '';
       });
     (controls(item, 'select[name]') as HTMLSelectElement[]).forEach(
       (select) => (select.selectedIndex = 0),
     );
+    item
+      .querySelectorAll('[data-media-field]')
+      .forEach((field) => field.dispatchEvent(new Event('change')));
     // Empty slots wait at the end, hidden, for "Add".
     item.hidden = true;
     list.insertBefore(item, add);

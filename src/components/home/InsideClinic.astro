@@ -1,6 +1,7 @@
 ---
 import Icon from '../Icon.astro';
-import { Image } from 'astro:assets';
+import ProfileImage from '../ProfileImage.astro';
+import { itemInput } from '../../lib/cms/fields';
 import Section from '../Section.astro';
 
 import { getSection } from '../../lib/content';
@@ -22,18 +23,16 @@ const insideClinic = await getSection('home_inside');
         </span>
       </button>
       <ul class="gallery__track" tabindex="0" aria-label="Clinic photos" data-gallery-track>
-        {insideClinic.tiles.map((tile) => (
+        {insideClinic.tiles.map((tile, i) => (
           <li class="gallery__tile">
             <figure>
-              <Image
+              <ProfileImage
                 class="gallery__img"
-                src={tile.image.src}
-                alt={tile.image.alt}
+                image={insideClinic.chosenPhotos[itemInput('tiles', i, 'photo')] ?? tile.image}
+                slot="home-inside"
                 width={360}
                 height={340}
-                densities={[1, 2]}
                 sizes="(max-width: 700px) 70vw, 340px"
-                loading="lazy"
               />
               <figcaption>{tile.caption}</figcaption>
             </figure>

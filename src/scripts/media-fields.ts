@@ -35,7 +35,6 @@ for (const field of document.querySelectorAll<HTMLElement>('[data-media-field]')
   const radios = () => [...field.querySelectorAll<HTMLInputElement>('input[type="radio"]')];
   if (!box || !fallback || radios().length === 0) continue;
 
-  const name = radios()[0].name;
   const label = (radio: HTMLInputElement) => radio.closest('label');
   const slotKey = field.dataset.slot;
   const slot = isSlotKey(slotKey) ? IMAGE_SLOTS[slotKey] : null;
@@ -204,7 +203,7 @@ for (const field of document.querySelectorAll<HTMLElement>('[data-media-field]')
       const wrapper = el('label');
       radio = el('input');
       radio.type = 'radio';
-      radio.name = name;
+      radio.name = radios()[0].name;
       radio.value = item.id;
       add(wrapper, radio);
       if (item.thumb) {
@@ -228,6 +227,7 @@ for (const field of document.querySelectorAll<HTMLElement>('[data-media-field]')
     render();
   };
 
+  field.addEventListener('change', render);
   fallback.hidden = true;
   box.hidden = false;
   render();

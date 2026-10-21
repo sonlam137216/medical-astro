@@ -2,7 +2,7 @@ import type { AdminDb } from './admin-auth';
 import { readColor } from './image-color.ts';
 import { toFocus } from './image-slots.ts';
 import { articleProblems, bodyImageIds, parseArticleBody } from './cms/articles.ts';
-import { formFromData, parseFields } from './cms/fields.ts';
+import { formFromData, imageReferences, parseFields } from './cms/fields.ts';
 import {
   REQUIRED_SECTIONS,
   sectionByKey,
@@ -731,11 +731,11 @@ export async function buildSnapshot(db: AdminDb): Promise<Snapshot> {
       visible: sectionShown(def, r.is_visible),
       data: { ...upgradeSectionData(def.fields, r.data as Record<string, unknown>) },
     };
+    const photos = imageReferences(def.fields, entry.data);
     for (const f of def.fields) {
-      if (f.type !== 'image') continue;
-      const id = entry.data[f.name];
-      delete entry.data[f.name];
-      if (typeof id !== 'string' || id === '') continue;
+      if (f.type === 'image') delete entry.data[f.name];
+    }
+    for (const { id, name } of photos) {
       const { data: asset, error: assetError } = await db
         .from('media_assets')
         .select(IMAGE_COLUMNS)
@@ -744,7 +744,7 @@ export async function buildSnapshot(db: AdminDb): Promise<Snapshot> {
         .maybeSingle();
       if (assetError) throw fail('a page text photo', assetError);
       const image = toSnapshotImage(asset);
-      if (image) (entry.images ??= {})[f.name] = image;
+      if (image) (entry.images ??= {})[name] = image;
     }
     sections.push(entry);
   }

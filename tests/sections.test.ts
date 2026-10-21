@@ -11,7 +11,14 @@ import {
   sectionShown,
   upgradeSectionData,
 } from '../src/lib/cms/sections.ts';
-import { itemInput, parseFields, valuesFromRow, type Field } from '../src/lib/cms/fields.ts';
+import {
+  formFromData,
+  imageReferences,
+  itemInput,
+  parseFields,
+  valuesFromRow,
+  type Field,
+} from '../src/lib/cms/fields.ts';
 import { createDb } from '../src/lib/db.ts';
 import {
   buildSnapshot,
@@ -378,4 +385,58 @@ test('a page has one row per section type', () => {
     failure(raw, "INSERT INTO page_sections (page_id, type) VALUES ('p1', 'home_hero')"),
     /UNIQUE/,
   );
+});
+
+test('clinic slides: photos round-trip with captions, older captions stay valid, and invalid ids fail', () => {
+  const fields = sectionByKey('home_inside')!.fields;
+  const id = '11111111-1111-4111-8111-111111111111';
+  const data = {
+    title: 'Clinic',
+    tiles: [{ caption: 'Exterior', photo: id }, { caption: 'Lounge' }],
+  };
+  const parsed = parseFields(fields, formFromData(fields, data));
+  assert.ok(parsed.ok);
+  assert.deepEqual(parsed.value.tiles, [
+    { caption: 'Exterior', photo: id },
+    { caption: 'Lounge', photo: '' },
+  ]);
+  assert.equal(valuesFromRow(fields, parsed.value)[itemInput('tiles', 0, 'photo')], id);
+  assert.deepEqual(imageReferences(fields, parsed.value), [
+    { name: 'tiles__0__photo', field: 'tiles', id },
+  ]);
+  const invalid = formFromData(fields, data);
+  invalid.set(itemInput('tiles', 0, 'photo'), 'not-a-media-id');
+  assert.equal(parseFields(fields, invalid).ok, false);
+  const noCaption = formFromData(fields, { title: 'Clinic', tiles: [{ photo: id }] });
+  assert.equal(parseFields(fields, noCaption).ok, false);
+});
+
+test('clinic slide photos are resolved into the published snapshot independently', async () => {
+  const { raw, db } = setup();
+  const id = '11111111-1111-4111-8111-111111111111';
+  raw.prepare("INSERT INTO pages (id, path, title) VALUES ('p1', '/', 'Home')").run();
+  raw
+    .prepare(
+      `INSERT INTO media_assets (id, r2_key, kind, mime_type, size_bytes, width, height, alt_text, variant_widths)
+    VALUES (?, ?, 'image', 'image/webp', 1000, 960, 960, 'Clinic exterior', '[960]')`,
+    )
+    .run(id, `media/${id}/v1/960.webp`);
+  raw.prepare('INSERT INTO page_sections (page_id, type, data) VALUES (?, ?, ?)').run(
+    'p1',
+    'home_inside',
+    JSON.stringify({
+      title: 'Our clinic',
+      tiles: [
+        { caption: 'Exterior', photo: id },
+        { caption: 'Lounge' },
+        { caption: 'Room', photo: id },
+      ],
+    }),
+  );
+  const snapshot = await buildSnapshot(db);
+  const section = snapshot.sections?.find((s) => s.key === 'home_inside');
+  assert.deepEqual(Object.keys(section?.images ?? {}), ['tiles__0__photo', 'tiles__2__photo']);
+  assert.equal(section?.images?.tiles__0__photo.alt, 'Clinic exterior');
+  assert.ok(isSnapshot(JSON.parse(JSON.stringify(snapshot))));
+  assert.deepEqual(snapshotProblems(snapshot), []);
 });

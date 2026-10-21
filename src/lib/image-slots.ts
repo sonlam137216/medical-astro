@@ -81,6 +81,11 @@ export const IMAGE_SLOTS = {
     frames: [{ label: 'About page, clinic photos (bottom right)', width: 300, height: 300 }],
     position: { x: 50, y: 50 },
   },
+  'home-inside': {
+    label: 'Clinic slide photo',
+    frames: [{ label: 'Home page, clinic photo strip', width: 340, height: 340 }],
+    position: { x: 50, y: 50 },
+  },
   'home-conversations': {
     label: 'Home picture',
     frames: [{ label: 'Home page, beside the text', width: 520, height: 440 }],

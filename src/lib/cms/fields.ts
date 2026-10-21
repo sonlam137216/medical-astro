@@ -27,7 +27,7 @@ export interface FieldBase {
 export interface ItemColumn {
   name: string;
   label: string;
-  kind: 'text' | 'textarea' | 'lines' | 'choice' | 'video' | 'prices';
+  kind: 'text' | 'textarea' | 'lines' | 'choice' | 'video' | 'prices' | 'image';
   max: number;
   required?: boolean;
   help?: string;
@@ -35,6 +35,8 @@ export interface ItemColumn {
   options?: readonly { value: string; label: string }[];
   /** `prices` only: the `lines` field that lists the countries. */
   countriesFrom?: string;
+  /** Image column: crop and size guidance for the media picker. */
+  slot?: SlotKey;
 }
 
 /** One country of a `prices` column. `saving` is empty for the first country (the one the others compare with). */
@@ -323,6 +325,14 @@ export function parseFields(fields: readonly Field[], form: URLSearchParams): Pa
               });
               if (entries.length > 0) filled = true;
               item[c.name] = entries;
+            } else if (c.kind === 'image') {
+              const v = oneLine(raw);
+              if (v && !UUID_RE.test(v)) {
+                errors[field.name] =
+                  `${field.itemLabel} ${i + 1}: please choose a photo from the list.`;
+              }
+              if (v) filled = true;
+              item[c.name] = v.toLowerCase();
             } else if (c.kind === 'choice') {
               const v = oneLine(raw);
               if (v !== '' && !c.options?.some((o) => o.value === v)) {
@@ -575,4 +585,24 @@ export function formFromData(fields: readonly Field[], data: Row): URLSearchPara
     } else if (typeof v === 'string') form.set(f.name, v);
   }
   return form;
+}
+
+/** Photo references, including images inside a list; names also key the snapshot's image map. */
+export function imageReferences(fields: readonly Field[], data: Row) {
+  const refs: { name: string; field: string; id: string }[] = [];
+  for (const f of fields) {
+    if (f.type === 'image' && typeof data[f.name] === 'string' && data[f.name]) {
+      refs.push({ name: f.name, field: f.name, id: data[f.name] as string });
+    } else if (f.type === 'items' && Array.isArray(data[f.name])) {
+      (data[f.name] as Row[]).forEach((item, i) => {
+        for (const c of f.columns) {
+          const id = item?.[c.name];
+          if (c.kind === 'image' && typeof id === 'string' && id) {
+            refs.push({ name: itemInput(f.name, i, c.name), field: f.name, id });
+          }
+        }
+      });
+    }
+  }
+  return refs;
 }

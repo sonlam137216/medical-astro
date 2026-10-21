@@ -99,7 +99,16 @@ const slotsFor = (f: Extract<Field, { type: 'items' }>) => {
           </button>
         </div>
         {f.columns.map((c) =>
-          c.kind === 'prices' ? (
+          c.kind === 'image' ? (
+            <MediaPicker
+              name={itemInput(f.name, i, c.name)}
+              label={c.label}
+              value={text(itemInput(f.name, i, c.name))}
+              images={options.images}
+              slot={c.slot}
+              help={c.help}
+            />
+          ) : c.kind === 'prices' ? (
             <div class="admin-prices" data-cost-prices data-column={c.name}>
               <span class="admin-prices__label">{c.label}</span>
               <table class="admin-prices__table">
