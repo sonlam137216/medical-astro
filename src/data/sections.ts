@@ -3,6 +3,7 @@
  * shows this text until somebody edits it in the admin ("Page text"); the admin form starts from it too. Each value
  * has the fields of the section's form, plus whatever the admin cannot edit (pictures, numbers).
  */
+import type { CountryPrice } from '../lib/cms/fields';
 import {
   hero as homeHero,
   servicesHeading,
@@ -46,9 +47,8 @@ import {
 export interface CostRow {
   name: string;
   note: string;
-  /** One line per country, "Australia: A$1,250 | 40 clinics" (see src/lib/cms/cost-table.ts). */
-  cells?: string[];
-  saving?: string;
+  /** One entry per country: price, line under it, saving (see src/lib/cms/cost-table.ts). */
+  prices?: CountryPrice[];
 }
 
 export const SECTION_SAMPLES = {

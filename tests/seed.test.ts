@@ -63,12 +63,14 @@ test('a snapshot of the seed can be published to staging; production still waits
   assert.deepEqual(snapshotProblems(snapshot, 'staging'), []);
   const costs = snapshot.sections?.find((s) => s.key === 'home_costs');
   assert.equal(costs?.visible, true);
-  assert.equal((costs?.data.rows as { cells: string[] }[]).length, 5);
-  assert.ok((costs?.data.rows as { cells: string[] }[]).every((r) => r.cells.length === 6));
+  const costRows = costs?.data.rows as { prices: { country: string; saving: string }[] }[];
+  assert.equal(costRows.length, 5);
+  assert.ok(costRows.every((r) => r.prices.length === 6));
   assert.equal((costs?.data.countries as string[]).length, 6);
   assert.ok(
-    (costs?.data.rows as { cells: string[] }[]).every((r) => r.cells[2].startsWith('Australia: ')),
+    costRows.every((r) => r.prices[2].country === 'Australia' && r.prices[2].saving !== ''),
   );
+  assert.ok(costRows.every((r) => r.prices[0].saving === '')); // Vietnam is not compared with itself
   const production = snapshotProblems(snapshot, 'production');
   assert.ok(production.length > 0);
   assert.ok(

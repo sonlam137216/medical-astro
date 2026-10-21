@@ -839,6 +839,140 @@ a.admin-btn {
   color: var(--a-muted);
 }
 
+/* A list shown as one box per line (the countries of a cost table), with move and remove buttons. */
+.admin-list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.admin-list legend {
+  padding: 0;
+  margin-bottom: 4px;
+}
+
+.admin-list__items {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: country;
+}
+
+.admin-list__item {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr) 40px 40px 84px;
+  align-items: center;
+  gap: 6px;
+  counter-increment: country;
+}
+
+.admin-list__item::before {
+  content: counter(country);
+  color: var(--a-muted);
+  font-size: 13px;
+  text-align: right;
+}
+
+.admin-list__add[hidden] {
+  display: none;
+}
+
+/* A button that does not apply to this line keeps its place, so every box has the same width. */
+.admin-list__item .admin-btn[hidden] {
+  display: inline-flex;
+  visibility: hidden;
+}
+
+.admin-list__item .admin-btn {
+  justify-content: center;
+  padding-inline: 0;
+}
+
+.admin-list__item .admin-btn--ghost {
+  color: var(--a-muted);
+  font-size: 13px;
+}
+
+.admin-list__item [data-list-remove]:hover {
+  color: var(--color-error);
+}
+
+/* The price boxes of one treatment: one row per country. */
+.admin-prices {
+  display: grid;
+  gap: 8px;
+}
+
+.admin-prices__label {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.admin-prices__table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  background: var(--a-surface);
+  border: 1px solid var(--a-line);
+  border-radius: 10px;
+}
+
+.admin-prices__table th,
+.admin-prices__table td {
+  padding: 6px 8px;
+  text-align: left;
+  border-bottom: 1px solid var(--a-line);
+}
+
+.admin-prices__table tr:last-child > * {
+  border-bottom: 0;
+}
+
+.admin-prices__table thead th {
+  font: 600 12px / 1.2 var(--font-sans);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--a-muted);
+}
+
+.admin-prices__table thead th:first-child {
+  width: 28%;
+}
+
+.admin-prices__table tbody th {
+  font-weight: 600;
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+
+.admin-prices__table tr[hidden],
+.admin-prices__table [hidden],
+.admin-prices .admin-btn[hidden] {
+  display: none;
+}
+
+.admin-form .admin-prices__table input {
+  padding: 7px 10px;
+  font-size: 14px;
+}
+
+.admin-prices__none {
+  color: var(--a-muted);
+  font-weight: 400;
+  font-size: 13px;
+}
+
+.admin-prices__fill {
+  justify-self: start;
+  color: var(--color-blue);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .admin-shell *,
   .admin-shell *::before,

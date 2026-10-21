@@ -20,21 +20,47 @@ export interface FieldBase {
 
 /**
  * One column of an `items` field. `lines` values are stored as an array of text; `choice` is one of `options`
- * (stored as its value, empty for none); `video` is a YouTube or Vimeo link (src/lib/video-embed.ts).
+ * (stored as its value, empty for none); `video` is a YouTube or Vimeo link (src/lib/video-embed.ts); `prices`
+ * is one price per country of the `lines` field named by `countriesFrom`, stored as CountryPrice[] in the order
+ * of that list (the cost tables: src/lib/cms/cost-table.ts).
  */
 export interface ItemColumn {
   name: string;
   label: string;
-  kind: 'text' | 'textarea' | 'lines' | 'choice' | 'video';
+  kind: 'text' | 'textarea' | 'lines' | 'choice' | 'video' | 'prices';
   max: number;
   required?: boolean;
   help?: string;
   /** `choice` only: the allowed values and their names in the admin. */
   options?: readonly { value: string; label: string }[];
+  /** `prices` only: the `lines` field that lists the countries. */
+  countriesFrom?: string;
 }
 
+/** One country of a `prices` column. `saving` is empty for the first country (the one the others compare with). */
+export interface CountryPrice {
+  country: string;
+  price: string;
+  /** The small line under the price, for example "40 clinics". */
+  detail: string;
+  saving: string;
+}
+
+/** The parts of a `prices` entry and their length limits. */
+export const PRICE_PARTS = { price: 40, detail: 60, saving: 40 } as const;
+export type PricePart = 'country' | keyof typeof PRICE_PARTS;
+
 export type Field =
-  | (FieldBase & { type: 'text'; max: number; placeholder?: string })
+  /**
+   * `choicesFrom`: shown as a list of the lines of that field except the first (the countries a cost table is
+   * compared with), plus an empty choice named `emptyLabel`. Stored as text like any other text field.
+   */
+  | (FieldBase & {
+      type: 'text';
+      max: number;
+      placeholder?: string;
+      choicesFrom?: { field: string; emptyLabel: string };
+    })
   /** A link: a site path, #anchor, https/http URL, mailto: or tel: (same rule as the `link_href` domain). */
   | (FieldBase & { type: 'url'; max: number; placeholder?: string })
   /**
@@ -46,8 +72,8 @@ export type Field =
   | (FieldBase & { type: 'email'; max: number })
   /** A web address starting with https:// or http:// (for example a social profile). */
   | (FieldBase & { type: 'weburl'; max: number; placeholder?: string })
-  /** One item per line, stored as text[] */
-  | (FieldBase & { type: 'lines'; maxItems: number; maxLength: number })
+  /** One item per line, stored as text[]. `inputs`: the form shows one box per item instead of a text area. */
+  | (FieldBase & { type: 'lines'; maxItems: number; maxLength: number; inputs?: boolean })
   /** Lowercase-hyphen key. Derived from the field named by `from` when left empty (if `from` is set). */
   | (FieldBase & { type: 'slug'; from?: string })
   /** A page address on this site, like /services/dental-implants (same rule as the `url_path` domain). */
@@ -87,6 +113,18 @@ export type Field =
 export const itemInput = (field: string, index: number, column: string) =>
   `${field}__${index}__${column}`;
 
+/** Name of one box of a `prices` column: the `j`th country of item `index`. */
+export const priceInput = (
+  field: string,
+  index: number,
+  column: string,
+  j: number,
+  part: PricePart,
+) => `${itemInput(field, index, column)}__${j}__${part}`;
+
+/** Most countries a `prices` column reads from a form (the countries list allows fewer). */
+const MAX_PRICE_ROWS = 16;
+
 export type FieldType = Field['type'];
 
 /** Form state: what was typed (strings), so a failed save can show the form again unchanged. */
@@ -110,6 +148,39 @@ export const multiLine = (v: unknown): string =>
     .replace(/\r\n?/g, '\n')
     .replace(CONTROL_KEEP_NEWLINE, ' ')
     .trim();
+
+/** The lines of a `lines` field: one text area, or one box per line (`inputs`), so every value is read. */
+const linesOf = (form: URLSearchParams, name: string): string[] =>
+  form
+    .getAll(name)
+    .join('\n')
+    .split(/\r?\n/)
+    .map(oneLine)
+    .filter((l) => l !== '');
+
+/** The boxes of one `prices` cell as typed (nothing checked yet). */
+function readPriceInputs(
+  form: URLSearchParams,
+  field: string,
+  index: number,
+  column: string,
+): CountryPrice[] {
+  const out: CountryPrice[] = [];
+  for (let j = 0; j < MAX_PRICE_ROWS; j++) {
+    const get = (part: PricePart) => form.get(priceInput(field, index, column, j, part));
+    if (get('country') === null) continue;
+    out.push({
+      country: oneLine(get('country')),
+      price: oneLine(get('price')),
+      detail: oneLine(get('detail')),
+      saving: oneLine(get('saving')),
+    });
+  }
+  return out;
+}
+
+const sameName = (a: string, b: string) =>
+  a.trim().toLocaleLowerCase('en') === b.trim().toLocaleLowerCase('en');
 
 /** 'Dr. Lê Thị Yến' -> 'dr-le-thi-yen' */
 export function slugify(text: string, max = 100): string {
@@ -199,10 +270,7 @@ export function parseFields(fields: readonly Field[], form: URLSearchParams): Pa
         break;
       }
       case 'lines': {
-        const items = (typed(field.name) ?? '')
-          .split(/\r?\n/)
-          .map(oneLine)
-          .filter((l) => l !== '');
+        const items = linesOf(form, field.name);
         if (items.length === 0 && need) errors[field.name] = need;
         else if (items.length > field.maxItems)
           errors[field.name] = `Use at most ${field.maxItems} lines.`;
@@ -230,6 +298,31 @@ export function parseFields(fields: readonly Field[], form: URLSearchParams): Pa
               }
               if (lines.length > 0) filled = true;
               item[c.name] = lines;
+            } else if (c.kind === 'prices') {
+              // One entry per country of the list, in its order. A country no longer in the list (removed
+              // without JavaScript) is left out; the first country is not compared, so it has no saving.
+              const countries = c.countriesFrom ? linesOf(form, c.countriesFrom) : [];
+              const typedPrices = readPriceInputs(form, field.name, i, c.name);
+              const entries: CountryPrice[] = [];
+              countries.forEach((country, j) => {
+                const p = typedPrices.find((t) => sameName(t.country, country));
+                if (!p) return;
+                const entry = { ...p, country, saving: j === 0 ? '' : p.saving };
+                if (!entry.price && !entry.detail && !entry.saving) return;
+                for (const part of ['price', 'detail', 'saving'] as const) {
+                  if (entry[part].length > PRICE_PARTS[part]) {
+                    errors[field.name] =
+                      `${field.itemLabel} ${i + 1}, ${country}: keep the ${part} under ${PRICE_PARTS[part]} characters.`;
+                  }
+                }
+                if (!entry.price) {
+                  errors[field.name] =
+                    `${field.itemLabel} ${i + 1}, ${country}: add the price, or clear the other boxes of that country.`;
+                }
+                entries.push(entry);
+              });
+              if (entries.length > 0) filled = true;
+              item[c.name] = entries;
             } else if (c.kind === 'choice') {
               const v = oneLine(raw);
               if (v !== '' && !c.options?.some((o) => o.value === v)) {
@@ -395,6 +488,11 @@ export function valuesFromRow(fields: readonly Field[], row: Row): FormValues {
         (Array.isArray(v) ? (v as Row[]) : []).slice(0, f.maxItems).forEach((item, i) => {
           for (const c of f.columns) {
             const cell = item?.[c.name];
+            if (c.kind === 'prices') {
+              values[itemInput(f.name, i, c.name)] =
+                Array.isArray(cell) && cell.length > 0 ? JSON.stringify(cell) : '';
+              continue;
+            }
             values[itemInput(f.name, i, c.name)] = Array.isArray(cell)
               ? cell.join('\n')
               : typeof cell === 'string'
@@ -420,11 +518,17 @@ export function valuesFromForm(fields: readonly Field[], form: URLSearchParams):
   const values = emptyValues(fields);
   for (const f of fields) {
     if (f.type === 'bool') values[f.name] = form.has(f.name);
+    else if (f.type === 'lines') values[f.name] = linesOf(form, f.name).join('\n');
     else if (f.type === 'items') {
       for (let i = 0; i < f.maxItems; i++)
         for (const c of f.columns) {
           const key = itemInput(f.name, i, c.name);
-          values[key] = form.get(key) ?? '';
+          if (c.kind === 'prices') {
+            const typedPrices = readPriceInputs(form, f.name, i, c.name).filter(
+              (p) => p.price || p.detail || p.saving,
+            );
+            values[key] = typedPrices.length > 0 ? JSON.stringify(typedPrices) : '';
+          } else values[key] = form.get(key) ?? '';
         }
     } else if (f.type === 'money') {
       values[f.name] = form.get(f.name) ?? '';
@@ -432,4 +536,43 @@ export function valuesFromForm(fields: readonly Field[], form: URLSearchParams):
     } else values[f.name] = form.get(f.name) ?? '';
   }
   return values;
+}
+
+/** The prices of a `prices` cell in the form state (JSON, see valuesFromRow), or none. */
+export function pricesFromValue(value: unknown): CountryPrice[] {
+  if (typeof value !== 'string' || value === '') return [];
+  try {
+    const list = JSON.parse(value) as unknown;
+    return Array.isArray(list) ? (list as CountryPrice[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+/** Stored data -> the form it was saved from, so stored data can go back through parseFields (Publish). */
+export function formFromData(fields: readonly Field[], data: Row): URLSearchParams {
+  const form = new URLSearchParams();
+  for (const f of fields) {
+    const v = data[f.name];
+    if (f.type === 'lines' && Array.isArray(v)) form.set(f.name, v.join('\n'));
+    else if (f.type === 'items' && Array.isArray(v)) {
+      (v as Row[]).slice(0, f.maxItems).forEach((item, i) => {
+        for (const c of f.columns) {
+          const cell = item?.[c.name];
+          if (c.kind === 'prices') {
+            (Array.isArray(cell) ? (cell as Partial<CountryPrice>[]) : []).forEach((p, j) => {
+              for (const part of ['country', 'price', 'detail', 'saving'] as const)
+                form.set(priceInput(f.name, i, c.name, j, part), String(p?.[part] ?? ''));
+            });
+            continue;
+          }
+          form.set(
+            itemInput(f.name, i, c.name),
+            Array.isArray(cell) ? cell.join('\n') : typeof cell === 'string' ? cell : '',
+          );
+        }
+      });
+    } else if (typeof v === 'string') form.set(f.name, v);
+  }
+  return form;
 }

@@ -4,7 +4,7 @@ import SectionIntro from '../SectionIntro.astro';
 import { costComparison as c } from '../../data/home';
 import { getSection } from '../../lib/content';
 import type { CostRow } from '../../data/sections';
-import { cellFor, sameCountry } from '../../lib/cms/cost-table';
+import { priceFor, sameCountry } from '../../lib/cms/cost-table';
 
 // Shared by Home, the service pages (both with home_costs) and the Dental Implants page: the same table with the rows, title and figures of each page's
 // "Page text" section. Before the section is edited the rows show the design's placeholder figures.
@@ -26,13 +26,15 @@ const defaultIndex = Math.max(
   countries.findIndex((country, i) => i > 0 && sameCountry(country, data?.compare ?? '')),
 );
 
-// "Australia: A$1,250 | 40 clinics" -> two lines. No price: a dash. Built-in rows: the design's placeholder figures.
+// The price and the line under it. No price: a dash. Built-in rows: the design's placeholder figures.
 const cellLines = (row: Row, country: string): string[] => {
   if (!data?.edited) return [c.cell.price, c.cell.clinics];
-  const value = cellFor(row.cells, country);
-  return value ? value.split(/\s*\|\s*/) : ['—'];
+  const price = priceFor(row.prices, country);
+  return price ? [price.price, price.detail].filter((line) => line !== '') : ['—'];
 };
-const saving = (row: Row) => (data?.edited ? row.saving || '—' : c.saving);
+// The saving against each compared country; the page shows the one of the selected country.
+const saving = (row: Row, country: string) =>
+  data?.edited ? priceFor(row.prices, country)?.saving || '—' : c.saving;
 const methodParagraphs = (data?.methodology ?? '')
   .split(/\n{2,}|\n/)
   .filter((p) => p.trim() !== '');
@@ -108,7 +110,16 @@ const methodParagraphs = (data?.methodology ?? '')
                   ))}
                 </td>
               ))}
-              <td>{saving(row)}</td>
+              <td>
+                {countries.map(
+                  (country, i) =>
+                    i > 0 && (
+                      <span data-saving={i} hidden={i !== defaultIndex}>
+                        {saving(row, country)}
+                      </span>
+                    ),
+                )}
+              </td>
             </tr>
           ))}
         </tbody>
@@ -127,8 +138,9 @@ const methodParagraphs = (data?.methodology ?? '')
 )}
 
 <script>
-  // Highlights the column of the chosen country (cells and options carry the column number). The table already renders every country, so
-  // without JavaScript the default country stays highlighted and nothing is lost.
+  // Highlights the column of the chosen country (cells and options carry the column number) and shows the saving
+  // against it. The table already renders every country, so without JavaScript the default country stays
+  // highlighted with its saving, and nothing is lost.
   document.querySelectorAll<HTMLElement>('[data-compare]').forEach((box) => {
     const select = box.querySelector('select');
     const table = box.parentElement?.querySelector<HTMLTableElement>('[data-compare-table]');
@@ -136,6 +148,9 @@ const methodParagraphs = (data?.methodology ?? '')
     select.addEventListener('change', () => {
       table.querySelectorAll<HTMLElement>('[data-country]').forEach((cell) => {
         cell.classList.toggle('is-selected', cell.dataset.country === select.value);
+      });
+      table.querySelectorAll<HTMLElement>('[data-saving]').forEach((saving) => {
+        saving.hidden = saving.dataset.saving !== select.value;
       });
       // On a phone the chosen column can sit off screen: bring it into view inside the table only.
       const head = table.querySelector<HTMLElement>(`thead [data-country="${select.value}"]`);

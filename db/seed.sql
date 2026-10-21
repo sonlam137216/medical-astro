@@ -158,83 +158,235 @@ from services s,
 where s.slug = 'dental-implants' and not exists (select 1 from service_situations);
 
 -- The cost comparison table of the Home page (also shown on every service page except Dental Implants), filled
--- with the design's SAMPLE figures (every cell "C$1,250 | 40 clinics") so the table can be tried on local and
--- staging (owner's choice, 2026-10-16). These are NOT real prices: Page text > "Home: treatment costs table" must be
--- rewritten with checked prices before production. Each price line names its country (the columns are the
--- "countries" list). The only Page text row of the seed; an edited row is kept.
+-- with SAMPLE figures (US$, savings worked out from them) so the table can be tried on local and staging (owner's
+-- choice, 2026-10-16; figures changed 2026-10-21). These are NOT real prices: Page text > "Home: treatment costs
+-- table" must be rewritten with checked prices before production. Each treatment has one price, a line under it
+-- and a saving per country (the "countries" list). The only Page text row of the seed; an edited row is kept.
 insert or ignore into page_sections (page_id, type, data)
 select id, 'home_costs', json('{
   "label": "Treatment costs",
   "title": "Exceptional dental care.\nMade more accessible.",
-  "countries": ["Vietnam", "United States", "Australia", "United Kingdom", "Canada", "New Zealand"],
+  "countries": [
+    "Vietnam",
+    "United States",
+    "Australia",
+    "United Kingdom",
+    "Canada",
+    "New Zealand"
+  ],
   "compare": "Australia",
   "rows": [
     {
       "name": "Dental implants",
-      "note": "Implant tooth replacement",
-      "cells": [
-        "Vietnam: C$1,250 | 40 clinics",
-        "United States: C$1,250 | 40 clinics",
-        "Australia: C$1,250 | 40 clinics",
-        "United Kingdom: C$1,250 | 40 clinics",
-        "Canada: C$1,250 | 40 clinics",
-        "New Zealand: C$1,250 | 40 clinics"
-      ],
-      "saving": ""
+      "note": "Per implant, crown included",
+      "prices": [
+        {
+          "country": "Vietnam",
+          "price": "US$1,100",
+          "detail": "Melatec",
+          "saving": ""
+        },
+        {
+          "country": "United States",
+          "price": "US$4,500",
+          "detail": "40 clinics",
+          "saving": "75%"
+        },
+        {
+          "country": "Australia",
+          "price": "US$4,200",
+          "detail": "35 clinics",
+          "saving": "73%"
+        },
+        {
+          "country": "United Kingdom",
+          "price": "US$3,300",
+          "detail": "30 clinics",
+          "saving": "66%"
+        },
+        {
+          "country": "Canada",
+          "price": "US$3,600",
+          "detail": "25 clinics",
+          "saving": "69%"
+        },
+        {
+          "country": "New Zealand",
+          "price": "US$3,900",
+          "detail": "20 clinics",
+          "saving": "71%"
+        }
+      ]
     },
     {
       "name": "All-on-4 & All-on-6",
-      "note": "Full-arch restoration with four or six implants",
-      "cells": [
-        "Vietnam: C$1,250 | 40 clinics",
-        "United States: C$1,250 | 40 clinics",
-        "Australia: C$1,250 | 40 clinics",
-        "United Kingdom: C$1,250 | 40 clinics",
-        "Canada: C$1,250 | 40 clinics",
-        "New Zealand: C$1,250 | 40 clinics"
-      ],
-      "saving": ""
+      "note": "Per arch, full-arch restoration",
+      "prices": [
+        {
+          "country": "Vietnam",
+          "price": "US$7,500",
+          "detail": "Melatec",
+          "saving": ""
+        },
+        {
+          "country": "United States",
+          "price": "US$24,000",
+          "detail": "40 clinics",
+          "saving": "68%"
+        },
+        {
+          "country": "Australia",
+          "price": "US$22,000",
+          "detail": "35 clinics",
+          "saving": "65%"
+        },
+        {
+          "country": "United Kingdom",
+          "price": "US$18,000",
+          "detail": "30 clinics",
+          "saving": "58%"
+        },
+        {
+          "country": "Canada",
+          "price": "US$20,000",
+          "detail": "25 clinics",
+          "saving": "62%"
+        },
+        {
+          "country": "New Zealand",
+          "price": "US$21,000",
+          "detail": "20 clinics",
+          "saving": "64%"
+        }
+      ]
     },
     {
       "name": "Porcelain veneers",
-      "note": "Thin porcelain shells for a natural smile",
-      "cells": [
-        "Vietnam: C$1,250 | 40 clinics",
-        "United States: C$1,250 | 40 clinics",
-        "Australia: C$1,250 | 40 clinics",
-        "United Kingdom: C$1,250 | 40 clinics",
-        "Canada: C$1,250 | 40 clinics",
-        "New Zealand: C$1,250 | 40 clinics"
-      ],
-      "saving": ""
+      "note": "Per tooth",
+      "prices": [
+        {
+          "country": "Vietnam",
+          "price": "US$350",
+          "detail": "Melatec",
+          "saving": ""
+        },
+        {
+          "country": "United States",
+          "price": "US$1,500",
+          "detail": "40 clinics",
+          "saving": "76%"
+        },
+        {
+          "country": "Australia",
+          "price": "US$1,400",
+          "detail": "35 clinics",
+          "saving": "75%"
+        },
+        {
+          "country": "United Kingdom",
+          "price": "US$1,000",
+          "detail": "30 clinics",
+          "saving": "65%"
+        },
+        {
+          "country": "Canada",
+          "price": "US$1,200",
+          "detail": "25 clinics",
+          "saving": "70%"
+        },
+        {
+          "country": "New Zealand",
+          "price": "US$1,300",
+          "detail": "20 clinics",
+          "saving": "73%"
+        }
+      ]
     },
     {
       "name": "Dental crowns",
-      "note": "Custom crowns for damaged or weakened teeth",
-      "cells": [
-        "Vietnam: C$1,250 | 40 clinics",
-        "United States: C$1,250 | 40 clinics",
-        "Australia: C$1,250 | 40 clinics",
-        "United Kingdom: C$1,250 | 40 clinics",
-        "Canada: C$1,250 | 40 clinics",
-        "New Zealand: C$1,250 | 40 clinics"
-      ],
-      "saving": ""
+      "note": "Zirconia, per tooth",
+      "prices": [
+        {
+          "country": "Vietnam",
+          "price": "US$300",
+          "detail": "Melatec",
+          "saving": ""
+        },
+        {
+          "country": "United States",
+          "price": "US$1,400",
+          "detail": "40 clinics",
+          "saving": "78%"
+        },
+        {
+          "country": "Australia",
+          "price": "US$1,600",
+          "detail": "35 clinics",
+          "saving": "81%"
+        },
+        {
+          "country": "United Kingdom",
+          "price": "US$900",
+          "detail": "30 clinics",
+          "saving": "66%"
+        },
+        {
+          "country": "Canada",
+          "price": "US$1,200",
+          "detail": "25 clinics",
+          "saving": "75%"
+        },
+        {
+          "country": "New Zealand",
+          "price": "US$1,300",
+          "detail": "20 clinics",
+          "saving": "76%"
+        }
+      ]
     },
     {
       "name": "Root canal treatment",
       "note": "Per tooth, crown excluded",
-      "cells": [
-        "Vietnam: C$1,250 | 40 clinics",
-        "United States: C$1,250 | 40 clinics",
-        "Australia: C$1,250 | 40 clinics",
-        "United Kingdom: C$1,250 | 40 clinics",
-        "Canada: C$1,250 | 40 clinics",
-        "New Zealand: C$1,250 | 40 clinics"
-      ],
-      "saving": ""
+      "prices": [
+        {
+          "country": "Vietnam",
+          "price": "US$150",
+          "detail": "Melatec",
+          "saving": ""
+        },
+        {
+          "country": "United States",
+          "price": "US$1,200",
+          "detail": "40 clinics",
+          "saving": "87%"
+        },
+        {
+          "country": "Australia",
+          "price": "US$1,500",
+          "detail": "35 clinics",
+          "saving": "90%"
+        },
+        {
+          "country": "United Kingdom",
+          "price": "US$800",
+          "detail": "30 clinics",
+          "saving": "81%"
+        },
+        {
+          "country": "Canada",
+          "price": "US$1,000",
+          "detail": "25 clinics",
+          "saving": "85%"
+        },
+        {
+          "country": "New Zealand",
+          "price": "US$1,100",
+          "detail": "20 clinics",
+          "saving": "86%"
+        }
+      ]
     }
   ],
-  "methodology": "SAMPLE FIGURES from the design, not real prices. Replace every figure with prices the clinic has checked before going live."
+  "methodology": "SAMPLE FIGURES for trying the table, not real prices. Replace every figure with prices the clinic has checked before going live.\n\nPrices are in US dollars. Vietnam shows Melatec''s own price; the other countries show the average price of the listed number of clinics. The saving compares Melatec''s price with the selected country."
 }')
 from pages where path = '/';

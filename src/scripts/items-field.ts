@@ -22,8 +22,9 @@ function renumber(list: HTMLElement) {
   });
 }
 
+// `data-item-keep`: a value the form fills in itself (the country of a price row), not something typed.
 const isEmpty = (item: HTMLElement) =>
-  controls(item, '[name]').every((input) => input.value.trim() === '');
+  controls(item, '[name]:not([data-item-keep])').every((input) => input.value.trim() === '');
 
 for (const list of document.querySelectorAll<HTMLElement>('[data-items]')) {
   const items = () => Array.from(list.querySelectorAll<HTMLElement>('[data-item]'));
@@ -61,7 +62,9 @@ for (const list of document.querySelectorAll<HTMLElement>('[data-items]')) {
     const item = remove.closest<HTMLElement>('[data-item]');
     if (!item) return;
     item
-      .querySelectorAll<HTMLInputElement | HTMLTextAreaElement>('input[name], textarea[name]')
+      .querySelectorAll<HTMLInputElement | HTMLTextAreaElement>(
+        'input[name]:not([data-item-keep]), textarea[name]',
+      )
       .forEach((input) => {
         input.value = '';
       });

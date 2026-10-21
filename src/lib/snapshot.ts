@@ -2,7 +2,7 @@ import type { AdminDb } from './admin-auth';
 import { readColor } from './image-color.ts';
 import { toFocus } from './image-slots.ts';
 import { articleProblems, bodyImageIds, parseArticleBody } from './cms/articles.ts';
-import { itemInput, parseFields } from './cms/fields.ts';
+import { formFromData, parseFields } from './cms/fields.ts';
 import {
   REQUIRED_SECTIONS,
   sectionByKey,
@@ -787,22 +787,7 @@ function sectionDataProblems(
   { fields, check }: Pick<SectionDef, 'fields' | 'check'>,
   data: Record<string, unknown>,
 ): string[] {
-  const form = new URLSearchParams();
-  for (const f of fields) {
-    const v = data[f.name];
-    if (f.type === 'lines' && Array.isArray(v)) form.set(f.name, v.join('\n'));
-    else if (f.type === 'items' && Array.isArray(v)) {
-      (v as Record<string, unknown>[]).slice(0, f.maxItems).forEach((item, i) => {
-        for (const c of f.columns) {
-          const cell = item?.[c.name];
-          form.set(
-            itemInput(f.name, i, c.name),
-            Array.isArray(cell) ? cell.join('\n') : typeof cell === 'string' ? cell : '',
-          );
-        }
-      });
-    } else if (typeof v === 'string') form.set(f.name, v);
-  }
+  const form = formFromData(fields, data);
   const parsed = parseFields(
     fields.filter((f) => f.type !== 'image'),
     form,

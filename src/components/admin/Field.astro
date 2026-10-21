@@ -1,5 +1,13 @@
 ---
-import { itemInput, type Field, type FieldErrors, type FormValues } from '../../lib/cms/fields';
+import {
+  itemInput,
+  priceInput,
+  pricesFromValue,
+  type Field,
+  type FieldErrors,
+  type FormValues,
+} from '../../lib/cms/fields';
+import { sameCountry, suggestedSaving } from '../../lib/cms/cost-table';
 import type { FormOptions } from '../../lib/cms/admin';
 import MediaPicker from './MediaPicker.astro';
 
@@ -17,6 +25,32 @@ const text = (name: string) => String(values[name] ?? '');
 const invalid = (name: string) => (errors[name] ? 'true' : undefined);
 // Slots of an `items` field shown without JavaScript: the filled ones plus two empty ones (at most the field's
 // maximum). The others are drawn hidden, for the "Add" button (src/scripts/items-field.ts).
+// The lines of a `lines` field in the form state (the countries of a cost table).
+const linesIn = (name: string) =>
+  text(name)
+    .split('\n')
+    .map((l) => l.trim())
+    .filter((l) => l !== '');
+// A list shown as boxes: the filled ones plus two empty ones without JavaScript (at most the field's maximum).
+const listBoxes = (f: Extract<Field, { type: 'lines' }>) => {
+  const filled = linesIn(f.name);
+  return [...filled, '', ''].slice(
+    0,
+    Math.max(filled.length, Math.min(f.maxItems, filled.length + 2)),
+  );
+};
+// The price boxes of one treatment: one row per country of the list, with what is saved for it.
+const priceRows = (countriesFrom: string | undefined, value: string) => {
+  const saved = pricesFromValue(value);
+  const rows = linesIn(countriesFrom ?? '').map((country) => {
+    const p = saved.find((s) => sameCountry(s.country, country));
+    return { country, price: p?.price ?? '', detail: p?.detail ?? '', saving: p?.saving ?? '' };
+  });
+  return rows.map((r, j) => ({
+    ...r,
+    suggested: j > 0 ? suggestedSaving(rows[0].price, r.price) : '',
+  }));
+};
 const slotsFor = (f: Extract<Field, { type: 'items' }>) => {
   let last = -1;
   for (let i = 0; i < f.maxItems; i++)
@@ -64,43 +98,123 @@ const slotsFor = (f: Extract<Field, { type: 'items' }>) => {
             Remove
           </button>
         </div>
-        {f.columns.map((c) => (
-          <label>
-            {c.label}
-            {c.kind === 'text' ? (
-              <input
-                name={itemInput(f.name, i, c.name)}
-                value={text(itemInput(f.name, i, c.name))}
-                maxlength={c.max}
-              />
-            ) : c.kind === 'video' ? (
-              <input
-                type="url"
-                inputmode="url"
-                name={itemInput(f.name, i, c.name)}
-                value={text(itemInput(f.name, i, c.name))}
-                maxlength={c.max}
-                placeholder="https://www.youtube.com/watch?v=…"
-              />
-            ) : c.kind === 'choice' ? (
-              <select name={itemInput(f.name, i, c.name)}>
-                <option value="">None</option>
-                {(c.options ?? []).map((o) => (
-                  <option value={o.value} selected={text(itemInput(f.name, i, c.name)) === o.value}>
-                    {o.label}
-                  </option>
-                ))}
-              </select>
-            ) : (
-              <textarea
-                name={itemInput(f.name, i, c.name)}
-                rows={c.kind === 'lines' ? 4 : 3}
-                maxlength={c.kind === 'textarea' ? c.max : undefined}
-              >{text(itemInput(f.name, i, c.name))}</textarea>
-            )}
-            {c.help && <span class="admin-hint">{c.help}</span>}
-          </label>
-        ))}
+        {f.columns.map((c) =>
+          c.kind === 'prices' ? (
+            <div class="admin-prices" data-cost-prices data-column={c.name}>
+              <span class="admin-prices__label">{c.label}</span>
+              <table class="admin-prices__table">
+                <thead>
+                  <tr>
+                    <th scope="col">Country</th>
+                    <th scope="col">Price</th>
+                    <th scope="col">Under the price</th>
+                    <th scope="col">Saving</th>
+                  </tr>
+                </thead>
+                <tbody data-price-rows>
+                  {priceRows(c.countriesFrom, text(itemInput(f.name, i, c.name))).map((r, j) => (
+                    <tr data-price-row>
+                      <th scope="row">
+                        <span data-price-country>{r.country}</span>
+                        <input
+                          type="hidden"
+                          name={priceInput(f.name, i, c.name, j, 'country')}
+                          value={r.country}
+                          data-item-keep
+                        />
+                      </th>
+                      <td>
+                        <input
+                          name={priceInput(f.name, i, c.name, j, 'price')}
+                          value={r.price}
+                          maxlength="40"
+                          placeholder="US$1,250"
+                          aria-label={`${r.country}: price`}
+                          data-price
+                        />
+                      </td>
+                      <td>
+                        <input
+                          name={priceInput(f.name, i, c.name, j, 'detail')}
+                          value={r.detail}
+                          maxlength="60"
+                          placeholder="40 clinics"
+                          aria-label={`${r.country}: under the price`}
+                        />
+                      </td>
+                      <td>
+                        <span class="admin-prices__none" hidden={j > 0} data-saving-none>
+                          No saving (base price)
+                        </span>
+                        <input
+                          name={priceInput(f.name, i, c.name, j, 'saving')}
+                          value={j > 0 ? r.saving : ''}
+                          maxlength="40"
+                          placeholder={r.suggested}
+                          aria-label={`${r.country}: saving`}
+                          hidden={j === 0}
+                          disabled={j === 0}
+                          data-saving
+                        />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <button
+                type="button"
+                class="admin-btn admin-btn--ghost admin-prices__fill"
+                data-fill-savings
+                hidden
+              >
+                Fill the empty savings with the suggested ones
+              </button>
+              {c.help && <span class="admin-hint">{c.help}</span>}
+              <span class="admin-hint" data-prices-nojs>
+                Added a country above? Save, and its boxes appear here.
+              </span>
+            </div>
+          ) : (
+            <label>
+              {c.label}
+              {c.kind === 'text' ? (
+                <input
+                  name={itemInput(f.name, i, c.name)}
+                  value={text(itemInput(f.name, i, c.name))}
+                  maxlength={c.max}
+                />
+              ) : c.kind === 'video' ? (
+                <input
+                  type="url"
+                  inputmode="url"
+                  name={itemInput(f.name, i, c.name)}
+                  value={text(itemInput(f.name, i, c.name))}
+                  maxlength={c.max}
+                  placeholder="https://www.youtube.com/watch?v=…"
+                />
+              ) : c.kind === 'choice' ? (
+                <select name={itemInput(f.name, i, c.name)}>
+                  <option value="">None</option>
+                  {(c.options ?? []).map((o) => (
+                    <option
+                      value={o.value}
+                      selected={text(itemInput(f.name, i, c.name)) === o.value}
+                    >
+                      {o.label}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <textarea
+                  name={itemInput(f.name, i, c.name)}
+                  rows={c.kind === 'lines' ? 4 : 3}
+                  maxlength={c.kind === 'textarea' ? c.max : undefined}
+                >{text(itemInput(f.name, i, c.name))}</textarea>
+              )}
+              {c.help && <span class="admin-hint">{c.help}</span>}
+            </label>
+          ),
+        )}
       </div>
     ))}
     <button type="button" class="admin-btn admin-btn--ghost admin-items__add" data-item-add hidden>
@@ -110,6 +224,58 @@ const slotsFor = (f: Extract<Field, { type: 'items' }>) => {
       Leave a card empty to leave it out. To add more than are shown, save and come back: two empty
       cards are offered each time (up to {f.maxItems}).
     </span>
+    {error && <span class="admin-field-error">{error}</span>}
+  </fieldset>
+)}
+
+{f.type === 'lines' && f.inputs && (
+  <fieldset class="admin-list" data-countries-list={f.name} data-max={f.maxItems}>
+    <legend>{f.label}</legend>
+    {f.help && <span class="admin-hint">{f.help}</span>}
+    <ol class="admin-list__items" data-list-items>
+      {listBoxes(f).map((line, n) => (
+        <li class="admin-list__item" data-list-item>
+          <input
+            name={f.name}
+            value={line}
+            maxlength={f.maxLength}
+            aria-label={`${f.label}: ${n + 1}`}
+            aria-invalid={invalid(f.name)}
+          />
+          <button
+            type="button"
+            class="admin-btn admin-btn--ghost"
+            aria-label="Move up"
+            title="Move up"
+            data-list-up
+            hidden
+          >
+            ↑
+          </button>
+          <button
+            type="button"
+            class="admin-btn admin-btn--ghost"
+            aria-label="Move down"
+            title="Move down"
+            data-list-down
+            hidden
+          >
+            ↓
+          </button>
+          <button type="button" class="admin-btn admin-btn--ghost" data-list-remove hidden>
+            Remove
+          </button>
+        </li>
+      ))}
+    </ol>
+    <button
+      type="button"
+      class="admin-btn admin-btn--ghost admin-items__add admin-list__add"
+      data-list-add
+      hidden
+    >
+      + Add country
+    </button>
     {error && <span class="admin-field-error">{error}</span>}
   </fieldset>
 )}
@@ -203,10 +369,37 @@ const slotsFor = (f: Extract<Field, { type: 'items' }>) => {
   f.type !== 'bool' &&
   f.type !== 'image' &&
   f.type !== 'money' &&
-  f.type !== 'items' && (
+  f.type !== 'items' &&
+  !(f.type === 'lines' && f.inputs) && (
     <label>
       {f.label}
-      {(f.type === 'text' ||
+      {f.type === 'text' && f.choicesFrom && (
+        <select
+          name={f.name}
+          aria-invalid={invalid(f.name)}
+          data-choices-from={f.choicesFrom.field}
+        >
+          <option value="" selected={text(f.name) === ''}>
+            {f.choicesFrom.emptyLabel}
+          </option>
+          {linesIn(f.choicesFrom.field)
+            .slice(1)
+            .map((choice) => (
+              <option value={choice} selected={sameCountry(choice, text(f.name))}>
+                {choice}
+              </option>
+            ))}
+          {text(f.name) !== '' &&
+            !linesIn(f.choicesFrom.field)
+              .slice(1)
+              .some((choice) => sameCountry(choice, text(f.name))) && (
+              <option value={text(f.name)} selected>
+                {text(f.name)}
+              </option>
+            )}
+        </select>
+      )}
+      {((f.type === 'text' && !f.choicesFrom) ||
         f.type === 'url' ||
         f.type === 'path' ||
         f.type === 'email' ||
@@ -292,4 +485,6 @@ const slotsFor = (f: Extract<Field, { type: 'items' }>) => {
   if (document.querySelector('[data-article-editor]')) void import('../../scripts/article-editor');
   if (document.querySelector('select[data-media-video]')) void import('../../scripts/media-fields');
   if (document.querySelector('[data-items]')) void import('../../scripts/items-field');
+  if (document.querySelector('[data-countries-list]'))
+    void import('../../scripts/cost-table-field');
 </script>

@@ -168,18 +168,23 @@ export const CLINIC_PHOTOS = [
 ] as const satisfies readonly (readonly [string, string, SlotKey])[];
 
 const countries: Field = {
-  ...lines(
-    COUNTRIES_FIELD,
-    'Countries (table columns)',
-    MAX_COUNTRIES,
-    40,
-    'One country per line, in the order of the columns. The first is Vietnam (Melatec’s prices, in blue); the visitor compares it with one of the others. Removing a country also means removing its price line from each treatment.',
-  ),
+  type: 'lines',
+  name: COUNTRIES_FIELD,
+  label: 'Countries (table columns)',
+  maxItems: MAX_COUNTRIES,
+  maxLength: 40,
+  help: 'The columns of the table, in this order. The first is Vietnam (Melatec’s prices, in blue); the visitor compares it with one of the others. Each treatment below has a price box for every country here.',
+  inputs: true,
   required: true,
 };
-const compare = text(COMPARE_FIELD, 'Country compared when the page opens', 40, {
-  help: 'One of the countries above, other than the first. Leave empty to use the second one.',
-});
+const compare: Field = {
+  type: 'text',
+  name: COMPARE_FIELD,
+  label: 'Country compared when the page opens',
+  max: 40,
+  choicesFrom: { field: COUNTRIES_FIELD, emptyLabel: 'The second country' },
+  help: 'The visitor can choose another one on the page.',
+};
 const costRows = (name: string, label: string) =>
   items(
     name,
@@ -189,22 +194,17 @@ const costRows = (name: string, label: string) =>
     [
       col('name', 'Treatment', 'text', 120, true),
       col('note', 'Short note', 'text', 200),
-      col(
-        'cells',
-        'Prices by country',
-        'lines',
-        120,
-        false,
-        'One line per country: the country as written in the Countries list, a colon, the price, then “ | ” and the number of clinics, for example “Australia: A$1,250 | 40 clinics”. Only enter figures the clinic can back up. A country with no line shows “—”.',
-      ),
-      col(
-        'saving',
-        'Saving',
-        'text',
-        60,
-        false,
-        'For example “Up to 70%”. Leave empty to show “—”.',
-      ),
+      {
+        ...col(
+          'prices',
+          'Prices by country',
+          'prices',
+          40,
+          false,
+          'Price, for example “US$1,250”; under the price, for example “40 clinics”; saving, for example “73%”. The saving shows when the visitor compares with that country. A country with no price shows “—”. Only enter figures the clinic can back up.',
+        ),
+        countriesFrom: COUNTRIES_FIELD,
+      },
     ],
     {
       help: 'Only use real, checked prices. The visitor chooses which country to compare with the first one.',
@@ -657,8 +657,8 @@ const isObj = (v: unknown): v is Obj => typeof v === 'object' && v !== null && !
 
 const pad = (n: number) => String(n).padStart(2, '0');
 
-const emptyValue = (kind: 'text' | 'textarea' | 'lines' | 'choice' | 'video' | 'items') =>
-  kind === 'lines' || kind === 'items' ? [] : '';
+const emptyValue = (kind: ItemColumn['kind'] | 'items') =>
+  kind === 'lines' || kind === 'items' || kind === 'prices' ? [] : '';
 
 /**
  * A row saved before a field (or a card column) was added has no value for it. Without this, the built-in words
