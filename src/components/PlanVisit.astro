@@ -9,81 +9,95 @@ import { getSection } from '../lib/content';
 
 const site = await getSiteContent();
 
-// Consultation block used on the Dental Implants landing page (different copy and fields from the shared one).
-const plan = (await getSection('implants_plan'))!;
+// Each page keeps its own editable copy; the Packages variant follows Figma's one-column form.
+interface Props {
+  variant?: 'implants' | 'packages';
+}
+const { variant = 'implants' } = Astro.props;
+const packages = variant === 'packages';
+const plan = await getSection(packages ? 'packages_plan' : 'implants_plan');
 const interests = (await getServiceLinks()).map((t) => t.label);
 ---
 
-<section class="band" id="consultation" aria-labelledby="plan-title">
-  <div class="container">
-    <div class="plan">
-      <div class="plan__info">
-        <p class="plan__label">{plan.label}</p>
-        <h2 class="t-h2" id="plan-title">
-          {plan.title}
-        </h2>
-        <p>{plan.body}</p>
-        <ul class="plan__bullets">
-          {plan.bullets.map((b) => (
-            <li>{b}</li>
-          ))}
-        </ul>
-        {site.whatsappUrl && (
-          <div>
-            <Button variant="outline" href={site.whatsappUrl}>
-              <Icon name="brand-whatsapp" />
-              Ask on WhatsApp
+{plan && (
+  <section
+    class:list={['band', { 'band--packages': packages }]}
+    id="consultation"
+    aria-labelledby="plan-title"
+  >
+    <div class="container">
+      <div class="plan">
+        <div class="plan__info">
+          <p class="plan__label">{plan.label}</p>
+          <h2 class="t-h2" id="plan-title">
+            {plan.title}
+          </h2>
+          <p>{plan.body}</p>
+          <ul class="plan__bullets">
+            {plan.bullets.map((b) => (
+              <li>{b}</li>
+            ))}
+          </ul>
+          {site.whatsappUrl && (
+            <div>
+              <Button variant={packages ? 'whatsapp-outline' : 'outline'} href={site.whatsappUrl}>
+                {!packages && <Icon name="brand-whatsapp" />}
+                Ask on WhatsApp
+              </Button>
+            </div>
+          )}
+        </div>
+
+        <!-- POST so personal data never lands in the URL. Same endpoint as the shared consultation form. -->
+        <form class="form" method="post" action="/api/consultation" data-form="consultation">
+          <FormGuards part="fields" />
+          <div class="field">
+            <label for="pv-name">{packages ? 'Name' : 'Full name'}</label>
+            <input
+              id="pv-name"
+              name="name"
+              type="text"
+              autocomplete="name"
+              placeholder={packages ? undefined : 'Your full name'}
+              maxlength="120"
+              required
+            />
+          </div>
+          {packages && <PhoneField id="pv-phone" label="Phone" placeholder="" />}
+          <div class="field">
+            <label for="pv-email">Email</label>
+            <input
+              id="pv-email"
+              name="email"
+              type="email"
+              autocomplete="email"
+              placeholder={packages ? undefined : 'you@example.com'}
+              maxlength="254"
+              required
+            />
+          </div>
+          {!packages && <PhoneField id="pv-phone" label="Phone / WhatsApp" class="form__wide" />}
+          <div class="field form__wide">
+            <label for="pv-interest">{packages ? 'Services' : 'Treatment interest'}</label>
+            <select id="pv-interest" name="service">
+              <option value="">Select a treatment</option>
+              {interests.map((i) => (
+                <option value={i}>{i}</option>
+              ))}
+            </select>
+          </div>
+          <div class="form__actions">
+            <Button type="submit" variant={packages ? 'outline' : 'primary'}>
+              Request consultation
             </Button>
           </div>
-        )}
+          <FormGuards part="status" />
+          {!packages && <p class="form__note">Your information is kept confidential.</p>}
+        </form>
       </div>
-
-      <!-- POST so personal data never lands in the URL. Same endpoint as the shared consultation form. -->
-      <form class="form" method="post" action="/api/consultation" data-form="consultation">
-        <FormGuards part="fields" />
-        <div class="field">
-          <label for="pv-name">Full name</label>
-          <input
-            id="pv-name"
-            name="name"
-            type="text"
-            autocomplete="name"
-            placeholder="Your full name"
-            maxlength="120"
-            required
-          />
-        </div>
-        <div class="field">
-          <label for="pv-email">Email</label>
-          <input
-            id="pv-email"
-            name="email"
-            type="email"
-            autocomplete="email"
-            placeholder="you@example.com"
-            maxlength="254"
-            required
-          />
-        </div>
-        <PhoneField id="pv-phone" label="Phone / WhatsApp" class="form__wide" />
-        <div class="field form__wide">
-          <label for="pv-interest">Treatment interest</label>
-          <select id="pv-interest" name="service">
-            <option value="">Select a treatment</option>
-            {interests.map((i) => (
-              <option value={i}>{i}</option>
-            ))}
-          </select>
-        </div>
-        <div class="form__actions">
-          <Button type="submit">Request consultation</Button>
-        </div>
-        <FormGuards part="status" />
-        <p class="form__note">Your information is kept confidential.</p>
-      </form>
     </div>
-  </div>
-</section>
+  </section>
+)}
 
 <style>
   .band {
@@ -203,15 +217,100 @@ const interests = (await getServiceLinks()).map((t) => t.label);
     color: var(--color-muted);
   }
 
+  /* Dental Packages / Treatment Prices, Figma 342:652. Keep the original Implants variant. */
+  .band--packages .plan {
+    grid-template-columns: minmax(0, 1.12fr) minmax(0, 1fr);
+    align-items: start;
+    gap: 32px;
+  }
+
+  .band--packages .plan__info {
+    gap: 18px;
+    color: var(--color-muted);
+    font-family: var(--font-display);
+  }
+
+  .band--packages .plan__label {
+    gap: 12px;
+    color: var(--color-blue);
+    font-weight: 500;
+  }
+
+  .band--packages .plan__info h2 {
+    color: var(--color-title);
+  }
+
+  .band--packages .plan__bullets {
+    gap: 14px;
+  }
+
+  .band--packages .form {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 28px;
+    margin-top: 72px;
+    padding: 36px 40px;
+    --field-label: var(--color-blue-deep);
+    --field-bg: var(--color-field);
+    --field-color: var(--color-blue-deep);
+    --field-height: 48px;
+    --field-radius: 10px;
+    --phone-code-width: 96px;
+    --phone-code-pad: 10px;
+  }
+
+  .band--packages .field input,
+  .band--packages .field select {
+    height: var(--field-height);
+    border-radius: var(--field-radius);
+    background: var(--field-bg);
+    color: var(--field-color);
+  }
+
+  .band--packages :global(.phone) {
+    gap: 0;
+    min-width: 0;
+  }
+
+  .band--packages :global(.phone select) {
+    border-radius: var(--field-radius) 0 0 var(--field-radius);
+  }
+
+  .band--packages :global(.phone input) {
+    min-width: 0;
+    border-left: 0;
+    border-radius: 0 var(--field-radius) var(--field-radius) 0;
+  }
+
+  .band--packages .form__actions :global(.btn) {
+    width: 100%;
+    border-color: var(--color-blue-deep);
+    border-radius: 999px;
+    padding-inline: 12px;
+    color: var(--color-blue-deep);
+    font-weight: 700;
+    text-transform: uppercase;
+    white-space: normal;
+  }
+
+  .band--packages .form :global(.form__status:empty) {
+    display: none;
+  }
+
   @media (max-width: 900px) {
-    .plan {
-      grid-template-columns: 1fr;
+    .plan,
+    .band--packages .plan {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .band--packages .form {
+      margin-top: 0;
     }
   }
 
   @media (max-width: 560px) {
-    .form {
-      grid-template-columns: 1fr;
+    .form,
+    .band--packages .form {
+      grid-template-columns: minmax(0, 1fr);
       padding: 24px 20px;
     }
   }

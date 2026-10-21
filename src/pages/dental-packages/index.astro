@@ -7,6 +7,7 @@ import SeamlessJourney from '../../components/SeamlessJourney.astro';
 import PackageGrid from '../../components/PackageGrid.astro';
 import CtaBand from '../../components/CtaBand.astro';
 import TourismSupport from '../../components/TourismSupport.astro';
+import PlanVisit from '../../components/PlanVisit.astro';
 import { careCta } from '../../data/shared';
 import { heroImage } from '../../data/home';
 import { getSection } from '../../lib/content';
@@ -23,7 +24,7 @@ const banner = await getPageBanner('/dental-packages');
 ---
 
 <!-- Figma frame: "Dental Packages / Single Treatments" -->
-<SiteLayout title={seo.title} description={seo.description}>
+<SiteLayout title={seo.title} description={seo.description} consultation={false} consultationAnchor>
   <PageHero
     variant="banner"
     upper
@@ -46,4 +47,5 @@ const banner = await getPageBanner('/dental-packages');
 
   <CtaBand {...careCta} />
   <TourismSupport />
+  <PlanVisit variant="packages" />
 </SiteLayout>

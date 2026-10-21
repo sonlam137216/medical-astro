@@ -31,6 +31,7 @@
   --color-muted: #57595b; /* secondary text (Figma 57595B) */
   --color-white: #ffffff;
   --color-border: #b3c9f3;
+  --color-field: #eaf4fa; /* Figma: treatment plan form fields */
   --color-soft: #f0f7fd; /* alternating light band */
   --color-card: #f7fbfe; /* Figma card fill F0F7FD at 58% over white */
   --color-green: #18c262; /* WhatsApp button */

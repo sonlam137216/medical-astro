@@ -650,6 +650,18 @@ export const SECTIONS: SectionDef[] = [
       lines('bullets', 'Points', 5, 200, 'One point per line.'),
     ],
   },
+  {
+    key: 'packages_plan',
+    page: '/dental-packages',
+    label: 'Dental Packages: get your plan',
+    where: 'The text beside the consultation form.',
+    fields: [
+      label,
+      title,
+      area('body', 'Text', 600),
+      lines('bullets', 'Points', 5, 200, 'One point per line.'),
+    ],
+  },
 ];
 
 export const sectionByKey = (key: string | undefined) => SECTIONS.find((s) => s.key === key);

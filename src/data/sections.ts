@@ -100,6 +100,7 @@ export const SECTION_SAMPLES = {
   },
   implants_why: implantsWhy,
   implants_plan: implantsPlan,
+  packages_plan: implantsPlan,
 };
 
 export type SectionKey = keyof typeof SECTION_SAMPLES;
