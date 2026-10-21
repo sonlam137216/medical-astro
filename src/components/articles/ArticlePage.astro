@@ -199,17 +199,24 @@ const jsonLd = site
 
           {article.reviewedBy && (
             <aside class="review">
-              <span class="review__icon" aria-hidden="true">
-                <Icon name="shield-check" size={18} />
-              </span>
+              <span class="review__avatar" aria-hidden="true" />
               <div class="review__text">
-                <p class="review__by">Clinically reviewed by {article.reviewedBy}</p>
+                <p class="review__by">Clinically reviewed by: {article.reviewedBy}</p>
+                <p class="review__description">
+                  Rooted in the principles of the Hippocratic Oath, our dentists bring expertise,
+                  precision and genuine care to every treatment.
+                </p>
                 {reviewed && <p class="review__date">Reviewed on {reviewed}</p>}
-                <a class="link-arrow" href="/our-doctors">
-                  Meet our doctors{' '}
-                  <span aria-hidden="true">
-                    <Icon name="arrow-right" size={14} />
-                  </span>
+                <a class="review__link" href="/our-doctors">
+                  View All Doctor
+                  <svg width="36" height="12" viewBox="0 0 36 12" fill="none" aria-hidden="true">
+                    <path
+                      d="M1 6h33m-5-5 5 5-5 5"
+                      stroke="currentColor"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                  </svg>
                 </a>
               </div>
             </aside>
@@ -460,34 +467,38 @@ const jsonLd = site
 
   .review {
     display: flex;
-    gap: 16px;
-    padding: 20px 24px;
-    border: 1px solid var(--color-border);
-    border-left: 4px solid var(--color-blue);
+    align-items: center;
+    gap: 10px;
+    padding: 16px 8px;
+    border: 1px solid #b6ceff;
     border-radius: var(--radius-card);
-    background: var(--color-card);
+    background: linear-gradient(110deg, #f7faff, #fff);
+    box-shadow: 0 4px 16px rgb(0 86 229 / 5%);
   }
 
-  .review__icon {
+  .review__avatar {
     flex: none;
-    display: grid;
-    place-items: center;
-    width: 32px;
-    height: 32px;
+    width: 80px;
+    height: 80px;
     border-radius: 50%;
-    background: var(--color-blue);
-    font-size: 16px;
-    color: var(--color-white);
+    background: #d9d9d9;
   }
 
   .review__text {
+    min-width: 0;
     display: grid;
-    gap: 2px;
+    gap: 4px;
   }
 
   .review__by {
-    font: 700 15px / 24px var(--font-display);
-    color: var(--color-title);
+    font: 700 12px / 18px var(--font-sans);
+    text-transform: uppercase;
+    color: var(--color-blue);
+  }
+
+  .review__description {
+    font: 400 12px / 22px var(--font-sans);
+    color: var(--color-navy);
   }
 
   .review__date {
@@ -495,8 +506,25 @@ const jsonLd = site
     color: var(--color-muted);
   }
 
-  .review .link-arrow {
-    margin-top: 6px;
+  .review__link {
+    display: inline-flex;
+    align-items: center;
+    justify-self: start;
+    gap: 8px;
+    font: 700 16px / 24px var(--font-sans);
+    color: var(--color-blue);
+  }
+
+  .review__link:hover {
+    color: var(--color-blue-deep);
+    text-decoration: underline;
+  }
+
+  @media (max-width: 480px) {
+    .review__avatar {
+      width: 56px;
+      height: 56px;
+    }
   }
 
   .back {

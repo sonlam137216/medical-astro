@@ -5,7 +5,7 @@ import Button from '../Button.astro';
 import LocationCard from '../cards/LocationCard.astro';
 import { getLocations, getSection } from '../../lib/content';
 
-const locations = await getLocations();
+const locations = (await getLocations()).slice(0, 3);
 const destinations = (await getSection('home_locations'))!;
 ---
 
