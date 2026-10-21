@@ -199,25 +199,23 @@ const jsonLd = site
 
           {article.reviewedBy && (
             <aside class="review">
-              <span class="review__avatar" aria-hidden="true" />
+              <span class="review__icon" aria-hidden="true">
+                <Icon name="shield-check" size={28} />
+              </span>
               <div class="review__text">
-                <p class="review__by">Clinically reviewed by: {article.reviewedBy}</p>
+                <p class="review__label">Clinically reviewed by</p>
+                <p class="review__by">{article.reviewedBy}</p>
                 <p class="review__description">
                   Rooted in the principles of the Hippocratic Oath, our dentists bring expertise,
                   precision and genuine care to every treatment.
                 </p>
-                {reviewed && <p class="review__date">Reviewed on {reviewed}</p>}
-                <a class="review__link" href="/our-doctors">
-                  View All Doctor
-                  <svg width="36" height="12" viewBox="0 0 36 12" fill="none" aria-hidden="true">
-                    <path
-                      d="M1 6h33m-5-5 5 5-5 5"
-                      stroke="currentColor"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    />
-                  </svg>
-                </a>
+                <div class="review__footer">
+                  <a class="review__link" href="/our-doctors">
+                    Meet our doctors
+                    <Icon name="arrow-right" size={16} />
+                  </a>
+                  {reviewed && <p class="review__date">Reviewed on {reviewed}</p>}
+                </div>
               </div>
             </aside>
           )}
@@ -467,42 +465,66 @@ const jsonLd = site
 
   .review {
     display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 16px 8px;
-    border: 1px solid #b6ceff;
-    border-radius: var(--radius-card);
-    background: linear-gradient(110deg, #f7faff, #fff);
-    box-shadow: 0 4px 16px rgb(0 86 229 / 5%);
+    align-items: flex-start;
+    gap: 20px;
+    padding: 28px;
+    border: 1px solid rgb(0 86 229 / 12%);
+    border-radius: 20px;
+    background: linear-gradient(120deg, #f4f8ff, #fff 80%);
+    box-shadow: 0 6px 24px rgb(0 19 169 / 3%);
   }
 
-  .review__avatar {
+  .review__icon {
     flex: none;
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    background: #d9d9d9;
+    display: grid;
+    place-items: center;
+    width: 56px;
+    height: 56px;
+    border: 1px solid rgb(0 86 229 / 10%);
+    border-radius: 16px;
+    background: var(--color-white);
+    color: var(--color-blue);
+    box-shadow: 0 3px 10px rgb(0 86 229 / 4%);
   }
 
   .review__text {
     min-width: 0;
+    flex: 1;
     display: grid;
     gap: 4px;
   }
 
-  .review__by {
-    font: 700 12px / 18px var(--font-sans);
+  .review__label {
+    font: 600 11px / 18px var(--font-sans);
+    letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--color-blue);
   }
 
-  .review__description {
-    font: 400 12px / 22px var(--font-sans);
+  .review__by {
+    font: 600 18px / 26px var(--font-sans);
     color: var(--color-navy);
   }
 
+  .review__description {
+    margin-top: 4px;
+    max-width: 60ch;
+    font: 400 14px / 24px var(--font-sans);
+    color: var(--color-muted);
+  }
+
+  .review__footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 24px;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid rgb(0 86 229 / 8%);
+  }
+
   .review__date {
-    font-size: var(--text-small);
+    font: 400 12px / 20px var(--font-sans);
     color: var(--color-muted);
   }
 
@@ -511,7 +533,8 @@ const jsonLd = site
     align-items: center;
     justify-self: start;
     gap: 8px;
-    font: 700 16px / 24px var(--font-sans);
+    min-height: 32px;
+    font: 600 14px / 22px var(--font-sans);
     color: var(--color-blue);
   }
 
@@ -521,9 +544,21 @@ const jsonLd = site
   }
 
   @media (max-width: 480px) {
-    .review__avatar {
-      width: 56px;
-      height: 56px;
+    .review {
+      gap: 14px;
+      padding: 20px 16px;
+      border-radius: 16px;
+    }
+
+    .review__icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+    }
+
+    .review__by {
+      font-size: 16px;
+      line-height: 24px;
     }
   }
 
