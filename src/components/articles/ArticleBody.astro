@@ -95,16 +95,20 @@ const external = (href: string) => /^https?:\/\//i.test(href);
     display: grid;
     grid-template-columns: minmax(0, 1fr);
     gap: 20px;
-    font-family: var(--font-sans);
+    font-family: var(--font-display);
     font-size: 17px;
     line-height: 30px;
     color: var(--color-navy);
     overflow-wrap: anywhere;
   }
 
+  .body :global(p) {
+    text-align: justify;
+  }
+
   .body :global(h2) {
     margin-top: 28px;
-    font: 700 32px / 38px var(--font-serif);
+    font: 700 32px / 38px var(--font-display);
     color: var(--color-heading);
     text-wrap: balance;
     scroll-margin-top: 24px;
@@ -136,7 +140,7 @@ const external = (href: string) => /^https?:\/\//i.test(href);
     border-left: 4px solid var(--color-blue);
     border-radius: 0 var(--radius-card) var(--radius-card) 0;
     background: var(--color-card);
-    font: 700 22px / 32px var(--font-serif);
+    font: 700 22px / 32px var(--font-display);
     color: var(--color-heading);
   }
 
