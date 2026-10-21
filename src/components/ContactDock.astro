@@ -1,0 +1,350 @@
+---
+import Icon from './Icon.astro';
+import type { IconName } from '../lib/icons';
+import { getSiteContent } from '../lib/site-content';
+
+// The floating contact buttons on the right of every page (picture from the owner, 2026-10-21): phone, Facebook,
+// Zalo, email and WhatsApp, then "back to top". Each button uses a detail of Site details and is left out while
+// that detail is empty; Site details can switch the whole column off. Self-added (the picture shows only the
+// buttons): the name of each button in a tooltip on hover/focus, the ringing phone, the smaller buttons on phones.
+// The links work without JavaScript; "back to top" needs it (data-needs-js) and only appears after scrolling.
+
+const site = await getSiteContent();
+const facebook = site.social.find((s) => s.platform === 'facebook')?.href ?? null;
+const tel = site.phoneIntl?.replace(/[^\d+]/g, '');
+
+interface Contact {
+  key: string;
+  href: string;
+  label: string;
+  icon?: IconName;
+}
+
+const contacts = (
+  [
+    tel && {
+      key: 'phone',
+      href: `tel:${tel}`,
+      label: `Call us: ${site.phoneIntl}`,
+      icon: 'phone-filled',
+    },
+    facebook && {
+      key: 'facebook',
+      href: facebook,
+      label: 'Facebook',
+      icon: 'brand-facebook-filled',
+    },
+    site.zaloUrl && { key: 'zalo', href: site.zaloUrl, label: 'Chat on Zalo' },
+    site.email && {
+      key: 'mail',
+      href: `mailto:${site.email}`,
+      label: `Email: ${site.email}`,
+      icon: 'mail-filled',
+    },
+    site.whatsappUrl && {
+      key: 'whatsapp',
+      href: site.whatsappUrl,
+      label: 'Chat on WhatsApp',
+      icon: 'brand-whatsapp-filled',
+    },
+  ] as (Contact | null | undefined | '')[]
+).filter((c): c is Contact => Boolean(c));
+---
+
+{site.contactButtons && (
+  <nav class="dock" aria-label="Contact us">
+    <ul class="dock__list">
+      {contacts.map((c) => (
+        <li>
+          <a class={`dock__btn dock__btn--${c.key}`} href={c.href} aria-label={c.label}>
+            {c.icon ? <Icon name={c.icon} size={26} /> : <span class="dock__zalo">Zalo</span>}
+            <span class="dock__tip" aria-hidden="true">
+              {c.label}
+            </span>
+          </a>
+        </li>
+      ))}
+      <li class="dock__top-item" data-needs-js>
+        <button
+          type="button"
+          class="dock__top"
+          data-dock-top
+          aria-label="Back to top"
+          tabindex="-1"
+        >
+          <Icon name="arrow-up" size={22} />
+          <span class="dock__tip" aria-hidden="true">
+            Back to top
+          </span>
+        </button>
+      </li>
+    </ul>
+  </nav>
+)}
+
+<script>
+  // "Back to top" shows once the first screen is scrolled past; pressing it scrolls up and moves the focus to the
+  // top of the page (the skip link's target would skip the header).
+  const top = document.querySelector<HTMLButtonElement>('[data-dock-top]');
+  if (top) {
+    const item = top.closest('li');
+    let ticking = false;
+    const update = () => {
+      ticking = false;
+      const shown = window.scrollY > window.innerHeight * 0.6;
+      item?.classList.toggle('is-shown', shown);
+      top.tabIndex = shown ? 0 : -1;
+    };
+    window.addEventListener(
+      'scroll',
+      () => {
+        if (!ticking) {
+          ticking = true;
+          requestAnimationFrame(update);
+        }
+      },
+      { passive: true },
+    );
+    update();
+    top.addEventListener('click', () => {
+      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' });
+      document.body.setAttribute('tabindex', '-1');
+      document.body.focus({ preventScroll: true });
+      document.body.addEventListener('blur', () => document.body.removeAttribute('tabindex'), {
+        once: true,
+      });
+    });
+  }
+</script>
+
+<style>
+  .dock {
+    --dock-size: 56px;
+    --dock-gap: 14px;
+    position: fixed;
+    right: 20px;
+    bottom: 24px;
+    z-index: 9;
+    pointer-events: none;
+  }
+
+  /* The picture: a soft blue-to-green glow behind the column. */
+  .dock::before {
+    content: '';
+    position: absolute;
+    inset: -24px -20px 40px;
+    z-index: -1;
+    border-radius: 999px;
+    background: linear-gradient(
+      180deg,
+      rgb(0 86 229 / 0%) 0%,
+      rgb(0 86 229 / 10%) 35%,
+      rgb(24 194 98 / 12%) 80%,
+      rgb(24 194 98 / 0%) 100%
+    );
+    filter: blur(14px);
+  }
+
+  .dock__list {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--dock-gap);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .dock__btn,
+  .dock__top {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: var(--dock-size);
+    height: var(--dock-size);
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    color: var(--color-white);
+    pointer-events: auto;
+    cursor: pointer;
+    box-shadow:
+      0 6px 16px rgb(2 15 50 / 18%),
+      inset 0 2px 4px rgb(255 255 255 / 45%);
+    transition:
+      scale var(--dur-base) var(--ease-out),
+      box-shadow var(--dur-base) var(--ease-out);
+  }
+
+  /* The picture: a dashed ring around each button. */
+  .dock__btn::before {
+    content: '';
+    position: absolute;
+    inset: -5px;
+    border: 1px dashed rgb(0 86 229 / 35%);
+    border-radius: 50%;
+  }
+
+  .dock__btn--phone {
+    background: radial-gradient(circle at 35% 30%, #fff 0%, #eef3fb 60%, #d9e3f4 100%);
+    color: var(--color-blue);
+  }
+
+  .dock__btn--facebook {
+    background: radial-gradient(circle at 35% 30%, #4d8dff 0%, #1a5ee8 55%, #0d3fb3 100%);
+  }
+
+  .dock__btn--zalo {
+    background: radial-gradient(circle at 35% 30%, #fff 0%, #f1f5fb 60%, #dbe5f5 100%);
+    color: #0068ff;
+  }
+
+  .dock__btn--mail {
+    background: radial-gradient(circle at 35% 30%, #4d9bff 0%, #1d6cf0 55%, #0b47c2 100%);
+  }
+
+  .dock__btn--whatsapp {
+    background: radial-gradient(circle at 35% 30%, #5fe08f 0%, #22bf5c 55%, #0f9443 100%);
+  }
+
+  .dock__btn--whatsapp::before {
+    border-color: rgb(24 194 98 / 45%);
+  }
+
+  .dock__zalo {
+    font: 700 15px / 1 var(--font-display);
+    letter-spacing: -0.02em;
+  }
+
+  .dock__top-item {
+    margin-top: 6px;
+    opacity: 0;
+    visibility: hidden;
+    translate: 0 8px;
+    transition:
+      opacity var(--dur-base) var(--ease-out),
+      translate var(--dur-base) var(--ease-out),
+      visibility 0s var(--dur-base);
+  }
+
+  .dock__top-item.is-shown {
+    opacity: 1;
+    visibility: visible;
+    translate: 0 0;
+    transition-delay: 0s;
+  }
+
+  .dock__top {
+    --dock-size: 48px;
+    background: var(--color-white);
+    color: var(--color-navy);
+    box-shadow: 0 6px 16px rgb(2 15 50 / 14%);
+  }
+
+  /* Self-added: the button's name to its left on hover / keyboard focus. */
+  .dock__tip {
+    position: absolute;
+    right: calc(100% + 14px);
+    top: 50%;
+    translate: 6px -50%;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: var(--color-navy);
+    color: var(--color-white);
+    font: 500 13px / 18px var(--font-sans);
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition:
+      opacity var(--dur-base) var(--ease-out),
+      translate var(--dur-base) var(--ease-out);
+  }
+
+  .dock__btn:focus-visible .dock__tip,
+  .dock__top:focus-visible .dock__tip {
+    opacity: 1;
+    translate: 0 -50%;
+  }
+
+  .dock__btn:focus-visible,
+  .dock__top:focus-visible {
+    outline: 2px solid var(--color-blue);
+    outline-offset: 7px;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .dock__btn:hover,
+    .dock__top:hover {
+      scale: 1.08;
+      box-shadow:
+        0 10px 22px rgb(2 15 50 / 24%),
+        inset 0 2px 4px rgb(255 255 255 / 45%);
+    }
+
+    .dock__btn:hover .dock__tip,
+    .dock__top:hover .dock__tip {
+      opacity: 1;
+      translate: 0 -50%;
+    }
+  }
+
+  /* Self-added: the phone rings now and then. */
+  @media (prefers-reduced-motion: no-preference) {
+    .dock__btn--phone :global(svg) {
+      animation: dock-ring 4s var(--ease-out) 2s infinite;
+    }
+  }
+
+  @keyframes dock-ring {
+    0%,
+    12%,
+    100% {
+      rotate: 0deg;
+    }
+
+    2%,
+    6%,
+    10% {
+      rotate: -14deg;
+    }
+
+    4%,
+    8% {
+      rotate: 14deg;
+    }
+  }
+
+  /* Phones: smaller buttons closer to the edge, no tooltips (no hover). */
+  @media (max-width: 768px) {
+    .dock {
+      --dock-size: 44px;
+      --dock-gap: 12px;
+      right: 12px;
+      bottom: 16px;
+    }
+
+    .dock__top {
+      --dock-size: 44px;
+    }
+
+    .dock :global(svg) {
+      width: 22px;
+      height: 22px;
+    }
+
+    .dock__zalo {
+      font-size: 12px;
+    }
+
+    .dock__tip {
+      display: none;
+    }
+  }
+
+  @media print {
+    .dock {
+      display: none;
+    }
+  }
+</style>

@@ -539,9 +539,9 @@ export const SECTIONS: SectionDef[] = [
   {
     key: 'service_articles',
     page: '/services',
-    label: 'Service pages: articles under the FAQ',
+    label: 'Service pages: guide under the FAQ',
     where:
-      'The round arrow button under the questions of every service page, Dental Implants included. It opens the articles ticked “Show on the service pages” in Articles (one list for all the services); without any such article the button is not shown.',
+      'The round arrow button under the questions of every service page, Dental Implants included. It opens the guide of that service in place (written in Services, “Guide under the FAQ”); a service without a guide has no button.',
     fields: [text('button', 'Text of the arrow button', 60, { required: true })],
   },
   {

@@ -32,6 +32,10 @@ export interface SiteContent {
   phoneDisplay: string | null;
   phoneIntl: string | null;
   whatsappUrl: string | null;
+  /** The Zalo link of the floating contact buttons. Never a sample. */
+  zaloUrl: string | null;
+  /** Whether the floating contact buttons are shown (Site details; on unless switched off). */
+  contactButtons: boolean;
   email: string | null;
   addressLine: string | null;
   hours: string | null;
@@ -86,6 +90,8 @@ export async function getSiteContent(): Promise<SiteContent> {
     phoneDisplay: s ? s.phoneDisplay : sample.phoneDisplay,
     phoneIntl: s ? s.phoneIntl : sample.phoneIntl,
     whatsappUrl: s ? s.whatsappUrl : sample.whatsappUrl,
+    zaloUrl: s?.zaloUrl ?? null,
+    contactButtons: s?.contactButtons !== false,
     email: s ? s.email : sample.email,
     addressLine: s ? s.addressLine : sample.addressLine,
     hours: s ? s.hours : sample.hours,

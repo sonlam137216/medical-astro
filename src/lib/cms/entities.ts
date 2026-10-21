@@ -1,5 +1,5 @@
 import type { Field } from './fields';
-import { ARTICLE_KINDS, MAX_ARTICLE_BODY } from './articles';
+import { ARTICLE_KINDS, MAX_ARTICLE_BODY, MAX_SERVICE_GUIDE } from './articles';
 import { MENU_GROUP_MAX } from '../menu';
 import { MAX_SMILE_STORY } from './smile-stories';
 
@@ -293,6 +293,15 @@ export const ENTITIES: EntityDef[] = [
         max: 6000,
         rows: 10,
         help: 'Shown on the service’s page under the treatments. Plain text; leave an empty line between paragraphs. Leave empty to show nothing.',
+      },
+      {
+        type: 'textarea',
+        name: 'guide_body',
+        label: 'Guide under the FAQ',
+        max: MAX_SERVICE_GUIDE,
+        rows: 16,
+        editor: 'article',
+        help: 'Opens in place when visitors press the round arrow button under the FAQ of this service’s page (its words are in Page text “Service pages: guide under the FAQ”). Written like an article: “## Heading”, “### Smaller heading”, “- item”, “1. item”, “> quote”, “**bold**”, “[words](https://…)”, and pictures from Media with the Picture button. Leave empty for no button on this page.',
       },
       {
         type: 'text',
@@ -695,13 +704,6 @@ export const ENTITIES: EntityDef[] = [
         label: 'Published (visible on the website after you publish)',
         default: false,
       },
-      {
-        type: 'bool',
-        name: 'show_on_service_pages',
-        label: 'Show on the service pages',
-        default: false,
-        help: 'Listed under the questions of every service page (Dental Implants included), behind the arrow button, newest first. One list for all the services: pick a few useful guides.',
-      },
     ],
     order: [{ column: 'published_on', ascending: false }, { column: 'title' }],
     deletable: true,
@@ -1019,6 +1021,14 @@ export const SITE_FIELDS: Field[] = [
     max: 500,
     placeholder: 'https://wa.me/84000000000',
   },
+  {
+    type: 'weburl',
+    name: 'zalo_url',
+    label: 'Zalo link',
+    max: 300,
+    placeholder: 'https://zalo.me/84000000000',
+    help: 'Used by the Zalo button of the floating contact buttons. Leave empty to hide that button.',
+  },
   { type: 'email', name: 'contact_email', label: 'Contact email (shown on the site)', max: 254 },
   { type: 'text', name: 'address_line', label: 'Address', max: 300 },
   {
@@ -1027,6 +1037,13 @@ export const SITE_FIELDS: Field[] = [
     label: 'Opening hours',
     max: 200,
     placeholder: 'Monday to Sunday (8:00–20:00)',
+  },
+  {
+    type: 'bool',
+    name: 'contact_buttons',
+    label: 'Show the floating contact buttons',
+    default: true,
+    help: 'The round buttons on the right of every page: phone, Facebook, Zalo, email, WhatsApp, then “back to top”. Each one uses the details on this page (phone in international format, Facebook page, Zalo link, contact email, WhatsApp link) and is hidden while its detail is empty.',
   },
   { type: 'text', name: 'copyright_text', group: 'Footer', label: 'Copyright line', max: 200 },
   {

@@ -565,6 +565,7 @@ export interface Tables {
       banner_image_id: string | null;
       created_at: string;
       description: string | null;
+      guide_body: string | null;
       id: string;
       image_id: string | null;
       inclusions: string[];
@@ -586,6 +587,7 @@ export interface Tables {
       banner_image_id?: string | null;
       created_at?: string;
       description?: string | null;
+      guide_body?: string | null;
       id?: string;
       image_id?: string | null;
       inclusions?: string[];
@@ -697,6 +699,8 @@ export interface Tables {
       tagline: string | null;
       updated_at: string;
       whatsapp_url: string | null;
+      zalo_url: string | null;
+      contact_buttons: boolean;
     };
     Insert: {
       address_line?: string | null;
@@ -718,6 +722,8 @@ export interface Tables {
       tagline?: string | null;
       updated_at?: string;
       whatsapp_url?: string | null;
+      zalo_url?: string | null;
+      contact_buttons?: boolean;
     };
   };
 }
@@ -837,6 +843,25 @@ export const TABLES: Record<TableName, TableInfo> = {
       situations_before_image_id: 'media_assets',
       situations_after_image_id: 'media_assets',
     },
+    // The guide can be tens of kilobytes: the audit log records the other columns only.
+    audit: [
+      'slug',
+      'title',
+      'summary',
+      'description',
+      'situations_label',
+      'image_id',
+      'banner_image_id',
+      'situations_before_image_id',
+      'situations_after_image_id',
+      'situations_consent_confirmed',
+      'inclusions',
+      'price_text',
+      'seo_title',
+      'seo_description',
+      'sort_order',
+      'is_visible',
+    ],
   },
   smile_results: {
     bool: ['consent_confirmed', 'is_visible'],
@@ -849,5 +874,5 @@ export const TABLES: Record<TableName, TableInfo> = {
     refs: { before_image_id: 'media_assets', after_image_id: 'media_assets' },
   },
   press_articles: { bool: ['is_visible'], uuid: true, refs: { image_id: 'media_assets' } },
-  site_settings: { json: ['social_links'] },
+  site_settings: { bool: ['contact_buttons'], json: ['social_links'] },
 };

@@ -192,6 +192,16 @@ export interface PublicService {
   situationsLabel: string | null;
   /** The before/after pair beside the cards; absent: the cards take the whole width. */
   situationsImages?: { before: PublicImage; after: PublicImage };
+  /** The guide under the FAQ of the service's page; null: no guide button. */
+  guide: PublicGuide | null;
+}
+
+/** An article-like text with its pictures (a service's guide). */
+export interface PublicGuide {
+  /** Source text in the format of src/lib/cms/articles.ts; render it with parseArticleBody. */
+  body: string;
+  /** Pictures placed in the body, by media id. */
+  images: Record<string, PublicImage>;
 }
 
 /** A price card of the Home page: a treatment ticked "Show on the Home page", linking to its service. */
@@ -230,6 +240,7 @@ export async function getServices(): Promise<PublicService[]> {
       })),
       situationsLabel: s.situationsLabel ?? null,
       situationsImages: publicPair(s.situationsImages),
+      guide: s.guide ? { body: s.guide.body, images: publicPictures(s.guide.bodyImages) } : null,
     }));
   }
   return sampleServiceDetails.map((s) => ({
@@ -256,7 +267,19 @@ export async function getServices(): Promise<PublicService[]> {
     // Only Dental Implants has sample situations (the design's); the clinic writes those of the other services.
     situations: s.slug === 'dental-implants' ? sampleImplantSituations : [],
     situationsLabel: s.slug === 'dental-implants' ? sampleImplantSituationsLabel : null,
+    // No sample guide: the guide is the clinic's own text.
+    guide: null,
   }));
+}
+
+/** The pictures of an article-format text that can be shown, by media id. */
+function publicPictures(images: Record<string, SnapshotImage> | undefined) {
+  return Object.fromEntries(
+    Object.entries(images ?? {}).flatMap(([id, image]) => {
+      const photo = toPublicImageOrUndefined(image);
+      return photo ? [[id, photo] as const] : [];
+    }),
+  );
 }
 
 /** A before/after pair of the snapshot, when both pictures can be shown. */
@@ -583,12 +606,7 @@ function toPublicArticle(
     excerpt: a.excerpt,
     body: a.body,
     cover: (a.coverImage && toPublicImage(snapshotImageInput(a.coverImage), publicBase)) || null,
-    bodyImages: Object.fromEntries(
-      Object.entries(a.bodyImages ?? {}).flatMap(([id, image]) => {
-        const photo = toPublicImageOrUndefined(image);
-        return photo ? [[id, photo] as const] : [];
-      }),
-    ),
+    bodyImages: publicPictures(a.bodyImages),
     category:
       a.category && categories.has(a.category)
         ? { slug: a.category, name: categories.get(a.category) as string }
@@ -619,14 +637,6 @@ async function listArticles(keep: (a: SnapshotArticle) => boolean): Promise<Publ
  */
 export async function getArticles(kind: ArticleKind): Promise<PublicArticle[]> {
   return listArticles((a) => a.kind === kind);
-}
-
-/**
- * The articles ticked "Show on the service pages" (either kind), newest first: one list for every service page,
- * shown under the FAQ. Empty (no button) until such an article is published.
- */
-export async function getServicePageArticles(): Promise<PublicArticle[]> {
-  return listArticles((a) => a.onServicePages === true);
 }
 
 /** Categories of one kind that are shown, in display order (each has its own list page). */

@@ -85,6 +85,8 @@ export function relatedArticles<
 }
 
 export const MAX_ARTICLE_BODY = 60_000;
+/** The longest guide of a service page (Services form; the table checks the same). Same format as articles. */
+export const MAX_SERVICE_GUIDE = 20_000;
 
 // ---------------------------------------------------------------------------
 // Body format

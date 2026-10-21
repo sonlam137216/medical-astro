@@ -94,8 +94,11 @@ export async function processPost(
 ): Promise<PostResult> {
   if (!isSameOrigin(request)) return { redirect: new Response('Forbidden', { status: 403 }) };
 
-  // An article body of 60,000 characters grows when URL-encoded (accents, spaces), so articles get more room.
-  const text = await readBodyLimited(request, def.key === 'articles' ? 320 * 1024 : 64 * 1024);
+  // An article body of 60,000 characters grows when URL-encoded (accents, spaces), so articles get more room, and so
+  // do services (their guide is up to 20,000 characters).
+  const limit =
+    def.key === 'articles' ? 320 * 1024 : def.key === 'services' ? 160 * 1024 : 64 * 1024;
+  const text = await readBodyLimited(request, limit);
   if (text === null) return { redirect: new Response('Payload Too Large', { status: 413 }) };
   const form = new URLSearchParams(text);
   const values = valuesFromForm(def.fields, form);

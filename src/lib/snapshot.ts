@@ -109,6 +109,10 @@ export interface SnapshotSite {
   videoUrl?: string;
   /** Search engine ownership tokens for the Home page's <meta> tags; absent when none is set. */
   verification?: SiteVerification;
+  /** The Zalo link of the floating contact buttons; absent when none is set. */
+  zaloUrl?: string;
+  /** Only present (false) when the floating contact buttons are switched off, so older hashes stay the same. */
+  contactButtons?: false;
 }
 
 export interface SnapshotPage {
@@ -166,6 +170,15 @@ export interface SnapshotService {
    * The before/after pair beside the situation cards; only when both pictures are still usable.
    */
   situationsImages?: { before: SnapshotImage; after: SnapshotImage };
+  /** The guide under the FAQ of the service's page (article format); absent when there is none. */
+  guide?: SnapshotGuide;
+}
+
+/** An article-like text: the format of src/lib/cms/articles.ts, with the pictures it places. */
+export interface SnapshotGuide {
+  body: string;
+  /** The pictures used in `body`, by media id. A picture that is gone is missing here. */
+  bodyImages?: Record<string, SnapshotImage>;
 }
 
 export interface SnapshotPackage {
@@ -259,7 +272,10 @@ export interface SnapshotArticle {
   updatedOn: string | null;
   seoTitle: string | null;
   seoDescription: string | null;
-  /** Listed under the FAQ of every service page. Only present when true, so older revisions keep their hash. */
+  /**
+   * Revisions published from 2026-10-17 to 2026-10-21: listed under the FAQ of every service page. No longer written
+   * nor used (each service page now has a guide of its own, `SnapshotService.guide`).
+   */
   onServicePages?: true;
 }
 
@@ -363,6 +379,8 @@ export async function buildSnapshot(db: AdminDb): Promise<Snapshot> {
       if (token && VERIFICATION_TOKEN_RE.test(token)) verification[engine.key] = token;
     }
     if (Object.keys(verification).length > 0) snapshot.site.verification = verification;
+    if (site.zalo_url && /^https?:\/\//i.test(site.zalo_url)) snapshot.site.zaloUrl = site.zalo_url;
+    if (site.contact_buttons === false) snapshot.site.contactButtons = false;
     if (site.intro_video_id) {
       const { data: video, error: videoError } = await db
         .from('media_assets')
@@ -508,7 +526,7 @@ export async function buildSnapshot(db: AdminDb): Promise<Snapshot> {
   const { data: articles, error: articlesError } = await db
     .from('articles')
     .select(
-      `slug, kind, title, excerpt, body, category_id, show_on_service_pages, author_name, reviewed_by, reviewed_on, published_on, updated_at, seo_title, seo_description, cover:media_assets(${IMAGE_COLUMNS})`,
+      `slug, kind, title, excerpt, body, category_id, author_name, reviewed_by, reviewed_on, published_on, updated_at, seo_title, seo_description, cover:media_assets(${IMAGE_COLUMNS})`,
     )
     .eq('is_visible', true)
     .order('published_on', { ascending: false })
@@ -516,33 +534,43 @@ export async function buildSnapshot(db: AdminDb): Promise<Snapshot> {
   if (articlesError) throw fail('articles', articlesError);
   if (categories.length > 0) snapshot.articleCategories = categories;
 
-  // Pictures placed in the article text. Looked up in small batches (D1 allows 100 parameters per statement).
-  // A picture that was deleted or archived is simply not in the map; snapshotProblems reports it.
-  const bodyImageRows = new Map<string, SnapshotImage>();
-  const wantedImages = [
-    ...new Set(articles.flatMap((a) => bodyImageIds(parseArticleBody(a.body)))),
-  ];
-  for (let i = 0; i < wantedImages.length; i += 80) {
-    const { data: found, error: foundError } = await db
-      .from('media_assets')
-      .select(`id, ${IMAGE_COLUMNS}`)
-      .eq('kind', 'image')
-      .in('id', wantedImages.slice(i, i + 80));
-    if (foundError) throw fail('article pictures', foundError);
-    for (const row of found) {
-      const image = toSnapshotImage(row);
-      if (image) bodyImageRows.set(row.id, image);
+  // Pictures placed in an article-format text (articles, service guides). Looked up in small batches (D1 allows 100
+  // parameters per statement). A picture that was deleted or archived is simply not in the map; snapshotProblems
+  // reports it.
+  const loadPictures = async (bodies: (string | null)[], what: string) => {
+    const rows = new Map<string, SnapshotImage>();
+    const wanted = [...new Set(bodies.flatMap((b) => bodyImageIds(parseArticleBody(b))))];
+    for (let i = 0; i < wanted.length; i += 80) {
+      const { data: found, error: foundError } = await db
+        .from('media_assets')
+        .select(`id, ${IMAGE_COLUMNS}`)
+        .eq('kind', 'image')
+        .in('id', wanted.slice(i, i + 80));
+      if (foundError) throw fail(what, foundError);
+      for (const row of found) {
+        const image = toSnapshotImage(row);
+        if (image) rows.set(row.id, image);
+      }
     }
-  }
+    return rows;
+  };
+  const picturesOf = (body: string | null, rows: Map<string, SnapshotImage>) => {
+    const pictures: Record<string, SnapshotImage> = {};
+    for (const id of bodyImageIds(parseArticleBody(body))) {
+      const image = rows.get(id);
+      if (image) pictures[id] = image;
+    }
+    return pictures;
+  };
+  const bodyImageRows = await loadPictures(
+    articles.map((a) => a.body),
+    'article pictures',
+  );
 
   if (articles.length > 0) {
     snapshot.articles = articles.map((a) => {
       const category = a.category_id ? (categorySlugs.get(a.category_id) ?? null) : null;
-      const bodyImages: Record<string, SnapshotImage> = {};
-      for (const id of bodyImageIds(parseArticleBody(a.body))) {
-        const image = bodyImageRows.get(id);
-        if (image) bodyImages[id] = image;
-      }
+      const bodyImages = picturesOf(a.body, bodyImageRows);
       return {
         slug: a.slug,
         kind: a.kind,
@@ -560,7 +588,6 @@ export async function buildSnapshot(db: AdminDb): Promise<Snapshot> {
         updatedOn: a.updated_at ? a.updated_at.slice(0, 10) : null,
         seoTitle: a.seo_title,
         seoDescription: a.seo_description,
-        ...(a.show_on_service_pages ? { onServicePages: true as const } : {}),
       };
     });
   }
@@ -568,7 +595,7 @@ export async function buildSnapshot(db: AdminDb): Promise<Snapshot> {
   const { data: services, error: servicesError } = await db
     .from('services')
     .select(
-      `id, slug, title, summary, description, seo_title, seo_description, situations_label, image:media_assets!image_id(${IMAGE_COLUMNS}), banner:media_assets!banner_image_id(${IMAGE_COLUMNS}), situations_before:media_assets!situations_before_image_id(${IMAGE_COLUMNS}), situations_after:media_assets!situations_after_image_id(${IMAGE_COLUMNS})`,
+      `id, slug, title, summary, description, guide_body, seo_title, seo_description, situations_label, image:media_assets!image_id(${IMAGE_COLUMNS}), banner:media_assets!banner_image_id(${IMAGE_COLUMNS}), situations_before:media_assets!situations_before_image_id(${IMAGE_COLUMNS}), situations_after:media_assets!situations_after_image_id(${IMAGE_COLUMNS})`,
     )
     .eq('is_visible', true)
     .order('sort_order', { ascending: true })
@@ -592,8 +619,14 @@ export async function buildSnapshot(db: AdminDb): Promise<Snapshot> {
     situationRows
       .filter((r) => r.service_id === serviceId)
       .map((r) => ({ tag: r.tag, title: r.title, description: r.description }));
+  const guideImageRows = await loadPictures(
+    services.map((s) => s.guide_body),
+    'service guide pictures',
+  );
   if (services.length > 0) {
     snapshot.services = services.map((s) => {
+      const guideBody = s.guide_body?.trim() ? s.guide_body : null;
+      const guideImages = picturesOf(guideBody, guideImageRows);
       const banner = toSnapshotImage(s.banner);
       const situations = situationsOf(s.id);
       const situationsLabel = s.situations_label?.trim();
@@ -623,6 +656,14 @@ export async function buildSnapshot(db: AdminDb): Promise<Snapshot> {
         ...(situations.length > 0 ? { situations } : {}),
         ...(situationsLabel ? { situationsLabel } : {}),
         ...(before && after ? { situationsImages: { before, after } } : {}),
+        ...(guideBody
+          ? {
+              guide: {
+                body: guideBody,
+                ...(Object.keys(guideImages).length > 0 ? { bodyImages: guideImages } : {}),
+              },
+            }
+          : {}),
       };
     });
   }
@@ -905,6 +946,18 @@ export function snapshotProblems(snapshot: Snapshot, target: string = 'staging')
         );
       }
     }
+    for (const id of bodyImageIds(parseArticleBody(s.guide?.body))) {
+      const image = s.guide?.bodyImages?.[id];
+      if (!image) {
+        problems.push(
+          `Service “${s.title}”: a picture in the guide is no longer in Media (deleted or archived). Choose another one or remove the line.`,
+        );
+      } else if (!image.decorative && !image.alt) {
+        problems.push(
+          `Service “${s.title}”: a picture in the guide has no description. Add one in Media, or mark the image as decorative.`,
+        );
+      }
+    }
   }
   for (const section of snapshot.sections ?? []) {
     const def = sectionByKey(section.key);
@@ -1045,6 +1098,15 @@ export function isSnapshot(value: unknown): value is Snapshot {
   if (videoUrl !== undefined && !(typeof videoUrl === 'string' && parseVideoUrl(videoUrl)))
     return false;
   if (isObject(value.site) && !isSiteVerification(value.site.verification)) return false;
+  if (
+    isObject(value.site) &&
+    !(
+      (value.site.zaloUrl === undefined ||
+        (typeof value.site.zaloUrl === 'string' && /^https?:\/\//i.test(value.site.zaloUrl))) &&
+      (value.site.contactButtons === undefined || value.site.contactButtons === false)
+    )
+  )
+    return false;
 
   const articles = (value.articles ?? []) as unknown[];
   const articlesValid = articles.every(
@@ -1111,7 +1173,15 @@ export function isSnapshot(value: unknown): value is Snapshot {
             isObject(x.situationsImages.before) &&
             typeof x.situationsImages.before.key === 'string' &&
             isObject(x.situationsImages.after) &&
-            typeof x.situationsImages.after.key === 'string')),
+            typeof x.situationsImages.after.key === 'string')) &&
+        (x.guide === undefined ||
+          (isObject(x.guide) &&
+            typeof x.guide.body === 'string' &&
+            (x.guide.bodyImages === undefined ||
+              (isObject(x.guide.bodyImages) &&
+                Object.values(x.guide.bodyImages).every(
+                  (i) => isObject(i) && typeof i.key === 'string',
+                ))))),
     )
   )
     return false;

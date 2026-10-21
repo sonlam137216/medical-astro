@@ -26,7 +26,7 @@ const [{ data, error }, { data: categories }] = await Promise.all([
   db
     .from('articles')
     .select(
-      'id, title, slug, kind, is_visible, show_on_service_pages, published_on, updated_at, author_name, category_id, category:article_categories(name)',
+      'id, title, slug, kind, is_visible, published_on, updated_at, author_name, category_id, category:article_categories(name)',
     )
     .order('updated_at', { ascending: false })
     .limit(1000),
@@ -197,12 +197,6 @@ const day = (iso: string | null | undefined) => (iso ? iso.slice(0, 10) : '—')
                   <span class="admin-status" data-status={a.is_visible ? 'done' : 'in_progress'}>
                     {a.is_visible ? 'Published' : 'Draft'}
                   </span>
-                  {a.show_on_service_pages && (
-                    <>
-                      <br />
-                      <small class="admin-muted">On service pages</small>
-                    </>
-                  )}
                 </td>
                 <td>{a.published_on ?? '—'}</td>
                 <td>{day(a.updated_at)}</td>

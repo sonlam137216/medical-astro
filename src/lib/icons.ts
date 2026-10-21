@@ -5,6 +5,7 @@
 import arrowDown from '@tabler/icons/outline/arrow-down.svg?raw';
 import arrowLeft from '@tabler/icons/outline/arrow-left.svg?raw';
 import arrowRight from '@tabler/icons/outline/arrow-right.svg?raw';
+import arrowUp from '@tabler/icons/outline/arrow-up.svg?raw';
 import brandWhatsapp from '@tabler/icons/outline/brand-whatsapp.svg?raw';
 import building from '@tabler/icons/outline/building.svg?raw';
 import calendarCheck from '@tabler/icons/outline/calendar-check.svg?raw';
@@ -45,13 +46,20 @@ import shieldCheck from '@tabler/icons/outline/shield-check.svg?raw';
 import stethoscope from '@tabler/icons/outline/stethoscope.svg?raw';
 import usersGroup from '@tabler/icons/outline/users-group.svg?raw';
 import starFilled from '@tabler/icons/filled/star.svg?raw';
+import brandFacebookFilled from '@tabler/icons/filled/brand-facebook.svg?raw';
+import brandWhatsappFilled from '@tabler/icons/filled/brand-whatsapp.svg?raw';
+import mailFilled from '@tabler/icons/filled/mail.svg?raw';
+import phoneFilled from '@tabler/icons/filled/phone.svg?raw';
 import type { ChoiceIcon } from './cms/sections';
 
 const ICONS = {
   'arrow-down': arrowDown,
   'arrow-left': arrowLeft,
   'arrow-right': arrowRight,
+  'arrow-up': arrowUp,
   'brand-whatsapp': brandWhatsapp,
+  'brand-whatsapp-filled': brandWhatsappFilled,
+  'brand-facebook-filled': brandFacebookFilled,
   building,
   'calendar-check': calendarCheck,
   'calendar-time': calendarTime,
@@ -90,6 +98,8 @@ const ICONS = {
   'shield-check': shieldCheck,
   stethoscope,
   'star-filled': starFilled,
+  'mail-filled': mailFilled,
+  'phone-filled': phoneFilled,
   'users-group': usersGroup,
 };
 

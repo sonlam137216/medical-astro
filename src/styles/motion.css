@@ -285,16 +285,11 @@
       }
     }
 
-    /* The articles behind the arrow button of the service pages (ServiceArticles) are often already on screen
-       when the button is pressed, so a scroll-linked fade would leave them half faded until the next scroll.
-       They fade in over a short time when the list opens instead (none → reveal restarts it on each opening). */
-    .more .card {
-      animation: none;
-    }
-
-    .more[open] .card {
+    /* The guide behind the arrow button of the service pages (ServiceGuide) opens where the visitor is looking,
+       so it fades in over a short time when it opens rather than with the scroll (none → reveal restarts it on
+       each opening). */
+    .more[open] .more__panel {
       animation: reveal var(--dur-base) var(--ease-out) both;
-      animation-delay: calc(var(--i, 0) * 60ms);
     }
 
     /* Eyebrow rules grow out from the text while their block reveals (not the hero eyebrow, which is on the
