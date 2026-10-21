@@ -212,6 +212,28 @@ export interface Tables {
       updated_at?: string;
     };
   };
+  service_faqs: {
+    Row: {
+      answer: string | null;
+      created_at: string;
+      service_id: string;
+      id: string;
+      is_visible: boolean;
+      question: string;
+      sort_order: number;
+      updated_at: string;
+    };
+    Insert: {
+      answer?: string | null;
+      created_at?: string;
+      service_id: string;
+      id?: string;
+      is_visible?: boolean;
+      question: string;
+      sort_order?: number;
+      updated_at?: string;
+    };
+  };
   faqs: {
     Row: {
       answer: string | null;
@@ -794,6 +816,7 @@ export const TABLES: Record<TableName, TableInfo> = {
     refs: { image_id: 'media_assets' },
   },
   faqs: { bool: ['is_visible'], uuid: true },
+  service_faqs: { bool: ['is_visible'], uuid: true, refs: { service_id: 'services' } },
   // The text can be tens of kilobytes: the audit log records the other columns only.
   legal_pages: {
     bool: ['is_visible'],

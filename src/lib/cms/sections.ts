@@ -541,7 +541,7 @@ export const SECTIONS: SectionDef[] = [
     page: '/services',
     label: 'Service pages: FAQ heading',
     where:
-      'The heading above the questions on every service page, Dental Implants included (the questions are in FAQs: one list for all the services).',
+      'The heading above the questions on every service page, Dental Implants included (questions are written separately in Services → a service → Service FAQs; a service without its own questions has no FAQ block).',
     canHide: false,
     fields: [label, title],
   },

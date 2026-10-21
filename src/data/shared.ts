@@ -179,17 +179,10 @@ export const combosHero = {
   body: 'Plan your dental care alongside a relaxing travel experience. Explore some of Vietnam’s most popular destinations while your treatment schedule is arranged around your trip.',
 };
 
-// The FAQ of every service page (one list for the whole site, FAQs in the admin). The design shows the questions
-// only: answers must be supplied by the clinic.
+// Shared FAQ heading. Questions are authored separately inside each service.
 export const serviceFaq = {
   label: 'FAQs',
   title: 'Frequently Asked Questions',
-  questions: [
-    'What should I send before my consultation?',
-    'How many visits will my treatment require?',
-    'What is included in my estimate?',
-    'Can you help with accommodation and transport?',
-  ],
 };
 
 // "Which treatment fits your situation" of the service pages (Figma "General Service Template"). The Figma line

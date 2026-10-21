@@ -4,7 +4,7 @@ import SectionIntro from './SectionIntro.astro';
 import type { PublicFaq } from '../lib/content';
 
 // The FAQ block of the service pages (Figma "General Service Template"): a heading and the questions as bordered
-// cards, the first one open. The questions come from FAQs (one list for every service page); the caller leaves the
+// cards, the first one open. The questions belong to the current service; the caller leaves the
 // block out when there are none.
 interface Props {
   label: string;
@@ -32,7 +32,6 @@ const paragraphs = (text: string) => text.split(/\n{2,}/);
             ))}
           </Fragment>
         )}
-        {/* PLACEHOLDER: the design shows questions only; sample questions have no answer yet. */}
         {!item.answer && <p class="muted">Answer to be provided by Melatec.</p>}
       </details>
     ))}

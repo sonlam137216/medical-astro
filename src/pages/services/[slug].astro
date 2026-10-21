@@ -13,10 +13,10 @@ import FaqList from '../../components/FaqList.astro';
 import ServiceGuide from '../../components/ServiceGuide.astro';
 import SmileResults from '../../components/SmileResults.astro';
 import TreatmentFit from '../../components/TreatmentFit.astro';
-import { careCta, serviceFaq } from '../../data/shared';
+import { careCta } from '../../data/shared';
 import { heroImage } from '../../data/home';
 import {
-  getFaqs,
+  getServiceFaqs,
   getSection,
   getService,
   getServices,
@@ -29,7 +29,7 @@ import { getPageBanner } from '../../lib/site-content';
 // The page of one service, built from the CMS (Services > a service, and its Treatments), after the Figma
 // "General Service Template" (banner, price cards, cost comparison, which treatment fits, how it works, results, FAQ;
 // the About text and the call to action are added). The cost comparison is the Home page's table (Page text > Home: treatment costs
-// table), the results slider (Smile results) and the FAQ (FAQs) are shared by every service page.
+// table) and the results slider (Smile results) are shared; FAQs belong to this service.
 // Dental Implants keeps its own page, written by hand at the same address, with its own table.
 
 export const prerender = true;
@@ -55,9 +55,9 @@ const paragraphs = (service.description ?? '')
   .map((p) => p.trim())
   .filter(Boolean);
 
-// The questions shared by every service page (FAQs): the sample questions before any is published.
+// Only questions authored for this service. No questions: no FAQ block.
 const faqHeading = (await getSection('service_faq'))!;
-const faqs = await getFaqs(serviceFaq.questions);
+const faqs = await getServiceFaqs(service.slug);
 const faqData = faqJsonLd(faqs);
 
 const site = Astro.site;

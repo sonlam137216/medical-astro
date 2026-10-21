@@ -158,6 +158,8 @@ export interface SnapshotService {
   description?: string | null;
   seoTitle?: string | null;
   seoDescription?: string | null;
+  /** Questions authored for this service only; absent in older revisions or when none are answered. */
+  faqs?: { question: string; answer: string }[];
   /** The shown treatments, in order. */
   options?: SnapshotServiceOption[];
   /** The wide picture at the top of the service's page; absent: the default banner. */
@@ -615,6 +617,18 @@ export async function buildSnapshot(db: AdminDb): Promise<Snapshot> {
     .order('sort_order', { ascending: true })
     .order('title', { ascending: true });
   if (situationsError) throw fail('service situations', situationsError);
+  const { data: serviceFaqRows, error: serviceFaqError } = await db
+    .from('service_faqs')
+    .select('service_id, question, answer')
+    .eq('is_visible', true)
+    .not('answer', 'is', null)
+    .order('sort_order')
+    .order('question');
+  if (serviceFaqError) throw fail('service FAQs', serviceFaqError);
+  const faqsOf = (serviceId: string) =>
+    serviceFaqRows
+      .filter((f) => f.service_id === serviceId && f.answer?.trim())
+      .map((f) => ({ question: f.question, answer: f.answer as string }));
   const situationsOf = (serviceId: string): SnapshotSituation[] =>
     situationRows
       .filter((r) => r.service_id === serviceId)
@@ -629,6 +643,7 @@ export async function buildSnapshot(db: AdminDb): Promise<Snapshot> {
       const guideImages = picturesOf(guideBody, guideImageRows);
       const banner = toSnapshotImage(s.banner);
       const situations = situationsOf(s.id);
+      const serviceFaqs = faqsOf(s.id);
       const situationsLabel = s.situations_label?.trim();
       // The pictures only when both are still usable.
       const before = toSnapshotImage(s.situations_before);
@@ -653,6 +668,7 @@ export async function buildSnapshot(db: AdminDb): Promise<Snapshot> {
             home: o.show_on_home,
           })),
         // Only when there is something, so services without them keep the same shape (and hash) as before.
+        ...(serviceFaqs.length > 0 ? { faqs: serviceFaqs } : {}),
         ...(situations.length > 0 ? { situations } : {}),
         ...(situationsLabel ? { situationsLabel } : {}),
         ...(before && after ? { situationsImages: { before, after } } : {}),
@@ -1163,6 +1179,16 @@ export function isSnapshot(value: unknown): value is Snapshot {
                 typeof o.title === 'string' &&
                 Array.isArray(o.inclusions) &&
                 typeof o.home === 'boolean',
+            ))) &&
+        (x.faqs === undefined ||
+          (Array.isArray(x.faqs) &&
+            x.faqs.every(
+              (f) =>
+                isObject(f) &&
+                typeof f.question === 'string' &&
+                f.question.trim().length > 0 &&
+                typeof f.answer === 'string' &&
+                f.answer.trim().length > 0,
             ))) &&
         (x.situationsLabel === undefined || typeof x.situationsLabel === 'string') &&
         (x.situations === undefined ||

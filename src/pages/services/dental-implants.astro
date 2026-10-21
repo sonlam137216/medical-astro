@@ -15,13 +15,12 @@ import ServiceGuide from '../../components/ServiceGuide.astro';
 import SmileResults from '../../components/SmileResults.astro';
 import TreatmentFit from '../../components/TreatmentFit.astro';
 import { getPageSeo, getPageBanner } from '../../lib/site-content';
-import { getFaqs, getSection, getService } from '../../lib/content';
+import { getServiceFaqs, getSection, getService } from '../../lib/content';
 import { faqJsonLd } from '../../lib/seo';
 import Icon from '../../components/Icon.astro';
 import { isIconName } from '../../lib/icons';
 
 import { heroImage } from '../../data/implants';
-import { serviceFaq } from '../../data/shared';
 
 export const prerender = true;
 
@@ -33,8 +32,8 @@ const service = await getService('dental-implants');
 const treatments = service?.options ?? [];
 const why = (await getSection('implants_why'))!;
 const faq = (await getSection('service_faq'))!;
-// The questions shared by every service page (FAQs).
-const faqs = await getFaqs(serviceFaq.questions);
+// Questions authored for Dental Implants only.
+const faqs = await getServiceFaqs('dental-implants');
 const seo = await getPageSeo('/services/dental-implants', {
   title: 'Dental implants · Melatec Dental Clinic',
   description:

@@ -8,7 +8,7 @@ import { smileResultErrors } from './smile-results';
 import { smileStoryErrors } from './smile-stories';
 import { situationPictureErrors } from './service-situations';
 
-/** The group new questions are saved in (FAQs have no groups any more; older rows keep theirs, unused). */
+/** The group new questions are saved in (the website list is independent of service FAQs). */
 const FAQ_GROUP = 'services';
 import type { EntityDef } from './entities';
 import {
@@ -136,7 +136,7 @@ export async function processPost(
 
   // `status_code` is the only numeric select; the column is an integer.
   const row: Row = { ...parsed.value };
-  // FAQs are one list for the whole site: the table still has a group column, which the form no longer shows.
+  // The independent website FAQ list keeps its legacy group; service FAQs use their own table.
   if (def.key === 'faqs' && id === null) row.group_key = FAQ_GROUP;
   if (typeof row.status_code === 'string') row.status_code = Number(row.status_code);
   // Patient photos: the clinic has the patients' consent beforehand, so the forms have no consent box. The tables

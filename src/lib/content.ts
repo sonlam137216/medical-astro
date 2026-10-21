@@ -486,19 +486,13 @@ export async function getSection<K extends SectionKey>(key: K): Promise<Section<
 
 export interface PublicFaq {
   question: string;
-  /** Null for sample questions: the design shows no answers, and answers must come from the clinic. */
-  answer: string | null;
+  answer: string;
 }
 
-/**
- * The questions of the service pages (one list for the whole site): the published, answered ones, or the sample
- * questions before any is published.
- */
-export async function getFaqs(sampleQuestions: string[]): Promise<PublicFaq[]> {
-  const published = (await loadSnapshot())?.faqs ?? [];
-  if (published.length > 0)
-    return published.map((f) => ({ question: f.question, answer: f.answer }));
-  return sampleQuestions.map((question) => ({ question, answer: null }));
+/** The published FAQs of this service only. No website or sample FAQ fallback. */
+export async function getServiceFaqs(serviceSlug: string): Promise<PublicFaq[]> {
+  const snapshot = await loadSnapshot();
+  return snapshot?.services?.find((service) => service.slug === serviceSlug)?.faqs ?? [];
 }
 
 export interface PublicSmileResult {

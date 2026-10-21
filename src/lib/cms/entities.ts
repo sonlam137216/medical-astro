@@ -261,7 +261,7 @@ export const ENTITIES: EntityDef[] = [
     singular: 'service',
     plural: 'Services',
     intro:
-      'The groups of treatments (Dental Implants, Porcelain Veneers…): the “Services” drop-down of the main menu, the cards of the Services page, a page of its own for each service and the consultation forms. The treatments of a service and their prices are added on the service’s page, under “Treatments”. Changes go live after you publish the website.',
+      'The groups of treatments (Dental Implants, Porcelain Veneers…): the “Services” drop-down of the main menu, the cards of the Services page, a page of its own for each service and the consultation forms. The treatments of a service and their prices are added on the service’s page, under “Treatments”. Questions for this service are added under “Service FAQs”; without them its FAQ block stays hidden. Changes go live after you publish the website.',
     titleField: 'title',
     columns: [
       { field: 'title', label: 'Service' },
@@ -909,12 +909,51 @@ export const ENTITIES: EntityDef[] = [
     deletable: true,
   },
   {
+    key: 'service-faqs',
+    table: 'service_faqs',
+    singular: 'question',
+    plural: 'Service FAQs',
+    intro:
+      'Questions written for one service only. Add them from Services → a service → Service FAQs. Only shown questions with an answer appear after publishing. A service without its own FAQs has no FAQ block; website FAQs are never used as a fallback.',
+    titleField: 'question',
+    columns: [
+      { field: 'service_id', label: 'Service' },
+      { field: 'question', label: 'Question' },
+      { field: 'sort_order', label: 'Order' },
+      { field: 'is_visible', label: 'Shown' },
+    ],
+    fields: [
+      {
+        type: 'ref',
+        name: 'service_id',
+        label: 'Service',
+        table: 'services',
+        labelColumn: 'title',
+        required: true,
+      },
+      { type: 'text', name: 'question', label: 'Question', max: 300, required: true },
+      {
+        type: 'textarea',
+        name: 'answer',
+        label: 'Answer',
+        max: 4000,
+        rows: 6,
+        help: 'Leave empty until the clinic has provided it.',
+      },
+      sortOrder,
+      visible,
+    ],
+    order: [{ column: 'sort_order' }, { column: 'question' }],
+    deletable: true,
+    parent: { field: 'service_id', entity: 'services' },
+  },
+  {
     key: 'faqs',
     table: 'faqs',
     singular: 'question',
     plural: 'FAQs',
     intro:
-      'The frequently asked questions of the service pages: one list, shown on every service page (Dental Implants, Porcelain Veneers…). A question without an answer is not shown on the website: answers about treatment must come from the clinic.',
+      'The website FAQ list, managed independently of service FAQs. To add questions to a service page, open Services → that service → Service FAQs. A question without an answer is not published: answers about treatment must come from the clinic.',
     titleField: 'question',
     columns: [
       { field: 'question', label: 'Question' },
