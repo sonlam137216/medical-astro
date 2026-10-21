@@ -5,9 +5,12 @@ import { getSiteContent } from '../lib/site-content';
 
 // The floating contact buttons on the right of every page (picture from the owner, 2026-10-21): phone, Facebook,
 // Zalo, email and WhatsApp, then "back to top". Each button uses a detail of Site details and is left out while
-// that detail is empty; Site details can switch the whole column off. Self-added (the picture shows only the
-// buttons): the name of each button in a tooltip on hover/focus, the ringing phone, the smaller buttons on phones.
-// The links work without JavaScript; "back to top" needs it (data-needs-js) and only appears after scrolling.
+// that detail is empty; Site details can switch the whole column off. The owner asked for a button that folds the
+// column away (always open it takes room): the contacts start folded behind one round button, which opens and
+// closes them, and the choice is kept while the visitor browses (sessionStorage). Self-added (the picture shows only
+// the buttons): the name of each button in a tooltip on hover/focus, the ringing phone, the pulsing fold button,
+// the smaller buttons on phones. Without JavaScript the contacts are simply all shown (no fold button); "back to
+// top" needs it too (data-needs-js) and only appears after scrolling.
 
 const site = await getSiteContent();
 const facebook = site.social.find((s) => s.platform === 'facebook')?.href ?? null;
@@ -52,42 +55,92 @@ const contacts = (
 ---
 
 {site.contactButtons && (
-  <nav class="dock" aria-label="Contact us">
-    <ul class="dock__list">
-      {contacts.map((c) => (
-        <li>
-          <a class={`dock__btn dock__btn--${c.key}`} href={c.href} aria-label={c.label}>
-            {c.icon ? <Icon name={c.icon} size={26} /> : <span class="dock__zalo">Zalo</span>}
-            <span class="dock__tip" aria-hidden="true">
-              {c.label}
-            </span>
-          </a>
-        </li>
-      ))}
-      <li class="dock__top-item" data-needs-js>
-        <button
-          type="button"
-          class="dock__top"
-          data-dock-top
-          aria-label="Back to top"
-          tabindex="-1"
-        >
-          <Icon name="arrow-up" size={22} />
-          <span class="dock__tip" aria-hidden="true">
-            Back to top
-          </span>
-        </button>
-      </li>
-    </ul>
+  <nav class="dock" data-dock aria-label="Contact us">
+    {contacts.length > 0 && (
+      <ul class="dock__list" id="dock-contacts">
+        {contacts.map((c, i) => (
+          <li style={`--k: ${contacts.length - 1 - i}`}>
+            <a class={`dock__btn dock__btn--${c.key}`} href={c.href} aria-label={c.label}>
+              {c.icon ? <Icon name={c.icon} size={26} /> : <span class="dock__zalo">Zalo</span>}
+              <span class="dock__tip" aria-hidden="true">
+                {c.label}
+              </span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    )}
+    {contacts.length > 0 && (
+      <button
+        type="button"
+        class="dock__toggle"
+        data-dock-toggle
+        aria-expanded="false"
+        aria-controls="dock-contacts"
+        aria-label="Contact us"
+        data-needs-js
+      >
+        <Icon name="message-dots" size={28} class="dock__when-closed" />
+        <Icon name="x" size={26} class="dock__when-open" />
+        <span class="dock__tip" aria-hidden="true">
+          <span class="dock__when-closed">Contact us</span>
+          <span class="dock__when-open">Hide</span>
+        </span>
+      </button>
+    )}
+    <div class="dock__top-item" data-needs-js>
+      <button type="button" class="dock__top" data-dock-top aria-label="Back to top" tabindex="-1">
+        <Icon name="arrow-up" size={22} />
+        <span class="dock__tip" aria-hidden="true">
+          Back to top
+        </span>
+      </button>
+    </div>
   </nav>
 )}
 
 <script>
+  // The fold button: opens and closes the contacts. Folded at first; the visitor's choice is kept for the visit
+  // (storage can be unavailable, then every page starts folded). Escape folds them and returns to the button.
+  const dock = document.querySelector<HTMLElement>('[data-dock]');
+  const toggle = dock?.querySelector<HTMLButtonElement>('[data-dock-toggle]');
+  if (dock && toggle) {
+    const KEY = 'mt-dock-open';
+    const setOpen = (open: boolean, remember = true) => {
+      dock.classList.toggle('is-open', open);
+      toggle.setAttribute('aria-expanded', String(open));
+      toggle.setAttribute('aria-label', open ? 'Hide the contact buttons' : 'Contact us');
+      if (!remember) return;
+      try {
+        sessionStorage.setItem(KEY, open ? '1' : '0');
+      } catch {
+        // Storage blocked: the choice lasts for this page only.
+      }
+    };
+    const readSaved = () => {
+      try {
+        return sessionStorage.getItem(KEY) === '1';
+      } catch {
+        return false;
+      }
+    };
+    setOpen(readSaved(), false);
+    // Only after the first state is set, so a page that starts open does not animate.
+    requestAnimationFrame(() => dock.classList.add('is-ready'));
+    toggle.addEventListener('click', () => setOpen(!dock.classList.contains('is-open')));
+    dock.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && dock.classList.contains('is-open')) {
+        setOpen(false);
+        toggle.focus();
+      }
+    });
+  }
+
   // "Back to top" shows once the first screen is scrolled past; pressing it scrolls up and moves the focus to the
   // top of the page (the skip link's target would skip the header).
   const top = document.querySelector<HTMLButtonElement>('[data-dock-top]');
   if (top) {
-    const item = top.closest('li');
+    const item = top.closest('.dock__top-item');
     let ticking = false;
     const update = () => {
       ticking = false;
@@ -126,10 +179,14 @@ const contacts = (
     right: 20px;
     bottom: 24px;
     z-index: 9;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--dock-gap);
     pointer-events: none;
   }
 
-  /* The picture: a soft blue-to-green glow behind the column. */
+  /* The picture: a soft blue-to-green glow behind the column (only while the contacts are out). */
   .dock::before {
     content: '';
     position: absolute;
@@ -144,6 +201,11 @@ const contacts = (
       rgb(24 194 98 / 0%) 100%
     );
     filter: blur(14px);
+    transition: opacity var(--dur-base) var(--ease-out);
+  }
+
+  :global(html.js) .dock:not(.is-open)::before {
+    opacity: 0;
   }
 
   .dock__list {
@@ -156,7 +218,32 @@ const contacts = (
     list-style: none;
   }
 
+  /* Folded (with JavaScript only): the contacts sink into the fold button and cannot be reached; they come out
+     one after the other, the nearest first. */
+  .dock__list > li {
+    transition:
+      opacity var(--dur-base) var(--ease-out),
+      translate var(--dur-base) var(--ease-out),
+      scale var(--dur-base) var(--ease-out),
+      visibility 0s;
+    transition-delay: calc(var(--k, 0) * 40ms);
+  }
+
+  :global(html.js) .dock:not(.is-open) .dock__list > li {
+    opacity: 0;
+    visibility: hidden;
+    translate: 0 calc((var(--k, 0) + 1) * 24px);
+    scale: 0.6;
+    transition-delay: 0s, 0s, 0s, var(--dur-base);
+  }
+
+  .dock:not(.is-ready) .dock__list > li,
+  .dock:not(.is-ready)::before {
+    transition: none;
+  }
+
   .dock__btn,
+  .dock__toggle,
   .dock__top {
     position: relative;
     display: grid;
@@ -178,7 +265,8 @@ const contacts = (
   }
 
   /* The picture: a dashed ring around each button. */
-  .dock__btn::before {
+  .dock__btn::before,
+  .dock__toggle::before {
     content: '';
     position: absolute;
     inset: -5px;
@@ -212,13 +300,38 @@ const contacts = (
     border-color: rgb(24 194 98 / 45%);
   }
 
+  .dock__toggle {
+    background: radial-gradient(circle at 35% 30%, #4d8dff 0%, #0056e5 55%, #0033b6 100%);
+  }
+
+  .dock__toggle :global(svg) {
+    transition:
+      rotate var(--dur-base) var(--ease-out),
+      opacity var(--dur-base) var(--ease-out);
+  }
+
+  .dock__toggle :global(svg.dock__when-open) {
+    position: absolute;
+  }
+
+  .dock.is-open .dock__toggle :global(svg.dock__when-closed),
+  .dock:not(.is-open) .dock__toggle :global(svg.dock__when-open) {
+    opacity: 0;
+    rotate: -90deg;
+  }
+
+  .dock.is-open .dock__tip .dock__when-closed,
+  .dock:not(.is-open) .dock__tip .dock__when-open {
+    display: none;
+  }
+
   .dock__zalo {
     font: 700 15px / 1 var(--font-display);
     letter-spacing: -0.02em;
   }
 
   .dock__top-item {
-    margin-top: 6px;
+    margin-top: 2px;
     opacity: 0;
     visibility: hidden;
     translate: 0 8px;
@@ -262,12 +375,14 @@ const contacts = (
   }
 
   .dock__btn:focus-visible .dock__tip,
+  .dock__toggle:focus-visible .dock__tip,
   .dock__top:focus-visible .dock__tip {
     opacity: 1;
     translate: 0 -50%;
   }
 
   .dock__btn:focus-visible,
+  .dock__toggle:focus-visible,
   .dock__top:focus-visible {
     outline: 2px solid var(--color-blue);
     outline-offset: 7px;
@@ -275,6 +390,7 @@ const contacts = (
 
   @media (hover: hover) and (pointer: fine) {
     .dock__btn:hover,
+    .dock__toggle:hover,
     .dock__top:hover {
       scale: 1.08;
       box-shadow:
@@ -283,16 +399,37 @@ const contacts = (
     }
 
     .dock__btn:hover .dock__tip,
+    .dock__toggle:hover .dock__tip,
     .dock__top:hover .dock__tip {
       opacity: 1;
       translate: 0 -50%;
     }
   }
 
-  /* Self-added: the phone rings now and then. */
+  /* Self-added: the phone rings now and then; the folded button sends out a soft ring to be noticed. */
   @media (prefers-reduced-motion: no-preference) {
     .dock__btn--phone :global(svg) {
       animation: dock-ring 4s var(--ease-out) 2s infinite;
+    }
+
+    .dock:not(.is-open) .dock__toggle::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      box-shadow: 0 0 0 0 rgb(0 86 229 / 45%);
+      animation: dock-pulse 2.4s var(--ease-out) 1s infinite;
+    }
+  }
+
+  @keyframes dock-pulse {
+    0% {
+      box-shadow: 0 0 0 0 rgb(0 86 229 / 45%);
+    }
+
+    70%,
+    100% {
+      box-shadow: 0 0 0 16px rgb(0 86 229 / 0%);
     }
   }
 

@@ -45,6 +45,7 @@ import send from '@tabler/icons/outline/send.svg?raw';
 import shieldCheck from '@tabler/icons/outline/shield-check.svg?raw';
 import stethoscope from '@tabler/icons/outline/stethoscope.svg?raw';
 import usersGroup from '@tabler/icons/outline/users-group.svg?raw';
+import x from '@tabler/icons/outline/x.svg?raw';
 import starFilled from '@tabler/icons/filled/star.svg?raw';
 import brandFacebookFilled from '@tabler/icons/filled/brand-facebook.svg?raw';
 import brandWhatsappFilled from '@tabler/icons/filled/brand-whatsapp.svg?raw';
@@ -101,6 +102,7 @@ const ICONS = {
   'mail-filled': mailFilled,
   'phone-filled': phoneFilled,
   'users-group': usersGroup,
+  x,
 };
 
 export type IconName = keyof typeof ICONS;
