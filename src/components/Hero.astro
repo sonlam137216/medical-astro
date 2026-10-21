@@ -89,6 +89,9 @@ const banner = await getPageBanner('/');
     display: flex;
     align-items: center;
     min-height: clamp(560px, 46vw, 700px);
+    /* Keep the Figma shape (1440 × 662, 46vw) on wide screens too, so a bigger monitor does not show a thinner
+       strip of the photo; stop at the first screen (the top bar and header take 156px). */
+    min-height: clamp(560px, 46vw, max(700px, 100svh - 156px));
     padding-block: 64px;
   }
 
