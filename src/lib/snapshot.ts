@@ -213,6 +213,15 @@ export interface SnapshotSmileStory {
   after: SnapshotImage;
 }
 
+/** A card of the Home page's "Melatec in the News" block (Press articles). */
+export interface SnapshotPressArticle {
+  /** The newspaper's page (https:// or http://). */
+  url: string;
+  /** Short text under the picture; absent: the picture alone. */
+  text?: string;
+  image: SnapshotImage;
+}
+
 export interface SnapshotLocation {
   slug: string;
   name: string;
@@ -271,6 +280,7 @@ export interface Snapshot {
   articles?: SnapshotArticle[];
   smileResults?: SnapshotSmileResult[];
   smileStories?: SnapshotSmileStory[];
+  pressArticles?: SnapshotPressArticle[];
 }
 
 /** Sections the website cannot go live without: the sample versions are placeholders from the design. */
@@ -735,6 +745,21 @@ export async function buildSnapshot(db: AdminDb): Promise<Snapshot> {
   }
   if (stories.length > 0) snapshot.smileStories = stories;
 
+  // Home news cards: only shown ones with a usable picture. The admin name stays out.
+  const { data: pressRows, error: pressError } = await db
+    .from('press_articles')
+    .select(`url, body, image:media_assets(${IMAGE_COLUMNS})`)
+    .eq('is_visible', true)
+    .order('sort_order', { ascending: true })
+    .order('title', { ascending: true });
+  if (pressError) throw fail('press articles', pressError);
+  const press: SnapshotPressArticle[] = [];
+  for (const r of pressRows) {
+    const image = toSnapshotImage(r.image);
+    if (image) press.push({ url: r.url, ...(r.body ? { text: r.body } : {}), image });
+  }
+  if (press.length > 0) snapshot.pressArticles = press;
+
   const { data: locations, error: locationsError } = await db
     .from('locations')
     .select(`slug, name, address_line, directions_url, image:media_assets(${IMAGE_COLUMNS})`)
@@ -945,6 +970,13 @@ export function snapshotProblems(snapshot: Snapshot, target: string = 'staging')
       problems.push(`Home: smile stories, slide ${i + 1}: ${STORY_PICTURE_ERROR}`);
     }
   });
+  (snapshot.pressArticles ?? []).forEach((a, i) => {
+    if (!a.image.decorative && !a.image.alt) {
+      problems.push(
+        `Home: in the news, article ${i + 1}: the picture has no description. Add one in Media.`,
+      );
+    }
+  });
   for (const l of snapshot.legalPages ?? []) {
     if (bodyImageIds(parseArticleBody(l.body)).length > 0) {
       problems.push(
@@ -1000,6 +1032,7 @@ export function isSnapshot(value: unknown): value is Snapshot {
       'articles',
       'smileResults',
       'smileStories',
+      'pressArticles',
     ].every((k) => arrayOrMissing(value[k]))
   )
     return false;
@@ -1148,6 +1181,18 @@ export function isSnapshot(value: unknown): value is Snapshot {
   if (
     !stories.every(
       (p) => isObject(p) && typeof p.body === 'string' && isImage(p.before) && isImage(p.after),
+    )
+  )
+    return false;
+  const press = (value.pressArticles ?? []) as unknown[];
+  if (
+    !press.every(
+      (p) =>
+        isObject(p) &&
+        typeof p.url === 'string' &&
+        /^https?:\/\//i.test(p.url) &&
+        (p.text === undefined || typeof p.text === 'string') &&
+        isImage(p.image),
     )
   )
     return false;

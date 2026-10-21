@@ -517,6 +517,24 @@ export async function getSmileStories(): Promise<PublicSmileStory[] | null> {
   });
 }
 
+export interface PublicPressArticle {
+  url: string;
+  text?: string;
+  image: PublicImage;
+}
+
+/**
+ * The cards of the Home page's "Melatec in the News" block (Press articles). Empty before any is published: the
+ * design's samples are real newspaper pages, so there is no sample card and the block is not shown.
+ */
+export async function getPressArticles(): Promise<PublicPressArticle[]> {
+  const articles = (await loadSnapshot())?.pressArticles ?? [];
+  return articles.flatMap((a) => {
+    const image = toPublicImageOrUndefined(a.image);
+    return image ? [{ url: a.url, ...(a.text ? { text: a.text } : {}), image }] : [];
+  });
+}
+
 export interface PublicLegalPage {
   slug: string;
   title: string;

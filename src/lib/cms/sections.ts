@@ -389,6 +389,14 @@ export const SECTIONS: SectionDef[] = [
     canHide: false,
     fields: [label, title],
   },
+  {
+    key: 'home_news',
+    page: '/',
+    label: 'Home: in the news heading',
+    where:
+      'The heading above the newspaper article cards near the bottom of the Home page (the articles are in “Home: in the news”). Without any shown article the block is not on the page.',
+    fields: [label, title],
+  },
   // ---- About -------------------------------------------------------------------------------------------------
   {
     key: 'about_hero',

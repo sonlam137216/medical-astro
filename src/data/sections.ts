@@ -71,6 +71,7 @@ export const SECTION_SAMPLES = {
   home_how: howItWorks,
   home_smile: smileStories,
   home_travel: travelGuide,
+  home_news: { label: 'Communications', title: 'Melatec in the News' },
   about_hero: aboutHero,
   about_stats: { items: stats },
   about_care: personalisedCare,

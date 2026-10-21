@@ -103,6 +103,16 @@ export const IMAGE_SLOTS = {
     frames: [{ label: 'Service pages, results slider', width: 448, height: 318 }],
     position: { x: 50, y: 40 },
   },
+  // A card of "Melatec in the News" on the Home page (Press articles): usually a screenshot of the newspaper page,
+  // so the top of the picture (the headline) stays in view. A card with a text under the picture has a shorter one.
+  'news-card': {
+    label: 'News article picture',
+    frames: [
+      { label: 'Home page news cards', width: 294, height: 363 },
+      { label: 'News cards with a text', width: 294, height: 220 },
+    ],
+    position: { x: 50, y: 0 },
+  },
   // One picture of a "Which treatment fits your situation" pair on a service's page (usually an X-ray): the before
   // and after pictures sit one above the other beside the cards.
   'treatment-situation': {

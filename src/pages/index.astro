@@ -14,6 +14,7 @@ import OurDoctors from '../components/home/OurDoctors.astro';
 import HowItWorks from '../components/home/HowItWorks.astro';
 import SmileStories from '../components/home/SmileStories.astro';
 import TravelGuide from '../components/home/TravelGuide.astro';
+import InTheNews from '../components/home/InTheNews.astro';
 
 // Static page: built once, served directly from Cloudflare static assets.
 export const prerender = true;
@@ -47,4 +48,5 @@ const organization = await getOrganizationJsonLd(Astro.site, {
   <HowItWorks />
   <SmileStories />
   <TravelGuide />
+  <InTheNews slot="after-social" />
 </SiteLayout>

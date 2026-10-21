@@ -90,5 +90,10 @@ const verification = path === '/' ? await getSiteVerificationMeta() : [];
   {consultation && <ConsultationSection bright={theme === 'sans'} />}
   <slot name="after-consultation" />
   {social && <SocialBar sans={theme === 'sans'} />}
+  {Astro.slots.has('after-social') && (
+    <div class:list={{ 'theme-sans': theme === 'sans' }}>
+      <slot name="after-social" />
+    </div>
+  )}
   <Footer consultationHere={consultationAnchor} />
 </BaseLayout>

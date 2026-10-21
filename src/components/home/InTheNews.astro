@@ -1,0 +1,288 @@
+---
+import Icon from '../Icon.astro';
+import ProfileImage from '../ProfileImage.astro';
+import Section from '../Section.astro';
+import SectionIntro from '../SectionIntro.astro';
+import { getPressArticles, getSection } from '../../lib/content';
+
+// "Communications: Melatec in the News" at the bottom of the Home page, below the social row (Figma, 2026-10-21):
+// cards of newspaper articles about the clinic, each a picture (usually a screenshot of the article) over a light
+// strip with "Read More". The articles are in Press articles ("Home: in the news"), the heading in Page text.
+// Nothing is shown before an article is published: the design's samples are real newspaper pages.
+// Not in Figma (added): the optional text under the picture (the picture is then shorter, frame 1 of the
+// `news-card` slot), the row scrolling sideways when there are more than three cards, with arrows drawn by
+// JavaScript only when it overflows (as on the service pages' results), and the hover/focus states. The whole card
+// is the link, so the "Read More" label is part of it rather than a second link.
+
+const heading = await getSection('home_news');
+const articles = heading ? await getPressArticles() : [];
+---
+
+{heading && articles.length > 0 && (
+  <Section labelledby="news-title">
+    <SectionIntro label={heading.label} headingId="news-title" align="center" lined>
+      <Fragment slot="title">{heading.title}</Fragment>
+    </SectionIntro>
+
+    <div class="news" data-news>
+      <ul class="news__track" aria-label="Newspaper articles" tabindex="0" data-news-track>
+        {articles.map((a) => (
+          <li class="news__item">
+            <a class="news__card" href={a.url}>
+              <ProfileImage
+                class="news__img"
+                image={a.image}
+                slot="news-card"
+                frame={a.text ? 1 : 0}
+                sizes="(max-width: 768px) 80vw, (max-width: 1024px) 45vw, 340px"
+              />
+              {a.text && <p class="news__text">{a.text}</p>}
+              <span class="news__more">
+                <span class="news__btn">
+                  Read More
+                  <svg
+                    class="news__arrow"
+                    width="40"
+                    height="12"
+                    viewBox="0 0 40 12"
+                    aria-hidden="true"
+                  >
+                    <path d="M1 6h37M33 1.5 38 6l-5 4.5" />
+                  </svg>
+                </span>
+              </span>
+            </a>
+          </li>
+        ))}
+      </ul>
+      <div class="news__nav" hidden data-news-nav>
+        <button class="news__nav-btn" type="button" aria-label="Previous articles" data-news-prev>
+          <Icon name="arrow-left" size={20} />
+        </button>
+        <button class="news__nav-btn" type="button" aria-label="Next articles" data-news-next>
+          <Icon name="arrow-right" size={20} />
+        </button>
+      </div>
+    </div>
+  </Section>
+)}
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-news]').forEach((root) => {
+    const track = root.querySelector<HTMLElement>('[data-news-track]');
+    const nav = root.querySelector<HTMLElement>('[data-news-nav]');
+    const prev = root.querySelector<HTMLButtonElement>('[data-news-prev]');
+    const next = root.querySelector<HTMLButtonElement>('[data-news-next]');
+    if (!track || !nav || !prev || !next) return;
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // One card (plus the gap) per click; the snap points line the row up again.
+    const step = () => {
+      const card = track.firstElementChild as HTMLElement | null;
+      const gap = parseFloat(getComputedStyle(track).columnGap) || 0;
+      return card ? card.offsetWidth + gap : track.clientWidth;
+    };
+    const update = () => {
+      nav.hidden = track.scrollWidth - track.clientWidth <= 1;
+      prev.disabled = track.scrollLeft <= 1;
+      next.disabled = track.scrollLeft >= track.scrollWidth - track.clientWidth - 1;
+    };
+    const go = (direction: number) =>
+      track.scrollBy({ left: direction * step(), behavior: reduce ? 'auto' : 'smooth' });
+
+    prev.addEventListener('click', () => go(-1));
+    next.addEventListener('click', () => go(1));
+    track.addEventListener('scroll', update, { passive: true });
+    new ResizeObserver(update).observe(track);
+    update();
+  });
+</script>
+
+<style>
+  .news {
+    display: grid;
+    gap: 20px;
+    min-width: 0;
+  }
+
+  /* Three cards side by side (Figma: 294 px cards, 24 px apart); more scroll sideways. With fewer, they sit in the
+     middle: the auto margins of the first and last card share the free space and drop to zero once the row
+     scrolls. The padding keeps the hover lift and the focus ring inside the scroller, which clips them. */
+  .news__track {
+    --card: calc((100% - 48px) / 3);
+    display: flex;
+    gap: 24px;
+    margin: -8px;
+    padding: 8px;
+    overflow-x: auto;
+    list-style: none;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: 8px;
+    scrollbar-width: none;
+    overscroll-behavior-x: contain;
+  }
+
+  .news__track::-webkit-scrollbar {
+    display: none;
+  }
+
+  .news__track:focus-visible {
+    outline: 3px solid var(--color-blue);
+    outline-offset: -2px;
+    border-radius: var(--radius-card);
+  }
+
+  .news__item {
+    display: flex;
+    flex: 0 0 var(--card);
+    min-width: 0;
+    scroll-snap-align: start;
+  }
+
+  .news__item:first-child {
+    margin-inline-start: auto;
+  }
+
+  .news__item:last-child {
+    margin-inline-end: auto;
+  }
+
+  /* Cards in a row are as tall as the tallest; the strip with "Read More" stays at the bottom. */
+  .news__card {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    overflow: hidden;
+    background: var(--color-soft);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card);
+    color: var(--color-navy);
+    text-decoration: none;
+    transition:
+      border-color 0.15s,
+      box-shadow 0.15s,
+      translate 0.15s;
+  }
+
+  .news__card:focus-visible {
+    outline: 3px solid var(--color-blue);
+    outline-offset: 2px;
+  }
+
+  .news__img {
+    display: block;
+    width: 100%;
+    height: auto;
+    background: var(--color-white);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .news__text {
+    margin: 0;
+    padding: 16px 20px 0;
+    font-size: var(--text-body);
+    line-height: var(--text-body-lh);
+    color: var(--color-title);
+    white-space: pre-line;
+  }
+
+  .news__more {
+    display: flex;
+    justify-content: center;
+    margin-top: auto;
+    padding: 16px 20px;
+  }
+
+  /* Figma: a white pill with a thin border, Montserrat Bold blue text and a long thin arrow. */
+  .news__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    min-height: 48px;
+    padding: 10px 28px;
+    background: var(--color-white);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-button);
+    font: 700 var(--text-button) / var(--text-button-lh) var(--font-display);
+    color: var(--color-blue);
+    white-space: nowrap;
+    transition: border-color 0.15s;
+  }
+
+  .news__arrow {
+    flex: none;
+    fill: none;
+    stroke: currentcolor;
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition: translate 0.15s;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .news__card:hover {
+      border-color: var(--color-blue);
+      box-shadow: 0 12px 28px rgb(0 86 229 / 12%);
+    }
+
+    .news__card:hover .news__btn {
+      border-color: var(--color-blue);
+    }
+
+    .news__card:hover .news__arrow {
+      translate: 4px 0;
+    }
+  }
+
+  @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+    .news__card:hover {
+      translate: 0 -4px;
+    }
+  }
+
+  .news__nav {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+  }
+
+  .news__nav[hidden] {
+    display: none;
+  }
+
+  .news__nav-btn {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    background: var(--color-white);
+    border: 1px solid var(--color-border);
+    border-radius: 50%;
+    color: var(--color-blue);
+    cursor: pointer;
+  }
+
+  .news__nav-btn:hover:not(:disabled) {
+    border-color: var(--color-blue);
+  }
+
+  .news__nav-btn:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+
+  @media (max-width: 1024px) {
+    .news__track {
+      --card: calc((100% - 24px) / 2.15);
+    }
+  }
+
+  @media (max-width: 768px) {
+    .news__track {
+      --card: 80%;
+      gap: 16px;
+    }
+  }
+</style>

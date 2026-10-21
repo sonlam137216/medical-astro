@@ -652,6 +652,30 @@ export interface Tables {
       updated_at?: string;
     };
   };
+  press_articles: {
+    Row: {
+      body: string | null;
+      created_at: string;
+      id: string;
+      image_id: string;
+      is_visible: boolean;
+      sort_order: number;
+      title: string;
+      updated_at: string;
+      url: string;
+    };
+    Insert: {
+      body?: string | null;
+      created_at?: string;
+      id?: string;
+      image_id: string;
+      is_visible?: boolean;
+      sort_order?: number;
+      title: string;
+      updated_at?: string;
+      url: string;
+    };
+  };
   site_settings: {
     Row: {
       address_line: string | null;
@@ -824,5 +848,6 @@ export const TABLES: Record<TableName, TableInfo> = {
     uuid: true,
     refs: { before_image_id: 'media_assets', after_image_id: 'media_assets' },
   },
+  press_articles: { bool: ['is_visible'], uuid: true, refs: { image_id: 'media_assets' } },
   site_settings: { json: ['social_links'] },
 };
