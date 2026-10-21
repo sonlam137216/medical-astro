@@ -11,6 +11,12 @@ import {
   type SectionDef,
 } from './cms/sections.ts';
 import { parseVideoUrl } from './video-embed.ts';
+import {
+  VERIFICATION_ENGINES,
+  VERIFICATION_TOKEN_RE,
+  isSiteVerification,
+  type SiteVerification,
+} from './site-verification.ts';
 import { STORY_PICTURE_ERROR } from './cms/smile-stories.ts';
 
 // What the public site is built from. A snapshot is a complete copy of the published content; the build
@@ -101,6 +107,8 @@ export interface SnapshotSite {
   video?: SnapshotVideo | null;
   /** A YouTube or Vimeo address for the Home page video (normalised watch address); absent when none is set. */
   videoUrl?: string;
+  /** Search engine ownership tokens for the Home page's <meta> tags; absent when none is set. */
+  verification?: SiteVerification;
 }
 
 export interface SnapshotPage {
@@ -338,6 +346,13 @@ export async function buildSnapshot(db: AdminDb): Promise<Snapshot> {
     };
     const embed = parseVideoUrl(site.intro_video_url);
     if (embed) snapshot.site.videoUrl = embed.watchUrl;
+    // Only when one is set, so the snapshots (and hashes) of sites without one stay exactly as they were.
+    const verification: SiteVerification = {};
+    for (const engine of VERIFICATION_ENGINES) {
+      const token = site[engine.column];
+      if (token && VERIFICATION_TOKEN_RE.test(token)) verification[engine.key] = token;
+    }
+    if (Object.keys(verification).length > 0) snapshot.site.verification = verification;
     if (site.intro_video_id) {
       const { data: video, error: videoError } = await db
         .from('media_assets')
@@ -1011,6 +1026,7 @@ export function isSnapshot(value: unknown): value is Snapshot {
   const videoUrl = isObject(value.site) ? value.site.videoUrl : undefined;
   if (videoUrl !== undefined && !(typeof videoUrl === 'string' && parseVideoUrl(videoUrl)))
     return false;
+  if (isObject(value.site) && !isSiteVerification(value.site.verification)) return false;
 
   const articles = (value.articles ?? []) as unknown[];
   const articlesValid = articles.every(

@@ -657,7 +657,9 @@ export interface Tables {
       address_line: string | null;
       contact_email: string | null;
       copyright_text: string | null;
+      bing_site_verification: string | null;
       default_og_image_id: string | null;
+      google_site_verification: string | null;
       id: number;
       intro_video_id: string | null;
       intro_video_url: string | null;
@@ -676,7 +678,9 @@ export interface Tables {
       address_line?: string | null;
       contact_email?: string | null;
       copyright_text?: string | null;
+      bing_site_verification?: string | null;
       default_og_image_id?: string | null;
+      google_site_verification?: string | null;
       id?: number;
       intro_video_id?: string | null;
       intro_video_url?: string | null;

@@ -28,6 +28,8 @@ interface Props {
   ogType?: 'website' | 'article';
   /** schema.org data for the page (see src/lib/seo.ts); written only on indexable builds. */
   jsonLd?: Record<string, unknown>[];
+  /** Search engine ownership tags (src/lib/site-verification.ts); written only on indexable builds. */
+  verification?: { name: string; content: string }[];
 }
 
 const {
@@ -38,6 +40,7 @@ const {
   image,
   ogType = 'website',
   jsonLd = [],
+  verification = [],
 } = Astro.props;
 
 // Canonical address, link previews and structured data are written only when the page may be indexed and the
@@ -76,6 +79,7 @@ const shareImage = seo ? absoluteUrl(Astro.site, image ?? DEFAULT_SHARE_IMAGE) :
         <meta name="twitter:card" content="summary_large_image" />
       </>
     )}
+    {seo && verification.map((v) => <meta name={v.name} content={v.content} />)}
     {seo && jsonLd.length > 0 && (
       <script type="application/ld+json" set:html={jsonLdString(jsonLd)} />
     )}

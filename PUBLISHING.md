@@ -54,6 +54,20 @@ Chỉ làm khi nội dung thật đã có và `npm run check:launch` sạch.
 
 `npm run check:seo` (build thường) và `npm run check:seo -- --site=https://…` (build đã đặt `SITE_URL` + `SITE_INDEXABLE=true`) kiểm các điều trên; CI chạy cả hai.
 
+### Xác minh quyền sở hữu với Google Search Console / Bing Webmaster Tools
+
+**Cách ưu tiên: bản ghi DNS TXT.** Google Search Console → Add property → chọn **Domain** (`melatec.vn`, không có `https://`) → chép bản ghi `google-site-verification=…` → thêm bản ghi **TXT** ở DNS của tên miền (Cloudflare dashboard → DNS → Add record, name `@`). Cách này xác minh cả tên miền (mọi subdomain, http và https), không phụ thuộc vào website, và không mất khi sửa nội dung hay build lại. Bing Webmaster Tools: dùng 'Import from Google Search Console' (sau khi Google đã xác minh), hoặc thêm bản ghi DNS mà Bing đưa.
+
+**Cách dự phòng: thẻ meta ở Home** (khi không sửa được DNS, hoặc Search Console dùng property kiểu 'URL prefix'):
+
+1. Search Console → 'URL prefix' (`https://<tên miền>`) → chọn **HTML tag**, chép thẻ `<meta name="google-site-verification" content="…" />`. Bing: 'HTML Meta Tag', thẻ `<meta name="msvalidate.01" content="…" />`.
+2. Admin → **Site details** → nhóm 'Search engine verification': dán cả thẻ hoặc chỉ phần `content` vào đúng ô (Google / Bing). Khi lưu, thẻ được rút lại còn mã (chữ, số, `-`, `_`, 8–128 ký tự); dán thẻ của Bing vào ô Google, thẻ khác, hoặc mã có ký tự lạ thì báo lỗi.
+3. **Publish lên production** và chờ build xong. Thẻ chỉ được in trong `<head>` của **Home**, và chỉ ở bản build indexable (`SITE_URL` + `SITE_INDEXABLE=true`): staging/local không bao giờ có thẻ này (staging luôn `noindex`, nên cũng không xác minh được ở đó).
+4. Mở mã nguồn `https://<tên miền>/` kiểm thấy thẻ, rồi bấm **Verify** ở Search Console / Bing.
+5. **Giữ nguyên mã** sau khi đã xác minh: Google định kỳ kiểm lại, xoá mã thì mất quyền sở hữu.
+
+Không có script bên thứ ba và CSP không đổi (chỉ là thẻ `<meta>`). `check:seo` báo lỗi nếu thẻ xuất hiện ngoài Home hoặc trên bản build không indexable. Tracking (GA4, GTM, Pixel) **chưa làm**: kéo theo CSP, đồng ý cookie và hiệu năng, cần chủ dự án quyết trước.
+
 ## Chống spam form (Turnstile)
 
 Tuỳ chọn, bật khi thấy spam ở hộp thư tư vấn. Cần **cả hai** cùng lúc:

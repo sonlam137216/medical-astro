@@ -53,6 +53,13 @@ for (const path of pages) {
   const noindex = /<meta name="robots" content="[^"]*noindex/.test(html);
   const canonical = tag(html, /<link rel="canonical" href="([^"]*)"/);
   const jsonLd = [...html.matchAll(/<script type="application\/ld\+json">([^<]*)<\/script>/g)];
+  // Search engine ownership tags (Site details): on the Home page of an indexable build only.
+  const verification = /<meta name="(?:google-site-verification|msvalidate\.01)"/.test(html);
+  if (verification && (!origin || path !== '/'))
+    fail(
+      path,
+      `has a search engine verification tag ${origin ? 'outside the Home page' : 'on a build that is not indexable'}`,
+    );
 
   if (!origin) {
     if (!noindex) fail(path, 'is indexable on a build that should be noindex');

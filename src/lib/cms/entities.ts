@@ -1002,6 +1002,23 @@ export const SITE_FIELDS: Field[] = [
     placeholder: 'https://…',
     help: p === 'facebook' ? 'Leave a link empty to hide its icon.' : undefined,
   })),
+  {
+    type: 'text',
+    name: 'google_site_verification',
+    group: 'Search engine verification',
+    label: 'Google Search Console code',
+    max: 300,
+    placeholder: '<meta name="google-site-verification" content="…" />',
+    help: 'Only needed when Google Search Console cannot check the site with a DNS TXT record. Choose “HTML tag” there and paste the tag or only its code. It is added to the Home page of the live site after Publish. Leave empty for no tag.',
+  },
+  {
+    type: 'text',
+    name: 'bing_site_verification',
+    label: 'Bing Webmaster Tools code',
+    max: 300,
+    placeholder: '<meta name="msvalidate.01" content="…" />',
+    help: 'The same for Bing Webmaster Tools (“HTML Meta Tag”). Bing can also import the site from Google Search Console.',
+  },
 ];
 
 export const entityByKey = (key: string | undefined) => ENTITIES.find((e) => e.key === key);

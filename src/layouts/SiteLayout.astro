@@ -6,7 +6,7 @@ import ConsultationSection from '../components/ConsultationSection.astro';
 import SocialBar from '../components/SocialBar.astro';
 import { getMediaOrigin } from '../lib/content';
 import { SITE_INDEXABLE, pagePath } from '../lib/seo';
-import { getPageMeta } from '../lib/site-content';
+import { getPageMeta, getSiteVerificationMeta } from '../lib/site-content';
 
 interface Props {
   title: string;
@@ -59,6 +59,8 @@ const {
 // Per-page settings from Pages (SEO): hidden from search engines, and the picture for link previews.
 const path = pagePath(Astro.url.pathname);
 const meta = await getPageMeta(path);
+// Google Search Console / Bing check the Home page for their tag (BaseLayout writes it on indexable builds only).
+const verification = path === '/' ? await getSiteVerificationMeta() : [];
 ---
 
 <!-- Pages are indexable only on a build made with SITE_INDEXABLE=true and a SITE_URL (integrations/build-env.mjs). -->
@@ -70,6 +72,7 @@ const meta = await getPageMeta(path);
   image={image ?? meta.shareImage ?? undefined}
   {ogType}
   {jsonLd}
+  {verification}
 >
   <slot name="head" slot="head" />
   <a class="skip-link visually-hidden" href="#main">
