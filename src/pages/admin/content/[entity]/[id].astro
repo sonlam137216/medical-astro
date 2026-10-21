@@ -165,6 +165,8 @@ const yesNo = (value: unknown) => (value === true ? 'yes' : value === false ? 'n
             No {child.def.plural.toLowerCase()} yet.{' '}
             {child.def.key === 'service-options' &&
               'Without treatments, the page of this service shows its description and invites visitors to ask for a quote.'}
+            {child.def.key === 'smile-results' &&
+              'Add before/after pairs here for this service only. Without shown pairs, this service has no Results block.'}
             {child.def.key === 'service-faqs' &&
               'Without answered, shown questions, the page of this service has no FAQ block. Website FAQs are not used here.'}
             {child.def.key === 'service-situations' &&

@@ -636,6 +636,7 @@ export interface Tables {
       created_at: string;
       id: string;
       is_visible: boolean;
+      service_id: string | null;
       sort_order: number;
       title: string;
       updated_at: string;
@@ -647,6 +648,7 @@ export interface Tables {
       created_at?: string;
       id?: string;
       is_visible?: boolean;
+      service_id?: string | null;
       sort_order?: number;
       title: string;
       updated_at?: string;
@@ -889,7 +891,11 @@ export const TABLES: Record<TableName, TableInfo> = {
   smile_results: {
     bool: ['consent_confirmed', 'is_visible'],
     uuid: true,
-    refs: { before_image_id: 'media_assets', after_image_id: 'media_assets' },
+    refs: {
+      service_id: 'services',
+      before_image_id: 'media_assets',
+      after_image_id: 'media_assets',
+    },
   },
   smile_stories: {
     bool: ['is_visible'],

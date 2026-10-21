@@ -1,4 +1,6 @@
 import { test } from 'node:test';
+import { DatabaseSync } from 'node:sqlite';
+import { readdirSync, readFileSync } from 'node:fs';
 import assert from 'node:assert/strict';
 import { createDb } from '../src/lib/db.ts';
 import { smileResultErrors } from '../src/lib/cms/smile-results.ts';
@@ -7,6 +9,9 @@ import { failure, testDb } from './helpers/sqlite.ts';
 
 const setup = () => {
   const { raw, sql } = testDb();
+  raw.exec(
+    "INSERT INTO services (id, slug, title) VALUES ('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', 'dental-implants', 'Dental Implants')",
+  );
   return { raw, db: createDb(sql, { actorId: 'admin-1', audit: true }) };
 };
 
@@ -29,7 +34,7 @@ const addPictures = (raw: ReturnType<typeof testDb>['raw']) => {
 };
 
 const insertPair =
-  'INSERT INTO smile_results (title, before_image_id, after_image_id, consent_confirmed, sort_order, is_visible) VALUES (?, ?, ?, ?, ?, ?)';
+  "INSERT INTO smile_results (service_id, title, before_image_id, after_image_id, consent_confirmed, sort_order, is_visible) VALUES ('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', ?, ?, ?, ?, ?, ?)";
 
 test('a shown pair needs consent and two different pictures, and keeps its pictures from being deleted', () => {
   const { raw } = setup();
@@ -100,4 +105,71 @@ test('a snapshot with a malformed pair is refused', () => {
   assert.equal(isSnapshot({ smileResults: [{ before: image, after: image }] }), true);
   assert.equal(isSnapshot({ smileResults: [{ before: image }] }), false);
   assert.equal(isSnapshot({ smileResults: {} }), false);
+});
+
+test('results are attached to their service, exclude hidden services and cannot outlive their service', async () => {
+  const { raw, db } = setup();
+  addPictures(raw);
+  raw.exec(
+    "INSERT INTO services (id, slug, title) VALUES ('bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb', 'crowns', 'Crowns')",
+  );
+  raw.prepare(insertPair).run('Implant case', ids.a, ids.b, 1, 0, 1);
+  raw
+    .prepare(
+      "INSERT INTO smile_results (service_id, title, before_image_id, after_image_id, consent_confirmed) VALUES (?, 'Crowns case', ?, ?, 1)",
+    )
+    .run('bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb', ids.c, ids.b);
+  let snapshot = await buildSnapshot(db);
+  assert.deepEqual(snapshot.smileResults?.map((p) => p.serviceSlug).sort(), [
+    'crowns',
+    'dental-implants',
+  ]);
+  assert.match(failure(raw, "DELETE FROM services WHERE slug = 'crowns'"), /FOREIGN KEY/);
+  raw.exec("UPDATE services SET is_visible = 0 WHERE slug = 'crowns'");
+  snapshot = await buildSnapshot(db);
+  assert.deepEqual(
+    snapshot.smileResults?.map((p) => p.serviceSlug),
+    ['dental-implants'],
+  );
+  assert.equal(
+    isSnapshot({ smileResults: [{ ...snapshot.smileResults![0], serviceSlug: 12 }] }),
+    false,
+  );
+});
+
+test('migration preserves shared pairs as independent rows on each existing service', () => {
+  const raw = new DatabaseSync(':memory:');
+  raw.exec('PRAGMA foreign_keys = ON');
+  const dir = new URL('../db/migrations/', import.meta.url);
+  for (const file of readdirSync(dir)
+    .sort()
+    .filter((f) => f < '0026'))
+    raw.exec(readFileSync(new URL(file, dir), 'utf8'));
+  addPictures(raw);
+  raw.exec(
+    "INSERT INTO services (id, slug, title) VALUES ('a', 'implants', 'Implants'), ('b', 'crowns', 'Crowns')",
+  );
+  raw
+    .prepare(
+      'INSERT INTO smile_results (title, before_image_id, after_image_id, consent_confirmed, sort_order) VALUES (?, ?, ?, 1, 7)',
+    )
+    .run('Legacy case', ids.a, ids.b);
+  raw.exec(readFileSync(new URL('0026_service_smile_results.sql', dir), 'utf8'));
+  const rows = raw
+    .prepare(
+      'SELECT id, service_id, before_image_id, sort_order FROM smile_results ORDER BY service_id',
+    )
+    .all();
+  assert.equal(rows.length, 2);
+  assert.deepEqual(
+    rows.map((r) => r.service_id),
+    ['a', 'b'],
+  );
+  assert.notEqual(rows[0].id, rows[1].id);
+  assert.ok(rows.every((r) => r.before_image_id === ids.a && r.sort_order === 7));
+  raw.prepare('UPDATE smile_results SET is_visible = 0 WHERE service_id = ?').run('a');
+  assert.equal(
+    raw.prepare("SELECT is_visible FROM smile_results WHERE service_id = 'b'").get()!.is_visible,
+    1,
+  );
 });

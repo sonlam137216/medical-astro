@@ -6,7 +6,7 @@ import SectionIntro from './SectionIntro.astro';
 import { getSection, getSmileResults } from '../lib/content';
 
 // "Results: Real Stories. Real Smiles." of the service pages (Figma "General Service Template"): a row of
-// before/after cards, the same on every service page. The pairs are in Smile results, the heading in Page text
+// before/after cards belonging to this service. Manage the pairs inside Services > a service > Results, the heading in Page text
 // ("Service pages: results heading"). Nothing is shown without a published pair: the design's sample photos show a
 // real person, so there is no sample content.
 // The row is a plain horizontal scroller that snaps to each card, so it works by swipe, trackpad or keyboard without
@@ -14,8 +14,12 @@ import { getSection, getSmileResults } from '../lib/content';
 // wider than the screen. On each card only the band around the knob drags the divider, so swiping elsewhere on a
 // picture scrolls the row.
 
+interface Props {
+  serviceSlug: string;
+}
+const { serviceSlug } = Astro.props;
 const heading = await getSection('service_results');
-const pairs = heading ? await getSmileResults() : [];
+const pairs = heading ? await getSmileResults(serviceSlug) : [];
 ---
 
 {heading && pairs.length > 0 && (

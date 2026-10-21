@@ -29,7 +29,7 @@ import { getPageBanner } from '../../lib/site-content';
 // The page of one service, built from the CMS (Services > a service, and its Treatments), after the Figma
 // "General Service Template" (banner, price cards, cost comparison, which treatment fits, how it works, results, FAQ;
 // the About text and the call to action are added). The cost comparison is the Home page's table (Page text > Home: treatment costs
-// table) and the results slider (Smile results) are shared; FAQs belong to this service.
+// table) is shared; Results and FAQs belong to this service.
 // Dental Implants keeps its own page, written by hand at the same address, with its own table.
 
 export const prerender = true;
@@ -144,7 +144,7 @@ const servicesBanner = await getPageBanner('/services');
   <CtaBand {...careCta} />
   <SeamlessJourney />
 
-  <SmileResults />
+  <SmileResults serviceSlug={service.slug} />
 
   {faqs.length > 0 ? (
     <FaqList label={faqHeading.label} title={faqHeading.title} {faqs}>

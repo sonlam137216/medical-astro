@@ -542,7 +542,7 @@ export const SECTIONS: SectionDef[] = [
     page: '/services',
     label: 'Service pages: results heading',
     where:
-      'The heading above the before/after slider on every service page, Dental Implants included (the pictures are in “Service pages: smile results”). Without any picture pair the block is not shown.',
+      'The heading above the before/after slider on every service page, Dental Implants included (manage each service’s pictures inside Services → a service → Results). Without any picture pair the block is not shown.',
     fields: [label, title],
   },
   {

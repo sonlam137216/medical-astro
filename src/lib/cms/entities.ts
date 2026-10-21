@@ -758,16 +758,25 @@ export const ENTITIES: EntityDef[] = [
     table: 'smile_results',
     singular: 'before/after pair',
     // The page first, so the two before/after lists are told apart in the menu.
-    plural: 'Service pages: smile results',
+    plural: 'Results (before/after)',
     intro:
-      'Before/after photos of real patients, shown as the “Real Stories. Real Smiles.” slider on every service page (one list for all services). Use two photos of the same patient taken from the same angle. The slides with text on the Home page are a separate list (“Home: smile stories”). Changes go live after you publish the website.',
+      'Before/after photos of real patients, shown as the “Real Stories. Real Smiles.” slider on the selected service page only. Manage these pairs inside Services → a service → Results; this list also lets you assign any legacy pairs without a service. Use two photos of the same patient taken from the same angle. The slides with text on the Home page are a separate list (“Home: smile stories”). Changes go live after you publish the website.',
     titleField: 'title',
     columns: [
       { field: 'title', label: 'Pair' },
+      { field: 'service_id', label: 'Service' },
       { field: 'sort_order', label: 'Order' },
       { field: 'is_visible', label: 'Shown' },
     ],
     fields: [
+      {
+        type: 'ref',
+        name: 'service_id',
+        label: 'Service',
+        table: 'services',
+        labelColumn: 'title',
+        required: true,
+      },
       {
         type: 'text',
         name: 'title',
@@ -796,7 +805,8 @@ export const ENTITIES: EntityDef[] = [
       sortOrder,
       visible,
     ],
-    order: [{ column: 'sort_order' }, { column: 'title' }],
+    order: [{ column: 'service_id' }, { column: 'sort_order' }, { column: 'title' }],
+    parent: { field: 'service_id', entity: 'services' },
     deletable: true,
   },
   {
@@ -805,7 +815,7 @@ export const ENTITIES: EntityDef[] = [
     singular: 'smile story',
     plural: 'Home: smile stories',
     intro:
-      'The slides of the “Smile transformations” block on the Home page: each slide is a short story beside a before/after slider of the same patient. The heading above the slides is in Page text (“Home: smile transformation”). The before/after cards of the service pages are a separate list (“Service pages: smile results”). Changes go live after you publish the website.',
+      'The slides of the “Smile transformations” block on the Home page: each slide is a short story beside a before/after slider of the same patient. The heading above the slides is in Page text (“Home: smile transformation”). The before/after cards of the service pages are managed separately inside Services → a service → Results. Changes go live after you publish the website.',
     titleField: 'title',
     columns: [
       { field: 'title', label: 'Story' },

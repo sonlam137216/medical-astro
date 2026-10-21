@@ -504,13 +504,18 @@ export interface PublicSmileResult {
  * The before/after pairs of the service pages' results slider (Smile results). Empty before any is published:
  * the design's sample photos show a real person, so there is no sample content and the block stays hidden.
  */
-export async function getSmileResults(): Promise<PublicSmileResult[]> {
+export async function getSmileResults(serviceSlug: string): Promise<PublicSmileResult[]> {
   const pairs = (await loadSnapshot())?.smileResults ?? [];
-  return pairs.flatMap((p) => {
-    const before = toPublicImageOrUndefined(p.before);
-    const after = toPublicImageOrUndefined(p.after);
-    return before && after ? [{ before, after }] : [];
-  });
+  return (
+    pairs
+      // Old published revisions still use the shared list until the next publish.
+      .filter((p) => p.serviceSlug === undefined || p.serviceSlug === serviceSlug)
+      .flatMap((p) => {
+        const before = toPublicImageOrUndefined(p.before);
+        const after = toPublicImageOrUndefined(p.after);
+        return before && after ? [{ before, after }] : [];
+      })
+  );
 }
 
 export interface PublicSmileStory {

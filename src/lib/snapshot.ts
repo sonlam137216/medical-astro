@@ -216,6 +216,8 @@ export interface SnapshotSection {
 
 /** A before/after pair of the service pages' results slider (Smile results). */
 export interface SnapshotSmileResult {
+  /** Absent only in revisions created before results belonged to services. */
+  serviceSlug?: string;
   before: SnapshotImage;
   after: SnapshotImage;
 }
@@ -770,7 +772,7 @@ export async function buildSnapshot(db: AdminDb): Promise<Snapshot> {
   const { data: results, error: resultsError } = await db
     .from('smile_results')
     .select(
-      `before:media_assets!before_image_id(${IMAGE_COLUMNS}), after:media_assets!after_image_id(${IMAGE_COLUMNS})`,
+      `service_id, before:media_assets!before_image_id(${IMAGE_COLUMNS}), after:media_assets!after_image_id(${IMAGE_COLUMNS})`,
     )
     .eq('is_visible', true)
     .order('sort_order', { ascending: true })
@@ -780,7 +782,8 @@ export async function buildSnapshot(db: AdminDb): Promise<Snapshot> {
   for (const r of results) {
     const before = toSnapshotImage(r.before);
     const after = toSnapshotImage(r.after);
-    if (before && after) pairs.push({ before, after });
+    const service = services.find((s) => s.id === r.service_id);
+    if (service && before && after) pairs.push({ serviceSlug: service.slug, before, after });
   }
   if (pairs.length > 0) snapshot.smileResults = pairs;
 
@@ -1272,7 +1275,16 @@ export function isSnapshot(value: unknown): value is Snapshot {
 
   const isImage = (i: unknown) => isObject(i) && typeof i.key === 'string';
   const pairs = (value.smileResults ?? []) as unknown[];
-  if (!pairs.every((p) => isObject(p) && isImage(p.before) && isImage(p.after))) return false;
+  if (
+    !pairs.every(
+      (p) =>
+        isObject(p) &&
+        (p.serviceSlug === undefined || typeof p.serviceSlug === 'string') &&
+        isImage(p.before) &&
+        isImage(p.after),
+    )
+  )
+    return false;
   const stories = (value.smileStories ?? []) as unknown[];
   if (
     !stories.every(
