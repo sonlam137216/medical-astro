@@ -175,8 +175,8 @@ const link = (href: string) => pageLink(href, consultationHere);
   .footer__legal a {
     display: flex;
     align-items: center;
-    min-height: 44px;
-    padding-block: 8px;
+    min-height: 32px;
+    padding-block: 4px;
     width: fit-content;
     max-width: 100%;
     color: rgb(255 255 255 / 85%);
@@ -259,6 +259,16 @@ const link = (href: string) => pageLink(href, consultationHere);
   }
 
   @media (max-width: 768px) {
+    .footer__col li a,
+    .footer__legal a {
+      min-height: 36px;
+      padding-block: 6px;
+    }
+
+    .footer__col li a {
+      width: 100%;
+    }
+
     .footer__col address a {
       display: inline-flex;
       align-items: center;
