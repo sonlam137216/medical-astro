@@ -26,7 +26,7 @@ const link = (href: string) => pageLink(href, consultationHere);
         {site.tagline && <p class="footer__tagline">{site.tagline}</p>}
       </div>
 
-      <nav class="footer__col" aria-label="Treatment">
+      <nav class="footer__col footer__treatments" aria-label="Treatment">
         <h2 class="footer__title">Treatment</h2>
         <ul>
           {site.footerTreatments.map((l) => (
@@ -37,7 +37,7 @@ const link = (href: string) => pageLink(href, consultationHere);
         </ul>
       </nav>
 
-      <nav class="footer__col" aria-label="Explore">
+      <nav class="footer__col footer__explore" aria-label="Explore">
         <h2 class="footer__title">Explore</h2>
         <ul>
           {site.footerExplore.map((l) => (
@@ -48,7 +48,7 @@ const link = (href: string) => pageLink(href, consultationHere);
         </ul>
       </nav>
 
-      <div class="footer__col">
+      <div class="footer__col footer__contact">
         <h2 class="footer__title">Contact Us</h2>
         <address>
           {site.addressLine && (
@@ -89,85 +89,105 @@ const link = (href: string) => pageLink(href, consultationHere);
 </footer>
 
 <style>
-  /*
-   * Figma Shared / Footer (2026-10-17, same on every page): blue gradient picture, Montserrat, the white logo
-   * emblem above the clinic name, 3 link columns, a white rule, then the legal row. Sizes follow Figma 1:1
-   * (the footer frame is about as wide as the site container).
-   */
   .footer {
     background: var(--gradient-footer);
     color: var(--color-white);
-    padding-block: 52px 32px;
+    padding-block: 56px 24px;
     font-family: var(--font-display);
   }
 
   .footer__grid {
     display: grid;
-    grid-template-columns: 1.35fr 1fr 1fr 1.6fr;
-    gap: 0;
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.6fr);
+    grid-template-areas: 'brand treatments explore contact';
+    gap: 32px;
+    align-items: start;
   }
 
   .footer__brand {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    width: fit-content;
+    grid-area: brand;
     max-width: 270px;
-    padding-right: 24px;
   }
 
-  /* The emblem sits centred over the clinic name (Figma). */
   .footer__logo {
     display: block;
-    align-self: center;
+    align-self: flex-start;
     line-height: 0;
   }
 
   .footer__logo img {
-    width: 91px;
+    width: 68px;
     height: auto;
   }
 
   .footer__name {
-    margin: 4px 0 0;
+    margin: 16px 0 0;
     font-weight: 700;
-    font-size: 20px;
-    line-height: 28px;
+    font-size: 18px;
+    line-height: 26px;
   }
 
   .footer__tagline {
     margin: 10px 0 0;
-    font-size: 17px;
-    line-height: 21px;
+    font-size: 14px;
+    line-height: 24px;
+    color: rgb(255 255 255 / 80%);
   }
 
   .footer__col {
-    font-size: 17px;
-    line-height: 21px;
+    min-width: 0;
+    font-size: 14px;
+    line-height: 24px;
+  }
+
+  .footer__treatments {
+    grid-area: treatments;
+  }
+
+  .footer__explore {
+    grid-area: explore;
+  }
+
+  .footer__contact {
+    grid-area: contact;
   }
 
   .footer__title {
-    margin: 0 0 12px;
+    margin: 0 0 16px;
     font-family: var(--font-display);
-    font-weight: 700;
-    font-size: 25px;
-    line-height: 30px;
-    text-transform: uppercase;
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 24px;
   }
 
   .footer__col ul {
     display: grid;
-    gap: 10px;
+    gap: 0;
     margin: 0;
     padding: 0;
     list-style: none;
   }
 
+  .footer__col li a,
+  .footer__legal a {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+    padding-block: 8px;
+    width: fit-content;
+    max-width: 100%;
+    color: rgb(255 255 255 / 85%);
+  }
+
   .footer__col address {
     display: grid;
-    gap: 12px;
+    gap: 16px;
     font-style: normal;
-    max-width: 320px;
+    overflow-wrap: anywhere;
+    color: rgb(255 255 255 / 85%);
   }
 
   /* Icons hang to the left of their line (Figma Home). */
@@ -185,17 +205,28 @@ const link = (href: string) => pageLink(href, consultationHere);
 
   .footer a:hover {
     text-decoration: underline;
+    text-underline-offset: 4px;
+    color: var(--color-white);
+  }
+
+  .footer a:focus-visible {
+    outline: 2px solid var(--color-white);
+    outline-offset: 4px;
+    border-radius: 4px;
   }
 
   .footer__bottom {
     display: flex;
     justify-content: space-between;
-    gap: 24px;
-    margin-top: 52px;
-    padding-top: 26px;
-    border-top: 1px solid var(--color-white);
-    font-size: 15px;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px 24px;
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid rgb(255 255 255 / 24%);
+    font-size: 12px;
     line-height: 20px;
+    color: rgb(255 255 255 / 72%);
   }
 
   .footer__bottom p {
@@ -205,7 +236,7 @@ const link = (href: string) => pageLink(href, consultationHere);
   .footer__legal {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px 32px;
+    gap: 0 20px;
     margin: 0;
     padding: 0;
     list-style: none;
@@ -214,42 +245,82 @@ const link = (href: string) => pageLink(href, consultationHere);
   @media (max-width: 1024px) {
     .footer__grid {
       grid-template-columns: 1fr 1fr;
-      gap: 40px;
+      grid-template-areas: 'brand contact' 'treatments explore';
+      gap: 32px 48px;
     }
 
     .footer__brand {
-      grid-column: 1 / -1;
       max-width: 320px;
-      padding-right: 0;
     }
 
-    .footer__logo {
-      align-self: flex-start;
-    }
-
-    .footer__title {
-      font-size: 22px;
-      line-height: 28px;
+    .footer__bottom {
+      padding-right: 64px;
     }
   }
 
-  /* Phones: a 40 px tap area for the phone number without spreading the lines apart. */
   @media (max-width: 768px) {
     .footer__col address a {
       display: inline-flex;
       align-items: center;
-      min-height: 40px;
+      min-height: 44px;
       margin-block: -10px;
     }
   }
 
   @media (max-width: 600px) {
+    .footer {
+      padding-block: 36px 88px;
+    }
+
     .footer__grid {
-      grid-template-columns: 1fr;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      grid-template-areas: 'brand brand' 'treatments explore' 'contact contact';
+      gap: 28px 20px;
+    }
+
+    .footer__brand {
+      max-width: 100%;
+      display: grid;
+      grid-template-columns: 56px minmax(0, 1fr);
+      gap: 8px 16px;
+      align-items: center;
+    }
+
+    .footer__logo {
+      grid-row: span 2;
+      align-self: start;
+    }
+
+    .footer__logo img {
+      width: 56px;
+    }
+
+    .footer__name,
+    .footer__tagline {
+      margin: 0;
+    }
+
+    .footer__name {
+      font-size: 16px;
+      line-height: 24px;
+    }
+
+    .footer__tagline {
+      font-size: 13px;
+      line-height: 21px;
+    }
+
+    .footer__contact {
+      padding-top: 24px;
+      padding-right: 44px;
+      border-top: 1px solid rgb(255 255 255 / 24%);
     }
 
     .footer__bottom {
       flex-direction: column;
+      align-items: flex-start;
+      margin-top: 28px;
+      padding-right: 44px;
     }
   }
 </style>

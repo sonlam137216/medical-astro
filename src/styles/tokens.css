@@ -87,9 +87,8 @@
   /* One height for the top banner of every page but Home (PageHero banner; the 'page-banner' picture frame in
      src/lib/image-slots.ts is 1440 × this). Taller copy grows the banner instead of being cut. */
   --page-hero-height: 480px;
-  /* Height of a sticky header. The header of this branch scrolls away, so sticky bars (article filters, the
-     article rail) sit at the top of the screen. */
-  --header-h: 0px;
+  /* Header.astro measures the rendered height so sticky bars and anchor links clear it at every screen size. */
+  --header-h: var(--nav-h);
 
   /* shape */
   --radius-control: 8px; /* form inputs (and admin controls) */

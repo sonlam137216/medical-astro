@@ -30,38 +30,38 @@ const isActive = (href: string) => (href === '/' ? current === '/' : current.sta
 const groupActive = (g: MenuGroup) => g.links.some((l) => isActive(l.href));
 ---
 
-<header class="header">
-  <div class="topbar">
-    <div class="container topbar__inner">
-      <p class="topbar__contact">
-        {site.phoneDisplay && (
-          <a href={`tel:${site.phoneIntl?.replace(/\s/g, '') ?? ''}`}>
-            <Icon name="phone" size={16} />
-            {site.phoneDisplay}
-          </a>
-        )}
-        {site.email && (
-          <a href={`mailto:${site.email}`}>
-            <Icon name="mail" size={16} />
-            {site.email}
-          </a>
-        )}
-      </p>
-      <div class="topbar__actions">
-        <a class="topbar__btn" href={link(cta.href ?? '#consultation')}>
-          <Icon name="calendar-check" size={16} />
-          {cta.label}
+<div class="topbar">
+  <div class="container topbar__inner">
+    <p class="topbar__contact">
+      {site.phoneDisplay && (
+        <a href={`tel:${site.phoneIntl?.replace(/\s/g, '') ?? ''}`}>
+          <Icon name="phone" size={16} />
+          {site.phoneDisplay}
         </a>
-        {utility && utility.href && (
-          <a class="topbar__btn" href={link(utility.href)}>
-            {utility.label}
-          </a>
-        )}
-        {utility && !utility.href && <span class="topbar__btn">{utility.label}</span>}
-      </div>
+      )}
+      {site.email && (
+        <a href={`mailto:${site.email}`}>
+          <Icon name="mail" size={16} />
+          {site.email}
+        </a>
+      )}
+    </p>
+    <div class="topbar__actions">
+      <a class="topbar__btn" href={link(cta.href ?? '#consultation')}>
+        <Icon name="calendar-check" size={16} />
+        {cta.label}
+      </a>
+      {utility && utility.href && (
+        <a class="topbar__btn" href={link(utility.href)}>
+          {utility.label}
+        </a>
+      )}
+      {utility && !utility.href && <span class="topbar__btn">{utility.label}</span>}
     </div>
   </div>
+</div>
 
+<header class="header">
   <div class="nav">
     <div class="container nav__inner">
       <Logo />
@@ -156,6 +156,16 @@ const groupActive = (g: MenuGroup) => g.links.some((l) => isActive(l.href));
 </header>
 
 <script>
+  // Content and wrapping change the header height across screen sizes and CMS settings.
+  const header = document.querySelector<HTMLElement>('header.header');
+  if (header) {
+    const updateHeaderHeight = () => {
+      document.documentElement.style.setProperty('--header-h', `${header.offsetHeight}px`);
+    };
+    updateHeaderHeight();
+    new ResizeObserver(updateHeaderHeight).observe(header);
+  }
+
   const menu = document.querySelector<HTMLElement>('[data-menu]');
   const toggle = document.querySelector<HTMLButtonElement>('[data-menu-toggle]');
 
@@ -209,6 +219,14 @@ const groupActive = (g: MenuGroup) => g.links.some((l) => isActive(l.href));
 </script>
 
 <style>
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: var(--color-white);
+    box-shadow: 0 2px 12px rgb(0 19 169 / 8%);
+  }
+
   /* Top bar: Figma #0056E5, contact on the left, two outlined pill buttons on the right. */
   .topbar {
     background: var(--color-blue);
@@ -486,6 +504,9 @@ const groupActive = (g: MenuGroup) => g.links.some((l) => isActive(l.href));
       right: 0;
       top: 100%;
       width: min(320px, 90vw);
+      max-height: calc(100dvh - var(--header-h) - 16px);
+      overflow-y: auto;
+      overscroll-behavior: contain;
       padding: 16px;
       background: var(--color-white);
       border: 1px solid var(--color-border);
