@@ -20,6 +20,11 @@ export interface ImageSlot {
 }
 
 export const IMAGE_SLOTS = {
+  'journey-banner': {
+    label: 'Seamless journey banner',
+    frames: [{ label: 'Inner pages, dental journey banner', width: 1200, height: 340 }],
+    position: { x: 75, y: 50 },
+  },
   'service-card': {
     label: 'Service card',
     frames: [{ label: 'Service cards', width: 384, height: 190 }],

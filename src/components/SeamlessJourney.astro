@@ -1,11 +1,12 @@
 ---
-import { Image } from 'astro:assets';
+import ProfileImage from './ProfileImage.astro';
 import Section from './Section.astro';
 import JourneySteps from './JourneySteps.astro';
 
 import { getSection } from '../lib/content';
 
 const j = (await getSection('shared_journey'))!;
+const picture = j.chosenPhotos.image ?? j.image;
 // The steps are the ones of "Home: how it works" (written once in the admin); switched off there, the banner
 // stands alone as before.
 const how = await getSection('home_how');
@@ -15,13 +16,11 @@ const steps = how?.steps ?? [];
 <Section labelledby="journey-title">
   <!-- Figma: left-aligned eyebrow + serif title sit on the white-faded left of a rounded dental-room photo. -->
   <div class="journey">
-    <Image
+    <ProfileImage
       class="journey__img"
-      src={j.image.src}
-      alt={j.image.alt}
-      widths={[720, 1040, 1600]}
+      image={picture}
+      slot="journey-banner"
       sizes="(max-width: 1440px) 100vw, 1040px"
-      loading="lazy"
     />
     <div class="journey__text">
       <p class="journey__label">{j.label}</p>
@@ -59,7 +58,6 @@ const steps = how?.steps ?? [];
     width: 100%;
     height: 100%;
     object-fit: cover;
-    object-position: 75% center;
   }
 
   .journey::before {

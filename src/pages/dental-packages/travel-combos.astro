@@ -17,7 +17,7 @@ import { getDestinations, getLocations, getSection } from '../../lib/content';
 
 export const prerender = true;
 
-const locations = await getLocations();
+const locations = (await getLocations()).slice(0, 3);
 const discoverCards = await getDestinations();
 const hero = (await getSection('combos_hero'))!;
 const seo = await getPageSeo('/dental-packages/travel-combos', {

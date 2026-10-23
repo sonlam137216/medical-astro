@@ -359,7 +359,7 @@ export const SECTIONS: SectionDef[] = [
     page: '/',
     label: 'Home: how it works',
     where:
-      'The numbered steps on the blue band (also shown under “Your Seamless Dental Journey” on inner pages).',
+      'Edit each step’s title, text, tag and icon here. These steps are shared by Home and “Your Seamless Dental Journey” on About, Services, every service page, Dental Packages and Travel Combos. Change the inner-page banner photo in “Seamless journey banner”.',
     fields: [
       label,
       title,
@@ -518,9 +518,17 @@ export const SECTIONS: SectionDef[] = [
     key: 'shared_journey',
     page: '/services',
     label: 'Seamless journey banner',
-    where: 'The photo banner with a title (Services, About, Dental Implants).',
+    where:
+      'The shared photo banner on About, Services, every service page, Dental Packages and Travel Combos. Changes here apply to all these pages. Edit the steps below it in “Home: how it works”.',
     canHide: false,
-    fields: [label, title],
+    fields: [
+      label,
+      title,
+      image(
+        'Choose the banner photo shared by all inner pages. The title sits over the left side. Leave empty to keep the built-in photo.',
+        'journey-banner',
+      ),
+    ],
   },
   {
     key: 'service_situations',
