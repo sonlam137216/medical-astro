@@ -48,7 +48,8 @@ export default defineConfig({
     csp: {
       directives: [
         "default-src 'self'",
-        `img-src ${sources("'self'", 'data:', 'blob:', mediaOrigin, 'https://www.facebook.com')}`,
+        // Meta Pixel sends tracking images to www.facebook.com and diagnostic images to connect.facebook.net.
+        `img-src ${sources("'self'", 'data:', 'blob:', mediaOrigin, 'https://www.facebook.com', 'https://connect.facebook.net')}`,
         `media-src ${sources("'self'", 'blob:', mediaOrigin)}`,
         "font-src 'self'",
         // Cloudflare Web Analytics is enabled on the live zone and injects its beacon at the edge.
