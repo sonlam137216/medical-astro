@@ -13,6 +13,8 @@ interface Props {
 const { consultationHere = true } = Astro.props;
 const site = await getSiteContent();
 const link = (href: string) => pageLink(href, consultationHere);
+// Older published menus still contain this link; keep it hidden until cookie settings exists.
+const legalLinks = site.footerLegal.filter(({ href }) => href !== '/cookie-settings');
 ---
 
 <footer class="footer">
@@ -78,7 +80,7 @@ const link = (href: string) => pageLink(href, consultationHere);
     <div class="footer__bottom">
       {site.copyright && <p>{site.copyright}</p>}
       <ul class="footer__legal">
-        {site.footerLegal.map((l) => (
+        {legalLinks.map((l) => (
           <li>
             <a href={link(l.href)}>{l.label}</a>
           </li>

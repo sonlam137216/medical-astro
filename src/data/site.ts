@@ -64,6 +64,5 @@ export const footerExplore: NavLink[] = [
 
 export const footerLegal: NavLink[] = [
   { label: 'Privacy Policy', href: '/privacy-policy' }, // PROVISIONAL
-  { label: 'Cookie settings', href: '/cookie-settings' }, // PROVISIONAL
   { label: 'Legal Disclaimer', href: '/legal-disclaimer' }, // PROVISIONAL
 ];
