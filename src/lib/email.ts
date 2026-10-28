@@ -1,5 +1,6 @@
 import type { SqlDatabase } from './db.ts';
 import { sha256Hex } from './admin-auth.ts';
+import { consultationEmail, testEmail, verificationEmail } from './email-templates.ts';
 
 /** Runtime-only settings. These must never be read by public content/snapshot code. */
 export interface EmailEnv {
@@ -40,6 +41,8 @@ interface Mail {
   to: string[];
   subject: string;
   text: string;
+  /** Optional so in-flight jobs keep their original payload and idempotency key after a deployment. */
+  html?: string;
 }
 type SendResult =
   | { ok: true; id: string }
@@ -211,8 +214,7 @@ export async function requestEmailVerification(
     {
       from: config.from,
       to: [email],
-      subject: 'Confirm Melatec email notifications',
-      text: `An administrator requested this address for consultation notifications. Sign in to the Melatec admin, then open this link and press Confirm. The link expires in one hour.\n\n${config.origin}/admin/email/confirm#token=${token}\n\nIf you did not expect this request, ignore this email.`,
+      ...verificationEmail(config.origin, token, (now + 3600) * SECOND),
     },
     `verification/${crypto.randomUUID()}`,
     fetcher,
@@ -276,16 +278,14 @@ function message(
   recipient: string,
   receivedAt: string,
 ): Mail {
-  const text =
+  const content =
     job.kind === 'test'
-      ? `This is a test of Melatec consultation notifications.\n\n${config.origin}/admin/consultations`
-      : `A new consultation request is available.\nRequest: ${job.consultation_id}\nReceived: ${receivedAt} (UTC)\n\n${config.origin}/admin/consultations/${job.consultation_id}\n\nSign in to view the request details.`;
-  // Plain text avoids HTML injection and tracking pixels. Tracking must also be disabled for the Resend domain.
+      ? testEmail(config.origin, job.created_at)
+      : consultationEmail(config.origin, job.consultation_id!, receivedAt);
   return {
     from: config.from,
     to: [recipient],
-    subject: job.kind === 'test' ? 'Melatec notification test' : 'New Melatec consultation request',
-    text,
+    ...content,
   };
 }
 

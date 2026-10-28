@@ -3,6 +3,7 @@ import { env } from 'cloudflare:workers';
 import AdminLayout from '../../../layouts/AdminLayout.astro';
 import '../../../styles/email-admin.css';
 import { emailConfig, emailSettings, recentEmails } from '../../../lib/email';
+import { EMAIL_TIME_LABEL, formatEmailDate } from '../../../lib/email-templates';
 
 export const prerender = false;
 const settings = await emailSettings(env.DB);
@@ -64,15 +65,14 @@ const ready =
         <dd>{settings.pending_email ?? 'None'}</dd>
         <dt>Verification link expires</dt>
         <dd>
-          {settings.token_expires_at
-            ? new Date(settings.token_expires_at * 1000).toISOString()
-            : '—'}
+          {settings.token_expires_at ? formatEmailDate(settings.token_expires_at * 1000) : '—'}
         </dd>
         <dt>Verification sending status</dt>
         <dd>{settings.confirmation_status ?? '—'}</dd>
         <dt>Last test accepted by Resend</dt>
-        <dd>{settings.last_test_at ?? 'None'}</dd>
+        <dd>{settings.last_test_at ? formatEmailDate(settings.last_test_at) : 'None'}</dd>
       </dl>
+      <p class="admin-muted">All times shown in {EMAIL_TIME_LABEL}.</p>
       <form method="post" action="/admin/email/action">
         <button
           class="admin-btn"
@@ -137,7 +137,7 @@ const ready =
         <table class="admin-table">
           <thead>
             <tr>
-              <th>Created (UTC)</th>
+              <th>Created (Vietnam time, UTC+7)</th>
               <th>Type</th>
               <th>Status</th>
               <th>Attempts</th>
@@ -147,7 +147,7 @@ const ready =
           <tbody>
             {jobs.map((job) => (
               <tr>
-                <td>{job.created_at}</td>
+                <td>{formatEmailDate(job.created_at)}</td>
                 <td>{job.kind}</td>
                 <td>{job.status}</td>
                 <td>{job.attempts}</td>

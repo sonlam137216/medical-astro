@@ -2,6 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { testDb } from './helpers/sqlite.ts';
 import { createDb } from '../src/lib/db.ts';
+import { formatEmailDate } from '../src/lib/email-templates.ts';
 import {
   emailConfig,
   emailSettings,
@@ -152,6 +153,11 @@ test('sender sends minimal metadata to current recipient and records provider ac
   assert.match(calls[0].mail.text as string, /https:\/\/clinic.example\/admin\/consultations\//);
   assert.equal(job(raw).status, 'accepted');
   assert.equal(job(raw).provider_id, 'provider-123');
+  assert.match(calls[0].mail.html as string, /View consultation request/);
+  const received = raw.prepare('SELECT created_at FROM consultation_requests LIMIT 1').get()!
+    .created_at as string;
+  assert.ok((calls[0].mail.text as string).includes(formatEmailDate(received)));
+  assert.ok((calls[0].mail.html as string).includes(formatEmailDate(received)));
   await processEmailOutbox(sql, config, fetcher, () => now + 60);
   assert.equal(calls.length, 1);
 });
@@ -321,4 +327,22 @@ test('provider quota and Retry-After defer retries without losing the queued not
   assert.equal(row.status, 'pending');
   assert.equal(row.error_code, 'provider_quota');
   assert.equal(row.next_attempt_at, now + 4000);
+});
+
+test('deploying HTML templates preserves an already-attempted plain-text payload for idempotency', async () => {
+  const { sql, raw } = setup();
+  await insert(sql);
+  const original = {
+    from: config.EMAIL_FROM,
+    to: [mailbox],
+    subject: 'Legacy subject',
+    text: 'Original plain text payload',
+  };
+  raw
+    .prepare("UPDATE email_outbox SET status = 'pending', attempts = 1, recipient = ?, payload = ?")
+    .run(mailbox, JSON.stringify(original));
+  const { calls, fetcher } = provider();
+  await processEmailOutbox(sql, config, fetcher, () => now);
+  assert.deepEqual(calls[0].mail, original);
+  assert.equal(job(raw).status, 'accepted');
 });
