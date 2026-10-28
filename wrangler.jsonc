@@ -61,24 +61,24 @@
   "observability": {
     "enabled": true,
   },
-  // Staging: build with CLOUDFLARE_ENV=staging (see `npm run deploy:staging`).
-  // Secrets for each environment are set separately; staging must never use production credentials.
+  // Legacy deployment alias: this Worker now serves the live melatecdentalclinic.com website.
+  // Keep using CLOUDFLARE_ENV=staging / deploy:staging to target its existing bindings and secrets.
   "env": {
     "staging": {
       "name": "melatec-website-staging",
       "triggers": { "crons": ["* * * * *"] },
       "vars": {
         "PUBLISH_TARGET": "staging",
-        "EMAIL_ENVIRONMENT": "staging",
+        "EMAIL_ENVIRONMENT": "production",
         "EMAIL_FROM": "Melatec <no-reply@melatecdentalclinic.com>",
-        "EMAIL_ADMIN_ORIGIN": "",
+        "EMAIL_ADMIN_ORIGIN": "https://melatecdentalclinic.com",
         "EMAIL_STAGING_TO": "",
         "EMAIL_HOURLY_LIMIT": "10",
         "EMAIL_DAILY_LIMIT": "30",
         "GITHUB_REPO": "sonlam137216/medical-astro",
         "GITHUB_WORKFLOW": "publish.yml",
       },
-      // Bindings are not inherited by environments. Staging has its own database: it never touches production data.
+      // Bindings are not inherited. These legacy-named D1/R2 resources contain the LIVE website data.
       "d1_databases": [
         {
           "binding": "DB",

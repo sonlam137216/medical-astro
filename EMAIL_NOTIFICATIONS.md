@@ -1,28 +1,33 @@
 # Email thông báo tư vấn
 
-Triển khai ngày 28/10/2026 theo `EMAIL_NOTIFICATIONS_PLAN.md`. Nhà cung cấp: Resend; backend: Cloudflare Workers; hàng đợi: D1. Mặc định **tắt**, chỉ bật trong CMS sau khi xác minh người nhận và gửi thử thành công. Chủ dự án báo đã thêm secret `RESEND_API_KEY` trên Worker. Chưa gửi email thật hoặc deploy remote trong đợt implement này.
+Triển khai ngày 28/10/2026 theo `EMAIL_NOTIFICATIONS_PLAN.md`. Nhà cung cấp: Resend; backend: Cloudflare Workers; hàng đợi: D1. Mặc định **tắt**, chỉ bật trong CMS sau khi xác minh người nhận và gửi thử thành công. Chủ dự án báo đã thêm secret `RESEND_API_KEY` trên Worker. Đã kiểm tra trang email live: không còn cảnh báo cấu hình, người nhận đã xác minh, notifications đang Paused và chưa có test email được nhà cung cấp nhận.
+
+## Worker đang phục vụ website thật
+
+Đã kiểm tra trực tiếp Cloudflare ngày 28/10/2026: `melatecdentalclinic.com` gắn vào **`melatec-website-staging`**; binding `DB` là **`melatec-staging`** (`09e15b8c-b43c-4878-bfe2-c37bef1c7d55`), R2 là `melatec-media-staging`. Các tài nguyên này chứa dữ liệu live dù còn tên staging.
+
+Giữ alias deploy `staging` và `PUBLISH_TARGET=staging` để workflow tiếp tục dùng đúng Worker/database hiện có. Chế độ email **`EMAIL_ENVIRONMENT=production`** và `EMAIL_ADMIN_ORIGIN=https://melatecdentalclinic.com` nằm trong **`env.staging.vars`**, đồng bộ với cấu hình live. Không cần tạo Worker hoặc chuyển database để bật email. Root/default trong Wrangler vẫn là cấu hình dự phòng có D1 ID placeholder, không phải Worker đang phục vụ domain.
 
 ## Cấu hình mỗi môi trường
 
 Trong `wrangler.jsonc`, đặt riêng cho production và `env.staging.vars`:
 
-| Biến runtime         | Giá trị                                                                                                                                                                                                                                                               |
-| -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `EMAIL_FROM`         | `Melatec <no-reply@melatecdentalclinic.com>` (địa chỉ chủ dự án cung cấp; tên hiển thị dùng tên thương hiệu)                                                                                                                                                          |
-| `EMAIL_ADMIN_ORIGIN` | Origin HTTPS thực tế nơi đăng nhập admin, không có path/query; ví dụ `https://your-worker.workers.dev`. Có thể khác domain gửi. Production đã đặt `https://melatecdentalclinic.com` theo URL admin chủ dự án cung cấp; staging vẫn để trống chờ URL thử nghiệm riêng. |
-| `EMAIL_ENVIRONMENT`  | `production` hoặc `staging`; bắt buộc khai báo rõ                                                                                                                                                                                                                     |
-| `EMAIL_STAGING_TO`   | Hộp thư thử nghiệm duy nhất được staging phép gửi; bắt buộc trên staging, dùng chữ thường                                                                                                                                                                             |
-| `EMAIL_HOURLY_LIMIT` | Ngân sách API attempts trong 60 phút trượt: production 20, staging 10                                                                                                                                                                                                 |
-| `EMAIL_DAILY_LIMIT`  | Ngân sách API attempts trong 24 giờ trượt: production 90, staging 30                                                                                                                                                                                                  |
+| Biến runtime         | Giá trị                                                                                                                                                                                                      |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `EMAIL_FROM`         | `Melatec <no-reply@melatecdentalclinic.com>` (địa chỉ chủ dự án cung cấp; tên hiển thị dùng tên thương hiệu)                                                                                                 |
+| `EMAIL_ADMIN_ORIGIN` | Origin HTTPS thực tế nơi đăng nhập admin, không có path/query; ví dụ `https://your-worker.workers.dev`. Có thể khác domain gửi. Worker live dùng `https://melatecdentalclinic.com` trong `env.staging.vars`. |
+| `EMAIL_ENVIRONMENT`  | `production` cho Worker live hiện tại; `staging` chỉ dành cho môi trường thử riêng trong tương lai                                                                                                           |
+| `EMAIL_STAGING_TO`   | Chỉ bắt buộc khi `EMAIL_ENVIRONMENT=staging`; không dùng cho Worker live hiện tại                                                                                                                            |
+| `EMAIL_HOURLY_LIMIT` | Ngân sách API attempts trong 60 phút trượt: production 20, staging 10                                                                                                                                        |
+| `EMAIL_DAILY_LIMIT`  | Ngân sách API attempts trong 24 giờ trượt: production 90, staging 30                                                                                                                                         |
 
 Đặt secret bằng terminal (nhập key tại prompt, không đưa vào dòng lệnh/chat/Git):
 
 ```sh
 npx wrangler secret put RESEND_API_KEY --env staging
-npx wrangler secret put RESEND_API_KEY
 ```
 
-Dùng key riêng cho staging/production, quyền Sending access giới hạn domain gửi. Local dùng `.dev.vars` đã được Git ignore; xem `.dev.vars.example`. Key local hiện chưa được cấu hình. Code không hỗ trợ chế độ `onboarding@resend.dev`.
+Key của website thật đặt trên `melatec-website-staging` (CLI dùng `--env staging`); nếu sau này tạo môi trường thử riêng thì dùng key riêng. Quyền Sending access giới hạn domain gửi. Local dùng `.dev.vars` đã được Git ignore; xem `.dev.vars.example`. Key local hiện chưa được cấu hình. Code không hỗ trợ chế độ `onboarding@resend.dev`.
 
 Trong Resend, tắt **Open tracking** và **Click tracking** cho domain gửi trước khi thử. Email dùng plain text, không chứa họ tên, điện thoại, email khách hoặc dịch vụ. Không gửi email cho khách. Kiểm tra hạn mức gói thực tế trên tài khoản, gồm cả lưu lượng ngoài website; ngân sách D1 chỉ đếm API attempts do website này gửi. Không tự động nâng gói. Thời gian lưu dữ liệu và log của nhà cung cấp cần được chủ tài khoản rà soát.
 
@@ -32,14 +37,14 @@ Cấu hình đầy đủ Turnstile theo `.dev.vars.example`: runtime `TURNSTILE_
 
 Push lên `main` chỉ kích hoạt CI theo workflow trong repo. Deploy qua Publish hoặc lệnh deploy riêng; migration không tự chạy.
 
-1. Kiểm tra đúng D1 theo môi trường. Production trong repo hiện vẫn có database ID placeholder; thay bằng ID thật trước khi deploy. Không áp migration bằng ID phỏng đoán.
-2. Áp migration trước deploy: `npm run db:migrate:staging`, sau đó `npm run db:migrate:production` khi chuyển production. Migration mới `0027_email_notifications.sql` không bật email, không backfill yêu cầu cũ.
+1. Website thật hiện dùng alias `staging`, D1 `melatec-staging` như đã xác minh ở trên. Giữ nguyên tài nguyên hiện có; không dùng lệnh `deploy:production` hoặc `db:migrate:production` cho website này khi root/default vẫn là placeholder.
+2. Khi cần áp migration cho website thật, dùng `npm run db:migrate:staging` trước deploy. Migration mới `0027_email_notifications.sql` không bật email, không backfill yêu cầu cũ.
 3. Cấu hình vars/secrets ở trên. `EMAIL_ADMIN_ORIGIN` là biến **runtime riêng**, không thay thế `SITE_URL` lúc build. Publish workflow hiện có giữ nguyên; vars đi theo Wrangler, secret được giữ trên Worker.
-4. Build/deploy theo quy trình `PUBLISHING.md`. Entrypoint mới `src/worker.ts` chuyển HTTP sang Astro `handle` và nhận `scheduled`; cron mỗi phút được khai báo riêng cho cả hai môi trường, không tạo Worker thứ hai.
+4. Build/deploy website thật bằng `npm run deploy:staging` hoặc Publish với target `staging` theo quy trình `PUBLISHING.md`. Entrypoint mới `src/worker.ts` chuyển HTTP sang Astro `handle` và nhận `scheduled`; cron mỗi phút được khai báo riêng cho cả hai môi trường, không tạo Worker thứ hai.
 5. Trong `/admin` → **Email notifications**, nhập email nhận → **Send verification link**. Staging chỉ cho phép `EMAIL_STAGING_TO`. Chờ tối thiểu 60 giây nếu cần gửi lại.
 6. Đăng nhập admin, mở lại link trong email, bấm **Confirm recipient**. GET chỉ hiển thị trang xác nhận; POST mới đổi địa chỉ. Link hết hạn sau một giờ, chỉ dùng một lần; DB chỉ lưu SHA-256 của token. Link dùng fragment (`#token=…`) để token không đi vào URL HTTP/access log; trình duyệt xóa fragment khỏi lịch sử và đưa token vào POST body. Cần JavaScript cho bước xác nhận. Nếu link mở khi chưa đăng nhập, đăng nhập rồi mở lại link từ email.
 7. **Queue test email**, chờ khoảng một phút và refresh. Trạng thái `accepted` + mã Resend chỉ xác nhận nhà cung cấp nhận lệnh gửi. Kiểm tra hộp thư thật/spam trước khi bấm **Enable notifications**.
-8. Gửi form tư vấn thử trên staging: kiểm tra có đúng một row tư vấn, một outbox và một email; gửi lại cùng submission ID không sinh thêm email. Kiểm tra đăng nhập, CSRF, Turnstile và một lần tắt/bật. Sau khi staging đạt yêu cầu, lặp cấu hình/xác minh/thử trên production.
+8. Gửi form tư vấn thử trên staging: kiểm tra có đúng một row tư vấn, một outbox và một email; gửi lại cùng submission ID không sinh thêm email. Kiểm tra đăng nhập, CSRF, Turnstile và một lần tắt/bật. Alias `staging` hiện là website thật; dùng dữ liệu thử có chủ đích và không seed/reset database live.
 
 ## Vận hành
 
@@ -61,7 +66,7 @@ Push lên `main` chỉ kích hoạt CI theo workflow trong repo. Deploy qua Publ
 - `npm run check`: 0 lỗi/cảnh báo; lint và Prettier cho các file thay đổi qua.
 - `npm run build:local` qua. Build thường trên máy đang trỏ đến endpoint đọc nội dung D1 không truy cập được; dùng dữ liệu D1 local để kiểm tra build, không đổi cấu hình cá nhân.
 - Kiểm HTTP và Chrome trên Worker build + DB `/tmp` riêng: đăng nhập bắt buộc, CSRF, GET không kích hoạt token, POST xác nhận một lần, token fragment → form → click xác nhận, form tư vấn hợp lệ/sai/honeypot/gửi trùng, outbox nguyên tử, scheduled handler; ảnh desktop 1440 và mobile 390, không tràn ngang toàn trang.
-- Migration 0027 đã áp vào D1 local của dự án, mặc định `enabled = 0`. Chưa áp migration remote, gửi thật hay deploy; cần nghiệm thu staging trước production.
+- Migration 0027 đã áp vào D1 local của dự án, mặc định `enabled = 0`. Ghi nhận lúc nghiệm thu local. Sau đó trang email live đã mở được và người nhận đã xác minh; chưa xác nhận một email test/alert thật được nhận trong hộp thư.
 
 ## Kiểm tra local
 
