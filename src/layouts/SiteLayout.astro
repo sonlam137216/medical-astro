@@ -8,6 +8,7 @@ import ContactDock from '../components/ContactDock.astro';
 import { getMediaOrigin } from '../lib/content';
 import { SITE_INDEXABLE, pagePath } from '../lib/seo';
 import { getPageMeta, getSiteVerificationMeta } from '../lib/site-content';
+import { META_PIXEL_ID, META_PIXEL_SCRIPT } from '../../integrations/inline-scripts.mjs';
 
 interface Props {
   title: string;
@@ -75,7 +76,19 @@ const verification = path === '/' ? await getSiteVerificationMeta() : [];
   {jsonLd}
   {verification}
 >
-  <slot name="head" slot="head" />
+  <Fragment slot="head">
+    <script is:inline set:html={META_PIXEL_SCRIPT}></script>
+    <slot name="head" />
+  </Fragment>
+  <noscript>
+    <img
+      height="1"
+      width="1"
+      style="display:none"
+      src={`https://www.facebook.com/tr?id=${META_PIXEL_ID}&ev=PageView&noscript=1`}
+      alt=""
+    />
+  </noscript>
   <a class="skip-link visually-hidden" href="#main">
     Skip to content
   </a>

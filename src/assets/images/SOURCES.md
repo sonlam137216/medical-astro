@@ -13,6 +13,7 @@ Cần kiểm tra lại ảnh, cách crop và logo khi cập nhật UI theo thi�
 - `logo.png` and `logo-white.png` are raster logos (370 px wide). Ask the owner for the vector original.
 - `logo-emblem-white.png`: the white tooth-and-crown emblem of the footer, 182×172 (Figma export `Asset 2 1`, 2x).
 - `social/*.png` are the four social icons from the design.
+- `social/tiktok.svg` is the filled TikTok icon from Tabler Icons (MIT), matching the site's icon library.
 
 Review with the owner before launch:
 

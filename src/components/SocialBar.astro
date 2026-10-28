@@ -4,6 +4,7 @@ import facebook from '../assets/images/social/facebook.png';
 import instagram from '../assets/images/social/instagram.png';
 import youtube from '../assets/images/social/youtube.png';
 import linkedin from '../assets/images/social/linkedin.png';
+import tiktok from '../assets/images/social/tiktok.svg';
 import { getSiteContent } from '../lib/site-content';
 
 interface Props {
@@ -12,7 +13,7 @@ interface Props {
 }
 
 const { sans = false } = Astro.props;
-const icons = { facebook, instagram, youtube, linkedin } as const;
+const icons = { facebook, instagram, youtube, linkedin, tiktok } as const;
 // Profile links come from Site details. Before anything is published they are shown without a link (Figma
 // shows the four icons but no URLs); published, a platform without a link is simply not shown.
 const links = (await getSiteContent()).social.flatMap((l) =>

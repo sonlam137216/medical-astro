@@ -81,6 +81,8 @@ Trang bài viết chỉ tồn tại cho bài đã đăng trong CMS. Ba link phá
 
 Trạng thái nghiệm thu, việc còn chờ và checklist deploy: xem [HANDOVER.md](./HANDOVER.md).
 
+Meta Pixel `2062370661047192` được gắn trong `SiteLayout` cho các trang công khai, ghi nhận `PageView` mỗi lần tải trang và có ảnh dự phòng khi tắt JavaScript. Trang quản trị và bản xem trước bài viết không gắn Pixel. Mã gốc nằm ở `integrations/inline-scripts.mjs`; CSP trong `astro.config.mjs` cho phép tải script và gửi sự kiện đến Meta. Thay đổi này cần build và deploy để có hiệu lực trên website đang chạy.
+
 ## Cấu trúc thư mục
 
 ```

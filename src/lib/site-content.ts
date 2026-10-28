@@ -59,6 +59,7 @@ const PLATFORM_NAMES: Record<string, string> = {
   instagram: 'Instagram',
   youtube: 'YouTube',
   linkedin: 'LinkedIn',
+  tiktok: 'TikTok',
 };
 
 export async function getSiteContent(): Promise<SiteContent> {

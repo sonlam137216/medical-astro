@@ -3,7 +3,7 @@ import { defineConfig } from 'astro/config';
 import cloudflare from '@astrojs/cloudflare';
 import redirectsFile from './integrations/redirects-file.mjs';
 import sitemapFile from './integrations/sitemap-file.mjs';
-import { JS_FLAG_SCRIPT, cspHash } from './integrations/inline-scripts.mjs';
+import { JS_FLAG_SCRIPT, META_PIXEL_SCRIPT, cspHash } from './integrations/inline-scripts.mjs';
 import { buildSetting, isIndexable, siteOrigin } from './integrations/build-env.mjs';
 
 // Public origin of the website (SITE_URL) and whether this build may be indexed (SITE_INDEXABLE=true).
@@ -48,11 +48,11 @@ export default defineConfig({
     csp: {
       directives: [
         "default-src 'self'",
-        `img-src ${sources("'self'", 'data:', 'blob:', mediaOrigin)}`,
+        `img-src ${sources("'self'", 'data:', 'blob:', mediaOrigin, 'https://www.facebook.com')}`,
         `media-src ${sources("'self'", 'blob:', mediaOrigin)}`,
         "font-src 'self'",
         // Cloudflare Web Analytics is enabled on the live zone and injects its beacon at the edge.
-        `connect-src ${sources("'self'", turnstile, 'https://cloudflareinsights.com')}`,
+        `connect-src ${sources("'self'", turnstile, 'https://cloudflareinsights.com', 'https://www.facebook.com')}`,
         // The Home page video when it is a YouTube or Vimeo link (see src/components/VideoEmbed.astro).
         `frame-src ${sources(turnstile, 'https://www.youtube-nocookie.com', 'https://player.vimeo.com')}`,
         "object-src 'none'",
@@ -60,9 +60,16 @@ export default defineConfig({
         "form-action 'self'",
       ],
       scriptDirective: {
-        resources: [sources("'self'", turnstile, 'https://static.cloudflareinsights.com')],
-        // Pages rendered on demand (admin) are not scanned at build time: list the layout's inline script.
-        hashes: [cspHash(JS_FLAG_SCRIPT)],
+        resources: [
+          sources(
+            "'self'",
+            turnstile,
+            'https://static.cloudflareinsights.com',
+            'https://connect.facebook.net',
+          ),
+        ],
+        // Scripts supplied through set:html need their hashes listed explicitly.
+        hashes: [cspHash(JS_FLAG_SCRIPT), cspHash(META_PIXEL_SCRIPT)],
       },
       styleDirective: { resources: ["'self'", "'unsafe-inline'"] },
     },

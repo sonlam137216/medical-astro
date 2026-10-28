@@ -1033,7 +1033,7 @@ export const ENTITIES: EntityDef[] = [
   },
 ];
 
-export const SOCIAL_PLATFORMS = ['facebook', 'instagram', 'youtube', 'linkedin'] as const;
+export const SOCIAL_PLATFORMS = ['facebook', 'instagram', 'youtube', 'linkedin', 'tiktok'] as const;
 
 /** The single row of site-wide details, edited at /admin/site (not part of the generic list). */
 export const SITE_FIELDS: Field[] = [
@@ -1117,9 +1117,9 @@ export const SITE_FIELDS: Field[] = [
     half: true,
     type: 'weburl',
     name: `social_${p}`,
-    label: `${p[0].toUpperCase()}${p.slice(1)} page`,
+    label: p === 'tiktok' ? 'TikTok page' : `${p[0].toUpperCase()}${p.slice(1)} page`,
     max: 300,
-    placeholder: 'https://…',
+    placeholder: p === 'tiktok' ? 'https://www.tiktok.com/@…' : 'https://…',
     help: p === 'facebook' ? 'Leave a link empty to hide its icon.' : undefined,
   })),
   {
