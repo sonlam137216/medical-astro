@@ -29,8 +29,8 @@ Làm theo thứ tự. Bước 1 và 5 cần chạy lệnh, các bước còn l�
    | `CLOUDFLARE_ACCOUNT_ID` | Account ID     |
 
    Biến (Variables, không phải secret): **`D1_DATABASE_ID`** (id database của môi trường này, lấy từ `wrangler d1 create`, bắt buộc: build và script `publish-job` đọc/ghi D1 qua API Cloudflare bằng id này). Tuỳ chọn: `R2_PUBLIC_BASE_URL` (URL công khai của bucket khi đã có custom domain; để trống thì ảnh đi qua Worker).
-   Biến tuỳ chọn cho **ra mắt** (đọc lúc build, ghi vào `.dev.vars` bởi workflow): `SITE_URL` (địa chỉ công khai, ví dụ `https://melatec.vn`: dùng cho canonical, thẻ chia sẻ, JSON-LD và `sitemap.xml`) và `SITE_INDEXABLE` (`true` để gỡ `noindex`; **chỉ có tác dụng ở environment `production` và khi đã có `SITE_URL`**). Để trống cả hai thì mọi trang vẫn `noindex` và `robots.txt` chặn tất cả. `TURNSTILE_SITE_KEY`: xem mục 'Chống spam form (Turnstile)' bên dưới.
-   Khi làm production, tạo thêm environment `production` với bộ secret riêng và bật **Required reviewers** để có người duyệt trước khi deploy.
+   Biến tuỳ chọn cho **ra mắt** (đọc lúc build, ghi vào `.dev.vars` bởi workflow): `SITE_URL` (website live: `https://melatecdentalclinic.com`; dùng cho canonical, thẻ chia sẻ, JSON-LD và `sitemap.xml`) và `SITE_INDEXABLE` (`true` để gỡ `noindex` khi đã có `SITE_URL` hợp lệ). **Cả target `staging` và `production` đều đọc hai biến này từ GitHub Environment tương ứng.** Để trống thì mọi trang vẫn `noindex` và `robots.txt` chặn tất cả. `TURNSTILE_SITE_KEY`: xem mục 'Chống spam form (Turnstile)' bên dưới.
+   Website thật hiện dùng environment `staging`, Worker `melatec-website-staging`, D1 `melatec-staging` và R2 `melatec-media-staging`. Giữ các tài nguyên này; không cần tạo environment `production` để bật SEO. Root/default trong Wrangler còn D1 placeholder, không dùng cho website live hiện tại.
 
 4. **Token cho Worker khởi động workflow** (không phải token ở bước 2): GitHub → Settings → Developer settings → Fine-grained personal access tokens → Generate. Chọn **Only select repositories** = repo này, quyền **Actions: Read and write** (Metadata read tự có). Đặt hạn ngắn (ví dụ 90 ngày) và ghi lịch gia hạn. Token này chỉ khởi động được workflow, không đọc được code.
 5. **Đặt secret cho Worker rồi deploy** (tự nhập, đừng dán token vào chat):
@@ -40,17 +40,17 @@ Làm theo thứ tự. Bước 1 và 5 cần chạy lệnh, các bước còn l�
    npm run deploy:staging      # đưa các biến GITHUB_REPO, GITHUB_WORKFLOW, PUBLISH_TARGET lên Worker
    ```
 
-   Với production: `--env` bỏ trống, và `PUBLISH_TARGET` của Worker production là `production` (khai báo trong `wrangler.jsonc`).
+   Website live hiện giữ `PUBLISH_TARGET=staging` và dùng `--env staging`. Chỉ dùng target `production` khi đã cấu hình tài nguyên riêng cho target đó.
 
 ## Ra mắt: cho công cụ tìm kiếm thấy website
 
 Chỉ làm khi nội dung thật đã có và `npm run check:launch` sạch.
 
-1. Đặt biến `SITE_URL` và `SITE_INDEXABLE=true` trong GitHub Environment `production` (xem bước 3).
-2. Publish lên production. Bản build sẽ: bỏ `noindex`, thêm canonical, thẻ `og:*`/`twitter:*`, JSON-LD (Home: `Dentist`, bài viết: `Article`, FAQ có đáp án: `FAQPage`), `robots.txt` (chặn `/admin/`, `/api/`, nêu sitemap) và `sitemap.xml` (mọi trang, trừ trang đã ẩn ở Pages (SEO)).
+1. Đặt biến `SITE_URL=https://melatecdentalclinic.com` và `SITE_INDEXABLE=true` trong GitHub Environment **`staging`** (website live hiện tại; xem bước 3). Đây là Variables, không phải Secrets hay biến runtime trên Cloudflare.
+2. Đẩy workflow đã cập nhật lên `main`, rồi Publish với target **`staging`**. Bản build sẽ: bỏ `noindex`, thêm canonical, thẻ `og:*`/`twitter:*`, JSON-LD (Home: `Dentist`, bài viết: `Article`, FAQ có đáp án: `FAQPage`), `robots.txt` (chặn `/admin/`, `/api/`, nêu sitemap) và `sitemap.xml` (mọi trang, trừ trang đã ẩn ở Pages (SEO)).
 3. Kiểm tra: mở `https://<tên miền>/robots.txt`, `/sitemap.xml`, xem mã nguồn Home có `<link rel="canonical">`. Gửi `sitemap.xml` cho Google Search Console.
 4. Từng trang có thể giữ ngoài công cụ tìm kiếm ở admin 'Pages (SEO)' (ô 'Hide this page from search engines'); ảnh chia sẻ riêng của trang cũng chọn ở đó. Trang không có ảnh riêng dùng `public/og-default.jpg` (1200×630).
-5. Staging không bao giờ có `SITE_INDEXABLE` (workflow chỉ ghi biến này khi target là `production`), nên staging luôn `noindex`.
+5. Môi trường thử riêng phải để `SITE_INDEXABLE` trống hoặc `false`. Tên target không tự quyết định quyền index; chỉ `SITE_INDEXABLE=true` cùng `SITE_URL` hợp lệ mới bật. Thay đổi biến cần Publish lại mới có tác dụng.
 
 `npm run check:seo` (build thường) và `npm run check:seo -- --site=https://…` (build đã đặt `SITE_URL` + `SITE_INDEXABLE=true`) kiểm các điều trên; CI chạy cả hai.
 
@@ -62,7 +62,7 @@ Chỉ làm khi nội dung thật đã có và `npm run check:launch` sạch.
 
 1. Search Console → 'URL prefix' (`https://<tên miền>`) → chọn **HTML tag**, chép thẻ `<meta name="google-site-verification" content="…" />`. Bing: 'HTML Meta Tag', thẻ `<meta name="msvalidate.01" content="…" />`.
 2. Admin → **Site details** → nhóm 'Search engine verification': dán cả thẻ hoặc chỉ phần `content` vào đúng ô (Google / Bing). Khi lưu, thẻ được rút lại còn mã (chữ, số, `-`, `_`, 8–128 ký tự); dán thẻ của Bing vào ô Google, thẻ khác, hoặc mã có ký tự lạ thì báo lỗi.
-3. **Publish lên production** và chờ build xong. Thẻ chỉ được in trong `<head>` của **Home**, và chỉ ở bản build indexable (`SITE_URL` + `SITE_INDEXABLE=true`): staging/local không bao giờ có thẻ này (staging luôn `noindex`, nên cũng không xác minh được ở đó).
+3. **Publish lên target live `staging`** và chờ build xong. Thẻ chỉ được in trong `<head>` của **Home**, và chỉ ở bản build indexable (`SITE_URL` + `SITE_INDEXABLE=true`), bất kể tên target. Bản build không indexable không có thẻ này.
 4. Mở mã nguồn `https://<tên miền>/` kiểm thấy thẻ, rồi bấm **Verify** ở Search Console / Bing.
 5. **Giữ nguyên mã** sau khi đã xác minh: Google định kỳ kiểm lại, xoá mã thì mất quyền sở hữu.
 
@@ -98,6 +98,6 @@ Chỉ đặt secret mà thiếu site key: form ngừng nhận yêu cầu (không
 - `GITHUB_DISPATCH_TOKEN` và `CLOUDFLARE_API_TOKEN` (token này sửa được cả database) chỉ nằm ở secret của Worker hoặc GitHub Environment, không commit, không ra trình duyệt.
 - Workflow ghi `.dev.vars` tạm trên máy chạy để build đọc được revision; file này không được commit và máy chạy bị huỷ sau mỗi lần.
 - Script `scripts/publish-job.mjs` chỉ ghi id và thông báo cố định vào DB, không ghi output của build.
-- **Staging và production dùng hai database D1 riêng** (`melatec-staging`, `melatec`), nên Publish ở staging không đụng dữ liệu production. Revision là bất biến, không xoá được: đừng Publish dữ liệu thử lên production.
+- **Target `staging` hiện ghi vào dữ liệu live** (`melatec-staging`), nên không Publish dữ liệu thử hoặc seed/reset database này. Revision là bất biến, không xoá được. Nếu cần môi trường thử riêng, tạo Worker/D1/R2 riêng và để `SITE_INDEXABLE` trống hoặc `false`.
 - **Migration không tự chạy khi deploy.** Thay đổi schema thì chạy `npm run db:migrate:staging` / `db:migrate:production` trước khi deploy.
 - Sau khi chạy `wrangler r2 bucket create` hoặc `wrangler d1 create`, mở lại `wrangler.jsonc`: lệnh này có thể tự thêm binding lạ (đã từng thêm `melatec_media`).

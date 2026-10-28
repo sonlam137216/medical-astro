@@ -21,8 +21,9 @@ R2_PUBLIC_BASE_URL=
 
 # Public address of the website and whether search engines may index this build. Read by the BUILD only (the publish
 # workflow writes them from GitHub Environment variables). SITE_URL gives pages their canonical address, link-preview
-# tags and the sitemap; SITE_INDEXABLE=true (production builds only, and only with a SITE_URL) removes `noindex`.
-# Leave both empty for local and staging: every page stays noindex and robots.txt refuses all crawlers.
+# tags and the sitemap; SITE_INDEXABLE=true (only with a valid SITE_URL) removes `noindex` for either deploy target.
+# The live website uses the staging target. Leave both empty for local and any separate test environment:
+# every page then stays noindex and robots.txt refuses all crawlers.
 SITE_URL=
 SITE_INDEXABLE=
 

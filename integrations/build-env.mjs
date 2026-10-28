@@ -35,7 +35,7 @@ export function siteOrigin() {
 
 /**
  * Whether search engines may index this build: SITE_INDEXABLE=true AND a valid SITE_URL. Everything else
- * (local, staging, a production build that has no domain yet) stays `noindex`.
+ * stays `noindex`, regardless of the deployment target's name.
  */
 export function isIndexable() {
   return buildSetting('SITE_INDEXABLE') === 'true' && siteOrigin() !== undefined;
