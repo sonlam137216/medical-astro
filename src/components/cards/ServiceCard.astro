@@ -18,7 +18,15 @@ interface Props {
   detail?: boolean;
 }
 
-const { title, body, total, href, image, linkLabel = 'Learn more', detail = false } = Astro.props;
+const {
+  title,
+  body,
+  total,
+  href,
+  image,
+  linkLabel = `Explore ${title}`,
+  detail = false,
+} = Astro.props;
 ---
 
 <article class="card service">

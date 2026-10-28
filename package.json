@@ -33,6 +33,7 @@
     "deploy:production": "astro build && wrangler deploy",
     "check:responsive": "node scripts/check-responsive.mjs",
     "check:motion": "node scripts/check-motion.mjs",
+    "check:font-layout": "node scripts/check-font-layout.mjs",
     "check:csp": "node scripts/check-csp.mjs",
     "check:seo": "node scripts/check-seo.mjs"
   },

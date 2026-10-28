@@ -49,9 +49,9 @@
   --color-error: #b3261e;
 
   /* font families */
-  --font-display: 'Montserrat Variable', 'Montserrat', system-ui, sans-serif;
+  --font-display: 'Montserrat Variable', 'Montserrat', 'Montserrat Fallback', system-ui, sans-serif;
   --font-serif: 'Cormorant Garamond', 'Times New Roman', serif;
-  --font-sans: 'Inter Variable', system-ui, sans-serif;
+  --font-sans: 'Inter Variable', 'Inter Fallback', system-ui, sans-serif;
   --font-roboto: 'Roboto', system-ui, sans-serif; /* footer, consultation form */
 
   /* type scale: size / line-height (Figma value × ~1.18, see header) */

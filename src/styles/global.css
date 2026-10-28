@@ -1,6 +1,26 @@
 @import './tokens.css';
 @import './motion.css';
 
+/* Match the bundled fonts' metrics with local Arial while they download. Values derived with Capsize from
+   the bundled Latin WOFF2 files; explicit line heights and a stable mobile header keep wrapping predictable. */
+@font-face {
+  font-family: 'Montserrat Fallback';
+  src: local('Arial');
+  size-adjust: 109.4659%;
+  ascent-override: 88.4293%;
+  descent-override: 22.9295%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: 'Inter Fallback';
+  src: local('Arial');
+  size-adjust: 107.1194%;
+  ascent-override: 90.4365%;
+  descent-override: 22.518%;
+  line-gap-override: 0%;
+}
+
 *,
 *::before,
 *::after {
@@ -243,6 +263,7 @@ html:not(.js) [data-needs-js] {
 }
 
 .link-arrow > span[aria-hidden] {
+  flex-shrink: 0;
   display: inline-grid;
   place-items: center;
   width: 26px;

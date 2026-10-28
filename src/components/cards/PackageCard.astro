@@ -18,7 +18,7 @@ interface Props {
   linkLabel?: string;
 }
 
-const { title, inclusions, total, note, href, image, linkLabel = 'Learn more' } = Astro.props;
+const { title, inclusions, total, note, href, image, linkLabel = `Explore ${title}` } = Astro.props;
 ---
 
 <article class="card package">

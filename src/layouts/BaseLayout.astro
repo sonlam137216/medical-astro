@@ -5,6 +5,7 @@ import '@fontsource/roboto/latin-400.css';
 import '@fontsource/roboto/latin-700.css';
 import '@fontsource/cormorant-garamond/latin-700.css';
 import '@fontsource/cormorant-garamond/vietnamese-700.css';
+import montserratLatin from '@fontsource-variable/montserrat/files/montserrat-latin-wght-normal.woff2?url';
 import '../styles/global.css';
 import {
   DEFAULT_SHARE_IMAGE,
@@ -65,6 +66,7 @@ const shareImage = seo ? absoluteUrl(Astro.site, image ?? DEFAULT_SHARE_IMAGE) :
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     {mediaOrigin && <link rel="preconnect" href={mediaOrigin} />}
+    <link rel="preload" href={montserratLatin} as="font" type="font/woff2" crossorigin />
     <title>{title}</title>
     {description && <meta name="description" content={description} />}
     {noindex && <meta name="robots" content="noindex, nofollow" />}

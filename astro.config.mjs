@@ -36,7 +36,8 @@ export default defineConfig({
   site,
   // Pages are built as `about.html`, not `about/index.html`: Cloudflare then serves them at `/about` (the form every
   // link and every CMS menu entry uses) and redirects `/about/` there, so links never go through a redirect.
-  build: { format: 'file' },
+  // The public pages have small stylesheets: inline them so the first render does not wait for CSS requests.
+  build: { format: 'file', inlineStylesheets: 'always' },
   integrations: [redirectsFile(), sitemapFile({ origin: site, indexable })],
   // Covers of the Home page YouTube/Vimeo videos are downloaded at build time and served from this site
   // (src/lib/video-thumbnail.ts; same list as THUMBNAIL_HOSTS in src/lib/video-embed.ts).
@@ -50,7 +51,8 @@ export default defineConfig({
         `img-src ${sources("'self'", 'data:', 'blob:', mediaOrigin)}`,
         `media-src ${sources("'self'", 'blob:', mediaOrigin)}`,
         "font-src 'self'",
-        `connect-src ${sources("'self'", turnstile)}`,
+        // Cloudflare Web Analytics is enabled on the live zone and injects its beacon at the edge.
+        `connect-src ${sources("'self'", turnstile, 'https://cloudflareinsights.com')}`,
         // The Home page video when it is a YouTube or Vimeo link (see src/components/VideoEmbed.astro).
         `frame-src ${sources(turnstile, 'https://www.youtube-nocookie.com', 'https://player.vimeo.com')}`,
         "object-src 'none'",
@@ -58,7 +60,7 @@ export default defineConfig({
         "form-action 'self'",
       ],
       scriptDirective: {
-        resources: [sources("'self'", turnstile)],
+        resources: [sources("'self'", turnstile, 'https://static.cloudflareinsights.com')],
         // Pages rendered on demand (admin) are not scanned at build time: list the layout's inline script.
         hashes: [cspHash(JS_FLAG_SCRIPT)],
       },

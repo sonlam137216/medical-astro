@@ -248,6 +248,7 @@ const groupActive = (g: MenuGroup) => g.links.some((l) => isActive(l.href));
 
   .topbar__contact {
     display: grid;
+    gap: 4px;
     margin: 0;
   }
 
@@ -255,6 +256,7 @@ const groupActive = (g: MenuGroup) => g.links.some((l) => isActive(l.href));
     display: inline-flex;
     align-items: center;
     gap: 8px;
+    min-height: 24px;
   }
 
   .topbar__contact :global(.icon) {
@@ -593,6 +595,13 @@ const groupActive = (g: MenuGroup) => g.links.some((l) => isActive(l.href));
   }
 
   @media (max-width: 768px) {
+    /* Do not let a late font swap move the actions from beside the contact details onto a new row. */
+    .topbar__inner {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      row-gap: 12px;
+    }
+
     .topbar__contact {
       font-size: 13px;
     }

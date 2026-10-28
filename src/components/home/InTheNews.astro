@@ -16,6 +16,7 @@ import { getPressArticles, getSection } from '../../lib/content';
 
 const heading = await getSection('home_news');
 const articles = heading ? await getPressArticles() : [];
+const publisher = (url: string) => new URL(url).hostname.replace(/^www\./, '');
 ---
 
 {heading && articles.length > 0 && (
@@ -28,7 +29,11 @@ const articles = heading ? await getPressArticles() : [];
       <ul class="news__track" aria-label="Newspaper articles" tabindex="0" data-news-track>
         {articles.map((a) => (
           <li class="news__item">
-            <a class="news__card" href={a.url}>
+            <a
+              class="news__card"
+              href={a.url}
+              aria-label={`Read article on ${publisher(a.url)}: ${a.text || a.image.alt || 'Melatec in the news'}`}
+            >
               <ProfileImage
                 class="news__img"
                 image={a.image}
@@ -39,7 +44,7 @@ const articles = heading ? await getPressArticles() : [];
               {a.text && <p class="news__text">{a.text}</p>}
               <span class="news__more">
                 <span class="news__btn">
-                  Read More
+                  <span class="news__link-text">Read article on {publisher(a.url)}</span>
                   <svg
                     class="news__arrow"
                     width="40"
@@ -200,14 +205,20 @@ const articles = heading ? await getPressArticles() : [];
     justify-content: center;
     gap: 12px;
     min-height: 48px;
-    padding: 10px 28px;
+    max-width: 100%;
+    padding: 10px 18px;
     background: var(--color-white);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-button);
     font: 700 var(--text-button) / var(--text-button-lh) var(--font-display);
     color: var(--color-blue);
-    white-space: nowrap;
+    text-align: center;
     transition: border-color 0.15s;
+  }
+
+  .news__link-text {
+    min-width: 0;
+    overflow-wrap: anywhere;
   }
 
   .news__arrow {

@@ -66,7 +66,7 @@ Chỉ làm khi nội dung thật đã có và `npm run check:launch` sạch.
 4. Mở mã nguồn `https://<tên miền>/` kiểm thấy thẻ, rồi bấm **Verify** ở Search Console / Bing.
 5. **Giữ nguyên mã** sau khi đã xác minh: Google định kỳ kiểm lại, xoá mã thì mất quyền sở hữu.
 
-Không có script bên thứ ba và CSP không đổi (chỉ là thẻ `<meta>`). `check:seo` báo lỗi nếu thẻ xuất hiện ngoài Home hoặc trên bản build không indexable. Tracking (GA4, GTM, Pixel) **chưa làm**: kéo theo CSP, đồng ý cookie và hiệu năng, cần chủ dự án quyết trước.
+Thẻ xác minh không tải script bên thứ ba. `check:seo` báo lỗi nếu thẻ xuất hiện ngoài Home hoặc trên bản build không indexable. Cloudflare Web Analytics đã được bật ở zone live; CSP trong code cho phép script từ `https://static.cloudflareinsights.com` và kết nối tới `https://cloudflareinsights.com` để beacon được Cloudflare chèn không bị chặn. Code không tự chèn beacon hoặc bật Analytics trên dashboard. Tracking (GA4, GTM, Pixel) **chưa làm**: kéo theo CSP, đồng ý cookie và hiệu năng, cần chủ dự án quyết trước.
 
 ## Chống spam form (Turnstile)
 

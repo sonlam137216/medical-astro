@@ -28,7 +28,7 @@ const { items } = Astro.props;
         inclusions={c.inclusions}
         total={c.priceText}
         href={c.href ?? '#consultation'}
-        linkLabel={c.href || c.priceText ? 'Learn more' : 'Request a quote'}
+        linkLabel={c.href || c.priceText ? `Explore ${c.title}` : `Request a quote for ${c.title}`}
         tone={i === 1 ? 'featured' : i === 2 ? 'tint' : 'default'}
       />
     </li>

@@ -31,6 +31,7 @@ jobs:
           npm run check:csp
           npm run check:responsive
           npm run check:motion
+          npm run check:font-layout
 
       # The build that goes live differs from the one above (indexable, with canonical addresses and a sitemap):
       # build it too, with a stand-in address, so a mistake in that switch cannot reach launch day unseen.

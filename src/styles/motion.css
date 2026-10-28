@@ -218,7 +218,9 @@
     animation-delay: 240ms;
   }
 
-  /* Reveal on scroll: fade + rise as a block enters the screen, over the first ~260 px of its entry
+  /* The small support tiles stay opaque: on desktop they can be on the first screen, where a partial fade
+     makes the text's contrast too low. Their hover lift above still applies.
+     Reveal on scroll: fade + rise as a block enters the screen, over the first ~260 px of its entry
      (a fixed length, so a tall block does not fade in slowly). Items of a card grid or list start a
      little apart (--i = position in the row/list, capped at 3), so they arrive one after another. */
   @supports (animation-timeline: view()) {
@@ -228,7 +230,6 @@
       .info,
       .stats__card,
       .stat__card,
-      .support__card,
       .guide__item,
       .guide__featured,
       .profile,
@@ -261,7 +262,6 @@
       .info,
       .stats__card,
       .stat__card,
-      .support__card,
       .guide__item,
       .profile,
       .why__item,
