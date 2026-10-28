@@ -1,0 +1,63 @@
+---
+import { env } from 'cloudflare:workers';
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import '../../../styles/email-admin.css';
+import { isSameOrigin } from '../../../lib/admin-auth';
+import { readBodyLimited } from '../../../lib/consultation';
+import { confirmEmail } from '../../../lib/email';
+
+export const prerender = false;
+let token = '';
+let failed = false;
+if (Astro.request.method === 'POST') {
+  if (!isSameOrigin(Astro.request)) return new Response('Forbidden', { status: 403 });
+  const body = await readBodyLimited(Astro.request, 1024);
+  if (body === null) return new Response('Payload Too Large', { status: 413 });
+  token = new URLSearchParams(body).get('token') ?? '';
+  try {
+    if (await confirmEmail(env.DB, token))
+      return Astro.redirect('/admin/email?result=confirmed', 303);
+  } catch {
+    console.error('email: confirmation failed');
+  }
+  failed = true;
+}
+const safeToken = /^[a-f0-9]{64}$/.test(token) ? token : '';
+---
+
+<AdminLayout title="Confirm recipient" current="email">
+  <main class="admin-main admin-main--email">
+    <h1>Confirm notification recipient</h1>
+    {failed ? (
+      <p class="admin-notice admin-notice--error" role="alert">
+        This link is invalid, expired or already used. Request a new verification email.
+      </p>
+    ) : (
+      <form class="admin-card" method="post" action="/admin/email/confirm">
+        <p>Press Confirm to activate the recipient address from this verification email.</p>
+        <noscript>
+          <p>Enable JavaScript to confirm this email address.</p>
+        </noscript>
+        <input id="confirmation-token" type="hidden" name="token" value={safeToken} />
+        <button id="confirm-recipient" class="admin-btn" type="submit" disabled={!safeToken}>
+          Confirm recipient
+        </button>
+      </form>
+    )}
+    <p>
+      <a href="/admin/email">Back to email notifications</a>
+    </p>
+  </main>
+</AdminLayout>
+
+<script>
+  // Keep the bearer token out of HTTP URLs and access logs. It reaches the server only in the POST body.
+  const token = new URLSearchParams(window.location.hash.slice(1)).get('token') ?? '';
+  if (window.location.hash) window.history.replaceState(null, '', window.location.pathname);
+  const input = document.querySelector<HTMLInputElement>('#confirmation-token');
+  const button = document.querySelector<HTMLButtonElement>('#confirm-recipient');
+  if (input && button && /^[a-f0-9]{64}$/.test(token)) {
+    input.value = token;
+    button.disabled = false;
+  }
+</script>

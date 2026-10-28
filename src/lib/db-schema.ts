@@ -4,6 +4,82 @@
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
 export interface Tables {
+  email_settings: {
+    Row: {
+      id: number;
+      enabled: boolean;
+      active_email: string | null;
+      pending_email: string | null;
+      token_hash: string | null;
+      token_expires_at: number | null;
+      action_after: number;
+      sender_token: string | null;
+      sender_until: number;
+      last_test_email: string | null;
+      last_test_at: string | null;
+      confirmation_status: string | null;
+    };
+    Insert: {
+      id: number;
+      enabled?: boolean;
+      active_email?: string | null;
+      pending_email?: string | null;
+      token_hash?: string | null;
+      token_expires_at?: number | null;
+      action_after?: number;
+      sender_token?: string | null;
+      sender_until?: number;
+      last_test_email?: string | null;
+      last_test_at?: string | null;
+      confirmation_status?: string | null;
+    };
+  };
+  email_outbox: {
+    Row: {
+      id: string;
+      kind: string;
+      consultation_id: string | null;
+      created_at: string;
+      expires_at: number;
+      status: string;
+      attempts: number;
+      next_attempt_at: number;
+      lease_until: number;
+      first_attempt_at: number | null;
+      recipient: string | null;
+      payload: string | null;
+      provider_id: string | null;
+      error_code: string | null;
+      accepted_at: string | null;
+    };
+    Insert: {
+      id: string;
+      kind: string;
+      consultation_id?: string | null;
+      created_at?: string;
+      expires_at: number;
+      status?: string;
+      attempts?: number;
+      next_attempt_at?: number;
+      lease_until?: number;
+      first_attempt_at?: number | null;
+      recipient?: string | null;
+      payload?: string | null;
+      provider_id?: string | null;
+      error_code?: string | null;
+      accepted_at?: string | null;
+    };
+  };
+  email_send_attempts: {
+    Row: {
+      id: string;
+      attempted_at: number;
+    };
+    Insert: {
+      id: string;
+      attempted_at: number;
+    };
+  };
   article_categories: {
     Row: {
       created_at: string;
@@ -775,6 +851,9 @@ export interface TableInfo {
 }
 
 export const TABLES: Record<TableName, TableInfo> = {
+  email_settings: { bool: ['enabled'], audit: false },
+  email_outbox: { audit: false, refs: { consultation_id: 'consultation_requests' } },
+  email_send_attempts: { audit: false },
   article_categories: { bool: ['is_visible'], uuid: true },
   articles: {
     bool: ['is_visible', 'show_on_service_pages'],

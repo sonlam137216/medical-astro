@@ -3,7 +3,8 @@
   "compatibility_date": "2026-10-01",
   "compatibility_flags": ["global_fetch_strictly_public"],
   "name": "melatec-website",
-  "main": "@astrojs/cloudflare/entrypoints/server",
+  "main": "./src/worker.ts",
+  "triggers": { "crons": ["* * * * *"] },
   "assets": {
     "directory": "./dist",
     "binding": "ASSETS",
@@ -49,6 +50,11 @@
   // Not secret. The token that may start the workflow is the secret GITHUB_DISPATCH_TOKEN.
   "vars": {
     "PUBLISH_TARGET": "production",
+    "EMAIL_ENVIRONMENT": "production",
+    "EMAIL_FROM": "Melatec <no-reply@melatecdentalclinic.com>",
+    "EMAIL_ADMIN_ORIGIN": "https://melatecdentalclinic.com",
+    "EMAIL_HOURLY_LIMIT": "20",
+    "EMAIL_DAILY_LIMIT": "90",
     "GITHUB_REPO": "sonlam137216/medical-astro",
     "GITHUB_WORKFLOW": "publish.yml",
   },
@@ -60,8 +66,15 @@
   "env": {
     "staging": {
       "name": "melatec-website-staging",
+      "triggers": { "crons": ["* * * * *"] },
       "vars": {
         "PUBLISH_TARGET": "staging",
+        "EMAIL_ENVIRONMENT": "staging",
+        "EMAIL_FROM": "Melatec <no-reply@melatecdentalclinic.com>",
+        "EMAIL_ADMIN_ORIGIN": "",
+        "EMAIL_STAGING_TO": "",
+        "EMAIL_HOURLY_LIMIT": "10",
+        "EMAIL_DAILY_LIMIT": "30",
         "GITHUB_REPO": "sonlam137216/medical-astro",
         "GITHUB_WORKFLOW": "publish.yml",
       },

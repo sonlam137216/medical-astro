@@ -42,3 +42,16 @@ GITHUB_API_URL=
 
 # Read by the build only (written by the workflow): the revision to build. Leave empty to use the newest.
 CONTENT_REVISION_ID=
+
+# Private email notifications (runtime only). Real API keys belong in Workers Secrets.
+# wrangler secret put RESEND_API_KEY [--env staging]
+RESEND_API_KEY=
+# Set these in wrangler.jsonc vars for each deployed environment; .dev.vars overrides them locally.
+EMAIL_FROM="Melatec <no-reply@melatecdentalclinic.com>"
+EMAIL_ADMIN_ORIGIN=
+# Explicit production/staging mode is required; staging can only send to EMAIL_STAGING_TO.
+EMAIL_ENVIRONMENT=staging
+EMAIL_STAGING_TO=
+# Conservative rolling-window API-attempt budgets, shared by verification, tests and alerts.
+EMAIL_HOURLY_LIMIT=20
+EMAIL_DAILY_LIMIT=90

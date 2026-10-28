@@ -1,5 +1,7 @@
 # Bàn giao và nghiệm thu UI theo Figma mới (P10)
 
+**Cập nhật email 28/10/2026:** Có chức năng email admin qua Resend, trang `/admin/email`, migration `0027_email_notifications.sql`, Worker cron mỗi phút. Mặc định tắt, chưa gửi thật/deploy remote; triển khai theo [EMAIL_NOTIFICATIONS.md](./EMAIL_NOTIFICATIONS.md). Các số liệu nghiệm thu bên dưới thuộc đợt cũ.
+
 Lập ngày 10/10/2026. Phạm vi: các trang public và phần CMS đã có (P0–P9). **Chưa deploy.** Phần admin A1–A5 (dịch vụ, gói, bảng giá, chi nhánh/điểm đến và nối vào website) **chưa làm**, nên chưa nghiệm thu được phần đó.
 
 ## 1. Đã làm xong

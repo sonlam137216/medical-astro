@@ -121,6 +121,8 @@ export const POST: APIRoute = async ({ request }) => {
 
   const { value } = result;
   // No admin is involved: the audit log records only where the request came from.
+  // Migration 0027 adds an AFTER INSERT trigger: consultation + optional email outbox + audit are atomic.
+  // A duplicate submission never enqueues another notification. Cron handles sending independently.
   const db = createDb(env.DB, { actorId: null, audit: true });
   const { error } = await db.from('consultation_requests').insert({
     submission_id: value.submissionId,

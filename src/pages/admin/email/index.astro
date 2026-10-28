@@ -1,0 +1,170 @@
+---
+import { env } from 'cloudflare:workers';
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import '../../../styles/email-admin.css';
+import { emailConfig, emailSettings, recentEmails } from '../../../lib/email';
+
+export const prerender = false;
+const settings = await emailSettings(env.DB);
+const jobs = await recentEmails(env.DB);
+const configured = Boolean(emailConfig(env));
+const messages: Record<string, string> = {
+  verification_sent:
+    'Verification email accepted by Resend. Open the link in that email and press Confirm.',
+  verification_failed:
+    'Verification email could not be confirmed as sent. Check the sending status below, then request a new link.',
+  invalid_email: 'Enter a valid address. Staging accepts only its configured test mailbox.',
+  rate_limited: 'Please wait one minute between verification emails and tests.',
+  budget: 'The email sending budget has been reached. Please try again later.',
+  configuration:
+    'Sending is not configured. Ask the technical administrator to check the runtime settings.',
+  verify_first: 'Verify a recipient before sending a test.',
+  test_first:
+    'A verified recipient and a test accepted by Resend are required before enabling notifications.',
+  test_queued: 'Test queued. Refresh this page after about one minute to check its status.',
+  enabled: 'Notifications enabled for new consultation requests.',
+  disabled:
+    'Notifications paused, including pending requests. An email already being sent may still arrive.',
+  confirmed:
+    'Recipient verified. Send a test to the new address before enabling notifications for the first time.',
+  unavailable: 'Could not complete the action. Please try again.',
+};
+const result = Astro.url.searchParams.get('result') ?? '';
+const ready =
+  settings.active_email &&
+  settings.last_test_email === settings.active_email &&
+  settings.last_test_at;
+---
+
+<AdminLayout title="Email notifications" current="email">
+  <main class="admin-main admin-main--email">
+    <h1>Email notifications</h1>
+    <p class="admin-muted">
+      New consultation alerts contain only a request ID, time and a link requiring admin sign-in.
+    </p>
+    {messages[result] && (
+      <p class="admin-notice" role="status">
+        {messages[result]}
+      </p>
+    )}
+    {!configured && (
+      <p class="admin-notice admin-notice--error" role="alert">
+        Sending is not configured. Set the Resend secret, sender and admin website origin. Staging
+        also requires a test mailbox.
+      </p>
+    )}
+    <section class="admin-card">
+      <h2>Notification status</h2>
+      <dl class="admin-dl">
+        <dt>Notifications</dt>
+        <dd>{settings.enabled ? 'Enabled' : 'Paused'}</dd>
+        <dt>Verified recipient</dt>
+        <dd>{settings.active_email ?? 'None'}</dd>
+        <dt>Pending recipient</dt>
+        <dd>{settings.pending_email ?? 'None'}</dd>
+        <dt>Verification link expires</dt>
+        <dd>
+          {settings.token_expires_at
+            ? new Date(settings.token_expires_at * 1000).toISOString()
+            : '—'}
+        </dd>
+        <dt>Verification sending status</dt>
+        <dd>{settings.confirmation_status ?? '—'}</dd>
+        <dt>Last test accepted by Resend</dt>
+        <dd>{settings.last_test_at ?? 'None'}</dd>
+      </dl>
+      <form method="post" action="/admin/email/action">
+        <button
+          class="admin-btn"
+          name="action"
+          value={settings.enabled ? 'disable' : 'enable'}
+          disabled={!settings.enabled && (!configured || !ready)}
+        >
+          {settings.enabled ? 'Pause notifications' : 'Enable notifications'}
+        </button>
+      </form>
+      <p class="admin-muted">
+        Pausing keeps pending alerts for up to 20 hours. Enabling resumes valid pending alerts;
+        older requests are never backfilled.
+      </p>
+    </section>
+    <form class="admin-card admin-form" method="post" action="/admin/email/action">
+      <h2>Change recipient</h2>
+      <p>
+        The current recipient stays active until the new address is verified. Verification links
+        expire after one hour and can be used once.
+      </p>
+      <label>
+        Email address
+        <input
+          type="email"
+          name="email"
+          maxlength="254"
+          required
+          value={settings.pending_email ?? settings.active_email ?? ''}
+        />
+      </label>
+      <div>
+        <button class="admin-btn" name="action" value="verify" disabled={!configured}>
+          Send verification link
+        </button>
+      </div>
+    </form>
+    <section class="admin-card">
+      <h2>Send a test</h2>
+      <p>
+        Tests go to the verified recipient, including while consultation notifications are paused.
+      </p>
+      <form method="post" action="/admin/email/action">
+        <button
+          class="admin-btn"
+          name="action"
+          value="test"
+          disabled={!configured || !settings.active_email}
+        >
+          Queue test email
+        </button>
+      </form>
+    </section>
+    <section class="admin-card">
+      <h2>Recent sending activity</h2>
+      <p class="admin-muted">
+        Accepted means Resend accepted the message for sending. It does not confirm delivery or that
+        the email was read. Uncertain jobs require a manual check in Resend; they are not
+        automatically resent.
+      </p>
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Created (UTC)</th>
+              <th>Type</th>
+              <th>Status</th>
+              <th>Attempts</th>
+              <th>Details</th>
+            </tr>
+          </thead>
+          <tbody>
+            {jobs.map((job) => (
+              <tr>
+                <td>{job.created_at}</td>
+                <td>{job.kind}</td>
+                <td>{job.status}</td>
+                <td>{job.attempts}</td>
+                <td>
+                  {job.error_code ?? job.provider_id ?? '—'}
+                  {job.consultation_id && (
+                    <p>
+                      <a href={`/admin/consultations/${job.consultation_id}`}>View request</a>
+                    </p>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {jobs.length === 0 && <p>No emails queued yet.</p>}
+    </section>
+  </main>
+</AdminLayout>

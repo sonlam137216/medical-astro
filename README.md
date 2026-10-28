@@ -113,7 +113,7 @@ Figma cũ đã đọc chỉ có bản desktop 1440px; chưa xác nhận các fra
 - **Nội dung trong code lấy nguyên từ Figma và nhiều chỗ là dữ liệu mẫu**: thẻ dịch vụ lặp lại, giá "600$" và "C$1,250", số liệu "30,000+ khách", "4.9/5 Google Reviews", thông tin bác sĩ. Cần chủ dự án xác nhận hoặc thay thế. Các chỗ này được đánh dấu `PLACEHOLDER` trong `src/data/*.ts`.
 - **Ảnh cần xác nhận quyền sử dụng**: ảnh trước/sau có người thật, ảnh X-quang, ảnh có chữ quảng cáo tiếng Việt in sẵn. Chi tiết ở `src/assets/images/SOURCES.md`.
 - Site `noindex` cho tới khi build production được đặt `SITE_URL` + `SITE_INDEXABLE=true` (xem mục 'Ra mắt' ở `PUBLISHING.md`); khi đó mới có canonical, thẻ chia sẻ, JSON-LD, `robots.txt` và `sitemap.xml`.
-- Form tư vấn gửi POST tới `/api/consultation` và lưu vào D1; không gửi email, xem yêu cầu ở `/admin`.
+- Form tư vấn gửi POST tới `/api/consultation`, lưu D1 cùng email outbox nguyên tử khi bật thông báo. Admin quản lý người nhận tại `/admin/email`; xem [EMAIL_NOTIFICATIONS.md](./EMAIL_NOTIFICATIONS.md) để cấu hình Resend và deploy migration 0027.
 - Không commit `.dev.vars`, `.env*`, token Cloudflare, token GitHub hay mật khẩu admin. Các file này đã nằm trong `.gitignore`.
 
 ## Lộ trình
@@ -121,7 +121,7 @@ Figma cũ đã đọc chỉ có bản desktop 1440px; chưa xác nhận các fra
 1. ~~Khởi tạo Astro + Cloudflare~~ xong.
 2. UI public: đã dựng bố cục theo Figma cũ; tiếp theo đối chiếu Figma mới, cập nhật tokens/component và từng trang, rồi kiểm tra desktop/mobile.
 3. Database Cloudflare D1, migration, đăng nhập admin, chỉ một vai trò `admin`: **xong ở mức code và test local; chưa tạo D1 thật** (xem `db/README.md`).
-4. ~~Form tư vấn~~ xong ở mức code (validate phía server, lưu DB, chống spam, không gửi email).
+4. ~~Form tư vấn~~ xong ở mức code (validate phía server, lưu DB, chống spam; có email admin tùy chọn qua Resend).
 5. CMS `/admin` và media R2: đang làm (bác sĩ, site, menu, pages, redirects, FAQ, media đã có).
 6. Quy trình draft, publish, build, deploy: đã chạy thật trên staging trước khi đổi sang D1; cần chạy lại sau khi tạo D1.
 7. Nghiệm thu hiệu năng quốc tế, bảo mật, SEO, go-live.

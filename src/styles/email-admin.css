@@ -1,0 +1,59 @@
+/* Email settings also need to work when an administrator opens a verification link on a phone. */
+.admin-main--email,
+.admin-main--email > * {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.admin-main--email .admin-dl {
+  margin-block: 14px;
+  grid-template-columns: minmax(0, 220px) minmax(0, 1fr);
+}
+
+.admin-main--email .admin-table {
+  min-width: 620px;
+}
+
+@media (max-width: 900px) {
+  .admin-shell:has(.admin-main--email) {
+    display: block;
+  }
+
+  .admin-shell:has(.admin-main--email) .admin-side {
+    position: static;
+    height: auto;
+  }
+
+  .admin-shell:has(.admin-main--email) .admin-nav {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-block: 8px;
+  }
+
+  .admin-shell:has(.admin-main--email) .admin-nav a {
+    flex-shrink: 0;
+  }
+
+  .admin-shell:has(.admin-main--email) .admin-nav__group {
+    display: none;
+  }
+
+  .admin-main--email {
+    padding: 24px 16px 64px;
+  }
+
+  .admin-main--email .admin-card {
+    padding: 18px;
+  }
+
+  .admin-main--email .admin-dl {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 4px;
+  }
+
+  .admin-main--email .admin-dl dd {
+    margin-bottom: 10px;
+  }
+}

@@ -12,7 +12,7 @@ interface Props {
 
 const { title, nav = true, current } = Astro.props;
 
-// Unprocessed requests: the only way an admin learns about a new one (the site sends no email).
+// Unprocessed requests remain visible even when email notifications are paused.
 let newCount = 0;
 if (nav) {
   const { count } = await Astro.locals.db
@@ -110,6 +110,10 @@ const icons = {
                 {newCount}
               </span>
             )}
+          </a>
+
+          <a href="/admin/email" aria-current={current === 'email' ? 'page' : undefined}>
+            Email notifications
           </a>
 
           <p class="admin-nav__group">Website content</p>

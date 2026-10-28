@@ -27,7 +27,9 @@ const counts = await Promise.all(
 
     <section aria-labelledby="req-title" class="admin-section">
       <h2 id="req-title">Consultation requests</h2>
-      <p class="admin-muted">The website sends no email, so check here for new requests.</p>
+      <p class="admin-muted">
+        Check new requests here, or manage <a href="/admin/email">email notifications</a>.
+      </p>
       <ul class="admin-stats">
         {STATUSES.map(([status, label], i) => (
           <li>

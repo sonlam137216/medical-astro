@@ -1,6 +1,6 @@
 # Database (Cloudflare D1)
 
-Schema, migration và dữ liệu mẫu cho database của website. Database là **Cloudflare D1** (SQLite), thay cho Supabase trước đây (chuyển ngày 2026-10-05). Quyết định đã chốt: chỉ một vai trò `admin`, không gửi email, chỉ tiếng Anh.
+Schema, migration và dữ liệu mẫu cho database của website. Database là **Cloudflare D1** (SQLite), thay cho Supabase trước đây (chuyển ngày 2026-10-05). Quyết định đã chốt: chỉ một vai trò `admin`, giao diện tiếng Anh; email thông báo admin tùy chọn qua Resend (bổ sung 28/10/2026).
 
 ## Mô hình bảo mật
 
@@ -14,6 +14,10 @@ D1 **không có API công khai và không có RLS**. Chỉ hai đường vào:
 Hệ quả cần nhớ: trước đây RLS là lớp phòng thủ thứ hai (quên kiểm quyền ở một trang thì DB vẫn chặn). **Giờ không còn lớp đó.** Quy tắc: route mới dưới `/admin` luôn được middleware che; route ngoài `/admin` không được đụng bảng nội dung hay yêu cầu tư vấn trừ `POST /api/consultation` (chỉ `insert`).
 
 Đăng nhập (`src/lib/admin-auth.ts`, `src/lib/password.ts`): email + mật khẩu, băm PBKDF2-SHA256 bằng Web Crypto. Trình duyệt giữ một token ngẫu nhiên trong cookie `httpOnly` (`mt-session`, `path=/admin`, 7 ngày); DB chỉ lưu SHA-256 của token (`admin_sessions`), nên đăng xuất hoặc đổi mật khẩu vô hiệu hoá ngay. Không ai tự thêm mình làm admin được: không có route tạo tài khoản; tài khoản tạo bằng `npm run admin:create` (xem dưới).
+
+## Email (migration 0027)
+
+`email_settings`, `email_outbox`, `email_send_attempts` là dữ liệu vận hành riêng tư, `audit: false`, không được đưa vào snapshot. Trigger `consultation_email_outbox` tạo việc gửi trong cùng giao dịch insert tư vấn/audit khi bật thông báo; submission trùng không tạo email. Worker cron xử lý hàng đợi. Migration mặc định tắt, không backfill. Hướng dẫn: [EMAIL_NOTIFICATIONS.md](../EMAIL_NOTIFICATIONS.md).
 
 ## Các bảng
 
