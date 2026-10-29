@@ -786,6 +786,11 @@ export interface Tables {
       bing_site_verification: string | null;
       default_og_image_id: string | null;
       google_site_verification: string | null;
+      google_ads_id: string | null;
+      google_ads_consultation_label: string | null;
+      google_ads_phone_label: string | null;
+      google_ads_zalo_label: string | null;
+      google_ads_whatsapp_label: string | null;
       id: number;
       intro_video_id: string | null;
       intro_video_url: string | null;
@@ -809,6 +814,11 @@ export interface Tables {
       bing_site_verification?: string | null;
       default_og_image_id?: string | null;
       google_site_verification?: string | null;
+      google_ads_id?: string | null;
+      google_ads_consultation_label?: string | null;
+      google_ads_phone_label?: string | null;
+      google_ads_zalo_label?: string | null;
+      google_ads_whatsapp_label?: string | null;
       id?: number;
       intro_video_id?: string | null;
       intro_video_url?: string | null;

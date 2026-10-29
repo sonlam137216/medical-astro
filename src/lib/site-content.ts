@@ -18,6 +18,7 @@ import {
 } from './media';
 import { parseVideoUrl, type VideoEmbed } from './video-embed';
 import { verificationMeta } from './site-verification';
+import type { GoogleAdsConfig } from './google-ads';
 import { groupMenu, withServicesMenu, type MenuItem } from './menu';
 
 // BUILD-TIME ONLY (see content.ts). Site-wide details and menus for the header, footer and contact blocks.
@@ -118,6 +119,10 @@ export async function getSiteContent(): Promise<SiteContent> {
 /** Search engine ownership <meta> tags from Site details (Home page only, see SiteLayout). Never a sample. */
 export async function getSiteVerificationMeta(): Promise<{ name: string; content: string }[]> {
   return verificationMeta((await loadSnapshot())?.site?.verification);
+}
+
+export async function getGoogleAdsConfig(): Promise<GoogleAdsConfig | undefined> {
+  return (await loadSnapshot())?.site?.googleAds;
 }
 
 /** Page title and description: the published SEO text for the page, or the built-in text. */

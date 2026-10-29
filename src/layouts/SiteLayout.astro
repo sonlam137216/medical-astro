@@ -5,6 +5,7 @@ import Footer from '../components/Footer.astro';
 import ConsultationSection from '../components/ConsultationSection.astro';
 import SocialBar from '../components/SocialBar.astro';
 import ContactDock from '../components/ContactDock.astro';
+import GoogleAds from '../components/GoogleAds.astro';
 import { getMediaOrigin } from '../lib/content';
 import { SITE_INDEXABLE, pagePath } from '../lib/seo';
 import { getPageMeta, getSiteVerificationMeta } from '../lib/site-content';
@@ -111,4 +112,5 @@ const verification = path === '/' ? await getSiteVerificationMeta() : [];
   )}
   <Footer consultationHere={consultationAnchor} />
   <ContactDock />
+  {!noindex && <GoogleAds />}
 </BaseLayout>

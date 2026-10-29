@@ -18,6 +18,7 @@ import {
   type SiteVerification,
 } from './site-verification.ts';
 import { STORY_PICTURE_ERROR } from './cms/smile-stories.ts';
+import { googleAdsFromRow, isGoogleAdsConfig, type GoogleAdsConfig } from './google-ads.ts';
 
 // What the public site is built from. A snapshot is a complete copy of the published content; the build
 // reads one snapshot (never the working-copy tables), so a half-edited draft cannot leak into a build.
@@ -109,6 +110,8 @@ export interface SnapshotSite {
   videoUrl?: string;
   /** Search engine ownership tokens for the Home page's <meta> tags; absent when none is set. */
   verification?: SiteVerification;
+  /** Optional Google Ads account and action labels; absent means disabled. */
+  googleAds?: GoogleAdsConfig;
   /** The Zalo link of the floating contact buttons; absent when none is set. */
   zaloUrl?: string;
   /** Only present (false) when the floating contact buttons are switched off, so older hashes stay the same. */
@@ -383,6 +386,8 @@ export async function buildSnapshot(db: AdminDb): Promise<Snapshot> {
       if (token && VERIFICATION_TOKEN_RE.test(token)) verification[engine.key] = token;
     }
     if (Object.keys(verification).length > 0) snapshot.site.verification = verification;
+    const googleAds = googleAdsFromRow(site);
+    if (googleAds) snapshot.site.googleAds = googleAds;
     if (site.zalo_url && /^https?:\/\//i.test(site.zalo_url)) snapshot.site.zaloUrl = site.zalo_url;
     if (site.contact_buttons === false) snapshot.site.contactButtons = false;
     if (site.intro_video_id) {
@@ -1117,6 +1122,12 @@ export function isSnapshot(value: unknown): value is Snapshot {
   if (videoUrl !== undefined && !(typeof videoUrl === 'string' && parseVideoUrl(videoUrl)))
     return false;
   if (isObject(value.site) && !isSiteVerification(value.site.verification)) return false;
+  if (
+    isObject(value.site) &&
+    value.site.googleAds !== undefined &&
+    !isGoogleAdsConfig(value.site.googleAds)
+  )
+    return false;
   if (
     isObject(value.site) &&
     !(

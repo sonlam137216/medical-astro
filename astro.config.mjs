@@ -30,6 +30,19 @@ const turnstile = buildSetting('TURNSTILE_SITE_KEY')
   : undefined;
 /** @param {(string | undefined)[]} list */
 const sources = (...list) => list.filter(Boolean).join(' ');
+// Google Ads' documented tag/conversion endpoints (no unsafe-inline or unsafe-eval).
+// Add an explicit regional Google domain here if Tag Assistant reports one for a target market.
+const googleAdsScript = [
+  'https://www.googletagmanager.com',
+  'https://www.googleadservices.com',
+  'https://www.google.com',
+];
+const googleAdsImages = [
+  ...googleAdsScript,
+  'https://googleads.g.doubleclick.net',
+  'https://pagead2.googlesyndication.com',
+  'https://www.google.com.vn',
+];
 
 // https://astro.build/config
 export default defineConfig({
@@ -49,13 +62,13 @@ export default defineConfig({
       directives: [
         "default-src 'self'",
         // Meta Pixel sends tracking images to www.facebook.com and diagnostic images to connect.facebook.net.
-        `img-src ${sources("'self'", 'data:', 'blob:', mediaOrigin, 'https://www.facebook.com', 'https://connect.facebook.net')}`,
+        `img-src ${sources("'self'", 'data:', 'blob:', mediaOrigin, 'https://www.facebook.com', 'https://connect.facebook.net', ...googleAdsImages)}`,
         `media-src ${sources("'self'", 'blob:', mediaOrigin)}`,
         "font-src 'self'",
         // Cloudflare Web Analytics is enabled on the live zone and injects its beacon at the edge.
-        `connect-src ${sources("'self'", turnstile, 'https://cloudflareinsights.com', 'https://www.facebook.com')}`,
+        `connect-src ${sources("'self'", turnstile, 'https://cloudflareinsights.com', 'https://www.facebook.com', ...googleAdsImages, 'https://ad.doubleclick.net')}`,
         // The Home page video when it is a YouTube or Vimeo link (see src/components/VideoEmbed.astro).
-        `frame-src ${sources(turnstile, 'https://www.youtube-nocookie.com', 'https://player.vimeo.com')}`,
+        `frame-src ${sources(turnstile, 'https://www.youtube-nocookie.com', 'https://player.vimeo.com', 'https://www.googletagmanager.com')}`,
         "object-src 'none'",
         "base-uri 'self'",
         "form-action 'self'",
@@ -67,6 +80,7 @@ export default defineConfig({
             turnstile,
             'https://static.cloudflareinsights.com',
             'https://connect.facebook.net',
+            ...googleAdsScript,
           ),
         ],
         // Scripts supplied through set:html need their hashes listed explicitly.

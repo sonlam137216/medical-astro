@@ -31,7 +31,7 @@ function wantsJson(request: Request) {
 function reply(
   request: Request,
   status: number,
-  body: { ok: boolean; message: string; errors?: Record<string, string> },
+  body: { ok: boolean; message: string; errors?: Record<string, string>; conversionId?: string },
 ) {
   if (wantsJson(request)) {
     return new Response(JSON.stringify(body), {
@@ -142,5 +142,9 @@ export const POST: APIRoute = async ({ request }) => {
   }
 
   // Only reached once the row is stored (or was already stored).
-  return reply(request, 200, { ok: true, message: MESSAGES.sent });
+  return reply(request, 200, {
+    ok: true,
+    message: MESSAGES.sent,
+    conversionId: value.submissionId,
+  });
 };

@@ -18,6 +18,8 @@ Website giới thiệu dịch vụ nha khoa kết hợp hỗ trợ khách quốc
 
 Không dùng Stripe, video streaming, tài khoản khách hàng hay hồ sơ bệnh án. Chi tiết quyết định và đề xuất kiến trúc nằm ở [WEBSITE_TECHSTACK.md](./WEBSITE_TECHSTACK.md).
 
+Google Ads: cấu hình mã và nhãn chuyển đổi trong **Admin → Site details → Google Ads measurement**. Xem [GOOGLE_ADS.md](./GOOGLE_ADS.md) để triển khai, kết nối tài khoản và kiểm tra đo lường.
+
 ## Bắt đầu
 
 Yêu cầu: Node.js **22.12 trở lên** (repo ghim 22.22.0 trong `.nvmrc`) và npm.

@@ -1,9 +1,14 @@
 // Progressive enhancement for every consultation form: submit in place and show the result
 // without leaving the page. Without JS the form still POSTs and the endpoint answers with a page.
 // A module (not a plain script), so the global declaration below is allowed.
-export {};
+import { trackGoogleAdsConversion } from './google-ads';
 
-type ApiReply = { ok: boolean; message: string; errors?: Record<string, string> };
+type ApiReply = {
+  ok: boolean;
+  message: string;
+  errors?: Record<string, string>;
+  conversionId?: string;
+};
 
 // Cloudflare Turnstile (optional spam check, see src/lib/turnstile.ts). The widget script is third-party, so it
 // is loaded only when someone starts filling in a form, never with the page.
@@ -71,6 +76,7 @@ document.querySelectorAll<HTMLFormElement>('form[data-form="consultation"]').for
 
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
+    if (button.disabled) return;
     form.querySelectorAll('[aria-invalid]').forEach((el) => el.removeAttribute('aria-invalid'));
 
     if (
@@ -93,6 +99,8 @@ document.querySelectorAll<HTMLFormElement>('form[data-form="consultation"]').for
       const data = (await response.json().catch(() => null)) as ApiReply | null;
 
       if (response.ok && data?.ok) {
+        // Only the server's saved receipt qualifies (honeypot replies deliberately omit it).
+        if (data.conversionId) trackGoogleAdsConversion('consultation', data.conversionId);
         form.reset();
         newId();
         show(data.message, 'ok');

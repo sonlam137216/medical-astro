@@ -1,0 +1,124 @@
+---
+import { getGoogleAdsConfig } from '../lib/site-content';
+import { SITE_INDEXABLE } from '../lib/seo';
+
+const config = SITE_INDEXABLE && Astro.site ? await getGoogleAdsConfig() : undefined;
+---
+
+{config && (
+  <div data-google-ads data-config={JSON.stringify(config)} data-origin={Astro.site?.origin}>
+    <section
+      id="ads-consent"
+      class="ads-consent"
+      data-ads-consent
+      hidden
+      aria-labelledby="ads-consent-title"
+    >
+      <div>
+        <h2 id="ads-consent-title">Ad measurement</h2>
+        <p>
+          May we use Google Ads cookies to measure which ads lead to enquiries? You can change your
+          choice below. This choice applies to Google Ads measurement.
+        </p>
+      </div>
+      <div class="ads-consent__actions">
+        <button type="button" data-ads-decline>
+          Decline
+        </button>
+        <button type="button" data-ads-accept>
+          Accept
+        </button>
+      </div>
+    </section>
+    <div class="ads-settings" data-needs-js>
+      <button type="button" data-ads-settings aria-controls="ads-consent" aria-expanded="false">
+        Ad measurement settings
+      </button>
+      <span class="visually-hidden" data-ads-status role="status"></span>
+    </div>
+  </div>
+)}
+
+<script>
+  import { initGoogleAds } from '../scripts/google-ads';
+  initGoogleAds();
+</script>
+
+<style>
+  .ads-consent[hidden] {
+    display: none;
+  }
+  .ads-consent {
+    position: fixed;
+    inset: auto 16px 16px;
+    z-index: 200;
+    margin-inline: auto;
+    max-width: 850px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    background: white;
+    color: var(--color-ink, #020f32);
+    border: 1px solid #b3c9f3;
+    border-radius: 12px;
+    box-shadow: 0 4px 24px rgb(0 26 79 / 18%);
+    font: 14px/1.5 var(--font-body, sans-serif);
+  }
+  .ads-consent h2 {
+    margin: 0 0 6px;
+    font: inherit;
+    font-weight: 700;
+    font-size: 18px;
+  }
+  .ads-consent p {
+    margin: 0;
+  }
+  .ads-consent__actions {
+    display: flex;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+  .ads-consent button {
+    min-height: 44px;
+    padding: 8px 18px;
+    border: 1px solid #0056e5;
+    border-radius: 8px;
+    background: white;
+    color: #0056e5;
+    font: inherit;
+    cursor: pointer;
+  }
+  .ads-consent [data-ads-accept] {
+    background: #0056e5;
+    color: white;
+  }
+  .ads-settings {
+    background: #001a4f;
+    text-align: center;
+    padding: 8px 16px 16px;
+  }
+  .ads-settings button {
+    color: white;
+    background: none;
+    border: 0;
+    text-decoration: underline;
+    font: inherit;
+    font-size: 13px;
+    padding: 10px;
+    cursor: pointer;
+  }
+  @media (max-width: 600px) {
+    .ads-consent {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 14px;
+      padding: 16px;
+      max-height: 80dvh;
+      overflow: auto;
+    }
+    .ads-consent__actions > button {
+      flex: 1;
+    }
+  }
+</style>

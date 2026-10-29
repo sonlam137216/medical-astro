@@ -2,6 +2,7 @@ import type { Field } from './fields';
 import { ARTICLE_KINDS, MAX_ARTICLE_BODY, MAX_SERVICE_GUIDE } from './articles';
 import { MENU_GROUP_MAX } from '../menu';
 import { MAX_SMILE_STORY } from './smile-stories';
+import { GOOGLE_ADS_ACTIONS } from '../google-ads';
 
 // Every kind of content the admin can edit with the generic list / add / edit pages, described as data.
 // Adding a module = adding an entry here (plus its part of the snapshot and its public pages).
@@ -1139,6 +1140,25 @@ export const SITE_FIELDS: Field[] = [
     placeholder: '<meta name="msvalidate.01" content="…" />',
     help: 'The same for Bing Webmaster Tools (“HTML Meta Tag”). Bing can also import the site from Google Search Console.',
   },
+  {
+    type: 'text',
+    name: 'google_ads_id',
+    group: 'Google Ads measurement',
+    label: 'Google Ads conversion ID',
+    max: 23,
+    placeholder: 'AW-123456789',
+    help: 'From Google Ads → Goals → Conversions → tag setup. Enter only the AW-… ID. Leave empty to disable. Save and Publish to apply. Runs on the live public site after visitors accept ad measurement.',
+  },
+  ...GOOGLE_ADS_ACTIONS.map((action): Field => ({
+    type: 'text',
+    name: action.column,
+    label: `${action.name}: Conversion Label`,
+    max: 100,
+    help:
+      action.key === 'consultation'
+        ? 'The label from this conversion action’s event snippet (the part after AW-…/ in send_to). Counts only a successfully saved form. Leave empty to skip.'
+        : 'Use a separate Google Ads conversion action and label for this contact click. A click does not confirm a call or message. Leave empty to skip.',
+  })),
 ];
 
 export const entityByKey = (key: string | undefined) => ENTITIES.find((e) => e.key === key);

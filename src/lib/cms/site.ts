@@ -3,6 +3,7 @@ import { isSameOrigin } from '../admin-auth';
 import { readBodyLimited } from '../consultation';
 import { parseVideoUrl } from '../video-embed';
 import { normalizeVerificationFields } from '../site-verification';
+import { normalizeGoogleAdsFields } from '../google-ads';
 import { SITE_FIELDS, SOCIAL_PLATFORMS } from './entities';
 import { validateRefs } from './admin';
 import {
@@ -63,6 +64,9 @@ export async function processSitePost(request: Request, db: AdminDb): Promise<Si
   const verificationErrors = normalizeVerificationFields(parsed.value);
   if (Object.keys(verificationErrors).length > 0)
     return { status: 422, values, errors: verificationErrors };
+
+  const adsErrors = normalizeGoogleAdsFields(parsed.value);
+  if (Object.keys(adsErrors).length > 0) return { status: 422, values, errors: adsErrors };
 
   const refErrors = await validateRefs(db, SITE_FIELDS, parsed.value);
   if (Object.keys(refErrors).length > 0) return { status: 422, values, errors: refErrors };

@@ -35,6 +35,7 @@
     "check:motion": "node scripts/check-motion.mjs",
     "check:font-layout": "node scripts/check-font-layout.mjs",
     "check:csp": "node scripts/check-csp.mjs",
+    "check:ads": "node scripts/check-google-ads.mjs",
     "check:seo": "node scripts/check-seo.mjs"
   },
   "dependencies": {
