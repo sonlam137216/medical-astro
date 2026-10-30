@@ -3,10 +3,20 @@ import { getGoogleAdsConfig } from '../lib/site-content';
 import { SITE_INDEXABLE } from '../lib/seo';
 
 const config = SITE_INDEXABLE && Astro.site ? await getGoogleAdsConfig() : undefined;
+// GA4 works independently of the optional Google Ads account configured in the CMS.
+const analyticsId = SITE_INDEXABLE && Astro.site ? 'G-SPEN3SLJ27' : undefined;
+const consentDescription = analyticsId
+  ? `May we use Google Analytics cookies to understand website visits${config ? ' and Google Ads cookies to measure which ads lead to enquiries' : ''}?`
+  : 'May we use Google Ads cookies to measure which ads lead to enquiries?';
 ---
 
-{config && (
-  <div data-google-ads data-config={JSON.stringify(config)} data-origin={Astro.site?.origin}>
+{(config || analyticsId) && (
+  <div
+    data-google-ads
+    data-config={JSON.stringify(config)}
+    data-analytics-id={analyticsId}
+    data-origin={Astro.site?.origin}
+  >
     <section
       id="ads-consent"
       class="ads-consent"
@@ -15,10 +25,10 @@ const config = SITE_INDEXABLE && Astro.site ? await getGoogleAdsConfig() : undef
       aria-labelledby="ads-consent-title"
     >
       <div>
-        <h2 id="ads-consent-title">Ad measurement</h2>
+        <h2 id="ads-consent-title">Website measurement</h2>
         <p>
-          May we use Google Ads cookies to measure which ads lead to enquiries? You can change your
-          choice below. This choice applies to Google Ads measurement.
+          {consentDescription} You can change your choice below. This choice applies to Google
+          measurement.
         </p>
       </div>
       <div class="ads-consent__actions">
@@ -32,7 +42,7 @@ const config = SITE_INDEXABLE && Astro.site ? await getGoogleAdsConfig() : undef
     </section>
     <div class="ads-settings" data-needs-js>
       <button type="button" data-ads-settings aria-controls="ads-consent" aria-expanded="false">
-        Ad measurement settings
+        Website measurement settings
       </button>
       <span class="visually-hidden" data-ads-status role="status"></span>
     </div>

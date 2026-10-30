@@ -43,6 +43,12 @@ const googleAdsImages = [
   'https://pagead2.googlesyndication.com',
   'https://www.google.com.vn',
 ];
+// GA4 collection endpoints, including Google's regional collectors.
+const googleAnalytics = [
+  'https://*.google-analytics.com',
+  'https://analytics.google.com',
+  'https://*.analytics.google.com',
+];
 
 // https://astro.build/config
 export default defineConfig({
@@ -62,11 +68,11 @@ export default defineConfig({
       directives: [
         "default-src 'self'",
         // Meta Pixel sends tracking images to www.facebook.com and diagnostic images to connect.facebook.net.
-        `img-src ${sources("'self'", 'data:', 'blob:', mediaOrigin, 'https://www.facebook.com', 'https://connect.facebook.net', ...googleAdsImages)}`,
+        `img-src ${sources("'self'", 'data:', 'blob:', mediaOrigin, 'https://www.facebook.com', 'https://connect.facebook.net', ...googleAdsImages, ...googleAnalytics)}`,
         `media-src ${sources("'self'", 'blob:', mediaOrigin)}`,
         "font-src 'self'",
         // Cloudflare Web Analytics is enabled on the live zone and injects its beacon at the edge.
-        `connect-src ${sources("'self'", turnstile, 'https://cloudflareinsights.com', 'https://www.facebook.com', ...googleAdsImages, 'https://ad.doubleclick.net')}`,
+        `connect-src ${sources("'self'", turnstile, 'https://cloudflareinsights.com', 'https://www.facebook.com', ...googleAdsImages, 'https://ad.doubleclick.net', ...googleAnalytics)}`,
         // The Home page video when it is a YouTube or Vimeo link (see src/components/VideoEmbed.astro).
         `frame-src ${sources(turnstile, 'https://www.youtube-nocookie.com', 'https://player.vimeo.com', 'https://www.googletagmanager.com')}`,
         "object-src 'none'",

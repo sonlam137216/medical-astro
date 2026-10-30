@@ -20,6 +20,8 @@ Không dùng Stripe, video streaming, tài khoản khách hàng hay hồ sơ b�
 
 Google Ads: cấu hình mã và nhãn chuyển đổi trong **Admin → Site details → Google Ads measurement**. Xem [GOOGLE_ADS.md](./GOOGLE_ADS.md) để triển khai, kết nối tài khoản và kiểm tra đo lường.
 
+Google Analytics 4: đã tích hợp mã `G-SPEN3SLJ27`, hoạt động sau khi khách đồng ý **Website measurement** trên bản build có `SITE_INDEXABLE=true` và `SITE_URL`. Không cần mã Google Ads để GA4 hoạt động. Chi tiết kiểm tra và cơ chế đồng ý ở [GOOGLE_ADS.md](./GOOGLE_ADS.md).
+
 ## Bắt đầu
 
 Yêu cầu: Node.js **22.12 trở lên** (repo ghim 22.22.0 trong `.nvmrc`) và npm.

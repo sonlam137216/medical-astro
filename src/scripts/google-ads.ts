@@ -14,7 +14,10 @@ declare global {
 }
 
 const CONSENT_KEY = 'melatec-google-ads-consent-v1';
+const ANALYTICS_CONSENT_KEY = 'melatec-google-measurement-consent-v2';
+let consentKey = CONSENT_KEY;
 let config: GoogleAdsConfig | undefined;
+let analyticsId: string | undefined;
 let granted = false;
 let started = false;
 const sent = new Set<string>();
@@ -25,7 +28,7 @@ function command(...args: unknown[]) {
 }
 
 function start() {
-  if (started || !config) return;
+  if (started || (!config && !analyticsId)) return;
   started = true;
   window.dataLayer ??= [];
   window.gtag ??= function () {
@@ -38,7 +41,11 @@ function start() {
     ad_user_data: 'denied',
     ad_personalization: 'denied',
   });
-  command('consent', 'update', { ad_storage: 'granted', ad_user_data: 'granted' });
+  command('consent', 'update', {
+    analytics_storage: analyticsId ? 'granted' : 'denied',
+    ad_storage: config ? 'granted' : 'denied',
+    ad_user_data: config ? 'granted' : 'denied',
+  });
   command('set', 'ads_data_redaction', true);
   command('set', 'allow_ad_personalization_signals', false);
   // Do not send arbitrary URL parameters, form values or referrer query strings.
@@ -48,10 +55,16 @@ function start() {
     page_title: 'Melatec Dental Clinic',
   });
   command('js', new Date());
-  command('config', config.id, { allow_enhanced_conversions: false });
+  if (analyticsId)
+    command('config', analyticsId, {
+      page_title: document.title,
+      allow_google_signals: false,
+      allow_ad_personalization_signals: false,
+    });
+  if (config) command('config', config.id, { allow_enhanced_conversions: false });
   const script = document.createElement('script');
   script.async = true;
-  script.src = `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(config.id)}`;
+  script.src = `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(analyticsId ?? config!.id)}`;
   document.head.appendChild(script);
 }
 
@@ -84,20 +97,28 @@ export function trackGoogleAdsConversion(
 export function initGoogleAds(): void {
   const root = document.querySelector<HTMLElement>('[data-google-ads]');
   if (!root || root.dataset.origin !== location.origin) return;
+  analyticsId = /^G-[A-Z0-9]+$/.test(root.dataset.analyticsId ?? '')
+    ? root.dataset.analyticsId
+    : undefined;
   try {
-    const parsed: unknown = JSON.parse(root.dataset.config ?? '');
-    if (!isGoogleAdsConfig(parsed)) return;
-    config = parsed;
+    if (root.dataset.config) {
+      const parsed: unknown = JSON.parse(root.dataset.config);
+      if (!isGoogleAdsConfig(parsed)) return;
+      config = parsed;
+    }
   } catch {
     return;
   }
+  if (!config && !analyticsId) return;
+  // The earlier Ads-only choice did not cover Analytics: ask for the expanded scope once.
+  consentKey = analyticsId ? `${ANALYTICS_CONSENT_KEY}${config ? '-ads' : ''}` : CONSENT_KEY;
   const panel = root.querySelector<HTMLElement>('[data-ads-consent]');
   const settings = root.querySelector<HTMLButtonElement>('[data-ads-settings]');
   const status = root.querySelector<HTMLElement>('[data-ads-status]');
   if (!panel || !settings) return;
   let choice: string | null = null;
   try {
-    choice = localStorage.getItem(CONSENT_KEY);
+    choice = localStorage.getItem(consentKey);
   } catch {
     /* Ask again when storage is unavailable. */
   }
@@ -109,23 +130,30 @@ export function initGoogleAds(): void {
   const choose = (accept: boolean) => {
     granted = accept;
     try {
-      localStorage.setItem(CONSENT_KEY, accept ? 'granted' : 'denied');
+      localStorage.setItem(consentKey, accept ? 'granted' : 'denied');
     } catch {
       /* Page-only choice. */
     }
     if (accept) {
-      if (started) command('consent', 'update', { ad_storage: 'granted', ad_user_data: 'granted' });
+      if (started)
+        command('consent', 'update', {
+          analytics_storage: analyticsId ? 'granted' : 'denied',
+          ad_storage: config ? 'granted' : 'denied',
+          ad_user_data: config ? 'granted' : 'denied',
+        });
       else start();
     } else if (started) {
-      command('consent', 'update', { ad_storage: 'denied', ad_user_data: 'denied' });
+      command('consent', 'update', {
+        analytics_storage: 'denied',
+        ad_storage: 'denied',
+        ad_user_data: 'denied',
+      });
       // Reset the loaded tag after the denial update; subsequent pages will not load it.
       location.reload();
     }
     showPanel(false);
     if (status)
-      status.textContent = accept
-        ? 'Google Ads measurement accepted.'
-        : 'Google Ads measurement declined.';
+      status.textContent = accept ? 'Google measurement accepted.' : 'Google measurement declined.';
     settings.focus({ preventScroll: true });
   };
   granted = choice === 'granted';
@@ -138,7 +166,7 @@ export function initGoogleAds(): void {
     if (!panel.hidden) panel.querySelector<HTMLButtonElement>('button')?.focus();
   });
   window.addEventListener('storage', (event) => {
-    if (event.key === CONSENT_KEY && event.newValue !== (granted ? 'granted' : 'denied'))
+    if (event.key === consentKey && event.newValue !== (granted ? 'granted' : 'denied'))
       location.reload();
   });
   // All contact links, including header/footer, cards and the floating dock.

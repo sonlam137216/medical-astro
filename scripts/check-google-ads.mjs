@@ -16,7 +16,7 @@ const builtPage = readFileSync('dist/client/index.html', 'utf8');
 const csp = builtPage.match(/<meta[^>]+http-equiv="Content-Security-Policy"[^>]+>/i)?.[0];
 assert.ok(csp, 'Build the website first: the browser check uses the real built CSP.');
 const markup = component.slice(
-  component.indexOf('<div data-google-ads'),
+  component.search(/<div\s+data-google-ads/),
   component.indexOf('\n)}'),
 );
 const css = component.match(/<style>([\s\S]*?)<\/style>/)?.[1] ?? '';
@@ -37,8 +37,16 @@ const escape = (value) => value.replaceAll('&', '&amp;').replaceAll('"', '&quot;
 const html = (
   config = settings,
   expectedOrigin = origin,
+  analyticsId = '',
 ) => `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width">${csp}<style>${css}</style></head><body>
-${markup.replace('data-config={JSON.stringify(config)}', `data-config="${escape(JSON.stringify(config))}"`).replace('data-origin={Astro.site?.origin}', `data-origin="${expectedOrigin}"`)}
+${markup
+  .replace(
+    'data-config={JSON.stringify(config)}',
+    config ? `data-config="${escape(JSON.stringify(config))}"` : '',
+  )
+  .replace('data-analytics-id={analyticsId}', `data-analytics-id="${analyticsId}"`)
+  .replace('{consentDescription}', 'May we use Google cookies to measure visits and enquiries?')
+  .replace('data-origin={Astro.site?.origin}', `data-origin="${expectedOrigin}"`)}
 <form data-form="consultation" method="post" action="/api/consultation"><input name="submission_id" type="hidden"><input name="name" value="Test patient"><input name="email" value="private@example.com"><button type="submit">Send</button><p data-status></p></form>
 <a id="phone" href="tel:+84123456789" target="_blank"><span>Phone</span></a>
 <a id="zalo" href="https://zalo.me/123" target="_blank">Zalo</a>
@@ -60,6 +68,7 @@ async function scenario(
     blocked = false,
     storageBlocked = false,
     width = 1440,
+    analyticsId = '',
   } = {},
 ) {
   const context = await browser.newContext({ viewport: { width, height: 900 } });
@@ -90,7 +99,10 @@ async function scenario(
         contentType: 'application/json',
         body: JSON.stringify(response.body),
       });
-    return route.fulfill({ contentType: 'text/html', body: html(config, expectedOrigin) });
+    return route.fulfill({
+      contentType: 'text/html',
+      body: html(config, expectedOrigin, analyticsId),
+    });
   });
   page.on('pageerror', (error) => errors.push(error.message));
   context.on('page', (popup) => {
@@ -153,6 +165,62 @@ async function scenario(
 }
 
 try {
+  // Analytics is independent of Ads, shares one tag when both are configured,
+  // and asks again when a visitor previously accepted only Ads measurement.
+  for (const config of [null, settings]) {
+    await scenario(
+      async ({ page, tags, load }) => {
+        await page.evaluate(() => localStorage.setItem('melatec-google-ads-consent-v1', 'granted'));
+        await load();
+        assert.equal(tags.length, 0, 'old Ads consent never silently enables Analytics');
+        await page.locator('[data-ads-decline]').click();
+        await load();
+        assert.equal(tags.length, 0, 'Analytics stays unloaded after declining');
+        await page.locator('[data-ads-settings]').click();
+        await page.locator('[data-ads-accept]').click();
+        await page.waitForFunction(() => !!window.dataLayer);
+        await page.waitForTimeout(100);
+        assert.equal(tags.length, 1, 'only one Google tag is loaded');
+        assert.equal(new URL(tags[0]).searchParams.get('id'), 'G-SPEN3SLJ27');
+        const commands = await page.evaluate(() =>
+          window.dataLayer.map((entry) => Array.from(entry)),
+        );
+        assert.equal(commands[0][2].analytics_storage, 'denied');
+        assert.equal(commands[1][2].analytics_storage, 'granted');
+        assert.equal(commands[1][2].ad_storage, config ? 'granted' : 'denied');
+        assert.deepEqual(
+          commands.filter((entry) => entry[0] === 'config').map((entry) => entry[1]),
+          config ? ['G-SPEN3SLJ27', settings.id] : ['G-SPEN3SLJ27'],
+        );
+        assert.ok(!JSON.stringify(commands).includes('private'));
+        // Exercise the real built CSP against both standard and regional collectors (requests mocked).
+        assert.deepEqual(
+          await page.evaluate(async () =>
+            Promise.all(
+              [
+                'https://www.google-analytics.com/g/collect',
+                'https://region1.google-analytics.com/g/collect',
+                'https://analytics.google.com/g/collect',
+              ].map(async (url) => {
+                await fetch(url, { mode: 'no-cors' });
+                return true;
+              }),
+            ),
+          ),
+          [true, true, true],
+        );
+        await load();
+        await page.waitForTimeout(100);
+        assert.equal(tags.length, 2, 'Analytics acceptance persists');
+        await page.locator('[data-ads-settings]').click();
+        await page.locator('[data-ads-decline]').click();
+        await page.waitForTimeout(150);
+        assert.equal(tags.length, 2, 'revocation unloads Analytics');
+      },
+      { config, analyticsId: 'G-SPEN3SLJ27' },
+    );
+  }
+
   await scenario(async ({ page, tags, conversions, submit, load }) => {
     assert.equal(tags.length, 0);
     await submit();
